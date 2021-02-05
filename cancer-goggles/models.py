@@ -23,6 +23,9 @@ class Camera:
             str(video_path), self.fourcc, self.fps, self.resolution
         )
 
+    def is_initialized(self):
+        return self.video_writer is not None
+
     def write(self):
         self.video_writer.write(self.last_frame)
 

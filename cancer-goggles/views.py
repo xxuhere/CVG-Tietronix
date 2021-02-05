@@ -1,4 +1,7 @@
 from pathlib import Path
+from datetime import datetime
+
+import cv2
 
 from pyqtgraph import ImageView, setConfigOption, PlotItem
 from PyQt5.QtCore import QTimer, Qt
@@ -77,6 +80,7 @@ class StartWindow(QMainWindow):
         self.goggles_dispaly.ui.histogram.hide()
         self.goggles_dispaly.ui.roiBtn.hide()
         self.goggles_dispaly.ui.menuBtn.hide()
+        self.goggles_dispaly.setWindowFlag(Qt.WindowCloseButtonHint, False)
 
         self.timer_video = QTimer()
         self.timer_video.timeout.connect(self.update_image)
@@ -129,12 +133,26 @@ class StartWindow(QMainWindow):
 
     def click_record(self, state):
         self.is_recording = True if state == Qt.Checked else False
+        if self.is_recording and not self.camera.is_initialized():
+            self.camera.initialize_video_writer(self.root_path)
 
     def update_image(self):
         frame = self.camera.get_frame()
+        frame_time = frame.copy()
+        now = datetime.now().astimezone().strftime("%A, %d. %B %Y %H:%M:%S %Z")
+        cv2.putText(
+            frame_time,
+            now,
+            (10, 30),
+            cv2.FONT_HERSHEY_PLAIN,
+            1,
+            (210, 155, 155),
+            1,
+            cv2.LINE_4,
+        )
         if self.is_recording:
             self.camera.write()
-        self.image_view.setImage(frame)
+        self.image_view.setImage(frame_time)
         if self.goggles_dispaly.isVisible():
             self.goggles_dispaly.setImage(frame)
 
@@ -144,15 +162,11 @@ class StartWindow(QMainWindow):
         print(f"clicked ({x}, {y})")
 
     def start_video(self):
-        self.checkbox_record.setDisabled(True)
-        if self.is_recording:
-            self.camera.initialize_video_writer(self.root_path)
         self.timer_video.start(int(1000 / self.camera.fps))
 
     def stop_video(self):
         self.timer_video.stop()
         self.camera.close_camera()
-        self.checkbox_record.setEnabled(True)
 
     def take_snapshot(self):
         self.camera.snapshot(self.root_path)
