@@ -1,7 +1,4 @@
 from pathlib import Path
-from datetime import datetime
-
-import cv2
 
 from pyqtgraph import ImageView, setConfigOption, PlotItem
 from PyQt5.QtCore import QTimer, Qt
@@ -68,9 +65,9 @@ class StartWindow(QMainWindow):
         self.btn_snap.clicked.connect(self.take_snapshot)
         self.layout.addWidget(self.btn_snap, 1, 2)
 
-        self.checkbox_placeholder = QCheckBox("Goggles Display", self.central_widget)
-        self.checkbox_placeholder.stateChanged.connect(self.activate_goggles_display)
-        self.layout.addWidget(self.checkbox_placeholder, 1, 3)
+        self.checkbox_goggles = QCheckBox("Goggles Display", self.central_widget)
+        self.checkbox_goggles.stateChanged.connect(self.activate_goggles_display)
+        self.layout.addWidget(self.checkbox_goggles, 1, 3)
 
         self.image_view = ImageView(view=PlotItem())
         self.image_view.getImageItem().mouseClickEvent = self.image_click
@@ -138,21 +135,9 @@ class StartWindow(QMainWindow):
 
     def update_image(self):
         frame = self.camera.get_frame()
-        frame_time = frame.copy()
-        now = datetime.now().astimezone().strftime("%A, %d. %B %Y %H:%M:%S %Z")
-        cv2.putText(
-            frame_time,
-            now,
-            (10, 30),
-            cv2.FONT_HERSHEY_PLAIN,
-            1,
-            (210, 155, 155),
-            1,
-            cv2.LINE_4,
-        )
         if self.is_recording:
             self.camera.write()
-        self.image_view.setImage(frame_time)
+        self.image_view.setImage(frame)
         if self.goggles_dispaly.isVisible():
             self.goggles_dispaly.setImage(frame)
 
@@ -186,5 +171,6 @@ class StartWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             event.accept()
             self.stop_video()
+            self.goggles_dispaly.close()
         else:
             event.ignore()

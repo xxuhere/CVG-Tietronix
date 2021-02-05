@@ -1,15 +1,17 @@
 from time import time
 from pathlib import Path
+from datetime import datetime
 
 import cv2
 
 
 class Camera:
-    def __init__(self, cam_num, resolution, fourcc, fps):
+    def __init__(self, cam_num, resolution, fourcc, fps, timestamped=False):
         self.cam_num = cam_num
-        self.fps = fps
-        self.cap = cv2.VideoCapture(self.cam_num)
         self.resolution = resolution
+        self.fps = fps
+        self.timestamped = timestamped
+        self.cap = cv2.VideoCapture(self.cam_num)
         self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self.video_writer = None
         self.last_frame = None
@@ -27,7 +29,22 @@ class Camera:
         return self.video_writer is not None
 
     def write(self):
-        self.video_writer.write(self.last_frame)
+        if self.timestamped:
+            now = datetime.now().astimezone().strftime("%A, %d. %B %Y %H:%M:%S %Z")
+            frame_copy = self.last_frame.copy()
+            cv2.putText(
+                frame_copy,
+                now,
+                (10, 30),
+                cv2.FONT_HERSHEY_PLAIN,
+                1,
+                (210, 155, 155),
+                1,
+                cv2.LINE_4,
+            )
+            self.video_writer.write(frame_copy)
+        else:
+            self.video_writer.write(self.last_frame)
 
     def get_frame(self):
         if not self.cap.isOpened():
