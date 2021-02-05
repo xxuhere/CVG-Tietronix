@@ -2,7 +2,7 @@ from pathlib import Path
 from time import time
 
 import cv2
-from pyqtgraph import ImageView
+from pyqtgraph import ImageView, setConfigOption, PlotItem
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -14,11 +14,13 @@ from PyQt5.QtWidgets import (
     QGridLayout,
     QCheckBox,
 )
-import numpy as np
 
 from meta_dialog import MetaDialog
 from parameters import parameters
 from parameter_dialog import ParameterDialog
+
+
+setConfigOption("imageAxisOrder", "row-major")
 
 
 class StartWindow(QMainWindow):
@@ -69,12 +71,18 @@ class StartWindow(QMainWindow):
         self.btn_snap.clicked.connect(self.take_snapshot)
         self.layout.addWidget(self.btn_snap, 1, 2)
 
-        self.checkbox_placeholder = QCheckBox("Placeholder", self.central_widget)
-        # self.checkbox_record.stateChanged.connect(self.click_record)
+        self.checkbox_placeholder = QCheckBox("Goggles Display", self.central_widget)
+        self.checkbox_placeholder.stateChanged.connect(self.activate_goggles_display)
         self.layout.addWidget(self.checkbox_placeholder, 1, 3)
 
-        self.image_view = ImageView()
+        self.image_view = ImageView(view=PlotItem())
+        self.image_view.getImageItem().mouseClickEvent = self.image_click
         self.layout.addWidget(self.image_view, 3, 0, 1, 4)
+
+        self.goggles_dispaly = ImageView()
+        self.goggles_dispaly.ui.histogram.hide()
+        self.goggles_dispaly.ui.roiBtn.hide()
+        self.goggles_dispaly.ui.menuBtn.hide()
 
         self.timer_video = QTimer()
         self.timer_video.timeout.connect(self.update_image)
@@ -132,8 +140,14 @@ class StartWindow(QMainWindow):
         frame = self.camera.get_frame()
         if self.is_recording:
             self.video_writer.write(frame)
-        frame = np.swapaxes(frame, 0, 1)
         self.image_view.setImage(frame)
+        if self.goggles_dispaly.isVisible():
+            self.goggles_dispaly.setImage(frame)
+
+    def image_click(self, event):
+        x, y = event.pos()
+        self.image_view.view.plot([x], [y], symbol='o')
+        print(f"clicked ({x}, {y})")
 
     def start_video(self):
         self.checkbox_record.setDisabled(True)
@@ -156,6 +170,12 @@ class StartWindow(QMainWindow):
 
     def take_snapshot(self):
         self.camera.snapshot(Path(self.root_path, self.folder))
+
+    def activate_goggles_display(self):
+        if self.goggles_dispaly.isVisible():
+            self.goggles_dispaly.hide()
+        else:
+            self.goggles_dispaly.show()
 
     def closeEvent(self, event):
         msg = "Close the app?"
