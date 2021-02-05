@@ -1,7 +1,5 @@
 from pathlib import Path
-from time import time
 
-import cv2
 from pyqtgraph import ImageView, setConfigOption, PlotItem
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
@@ -30,14 +28,10 @@ class StartWindow(QMainWindow):
         self.resize(1280, 720)
 
         self.camera = camera
-        self.fps = 25
         self.root_path = Path(__file__).parent.parent
-        self.folder = "image"
         self.parameters = parameters
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
-        self.fourcc = cv2.VideoWriter_fourcc(*"XVID")
-        self.video_writer = None
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -97,7 +91,7 @@ class StartWindow(QMainWindow):
         self.user_name_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.user_name_label)
 
-        self.patient_name_label = QLabel("Patient Name: test_patient")
+        self.patient_name_label = QLabel("Patient ID: test_patient")
         self.user_name_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.patient_name_label)
 
@@ -114,7 +108,7 @@ class StartWindow(QMainWindow):
         if meta_info_dialog.exec_():
             self.user_name_label.setText(f"User Name: {meta_info_dialog.user_name}")
             self.patient_name_label.setText(
-                f"Patient Name: {meta_info_dialog.patient_name}"
+                f"Patient ID: {meta_info_dialog.patient_name}"
             )
             self.surgery_type_label.setText(
                 f"Surgery Type: {meta_info_dialog.surgery_type.name}"
@@ -139,37 +133,29 @@ class StartWindow(QMainWindow):
     def update_image(self):
         frame = self.camera.get_frame()
         if self.is_recording:
-            self.video_writer.write(frame)
+            self.camera.write()
         self.image_view.setImage(frame)
         if self.goggles_dispaly.isVisible():
             self.goggles_dispaly.setImage(frame)
 
     def image_click(self, event):
         x, y = event.pos()
-        self.image_view.view.plot([x], [y], symbol='o')
+        self.image_view.view.plot([x], [y], symbol="o")
         print(f"clicked ({x}, {y})")
 
     def start_video(self):
         self.checkbox_record.setDisabled(True)
         if self.is_recording:
-            video_folder = Path(self.root_path, "video")
-            if not video_folder.exists():
-                video_folder.mkdir()
-            video_path = Path(video_folder, f"record_{int(time())}.avi")
-            self.video_writer = cv2.VideoWriter(
-                str(video_path), self.fourcc, self.fps, self.camera.resolution
-            )
-        self.timer_video.start(int(1000 / self.fps))
+            self.camera.initialize_video_writer(self.root_path)
+        self.timer_video.start(int(1000 / self.camera.fps))
 
     def stop_video(self):
         self.timer_video.stop()
-        if self.video_writer is not None:
-            self.video_writer.release()
         self.camera.close_camera()
         self.checkbox_record.setEnabled(True)
 
     def take_snapshot(self):
-        self.camera.snapshot(Path(self.root_path, self.folder))
+        self.camera.snapshot(self.root_path)
 
     def activate_goggles_display(self):
         if self.goggles_dispaly.isVisible():
