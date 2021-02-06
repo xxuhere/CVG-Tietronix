@@ -1,4 +1,5 @@
 from pathlib import Path
+from time import time
 
 from pyqtgraph import ImageView, setConfigOption, PlotItem
 from PyQt5.QtCore import QTimer, Qt
@@ -28,10 +29,12 @@ class StartWindow(QMainWindow):
         self.resize(1280, 720)
 
         self.camera = camera
+        self.timer_interval = int(1000 / self.camera.fps)
         self.root_path = Path(__file__).parent.parent
         self.parameters = parameters
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
+        self.utilization = 0.0
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -82,11 +85,19 @@ class StartWindow(QMainWindow):
         self.timer_video = QTimer()
         self.timer_video.timeout.connect(self.update_image)
 
+        self.timer_utilization = QTimer()
+        self.timer_utilization.timeout.connect(self.update_utilization)
+
         self._create_status_bar()
 
     def _create_status_bar(self):
         self.statusbar = self.statusBar()
         self.statusbar.setContentsMargins(10, 0, 10, 0)
+
+        self.utilization_label = QLabel("Utilization: 0 %")
+        self.utilization_label.setContentsMargins(5, 0, 5, 0)
+        self.utilization_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.statusbar.addPermanentWidget(self.utilization_label)
 
         self.user_name_label = QLabel("User Name: test_user")
         self.user_name_label.setContentsMargins(5, 0, 5, 0)
@@ -134,12 +145,18 @@ class StartWindow(QMainWindow):
             self.camera.initialize_video_writer(self.root_path)
 
     def update_image(self):
+        start = time()
         frame = self.camera.get_frame()
         if self.is_recording:
             self.camera.write()
         self.image_view.setImage(frame)
         if self.goggles_dispaly.isVisible():
             self.goggles_dispaly.setImage(frame)
+        end = time()
+        self.utilization = (end - start) * 1000 / self.timer_interval
+
+    def update_utilization(self):
+        self.utilization_label.setText(f"Utilization: {self.utilization:.2f} %")
 
     def image_click(self, event):
         x, y = event.pos()
@@ -147,10 +164,13 @@ class StartWindow(QMainWindow):
         print(f"clicked ({x}, {y})")
 
     def start_video(self):
-        self.timer_video.start(int(1000 / self.camera.fps))
+        self.timer_video.start(self.timer_interval)
+        self.timer_utilization.start(1000)
 
     def stop_video(self):
         self.timer_video.stop()
+        self.timer_utilization.stop()
+        self.utilization_label.setText("Utilization: 0 %")
         self.camera.close_camera()
 
     def take_snapshot(self):
