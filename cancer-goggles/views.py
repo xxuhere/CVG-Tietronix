@@ -21,6 +21,8 @@ from parameter_dialog import ParameterDialog
 
 setConfigOption("imageAxisOrder", "row-major")
 
+milliseconds_per_seconds = 1000
+
 
 class StartWindow(QMainWindow):
     def __init__(self, camera=None):
@@ -29,12 +31,15 @@ class StartWindow(QMainWindow):
         self.resize(1280, 720)
 
         self.camera = camera
-        self.timer_interval = int(1000 / self.camera.fps)
+        self.timer_interval = int(milliseconds_per_seconds / self.camera.fps)
         self.root_path = Path(__file__).parent.parent
         self.parameters = parameters
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
         self.utilization = 0.0
+        self.curr_time = 1.0
+        self.realtime_fps = 0.0
+        self.frame_counter = 0
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -86,7 +91,7 @@ class StartWindow(QMainWindow):
         self.timer_video.timeout.connect(self.update_image)
 
         self.timer_utilization = QTimer()
-        self.timer_utilization.timeout.connect(self.update_utilization)
+        self.timer_utilization.timeout.connect(self.update_utilization_fps)
 
         self._create_status_bar()
 
@@ -98,6 +103,11 @@ class StartWindow(QMainWindow):
         self.utilization_label.setContentsMargins(5, 0, 5, 0)
         self.utilization_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.statusbar.addPermanentWidget(self.utilization_label)
+
+        self.fps_label = QLabel("FPS: 0")
+        self.fps_label.setContentsMargins(5, 0, 5, 0)
+        self.fps_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.statusbar.addPermanentWidget(self.fps_label)
 
         self.user_name_label = QLabel("User Name: test_user")
         self.user_name_label.setContentsMargins(5, 0, 5, 0)
@@ -153,10 +163,22 @@ class StartWindow(QMainWindow):
         if self.goggles_dispaly.isVisible():
             self.goggles_dispaly.setImage(frame)
         end = time()
-        self.utilization = (end - start) * 1000 / self.timer_interval
 
-    def update_utilization(self):
+        if self.frame_counter == 0:
+            self.curr_time = time()
+
+        self.frame_counter += 1
+
+        if self.frame_counter == self.camera.fps:
+            self.realtime_fps = self.camera.fps / (time() - self.curr_time)
+            self.frame_counter = 0
+
+        # before simplify: (end - start) * ms_per_s / (ms_per_s * self.realtime_fps)
+        self.utilization = (end - start) * self.realtime_fps
+
+    def update_utilization_fps(self):
         self.utilization_label.setText(f"Utilization: {self.utilization:.2f} %")
+        self.fps_label.setText(f"FPS {self.realtime_fps:.2f}")
 
     def image_click(self, event):
         x, y = event.pos()
