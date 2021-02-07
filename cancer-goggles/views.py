@@ -1,8 +1,9 @@
 from pathlib import Path
 from time import time
 
+import cv2
 from pyqtgraph import ImageView, setConfigOption, PlotItem
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, QThread
 from PyQt5.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -17,7 +18,6 @@ from PyQt5.QtWidgets import (
 from meta_dialog import MetaDialog
 from parameters import parameters
 from parameter_dialog import ParameterDialog
-
 
 setConfigOption("imageAxisOrder", "row-major")
 
@@ -36,6 +36,7 @@ class StartWindow(QMainWindow):
         self.parameters = parameters
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
+        self.goggles_dispaly = False
         self.utilization = 0.0
         self.curr_time = 1.0
         self.realtime_fps = 0.0
@@ -80,12 +81,6 @@ class StartWindow(QMainWindow):
         self.image_view = ImageView(view=PlotItem())
         self.image_view.getImageItem().mouseClickEvent = self.image_click
         self.layout.addWidget(self.image_view, 3, 0, 1, 4)
-
-        self.goggles_dispaly = ImageView()
-        self.goggles_dispaly.ui.histogram.hide()
-        self.goggles_dispaly.ui.roiBtn.hide()
-        self.goggles_dispaly.ui.menuBtn.hide()
-        self.goggles_dispaly.setWindowFlag(Qt.WindowCloseButtonHint, False)
 
         self.timer_video = QTimer()
         self.timer_video.timeout.connect(self.update_image)
@@ -160,8 +155,9 @@ class StartWindow(QMainWindow):
         if self.is_recording:
             self.camera.write()
         self.image_view.setImage(frame)
-        if self.goggles_dispaly.isVisible():
-            self.goggles_dispaly.setImage(frame)
+        if self.goggles_dispaly:
+            thread = GogglesThread(frame)
+            thread.run()
         end = time()
 
         if self.frame_counter == 0:
@@ -193,16 +189,18 @@ class StartWindow(QMainWindow):
         self.timer_video.stop()
         self.timer_utilization.stop()
         self.utilization_label.setText("Utilization: 0 %")
+        self.fps_label.setText("FPS 0")
         self.camera.close_camera()
 
     def take_snapshot(self):
         self.camera.snapshot(self.root_path)
 
     def activate_goggles_display(self):
-        if self.goggles_dispaly.isVisible():
-            self.goggles_dispaly.hide()
+        if self.goggles_dispaly:
+            self.goggles_dispaly = False
+            cv2.destroyAllWindows()
         else:
-            self.goggles_dispaly.show()
+            self.goggles_dispaly = True
 
     def closeEvent(self, event):
         msg = "Close the app?"
@@ -213,6 +211,15 @@ class StartWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             event.accept()
             self.stop_video()
-            self.goggles_dispaly.close()
+            cv2.destroyAllWindows()
         else:
             event.ignore()
+
+
+class GogglesThread(QThread):
+    def __init__(self, frame):
+        super().__init__()
+        self.frame = frame
+
+    def run(self):
+        cv2.imshow("Goggles", self.frame)

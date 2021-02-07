@@ -12,9 +12,7 @@ class Camera:
         self.fps = fps
         self.timestamped = timestamped
 
-        # using cv2.CAP_DSHOW reduced the fps for single output
-        # but it doesn't affect fps for dual outputs
-        self.cap = cv2.VideoCapture(self.cam_num, cv2.CAP_DSHOW)
+        self.cap = cv2.VideoCapture(self.cam_num)
         self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self.video_writer = None
         self.last_frame = None
