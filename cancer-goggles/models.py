@@ -62,7 +62,7 @@ class Camera:
         snapshot_path = Path(folder_path, f"snapshot_{int(time())}.jpg")
         cv2.imwrite(str(snapshot_path), self.last_frame)
 
-    def close_camera(self):
+    def __del__(self):
         if self.video_writer is not None:
             self.video_writer.release()
         self.cap.release()

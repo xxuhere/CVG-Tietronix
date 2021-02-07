@@ -190,7 +190,6 @@ class StartWindow(QMainWindow):
         self.timer_utilization.stop()
         self.utilization_label.setText("Utilization: 0 %")
         self.fps_label.setText("FPS 0")
-        self.camera.close_camera()
 
     def take_snapshot(self):
         self.camera.snapshot(self.root_path)
@@ -210,8 +209,8 @@ class StartWindow(QMainWindow):
 
         if reply == QMessageBox.Yes:
             event.accept()
-            self.stop_video()
             cv2.destroyAllWindows()
+            self.stop_video()
         else:
             event.ignore()
 
