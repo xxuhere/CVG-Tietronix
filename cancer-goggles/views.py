@@ -173,7 +173,7 @@ class StartWindow(QMainWindow):
             self.realtime_fps = self.camera.fps / (time() - self.curr_time)
             self.frame_counter = 0
 
-        # before simplify: (end - start) * ms_per_s / (ms_per_s * self.realtime_fps)
+        # before simplify: (end - start) * ms_per_s / (ms_per_s / self.realtime_fps)
         self.utilization = (end - start) * self.realtime_fps
 
     def update_utilization_fps(self):
