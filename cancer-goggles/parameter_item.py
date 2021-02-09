@@ -12,18 +12,22 @@ class ParameterItem(QGroupBox):
         super().__init__()
         layout = QHBoxLayout()
 
-        layout.addWidget(QLabel(name))
+        label_param_name = QLabel(name)
+        label_param_name.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        label_param_name.setMinimumWidth(100)
+        layout.addWidget(label_param_name)
 
-        self.param_slider = QSlider(Qt.Horizontal)
-        self.param_slider.setRange(int(low / step), int(high / step))
-        self.param_slider.setFocusPolicy(Qt.NoFocus)
-        self.param_slider.valueChanged.connect(self.change_value)
-        layout.addWidget(self.param_slider)
+        param_slider = QSlider(Qt.Horizontal)
+        param_slider.setRange(int(low / step), int(high / step))
+        param_slider.setFocusPolicy(Qt.NoFocus)
+        param_slider.valueChanged.connect(self.change_value)
+        layout.addWidget(param_slider)
 
-        self.label = QLabel(str(default), self)
-        self.label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        self.label.setMinimumWidth(50)
-        layout.addWidget(self.label)
+        label_value = QLabel(str(default))
+        label_value.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        label_value.setMinimumWidth(40)
+        layout.addWidget(label_value)
+        self.label = label_value
 
         self.setLayout(layout)
 
@@ -35,5 +39,5 @@ class ParameterItem(QGroupBox):
 
     def change_value(self, value):
         adjusted = value * self.step
-        self.label.setText(f"{adjusted:.3f}")
+        self.label.setText(f"{adjusted:.2f}")
         self.current_value = adjusted
