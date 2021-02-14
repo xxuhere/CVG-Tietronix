@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QHBoxLayout,
     QGroupBox,
     QLabel,
     QSlider,
 )
-from PyQt5.QtCore import Qt
+from PySide6.QtCore import Qt
 
 
 class ParameterItem(QGroupBox):

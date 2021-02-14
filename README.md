@@ -3,8 +3,7 @@
 ## Dependencies
 1. NumPy
 2. opencv-python
-3. PyQt5
-4. PyQtGraph
+3. PySide6
 
 ## Desktop Setup
 Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and create an environment:
@@ -21,7 +20,7 @@ conda activate goggles-dev
 opencv-python and PyQt5 are not up to date on conda, so it's better to install them using `pip` at this moment.
 
 ```shell
-pip install opencv-python pyqt5 pyqtgraph
+pip install opencv-python pyside6
 ```
 
 There are many tutorials on Python environment management on the internet. Google if for details.

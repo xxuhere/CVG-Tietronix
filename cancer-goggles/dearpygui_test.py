@@ -28,7 +28,9 @@ def update_canvas(sender, data):
         frame = camera.get_frame()
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
         dpg.add_texture("texture id", frame, 640, 480)
-        dpg.draw_image('drawing', "texture id", [0, 0], [640, 480], uv_min=[0, 0], uv_max=[1, 1])
+        dpg.draw_image(
+            "drawing", "texture id", [0, 0], [640, 480], uv_min=[0, 0], uv_max=[1, 1]
+        )
         frame_counter = 0
     else:
         frame_counter += 1
@@ -41,7 +43,7 @@ with sdpg.window("Video Window", width=640, height=480):
     dpg.set_main_window_size(1000, 800)
     dpg.set_main_window_title("Pixel selector")
 
-    dpg.add_drawing('drawing', width=640, height=480)
+    dpg.add_drawing("drawing", width=640, height=480)
 
 
 dpg.set_render_callback(update_canvas)

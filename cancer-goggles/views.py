@@ -2,9 +2,8 @@ from pathlib import Path
 from time import time
 
 import cv2
-from pyqtgraph import ImageView, setConfigOption, PlotItem
-from PyQt5.QtCore import QTimer, Qt, QThread
-from PyQt5.QtWidgets import (
+from PySide6.QtCore import QTimer, Qt, QThread
+from PySide6.QtWidgets import (
     QMainWindow,
     QWidget,
     QPushButton,
@@ -18,8 +17,7 @@ from PyQt5.QtWidgets import (
 from meta_dialog import MetaDialog
 from parameters import parameters
 from parameter_dialog import ParameterDialog
-
-setConfigOption("imageAxisOrder", "row-major")
+from utils import convert_nparray_to_qpixmap
 
 milliseconds_per_seconds = 1000
 
@@ -78,8 +76,7 @@ class StartWindow(QMainWindow):
         self.checkbox_goggles.stateChanged.connect(self.activate_goggles_display)
         self.layout.addWidget(self.checkbox_goggles, 1, 3)
 
-        self.image_view = ImageView(view=PlotItem())
-        self.image_view.getImageItem().mouseClickEvent = self.image_click
+        self.image_view = QLabel()
         self.layout.addWidget(self.image_view, 3, 0, 1, 4)
 
         self.timer_video = QTimer()
@@ -133,7 +130,7 @@ class StartWindow(QMainWindow):
 
     def select_directory(self):
         directory_dialog = QFileDialog()
-        directory_dialog.setFileMode(QFileDialog.DirectoryOnly)
+        directory_dialog.setFileMode(QFileDialog.Directory)
         if directory_dialog.exec_():
             directory = directory_dialog.selectedFiles()[0]
             self.path_label.setText(f"Main Directory: {directory}")
@@ -154,7 +151,10 @@ class StartWindow(QMainWindow):
         frame = self.camera.get_frame()
         if self.is_recording:
             self.camera.write()
-        self.image_view.setImage(frame)
+
+        frame_pixmap = convert_nparray_to_qpixmap(frame)
+        self.image_view.setPixmap(frame_pixmap)
+
         if self.goggles_dispaly:
             thread = GogglesThread(frame)
             thread.run()
@@ -175,11 +175,6 @@ class StartWindow(QMainWindow):
     def update_utilization_fps(self):
         self.utilization_label.setText(f"Utilization: {self.utilization:.2f} %")
         self.fps_label.setText(f"FPS {self.realtime_fps:.2f}")
-
-    def image_click(self, event):
-        x, y = event.pos()
-        self.image_view.view.plot([x], [y], symbol="o")
-        print(f"clicked ({x}, {y})")
 
     def start_video(self):
         self.timer_video.start(self.timer_interval)
