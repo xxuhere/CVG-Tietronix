@@ -40,7 +40,7 @@ sudo apt install python3-dev python3-venv python3-pip python3-numpy python3-pyqt
 ```
 
 ```shell
-python -m pip install opencv-python pyqtgraph
+python3 -m pip install opencv-python pyqtgraph
 ```
 
 This procedure is not tested. I'll test it on a fresh installed Pi soon.
@@ -50,6 +50,10 @@ This procedure is not tested. I'll test it on a fresh installed Pi soon.
 ```shell
 python3 [path to]/start.py
 ```
+
+## Alternatives of Qt
+[DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
+
 
 ## Streaming
 
