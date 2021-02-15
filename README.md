@@ -5,7 +5,7 @@
 2. opencv-python
 3. PySide6
 
-## Desktop Setup
+## Desktop Setup [outdated]
 Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and create an environment:
 ```shell
 conda create --name goggles-dev python=3.8 numpy
@@ -25,7 +25,7 @@ pip install opencv-python pyside6
 
 There are many tutorials on Python environment management on the internet. Google if for details.
 
-## Raspberry Pi Setup
+## Raspberry Pi Setup [outdated]
 
 This App is tested on [Ubuntu Desktop 20.10 64-bit OS](https://ubuntu.com/download/raspberry-pi). 
 In general, we should use virtual environments, such as venv and conda, for Python development. 

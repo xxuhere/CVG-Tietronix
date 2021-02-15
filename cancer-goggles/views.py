@@ -77,6 +77,7 @@ class StartWindow(QMainWindow):
         self.layout.addWidget(self.checkbox_goggles, 1, 3)
 
         self.image_view = QLabel()
+        self.image_view.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.image_view, 3, 0, 1, 4)
 
         self.timer_video = QTimer()

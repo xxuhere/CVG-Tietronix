@@ -18,7 +18,7 @@ camera_number = 0
 
 resolution = (640, 480)
 fourcc = "XVID"
-fps = 20
+fps = 30
 timestamped = True
 
 camera = Camera(camera_number, resolution, fourcc, fps, timestamped=timestamped)
