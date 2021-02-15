@@ -2,21 +2,21 @@ from pathlib import Path
 from time import time
 
 import cv2
-from PySide6.QtCore import QTimer, Qt, QThread
+from PySide6.QtCore import Qt, QThread, QTimer
 from PySide6.QtWidgets import (
-    QMainWindow,
-    QWidget,
-    QPushButton,
-    QMessageBox,
-    QLabel,
+    QCheckBox,
     QFileDialog,
     QGridLayout,
-    QCheckBox,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QWidget,
 )
 
 from meta_dialog import MetaDialog
-from parameters import parameters
 from parameter_dialog import ParameterDialog
+from parameters import parameters
 from utils import convert_nparray_to_qpixmap
 
 milliseconds_per_seconds = 1000

@@ -1,8 +1,4 @@
-from PySide6.QtWidgets import (
-    QVBoxLayout,
-    QDialog,
-    QDialogButtonBox,
-)
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout
 
 from parameter_item import ParameterItem
 

@@ -1,7 +1,7 @@
 from enum import Enum
 
 import cv2
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtGui import QImage, QPixmap
 
 
 class Surgery(Enum):

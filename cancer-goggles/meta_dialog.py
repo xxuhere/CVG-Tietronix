@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import (
-    QVBoxLayout,
+    QComboBox,
     QDialog,
+    QDialogButtonBox,
     QFormLayout,
-    QLineEdit,
     QGroupBox,
     QLabel,
-    QComboBox,
-    QDialogButtonBox,
+    QLineEdit,
+    QVBoxLayout,
 )
 
 from utils import Surgery

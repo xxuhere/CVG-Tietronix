@@ -7,7 +7,6 @@ from PySide6.QtWidgets import QApplication
 from models import Camera
 from views import StartWindow
 
-
 dirname = Path(pyside_path).parent
 plugin_path = Path(dirname, "plugins", "platforms")
 os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = str(plugin_path)
