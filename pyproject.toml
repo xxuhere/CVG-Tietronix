@@ -1,13 +1,21 @@
 [build-system]
 requires = [
-  "setuptools >= 40.9.0",
+  "setuptools>=40.9.0",
   "wheel",
+  "cython==0.29.21",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
 
 [tool.black]
 target-version = ['py38']
 
 [tool.isort]
 profile = "black"
-src_paths = ["cancer-goggles"]
+src_paths = ["goggles"]
+skip = "setup.py"

@@ -1,0 +1,13 @@
+name: goggles-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - cython=0.29.21
+  - black
+  - isort
+  - pytest
+  - pip
+  - pip:
+    - opencv-python
+    - pyside6

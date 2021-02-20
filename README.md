@@ -2,54 +2,36 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-## Dependencies
-1. NumPy
-2. opencv-python
-3. PySide6
-
-## Desktop Setup [outdated]
-Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and create an environment:
-```shell
-conda create --name goggles-dev python=3.8 numpy
-```
-
-Update conda and activate the environment we just create:
+## Desktop Setup
+Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and update conda base environment:
 ```shell
 conda update conda
+```
+
+Create and activate the development environment:
+```shell
+conda create -f environment.yml
 conda activate goggles-dev
 ```
 
-opencv-python and PyQt5 are not up to date on conda, so it's better to install them using `pip` at this moment.
+See the official doc for how to manage conda environments https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
 
+
+## Build the Python binding for FPGA
 ```shell
-pip install opencv-python pyside6
+python setup.py build_ext
 ```
 
-There are many tutorials on Python environment management on the internet. Google if for details.
-
-## Raspberry Pi Setup [outdated]
-
-This App is tested on [Ubuntu Desktop 20.10 64-bit OS](https://ubuntu.com/download/raspberry-pi). 
-In general, we should use virtual environments, such as venv and conda, for Python development. 
-Currently, there is a bug regarding of PyQt5 installation using pip. So the easiest
-way to do this is to use the system's default Python and install PyQt5 using `apt` at the system level.
-
+## Test the fpga
+The `--runfpga` flag activates tests related to fpga. Those tests would fail if no fpga is plugged in.
 ```shell
-sudo apt update
-sudo apt upgrade
-sudo apt install python3-dev python3-venv python3-pip python3-numpy python3-pyqt5 
+pytest --runfpga goggles
 ```
 
+## Start the GUI
+Within the project root directory, run
 ```shell
-python3 -m pip install opencv-python pyqtgraph
-```
-
-This procedure is not tested. I'll test it on a fresh installed Pi soon.
-
-## Run the App
-
-```shell
-python3 [path to]/start.py
+python goggles/start.py
 ```
 
 ## Alternatives of Qt
