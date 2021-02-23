@@ -4,6 +4,8 @@ channels:
 dependencies:
   - python=3.8
   - cython=0.29.21
+  - matplotlib
+  - scikit-image
   - black
   - isort
   - pytest
@@ -11,3 +13,4 @@ dependencies:
   - pip:
     - opencv-python
     - pyside6
+    - dearpygui
