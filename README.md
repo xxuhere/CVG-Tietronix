@@ -22,8 +22,8 @@ See the official doc for how to manage conda environments https://docs.conda.io/
 python setup.py build_ext
 ```
 
-## Test the fpga
-The `--runfpga` flag activates tests related to fpga. Those tests would fail if no fpga is plugged in.
+## Test the FPGA
+The `--runfpga` flag activates FPGA tests. Those tests would fail if the FPGA is not plugged in.
 ```shell
 pytest --runfpga goggles
 ```
@@ -34,9 +34,12 @@ Within the project root directory, run
 python goggles/start.py
 ```
 
+## QT Python Bindings
+There are two popular Python Qt bindings: PyQT and PySide. We are currently using PySide6, which does not have a pip
+or conda wheel up for ARM machine (Raspberry Pi) yet. I'll address this issue soon. 
+
 ## Alternatives of Qt
 [DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
-
 
 ## Streaming
 
