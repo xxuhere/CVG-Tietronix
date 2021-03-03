@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from utils import Surgery
+from goggles.utils import Surgery
 
 
 class MetaDialog(QDialog):

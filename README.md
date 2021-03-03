@@ -14,12 +14,14 @@ conda create -f environment.yml
 conda activate goggles-dev
 ```
 
-See the official doc for how to manage conda environments https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html. 
+See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) 
+for how to manage conda environments. 
 
 
-## Build the Python binding for FPGA
+## Build the Python binding for FPGA and install the App
 ```shell
 python setup.py build_ext
+python -m pip install -e .
 ```
 
 ## Test the FPGA
@@ -29,9 +31,13 @@ pytest --runfpga goggles
 ```
 
 ## Start the GUI
-Within the project root directory, run
+Within `goggles-dev` environment,
 ```shell
-python goggles/start.py
+python -m goggles
+```
+Or simply,
+```shell
+cancer-goggles
 ```
 
 ## QT Python Bindings

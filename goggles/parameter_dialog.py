@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout
 
-from parameter_item import ParameterItem
+from goggles.parameter_item import ParameterItem
 
 
 class ParameterDialog(QDialog):

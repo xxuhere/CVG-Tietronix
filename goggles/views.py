@@ -14,10 +14,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from meta_dialog import MetaDialog
-from parameter_dialog import ParameterDialog
-from parameters import parameters
-from utils import convert_nparray_to_qpixmap
+from goggles.meta_dialog import MetaDialog
+from goggles.parameter_dialog import ParameterDialog
+from goggles.parameters import parameters
+from goggles.utils import convert_nparray_to_qpixmap
 
 milliseconds_per_seconds = 1000
 

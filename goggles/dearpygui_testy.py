@@ -2,7 +2,7 @@ import cv2
 import dearpygui.core as dpg
 import dearpygui.simple as sdpg
 
-from models import Camera
+from goggles.models import Camera
 
 # camera_number = "rtsp://10.0.0.7:8555/unicast"
 camera_number = 0
