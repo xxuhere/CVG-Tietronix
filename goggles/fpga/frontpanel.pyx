@@ -187,3 +187,89 @@ cdef class PyFrontPanel:
 
         self.set_wire_in_value(0x06, 0x0000)
         self.update_wire_ins()
+
+    def program_stereo_imager(self):
+        # broadcast write to de_assert LVDS power_down
+        self.program_dual_register(0x00B1, 0x0000, 0)
+        self.program_dual_register(0x00B1, 0x0000, 1)
+
+        # individual write to the master clock
+        self.program_dual_register(0x00B1, 0x0001, 0)
+
+        # set both sensor to stereoscopic mode
+        self.program_dual_register(0x0007, 0x0038, 0)
+        self.program_dual_register(0x0007, 0x0038, 1)
+
+        # set pixel operation mode
+        self.program_dual_register(0x000F, 0x0002, 0)
+        self.program_dual_register(0x000F, 0x0102, 1)
+
+        # set read mode to normal
+        self.program_dual_register(0x000D, 0x0300, 0)
+        self.program_dual_register(0x000D, 0x0300, 1)
+
+        # set AGC/AEC mode
+        self.program_dual_register(0x00AF, 0x0000, 0)
+        self.program_dual_register(0x00AF, 0x0000, 1)
+
+        # set desired AGC/AEC bin (brightness level during auto)
+        self.program_dual_register(0x00A5, 0x003A, 0)
+        self.program_dual_register(0x00A5, 0x003A, 1)
+
+        # set analog gain (manual gain)
+        self.program_dual_register(0x0035, 0x0010, 0)
+        self.program_dual_register(0x0035, 0x0010, 1)
+
+        # set row noise correction control
+        self.program_dual_register(0x0070, 0x0001, 0)
+        self.program_dual_register(0x0070, 0x0001, 1)
+
+        # set row noise correction constant
+        self.program_dual_register(0x000B, 0x01E0, 0)
+        self.program_dual_register(0x000B, 0x01E0, 1)
+
+        self.program_dual_register(0x0003, 0x01E0, 0)
+        self.program_dual_register(0x0003, 0x01E0, 1)
+
+        self.program_dual_register(0x0004, 0x02F0, 0)
+        self.program_dual_register(0x0004, 0x02F0, 1)
+
+        self.program_dual_register(0x00B3, 0x0000, 0)
+        self.program_dual_register(0x00B3, 0x0000, 1)
+
+        self.program_dual_register(0x00B2, 0x0000, 0)
+        self.program_dual_register(0x00B2, 0x0000, 1)
+
+        # enable PLL
+        self.program_dual_register(0x00B1, 0x0000, 0)
+        self.program_dual_register(0x00B1, 0x0000, 1)
+
+        # set the slave sensor to stereo
+        self.program_dual_register(0x0007, 0x0078, 1)
+
+        # shift clock out
+        self.program_dual_register(0x00B2, 0x0000, 0)
+        self.program_dual_register(0x00B2, 0x0000, 1)
+
+        # control ser_data_in
+        self.program_dual_register(0x00B3, 0x0000, 0)
+        self.program_dual_register(0x00B3, 0x0000, 1)
+
+        self.program_dual_register(0x00B4, 0x0000, 0)
+        self.program_dual_register(0x00B4, 0x0000, 1)
+
+        self.program_dual_register(0x00B5, 0x0001, 0)
+        self.program_dual_register(0x00B5, 0x0001, 1)
+
+        self.program_dual_register(0x00B7, 0x0007, 0)
+        self.program_dual_register(0x00B7, 0x0007, 1)
+
+        self.program_dual_register(0x00B7, 0x0003, 0)
+        self.program_dual_register(0x00B7, 0x0003, 1)
+
+        # soft reset
+        self.program_dual_register(0x000C, 0x0001, 0)
+        self.program_dual_register(0x000C, 0x0001, 1)
+
+        self.program_dual_register(0x000C, 0x0000, 0)
+        self.program_dual_register(0x000C, 0x0000, 1)
