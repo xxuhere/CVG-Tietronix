@@ -182,6 +182,8 @@ class StartWindow(QMainWindow):
         self.timer_utilization.start(1000)
 
     def stop_video(self):
+        if self.checkbox_record.isChecked():
+            self.checkbox_record.click()
         self.timer_video.stop()
         self.timer_utilization.stop()
         self.utilization_label.setText("Utilization: 0 %")
