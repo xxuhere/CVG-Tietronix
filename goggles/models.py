@@ -51,7 +51,7 @@ class Camera:
         if not self.cap.isOpened():
             self.cap.open(self.cam_num)
         ret, video_frame = self.cap.read()
-        if video_frame is not None:
+        if ret:
             self.last_frame = video_frame
         return self.last_frame
 
