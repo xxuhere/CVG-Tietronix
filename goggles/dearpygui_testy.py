@@ -20,6 +20,7 @@ from dearpygui.core import (
 from dearpygui.simple import group, window
 
 from goggles.models import Camera
+from goggles.parameters import parameters
 
 # camera_number = "rtsp://10.0.0.7:8555/unicast"
 camera_number = 0
@@ -79,26 +80,8 @@ with window("Main Window"):
         add_checkbox("Recording", default_value=False, source="is_recording")
         add_same_line(spacing=20)
         add_checkbox("Goggle View", default_value=False, source="display_goggle_view")
-        add_slider_int(
-            "NIR Exposure",
-            default_value=1,
-            min_value=1,
-            max_value=8192,
-            source="exp_nir",
-        )
-        add_slider_int(
-            "Visible Exposure",
-            default_value=1,
-            min_value=1,
-            max_value=1000,
-            source="exp_vis",
-        )
-        add_slider_int(
-            "Disparity X", default_value=0, min_value=0, max_value=200, source="disp_x"
-        )
-        add_slider_int(
-            "Disparity Y", default_value=0, min_value=0, max_value=200, source="disp_y"
-        )
+        for name, (low, high, step, default) in parameters.items():
+            add_slider_int(name, default_value=default, min_value=low, max_value=high, source=name)
 
     add_same_line()
     image = np.zeros((640, 480, 3), dtype=np.uint8)
