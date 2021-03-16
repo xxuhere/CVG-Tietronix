@@ -81,7 +81,9 @@ with window("Main Window"):
         add_same_line(spacing=20)
         add_checkbox("Goggle View", default_value=False, source="display_goggle_view")
         for name, (low, high, step, default) in parameters.items():
-            add_slider_int(name, default_value=default, min_value=low, max_value=high, source=name)
+            add_slider_int(
+                name, default_value=default, min_value=low, max_value=high, source=name
+            )
 
     add_same_line()
     image = np.zeros((640, 480, 3), dtype=np.uint8)
