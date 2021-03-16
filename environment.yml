@@ -1,16 +1,16 @@
-name: goggles-dev
+name: goggles-test
 channels:
   - conda-forge
 dependencies:
   - python=3.8
-  - cython=0.29.21
+  - cython=0.29.22
   - matplotlib
   - scikit-image
   - black
   - isort
   - pytest
+  - pyqt
   - pip
   - pip:
     - opencv-python
-    - pyside6
     - dearpygui

@@ -2,8 +2,8 @@ from pathlib import Path
 from time import time
 
 import cv2
-from PySide6.QtCore import Qt, QThread, QTimer
-from PySide6.QtWidgets import (
+from PyQt5.QtCore import Qt, QThread, QTimer
+from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QGridLayout,
