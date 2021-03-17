@@ -30,6 +30,8 @@ The `--runfpga` flag activates FPGA tests. Those tests would fail if the FPGA is
 pytest --runfpga src
 ```
 
+#### Note: All DLLs are taken from https://github.com/open-ephys/plugin-GUI
+
 ## Start the GUI
 Within `goggles-dev` environment,
 ```shell
@@ -41,11 +43,15 @@ goggles
 ```
 
 ## QT Python Bindings
-There are two popular Python Qt bindings: PyQT and PySide. We are currently using PySide6, which does not have a pip
-or conda wheel up for ARM machine (Raspberry Pi) yet. I'll address this issue soon. 
+There are two popular Python Qt bindings: PyQT and PySide. We are currently using PyQt5.
 
 ## Alternatives of Qt
 [DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
+There is a demo GUI implemented using this framework. You can check it out with
+
+```python
+python [path to]dearpygui_testy.py
+```
 
 ## Streaming
 
