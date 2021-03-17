@@ -6,7 +6,7 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 
-from goggles.fpga.okFrontPanelDLL cimport (
+from src.fpga.okFrontPanelDLL cimport (
     okCFrontPanel,
     okCPLL22393,
     okFrontPanelDLL_FreeLib,
@@ -15,7 +15,7 @@ from goggles.fpga.okFrontPanelDLL cimport (
 )
 
 
-def load_lib(lib_name):
+def load_lib(lib_name=None):
     if lib_name is None:
         success = okFrontPanelDLL_LoadLib(NULL)
     else:

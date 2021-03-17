@@ -19,8 +19,8 @@ from dearpygui.core import (
 )
 from dearpygui.simple import group, window
 
-from goggles.models import Camera
-from goggles.parameters import parameters
+from src.models import Camera
+from src.parameters import parameters
 
 # camera_number = "rtsp://10.0.0.7:8555/unicast"
 camera_number = 0

@@ -27,17 +27,17 @@ python -m pip install -e .
 ## Test the FPGA
 The `--runfpga` flag activates FPGA tests. Those tests would fail if the FPGA is not plugged in.
 ```shell
-pytest --runfpga goggles
+pytest --runfpga src
 ```
 
 ## Start the GUI
 Within `goggles-dev` environment,
 ```shell
-python -m goggles
+python -m src
 ```
 Or simply,
 ```shell
-cancer-goggles
+goggles
 ```
 
 ## QT Python Bindings

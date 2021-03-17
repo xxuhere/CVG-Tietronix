@@ -1,4 +1,4 @@
-name: goggles-test
+name: goggles-dev
 channels:
   - conda-forge
 dependencies:
@@ -9,8 +9,8 @@ dependencies:
   - black
   - isort
   - pytest
-  - pyqt
   - pip
   - pip:
+    - pyqt5
     - opencv-python
     - dearpygui

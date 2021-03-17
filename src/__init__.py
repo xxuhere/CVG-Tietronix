@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication
 
-from goggles.models import Camera
-from goggles.views import StartWindow
+from src.models import Camera
+from src.views import StartWindow
 
 
 def start_gui():

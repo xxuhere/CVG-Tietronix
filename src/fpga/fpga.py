@@ -1,4 +1,6 @@
-from goggles.fpga.frontpanel import PyFrontPanel, PyOkCPLL22393, get_version, load_lib
+from typing import Optional
+
+from src.fpga.frontpanel import PyFrontPanel, PyOkCPLL22393, get_version, load_lib
 
 micron_clock_divider = 70
 
@@ -10,8 +12,8 @@ clock_source_pll_1_0 = 4
 clock_source_pll_2_0 = 6
 
 
-def initialize_fpga(config_file: str):
-    load_lib(config_file)
+def initialize_fpga(dll_path: Optional[str], config_file: str):
+    load_lib(dll_path)
     date, time = get_version()
     print(f"FrontPanel DLL loaded. Build time: {date}, {time}.")
 

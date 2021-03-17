@@ -14,10 +14,10 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-from goggles.meta_dialog import MetaDialog
-from goggles.parameter_dialog import ParameterDialog
-from goggles.parameters import parameters
-from goggles.utils import convert_nparray_to_qpixmap
+from src.meta_dialog import MetaDialog
+from src.parameter_dialog import ParameterDialog
+from src.parameters import parameters
+from src.utils import convert_nparray_to_qpixmap
 
 milliseconds_per_seconds = 1000
 

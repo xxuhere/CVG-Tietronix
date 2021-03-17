@@ -4,5 +4,5 @@ from setuptools import setup
 from Cython.Build import cythonize
 
 
-front_panel = Path("goggles", "fpga", "frontpanel.pyx")
+front_panel = Path("src", "fpga", "frontpanel.pyx")
 setup(ext_modules=cythonize(str(front_panel)))
