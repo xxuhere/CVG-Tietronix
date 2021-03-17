@@ -49,7 +49,7 @@ There are two popular Python Qt bindings: PyQT and PySide. We are currently usin
 [DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
 There is a demo GUI implemented using this framework. You can check it out with
 
-```python
+```shell
 python [path to]dearpygui_testy.py
 ```
 
