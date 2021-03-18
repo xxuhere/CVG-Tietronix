@@ -34,7 +34,7 @@ class StartWindow(QMainWindow):
         self.parameters = parameters
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
-        self.goggles_dispaly = False
+        self.goggles_display = False
         self.utilization = 0.0
         self.curr_time = 1.0
         self.realtime_fps = 0.0
@@ -156,7 +156,7 @@ class StartWindow(QMainWindow):
         frame_pixmap = convert_nparray_to_qpixmap(frame)
         self.image_view.setPixmap(frame_pixmap)
 
-        if self.goggles_dispaly:
+        if self.goggles_display:
             cv2.imshow("Goggles", frame)
         end = time()
 
@@ -196,11 +196,11 @@ class StartWindow(QMainWindow):
         self.camera.snapshot(self.root_path)
 
     def activate_goggles_display(self):
-        if self.goggles_dispaly:
-            self.goggles_dispaly = False
+        if self.goggles_display:
+            self.goggles_display = False
             cv2.destroyAllWindows()
         else:
-            self.goggles_dispaly = True
+            self.goggles_display = True
 
     def closeEvent(self, event):
         msg = "Close the app?"
