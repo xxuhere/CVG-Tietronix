@@ -2,7 +2,7 @@ from pathlib import Path
 from time import time
 
 import cv2
-from PyQt5.QtCore import Qt, QThread, QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
     QCheckBox,
     QFileDialog,
@@ -157,8 +157,7 @@ class StartWindow(QMainWindow):
         self.image_view.setPixmap(frame_pixmap)
 
         if self.goggles_dispaly:
-            thread = GogglesThread(frame)
-            thread.run()
+            cv2.imshow("Goggles", frame)
         end = time()
 
         if self.frame_counter == 0:
@@ -178,8 +177,12 @@ class StartWindow(QMainWindow):
         self.fps_label.setText(f"FPS {self.realtime_fps:.2f}")
 
     def start_video(self):
+        if not self.camera.is_opened():
+            msg = "Camera not found."
+            QMessageBox.about(self, "Message", msg)
+            return
         self.timer_video.start(self.timer_interval)
-        self.timer_utilization.start(1000)
+        self.timer_utilization.start(milliseconds_per_seconds)
 
     def stop_video(self):
         if self.checkbox_record.isChecked():
@@ -211,12 +214,3 @@ class StartWindow(QMainWindow):
             self.stop_video()
         else:
             event.ignore()
-
-
-class GogglesThread(QThread):
-    def __init__(self, frame):
-        super().__init__()
-        self.frame = frame
-
-    def run(self):
-        cv2.imshow("Goggles", self.frame)

@@ -17,6 +17,9 @@ class Camera:
         self.video_writer = None
         self.last_frame = None
 
+    def is_opened(self):
+        return self.cap.isOpened()
+
     def initialize_video_writer(self, root_path):
         folder_path = Path(root_path, "video")
         if not folder_path.exists():
@@ -59,7 +62,7 @@ class Camera:
         folder_path = Path(root_path, "image")
         if not folder_path.exists():
             folder_path.mkdir()
-        snapshot_path = Path(folder_path, f"snapshot_{int(time())}.jpg")
+        snapshot_path = Path(folder_path, f"{int(time())}.jpg")
         cv2.imwrite(str(snapshot_path), self.last_frame)
 
     def __del__(self):
