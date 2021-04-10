@@ -58,7 +58,7 @@ Then build the FPGA binding and install the App using the commend from the previ
 ## Test the FPGA
 The `--runfpga` flag activates FPGA tests. Those tests would fail if the FPGA is not plugged in.
 ```shell
-pytest --runfpga src
+pytest --runfpga
 ```
 
 #### Note: All DLLs are taken from https://github.com/open-ephys/plugin-GUI

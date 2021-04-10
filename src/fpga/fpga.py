@@ -19,6 +19,7 @@ def initialize_fpga(dll_path: Optional[str], config_file: str):
 
     dev = PyFrontPanel()
     dev.open_by_serial()
+    print("FPGA is opened by serial.")
 
     pll = PyOkCPLL22393()
     pll.set_reference(48.0)

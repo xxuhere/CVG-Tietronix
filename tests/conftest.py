@@ -7,10 +7,6 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_configure(config):
-    config.addinivalue_line("markers", "fpga: mark test as requiring fpga to run")
-
-
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--runfpga"):
         return
