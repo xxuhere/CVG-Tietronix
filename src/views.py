@@ -122,7 +122,7 @@ class StartWindow(QMainWindow):
         if meta_info_dialog.exec_():
             self.user_name_label.setText(f"User Name: {meta_info_dialog.user_name}")
             self.patient_name_label.setText(
-                f"Patient ID: {meta_info_dialog.patient_name}"
+                f"Patient ID: {meta_info_dialog.patient_id}"
             )
             self.surgery_type_label.setText(
                 f"Surgery Type: {meta_info_dialog.surgery_type.name}"

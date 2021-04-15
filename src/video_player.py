@@ -23,7 +23,7 @@ class VideoPlayer(QWidget):
         self.setLayout(layout)
         self._set_default_image()
 
-    def _set_default_image(self):
+    def _set_default_image(self) -> None:
         h, w = self.camera.resolution
         black_frame = np.ones((w, h, 3))
         self.set_image(black_frame)

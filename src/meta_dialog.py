@@ -20,14 +20,14 @@ class MetaDialog(QDialog):
         layout = QFormLayout()
 
         self.user_name = "test_user"
-        self.patient_name = "test_patient"
+        self.patient_id = "test_patient"
         self.surgery_type = Surgery.Test
 
         self.user_name_line = QLineEdit()
         layout.addRow(QLabel("User Name:"), self.user_name_line)
 
-        self.patient_name_line = QLineEdit()
-        layout.addRow(QLabel("Patient Name:"), self.patient_name_line)
+        self.patient_id_line = QLineEdit()
+        layout.addRow(QLabel("Patient ID:"), self.patient_id_line)
 
         surgery_types = [name for name, _ in Surgery.__members__.items()]
         self.surgery_types_box = QComboBox()
@@ -48,7 +48,7 @@ class MetaDialog(QDialog):
     def accept(self):
         if self.user_name_line.text() != "":
             self.user_name = self.user_name_line.text()
-        if self.patient_name_line.text() != "":
-            self.patient_name = self.patient_name_line.text()
+        if self.patient_id_line.text() != "":
+            self.patient_id = self.patient_id_line.text()
         self.surgery_type = Surgery[self.surgery_types_box.currentText()]
         super().accept()
