@@ -26,9 +26,15 @@ class Camera:
     def is_opened(self):
         return self.cap.isOpened()
 
+    def open(self):
+        self.cap.open(self.cam_num)
+
+    def close(self):
+        self.__del__()
+
     def get_frame(self):
         if not self.is_opened():
-            self.cap.open(self.cam_num)
+            self.open()
         ret, video_frame = self.cap.read()
         if ret:
             self.last_frame = video_frame
@@ -85,3 +91,22 @@ class Camera:
 
     def __str__(self):
         return f"OpenCV Camera {self.cam_num}"
+
+
+class DualCamera:
+    def __init__(self, resolution, fourcc, fps, timestamped=False):
+        self.camera_0 = Camera(0, resolution, fourcc, fps, timestamped)
+        self.camera_1 = Camera(1, resolution, fourcc, fps, timestamped)
+        self.last_frames = None
+        self.last_timestamp = None
+
+    def _check_camera_is_opened(self):
+        if not self.camera_0.is_opened():
+            self.camera_0.open()
+        if not self.camera_1.is_opened():
+            self.camera_1.open()
+
+    def get_frames(self):
+        self._check_camera_is_opened()
+        self.last_frames = (self.camera_0.get_frame(), self.camera_1.get_frame())
+        self.last_timestamp = int(time())

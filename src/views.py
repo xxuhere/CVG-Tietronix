@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 from src.meta_dialog import MetaDialog
 from src.parameter_dialog import ParameterDialog
 from src.parameters import parameters
-from src.utils import convert_nparray_to_qpixmap
+from src.video_player import VideoPlayer
 
 milliseconds_per_seconds = 1000
 
@@ -35,7 +35,6 @@ class StartWindow(QMainWindow):
         self.parameters_value = [value for _, _, _, value in parameters.values()]
         self.is_recording = False
         self.goggles_display = False
-        self.utilization = 0.0
         self.curr_time = 1.0
         self.realtime_fps = 0.0
         self.frame_counter = 0
@@ -60,6 +59,10 @@ class StartWindow(QMainWindow):
         self.checkbox_record.stateChanged.connect(self.click_record)
         self.layout.addWidget(self.checkbox_record, 0, 3)
 
+        self.checkbox_sidebyside = QCheckBox("Side By Side", self.central_widget)
+        self.checkbox_sidebyside.stateChanged.connect(self.click_sidebyside)
+        self.layout.addWidget(self.checkbox_sidebyside, 0, 4)
+
         self.btn_start = QPushButton("Start Video", self.central_widget)
         self.btn_start.clicked.connect(self.start_video)
         self.layout.addWidget(self.btn_start, 1, 0)
@@ -76,15 +79,21 @@ class StartWindow(QMainWindow):
         self.checkbox_goggles.stateChanged.connect(self.activate_goggles_display)
         self.layout.addWidget(self.checkbox_goggles, 1, 3)
 
-        self.image_view = QLabel()
-        self.image_view.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.image_view, 3, 0, 1, 4)
+        self.checkbox_superimposed = QCheckBox("Superimposed", self.central_widget)
+        self.checkbox_superimposed.stateChanged.connect(self.click_superimposed)
+        self.layout.addWidget(self.checkbox_superimposed, 1, 4)
+
+        self.image_view_0 = VideoPlayer(self.camera)
+        self.layout.addWidget(self.image_view_0, 2, 0, 1, 2)
+
+        self.image_view_1 = VideoPlayer(self.camera)
+        self.layout.addWidget(self.image_view_1, 2, 2, 1, 2)
 
         self.timer_video = QTimer()
         self.timer_video.timeout.connect(self.update_image)
 
-        self.timer_utilization = QTimer()
-        self.timer_utilization.timeout.connect(self.update_utilization_fps)
+        self.timer_fps = QTimer()
+        self.timer_fps.timeout.connect(self.update_fps)
 
         self._create_status_bar()
 
@@ -92,30 +101,20 @@ class StartWindow(QMainWindow):
         self.statusbar = self.statusBar()
         self.statusbar.setContentsMargins(10, 0, 10, 0)
 
-        self.utilization_label = QLabel("Utilization: 0 %")
-        self.utilization_label.setContentsMargins(5, 0, 5, 0)
-        self.utilization_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.statusbar.addPermanentWidget(self.utilization_label)
-
-        self.fps_label = QLabel("FPS: 0")
-        self.fps_label.setContentsMargins(5, 0, 5, 0)
-        self.fps_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.statusbar.addPermanentWidget(self.fps_label)
-
         self.user_name_label = QLabel("User Name: test_user")
         self.user_name_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.user_name_label)
 
         self.patient_name_label = QLabel("Patient ID: test_patient")
-        self.user_name_label.setContentsMargins(5, 0, 5, 0)
+        self.patient_name_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.patient_name_label)
 
         self.surgery_type_label = QLabel("Surgery Type: test_surgery")
-        self.user_name_label.setContentsMargins(5, 0, 5, 0)
+        self.surgery_type_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.surgery_type_label)
 
         self.path_label = QLabel(f"Main Directory: {self.root_path}")
-        self.user_name_label.setContentsMargins(5, 0, 5, 0)
+        self.path_label.setContentsMargins(5, 0, 5, 0)
         self.statusbar.addPermanentWidget(self.path_label)
 
     def enter_meta_info(self):
@@ -147,18 +146,19 @@ class StartWindow(QMainWindow):
         if self.is_recording and not self.camera.is_initialized():
             self.camera.initialize_video_writer(self.root_path)
 
+    def click_sidebyside(self, state):
+        pass
+
     def update_image(self):
-        start = time()
         frame = self.camera.get_frame()
         if self.is_recording:
             self.camera.write()
 
-        frame_pixmap = convert_nparray_to_qpixmap(frame)
-        self.image_view.setPixmap(frame_pixmap)
+        self.image_view_0.set_image(frame)
+        self.image_view_1.set_image(frame)
 
         if self.goggles_display:
             cv2.imshow("Goggles", frame)
-        end = time()
 
         if self.frame_counter == 0:
             self.curr_time = time()
@@ -169,12 +169,9 @@ class StartWindow(QMainWindow):
             self.realtime_fps = self.camera.fps / (time() - self.curr_time)
             self.frame_counter = 0
 
-        # before simplify: (end - start) * ms_per_s / (ms_per_s / self.realtime_fps)
-        self.utilization = (end - start) * self.realtime_fps
-
-    def update_utilization_fps(self):
-        self.utilization_label.setText(f"Utilization: {self.utilization:.2f} %")
-        self.fps_label.setText(f"FPS {self.realtime_fps:.2f}")
+    def update_fps(self):
+        self.image_view_0.set_fps(self.realtime_fps)
+        self.image_view_1.set_fps(self.realtime_fps)
 
     def start_video(self):
         if not self.camera.is_opened():
@@ -182,15 +179,15 @@ class StartWindow(QMainWindow):
             QMessageBox.about(self, "Message", msg)
             return
         self.timer_video.start(self.timer_interval)
-        self.timer_utilization.start(milliseconds_per_seconds)
+        self.timer_fps.start(milliseconds_per_seconds)
 
     def stop_video(self):
         if self.checkbox_record.isChecked():
             self.checkbox_record.click()
         self.timer_video.stop()
-        self.timer_utilization.stop()
-        self.utilization_label.setText("Utilization: 0 %")
-        self.fps_label.setText("FPS 0")
+        self.timer_fps.stop()
+        self.image_view_0.set_fps(0)
+        self.image_view_1.set_fps(0)
 
     def take_snapshot(self):
         self.camera.snapshot(self.root_path)
@@ -201,6 +198,9 @@ class StartWindow(QMainWindow):
             cv2.destroyAllWindows()
         else:
             self.goggles_display = True
+
+    def click_superimposed(self, state):
+        pass
 
     def closeEvent(self, event):
         msg = "Close the app?"
