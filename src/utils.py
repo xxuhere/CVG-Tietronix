@@ -12,7 +12,17 @@ class Surgery(Enum):
     C = 4
 
 
-def convert_nparray_to_qpixmap(img):
+def check_cameras() -> (bool, bool):
+    cam_0 = cv2.VideoCapture(0)
+    cam_0_on, _ = cam_0.read()
+    cam_0.release()
+    cam_1 = cv2.VideoCapture(1)
+    cam_1_on, _ = cam_1.read()
+    cam_1.release()
+    return cam_0_on, cam_1_on
+
+
+def ndarray_to_qpixmap(img):
     w, h, ch = img.shape
     if img.ndim == 1:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
