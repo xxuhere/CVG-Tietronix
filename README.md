@@ -74,7 +74,8 @@ goggles
 ```
 
 ## QT Python Bindings
-There are two popular Python Qt bindings: PyQT and PySide. We are currently using PyQt5.
+There are two popular Python Qt bindings: PyQT and PySide. We are currently using PyQt5 5.15.0, which is the latest
+version available via `apt` on Ubuntu.
 
 ## Alternatives of Qt
 [DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
