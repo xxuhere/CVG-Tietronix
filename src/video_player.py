@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from src.models import Camera
 from src.utils import ndarray_to_qpixmap
 
 
@@ -24,7 +25,7 @@ class VideoPlayer(QWidget):
         self.source = source
         self.video_interval = (
             int(self.milliseconds_per_seconds / self.source.fps)
-            if self.source is not None
+            if self.source is Camera
             else 0
         )
 
@@ -56,7 +57,7 @@ class VideoPlayer(QWidget):
         self.realtime_fps = 0.0
         self.frame_counter = 0
 
-        w, h = self.source.resolution if self.source is not None else (640, 480)
+        w, h = self.source.resolution if self.source is Camera else (640, 480)
         self.black_frame = np.ones((h, w, 3))
         self._set_default_image()
 
