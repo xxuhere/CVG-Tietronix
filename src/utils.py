@@ -23,9 +23,9 @@ def check_cameras() -> (bool, bool):
 
 
 def ndarray_to_qpixmap(img):
-    w, h, ch = img.shape
-    if img.ndim == 1:
+    if img.ndim == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    w, h, _ = img.shape
     qimg = QImage(img.data, h, w, 3 * h, QImage.Format_RGB888)
     return QPixmap(qimg)
 
