@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from src.algorithms.threshold import thresholding
 from src.models import Camera
 from src.utils import ndarray_to_qpixmap
 
@@ -79,6 +80,10 @@ class VideoPlayer(QWidget):
 
     def update_image(self):
         frame = self.source.get_frame()
+
+        if self.control_panel.segmentation_on:
+            frame = thresholding(frame)
+
         self._set_image(frame)
 
         if self.control_panel.is_recording:
@@ -103,7 +108,7 @@ class VideoPlayer(QWidget):
         return self.source.is_initialized()
 
     def initialize_video_writer(self):
-        self.source.initialize_video_writer(self.parent().parent().root_path)
+        self.source.initialize_video_writer(self.parent().parent().parent().root_path)
 
     def cleanup(self):
         self.stop_video()
@@ -149,10 +154,22 @@ class VideoControlPanel(QWidget):
         self.cbx_goggle.setDisabled(disable)
         layout.addWidget(self.cbx_goggle, 2, 1)
 
+        self.cbx_segmentation = QCheckBox("Segmentation")
+        self.cbx_segmentation.stateChanged.connect(self.segmentation)
+        self.cbx_segmentation.setDisabled(disable)
+        layout.addWidget(self.cbx_segmentation, 3, 0)
+
+        self.cbx_superimposed = QCheckBox("Superimposed")
+        self.cbx_superimposed.stateChanged.connect(self.superimposed)
+        self.cbx_superimposed.setDisabled(disable)
+        layout.addWidget(self.cbx_superimposed, 3, 1)
+
         self.setLayout(layout)
 
         self.is_recording = False
         self.project_to_goggle = False
+        self.segmentation_on = False
+        self.superimposed_on = False
 
     def start(self):
         self.parent().start_video()
@@ -173,6 +190,14 @@ class VideoControlPanel(QWidget):
         self.project_to_goggle = True if state == Qt.Checked else False
         if not self.project_to_goggle:
             cv2.destroyAllWindows()
+
+    def segmentation(self, state):
+        self.segmentation_on = True if state == Qt.Checked else False
+
+    def superimposed(self, state):
+        self.superimposed_on = True if state == Qt.Checked else False
+        if self.superimposed_on and not self.segmentation_on:
+            self.cbx_segmentation.click()
 
     def cleanup(self):
         if self.cbx_record.isChecked():

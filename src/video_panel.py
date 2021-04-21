@@ -13,10 +13,4 @@ class VideoPanel(QWidget):
         self.player_1 = VideoPlayer(camera_1)
         layout.addWidget(self.player_1, 0, 1)
 
-        self.dummy_0 = VideoPlayer()
-        layout.addWidget(self.dummy_0, 1, 0)
-
-        self.dummy_1 = VideoPlayer()
-        layout.addWidget(self.dummy_1, 1, 1)
-
         self.setLayout(layout)
