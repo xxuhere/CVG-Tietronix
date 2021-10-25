@@ -1,0 +1,53 @@
+#pragma once
+
+#include "Param.h"
+#include <boost/optional.hpp>
+
+namespace CVG {
+
+	/// <summary>
+	/// Implementation of the Param variant for int datatypes.
+	/// </summary>
+	class ParamInt : public Param
+	{
+	private:
+		int curVal;
+
+		boost::optional<int> defVal;
+		boost::optional<int> failVal;
+		boost::optional<int> minVal;
+		boost::optional<int> maxVal;
+
+	protected:
+		void ModifyJSONImpl(json& js) override;
+
+	public:
+		/// <summary>
+		/// Constructor for the int implementation of Param.
+		/// </summary>
+		ParamInt(
+			const std::string& id,
+			const std::string& label,
+			const std::string& category,
+			const std::string& unit,
+			int value,
+			boost::optional<int> defVal,
+			boost::optional<int> failVal,
+			boost::optional<int> minVal,
+			boost::optional<int> maxVal);
+
+		std::string StrValue() override;
+		bool HasMin() override;
+		bool HasMax() override;
+		bool HasFail() override;
+		bool SetValue(int value, ValTy ty) override;
+		bool GetValue(int& value, ValTy ty) override;
+		bool SetValue(float value, ValTy ty) override;
+		bool GetValue(float& value, ValTy ty) override;
+		bool SetValue(const std::string& value, ValTy ty) override;
+		bool GetValue(std::string& value, ValTy ty) override;
+		bool SetValue(bool value, ValTy ty) override;
+		bool GetValue(bool& value, ValTy ty) override;
+		bool ResetToDefault() override;
+	};
+}
