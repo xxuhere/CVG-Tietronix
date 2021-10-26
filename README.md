@@ -10,12 +10,12 @@ conda update conda
 
 Create and activate the development environment:
 ```shell
-conda create -f environment.yml
+conda env create --file environment.yml --name goggles-dev
 conda activate goggles-dev
 ```
 
-See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) 
-for how to manage conda environments. 
+See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
+for how to manage conda environments.
 
 Build the Python binding for FPGA and install the App
 ```shell

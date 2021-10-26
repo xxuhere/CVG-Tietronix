@@ -11,6 +11,6 @@ dependencies:
   - pytest
   - pip
   - pip:
-    - pyqt5=5.15.4
+    - pyqt5==5.15.4
     - opencv-python
     - dearpygui
