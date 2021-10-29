@@ -119,12 +119,12 @@ namespace CVG
 
 		boost::optional<int> vcur = $_anon::PullInt(js, "current");
 		boost::optional<int> vdef = $_anon::PullInt(js, "default");
-		if (!vdef.has_value() && !vcur.has_value())
+		if (!vdef && !vcur)
 		{
 			error = "Param int " + id + ", must contain either a default or current value.";
 			return nullptr;
 		}
-		if (!vcur.has_value())
+		if (!vcur)
 			vcur = vdef;
 
 
@@ -161,12 +161,12 @@ namespace CVG
 
 		boost::optional<std::string> vcur = $_anon::PullString(js, "current");
 		boost::optional<std::string> vdef = $_anon::PullString(js, "default");
-		if (!vdef.has_value() && !vcur.has_value())
+		if (!vdef && !vcur)
 		{
 			error = "Param string " + id + ", must have either a default or current value.";
 			return nullptr;
 		}
-		if (!vcur.has_value())
+		if (!vcur)
 			vcur = vdef;
 
 		boost::optional<std::string> vfail = $_anon::PullString(js, "fail");
@@ -202,12 +202,12 @@ namespace CVG
 		boost::optional<bool> vcur = $_anon::PullBool(js, "current");
 		boost::optional<bool> vdef = $_anon::PullBool(js, "default");
 
-		if (!vdef.has_value() && !vcur.has_value())
+		if (!vdef && !vcur)
 		{
 			error = "Param bool " + id + " must have either a current or default value.";
 			return nullptr;
 		}
-		if (!vcur.has_value())
+		if (!vcur)
 			vcur = vdef;
 
 		boost::optional<bool> vfail = $_anon::PullBool(js, "fail");
@@ -239,12 +239,12 @@ namespace CVG
 
 		boost::optional<std::string> vcur = $_anon::PullString(js, "current");
 		boost::optional<std::string> vdef = $_anon::PullString(js, "default");
-		if (!vdef.has_value() && !vcur.has_value())
+		if (!vdef && !vcur)
 		{
 			error = "Param enum " + id + ", must have either a default or current value.";
 			return nullptr;
 		}
-		if (!vcur.has_value())
+		if (!vcur)
 			vcur = vdef;
 
 		// The only big different from ParseString is the extraction of the 
@@ -301,12 +301,12 @@ namespace CVG
 
 		boost::optional<float> vcur = $_anon::PullFloat(js, "current");
 		boost::optional<float> vdef = $_anon::PullFloat(js, "default");
-		if (!vdef.has_value() && !vcur.has_value())
+		if (!vdef && !vcur)
 		{
 			error = "Param float " + id + ", must have either a default or current value.";
 			return nullptr;
 		}
-		if(!vcur.has_value())
+		if(!vcur)
 			vcur = vdef;
 
 

@@ -21,10 +21,10 @@ namespace CVG {
 	{
 		js["current"] = this->curVal;
 
-		if(this->defVal.has_value())
+		if(this->defVal)
 			js["default"] = this->defVal.get();
 
-		if (this->failVal.has_value())
+		if (this->failVal)
 			js["fail"] = this->failVal.get();
 	}
 
@@ -45,7 +45,7 @@ namespace CVG {
 
 	bool ParamBool::HasFail() 
 	{
-		return this->failVal.has_value();
+		return !!this->failVal;
 	}
 
 	bool ParamBool::SetValue(int value, ValTy ty) 
@@ -76,14 +76,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = BoolToInt(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = BoolToInt(this->failVal.get());
@@ -119,14 +119,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = BoolToFloat(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = BoolToFloat(this->failVal.get());
@@ -163,14 +163,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = BoolToString(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = BoolToString(this->failVal.get());
@@ -207,14 +207,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = this->failVal.get();
@@ -225,7 +225,7 @@ namespace CVG {
 
 	bool ParamBool::ResetToDefault()
 	{
-		if (!this->defVal.has_value())
+		if (!this->defVal)
 			return false;
 
 		this->curVal = this->defVal.get();

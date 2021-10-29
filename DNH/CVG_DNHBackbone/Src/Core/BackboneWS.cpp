@@ -156,6 +156,10 @@ namespace CVG
 			this->HandleRTAPI_Disarm(connection, js, postage);
 		else if (apity == "purpose")
 			this->HandleRTAPI_Purpose(connection, js, postage);
+		else if (apity == "subscribe")
+			this->HandleRTAPI_Sub(connection, js, postage);
+		else if (apity == "publish")
+			this->HandleRTAPI_Publish(connection, js, postage);
 		else
 			SendError(connection, ErrorTy::Error, "Unknown apity.", apity, postage);
 	}
@@ -733,20 +737,6 @@ namespace CVG
 	{
 	}
 
-	void BackboneWS::HandleRTAPI_Publish(
-		WSConSPtr con, 
-		const json& js, 
-		const std::string& postage)
-	{
-	}
-
-	void BackboneWS::HandleRTAPI_Sub(
-		WSConSPtr con, 
-		const json& js, 
-		const std::string& postage)
-	{
-	}
-
 	void BackboneWS::HandleRTAPI_Purpose(
 		WSConSPtr con, 
 		const json& js, 
@@ -823,6 +813,170 @@ namespace CVG
 		resp["missing"] = jsmissing;
 
 		SendJSON(con, resp);
+	}
+
+	void BackboneWS::HandleRTAPI_Publish(WSConSPtr con, const json& js, const std::string& postage)
+	{
+		static const std::string _APITY = "publish";
+
+		if (!js.contains("data"))
+		{
+			this->SendError(con, ErrorTy::Error, "publish's data member is missing.", postage, _APITY);
+			return;
+		}
+		if (!js["data"].is_object())
+		{
+			this->SendError(con, ErrorTy::Error, "publish's data member isn't an object.", postage, _APITY);
+			return;
+		}
+
+		std::vector<std::string> recipients;
+
+		json jsMsg;
+		jsMsg["apity"] = "msg";
+		jsMsg["data"] = js["data"];
+
+		EquipmentListSPtr equips = this->coreSys->GetEquipmentCache();
+
+		if (js.contains("guids"))
+		{
+			if (!js["guids"].is_array())
+			{
+				this->SendError(con, ErrorTy::Error, "publish's guid member isn't an array.", postage, _APITY);
+				return;
+			}
+
+			for (const json& jsguid : js["guids"])
+			{
+				if (jsguid.is_string())
+					recipients.push_back((std::string)jsguid);
+			}
+
+			jsMsg["mode"] = "guids";
+			
+		}
+		else if (js.contains("topic"))
+		{
+			if(!js["topic"].is_string())
+			{
+				this->SendError(con, ErrorTy::Error, "publish's topic member must be a string.", postage, _APITY);
+				return;
+			}
+
+			std::string topic = js["topic"];
+
+			for (auto it : equips->itemsByGUID)
+			{
+				if (it.second->IsSubscribed(topic))
+					recipients.push_back(it.first);
+			}
+
+			jsMsg["mode"] = "topic";
+			jsMsg["topic"] = topic;
+		}
+		else
+		{
+			this->SendError(con, ErrorTy::Error, "publish request must either have a guids or topic member..", postage, _APITY);
+			return;
+		}
+
+		bool anyrecepts = false;
+		if (recipients.size() == 0)
+		{
+			std::string respStr = jsMsg.dump();
+			for (std::string guidsrcvr : recipients)
+			{
+				EquipmentSPtr eqrcvr = equips->FindGUID(guidsrcvr);
+				if (eqrcvr == nullptr)
+					continue;
+
+				this->SendString(eqrcvr->GetSocket(), respStr);
+				anyrecepts = true;
+			}
+		}
+
+		// Send a response to the sender to confirm the request 
+		// was handled, as well as letting them know if anyone 
+		// received it.
+		//
+		// For now we don't give much more information back. If
+		// they want to track more information, the requestor can
+		// track via postage.
+		json jsresp;
+		jsresp["apity"] = _APITY;
+		ResponseUtils::ApplyPostage(jsMsg, postage);
+		jsresp["anyrecv"] = anyrecepts ? true : false;
+		this->SendJSON(con, jsresp);
+	}
+
+	void BackboneWS::HandleRTAPI_Sub(WSConSPtr con, const json& js, const std::string& postage)
+	{
+		static const std::string _APITY = "subscribe";
+
+		if(!js.contains("mode") || !js["mode"])
+		{
+			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add or rem.", postage, _APITY);
+			return;
+		}
+
+		std::string mode = js["mode"];
+		if (mode != "add" && mode != "rem")
+		{
+			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add or rem.", postage, _APITY);
+			return;
+		}
+
+		if (!js.contains("topics") || !js["topics"].is_array())
+		{
+			this->SendError(con, ErrorTy::Error, "subscribe must have a mode topics member of type array.", postage, _APITY);
+			return;
+		}
+
+		// We're collecting these as a set, which will be converted
+		// to a vector later. It might seem more practical to just
+		// use a vector, but we're leveraging the unique member 
+		// property to guard against duplicates.
+		std::set<std::string> topics;
+		for (const json& jst : js["topics"])
+		{
+			if (!jst.is_string())
+				continue;
+
+			topics.insert((std::string)js);
+		}
+
+		bool any = false;
+
+		EquipmentListSPtr eqs = this->coreSys->GetEquipmentCache();
+		EquipmentSPtr eqReq = eqs->FindConnection(con);
+
+		if (eqReq == nullptr)
+		{ 
+			// Sanity check,
+			// Not expected to ever happen.
+			this->SendError(con, ErrorTy::Error, "Corrupted state detected while modifying subscriptions.", _APITY, postage);
+			return;
+		}
+
+		// Record what changes were successful.
+		bool success = false;
+		if (mode == "add")
+		{
+			std::vector<std::string> v(topics.begin(), topics.end());
+			success = eqReq->Subscribe(v);
+		}
+		if (mode == "rem")
+		{
+			std::vector<std::string> v(topics.begin(), topics.end());
+			success = eqReq->Unsubscribe(v);
+		}
+
+		json jsresp;
+		jsresp["apity"] = _APITY;
+		ResponseUtils::ApplyPostage(jsresp, postage);
+		jsresp["mode"] = mode;
+		jsresp["status"] = success ? "success" : "fail";
+		this->SendJSON(con, jsresp);
 	}
 
 	void BackboneWS::Ping()

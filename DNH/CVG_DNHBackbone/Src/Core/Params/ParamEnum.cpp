@@ -24,12 +24,12 @@ namespace CVG {
 		{
 			this->curVal = this->allowedValues[0];
 		}
-		if (!this->defVal.has_value())
+		if (!this->defVal)
 		{
 			if (!this->ContainsAllowed(this->defVal.get()))
 				this->defVal = this->allowedValues[0];
 		}
-		if (this->failVal.has_value())
+		if (!!this->failVal)
 		{
 			if (!this->ContainsAllowed(this->failVal.get()))
 				this->failVal = this->allowedValues[0];
