@@ -10,12 +10,12 @@ conda update conda
 
 Create and activate the development environment:
 ```shell
-conda env create --file environment.yml --name goggles-dev
+conda create -f environment.yml
 conda activate goggles-dev
 ```
 
-See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
-for how to manage conda environments.
+See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) 
+for how to manage conda environments. 
 
 Build the Python binding for FPGA and install the App
 ```shell
@@ -26,7 +26,10 @@ python -m pip install -e .
 ## Raspberry Pi Setup
 
 In general, Qt's support for Arm devices is not great. The only prebuild Qt library on Arm is available via `apt`. 
+
 This instruction is for [Ubuntu Desktop 20.10 for Raspberry Pi 4](https://ubuntu.com/download/raspberry-pi). 
+
+If an image for Ubuntu Desktop 20 for Raspberry Pi cannot be found, use Ubuntu Server 20 LTS for Raspberry Pi (64 bit). Then after installing Ubuntu server, install the GNOME UI on it. Instructions for installing GNOME can be found [here](https://www.cyberciti.biz/faq/ubuntu-linux-install-gnome-desktop-on-server/).
 
 We chose Ubuntu rather than Raspbian because 64-bit system performs better than 32-bit system with enough resource, 
 and Pi 4 has enough memory take all benefits of a 64-bit OS. Also, the default Python3 version of Ubuntu 20.10
