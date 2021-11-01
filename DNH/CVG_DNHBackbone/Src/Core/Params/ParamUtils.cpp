@@ -192,13 +192,18 @@ namespace CVG
 					return boost::none;
 
 				json jsmem = js[name];
-				if (!jsmem.is_boolean())
-					return boost::none;
+				if (jsmem.is_boolean())
+					return (bool)jsmem;
 
-				return (bool)jsmem;
+				if (jsmem.is_number_integer())
+					return (int)jsmem != 0;
+
+				if (jsmem.is_number_float())
+					return (float)jsmem != 0.0f;
+
+				return boost::none;
 			}
 		};
-
 		boost::optional<bool> vcur = $_anon::PullBool(js, "current");
 		boost::optional<bool> vdef = $_anon::PullBool(js, "default");
 
