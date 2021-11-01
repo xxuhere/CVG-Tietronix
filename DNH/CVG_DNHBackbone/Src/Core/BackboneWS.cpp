@@ -297,6 +297,9 @@ namespace CVG
 		std::string reqpurpose;
 		ParseUtils::ExtractJSONString(js, "purpose", reqpurpose);
 
+		std::string reqhostname;
+		ParseUtils::ExtractJSONString(js, "hostname", reqhostname);
+
 		std::string reqmanu;
 		ParseUtils::ExtractJSONString(js, "manufacturer", reqmanu);
 
@@ -329,12 +332,12 @@ namespace CVG
 			}
 		}
 
-		// CLIENT DATA
+		// EXTRACT CLIENT DATA
 		//
 		//////////////////////////////////////////////////
 
 		static std::set<std::string> alreadyCovered = 
-			{"apity", "type", "name", "manufacturer", "params", "topics", "purpose"};
+			{"apity", "type", "name", "manufacturer", "params", "topics", "purpose", "hostname"};
 		// Everything else in the object we didn't 
 		// look at and convert to a C/C++ representation
 		// gets stored as custom client data.
@@ -351,7 +354,7 @@ namespace CVG
 		//
 		//////////////////////////////////////////////////
 
-		Equipment* eq = new Equipment(reqname, reqmanu, reqpurpose, eqtype, params, clientData);
+		Equipment* eq = new Equipment(reqname, reqmanu, reqpurpose, reqhostname, eqtype, params, clientData);
 		return EquipmentSPtr(eq);
 	}
 

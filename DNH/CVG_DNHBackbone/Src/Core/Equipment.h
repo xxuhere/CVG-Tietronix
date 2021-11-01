@@ -39,6 +39,11 @@ namespace CVG
 		// DNH during runtime, and will be unique for ALL Equipment.
 		std::string guid;
 
+		// The hostname of the equipment. If the host wants to provide
+		// its local network ID so other things can directly connect
+		// to it.
+		std::string hostname;
+
 		// The type of equipment.
 		EQType equipmentType;
 
@@ -76,6 +81,7 @@ namespace CVG
 			const std::string & name, 
 			const std::string & manufacturer,
 			const std::string & purpose,
+			const std::string& hostname,
 			EQType type,
 			std::vector<ParamSPtr> params,
 			json clientData);
