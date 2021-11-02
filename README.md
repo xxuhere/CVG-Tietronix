@@ -25,10 +25,10 @@ python -m pip install -e .
 
 ## Raspberry Pi Setup
 
-In general, Qt's support for Arm devices is not great. The only prebuild Qt library on Arm is available via `apt`. 
-This instruction is for [Ubuntu Desktop 20.10 for Raspberry Pi 4](https://ubuntu.com/download/raspberry-pi). 
+In general, Qt's support for Arm devices is not great. The only prebuild Qt library on Arm is available via `apt`.
+This instruction is for [Ubuntu Desktop 20.10 for Raspberry Pi 4](https://ubuntu.com/download/raspberry-pi).
 
-We chose Ubuntu rather than Raspbian because 64-bit system performs better than 32-bit system with enough resource, 
+We chose Ubuntu rather than Raspbian because 64-bit system performs better than 32-bit system with enough resource,
 and Pi 4 has enough memory take all benefits of a 64-bit OS. Also, the default Python3 version of Ubuntu 20.10
 is 3.8, which is identical to the version used in development. So this OS requires the least setup.
 
@@ -42,6 +42,12 @@ sudo apt install python3-pyqt5
 ```
 
 Create and activate a virtualenv. See [venv](https://docs.python.org/3/library/venv.html) for details.
+
+install venv:
+```shell
+sudo apt install python3.8-venv
+```
+
 Since we installed pyqt5 at the system level, we need the `--system-site-packages` flag to give venv the access.
 ```shell
 python3 -m venv ~/virtualenvs/goggles-dev --system-site-packages
