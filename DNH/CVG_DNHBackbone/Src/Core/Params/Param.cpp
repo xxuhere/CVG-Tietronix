@@ -1,6 +1,5 @@
-#pragma once
-
 #include "Param.h"
+
 namespace CVG {
 
 	Param::Param(

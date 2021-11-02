@@ -32,6 +32,7 @@ namespace CVG
 		const std::string& name,
 		const std::string& manufacturer,
 		const std::string& purpose,
+		const std::string & hostname,
 		EQType type,
 		std::vector<ParamSPtr> params,
 		json clientData)
@@ -43,6 +44,8 @@ namespace CVG
 
 		this->name = name;
 		this->manufacturer = manufacturer;
+		this->purpose = purpose;
+		this->hostname = hostname;
 		this->equipmentType = type;
 		this->params = params;
 		this->clientData = clientData;
@@ -116,6 +119,9 @@ namespace CVG
 		ret["manufacturer"] = this->manufacturer;
 		ret["guid"] = this->guid;
 		ret["purpose"] = this->purpose;
+
+		if(this->hostname.size() > 0)
+			ret["hostname"] = this->hostname;
 
 		json jsParams = json::array();
 		for (ParamSPtr pp : this->params)

@@ -25,16 +25,16 @@ namespace CVG
 	{
 		js["current"] = this->curVal;
 
-		if(this->defVal.has_value())
+		if(this->defVal)
 			js["default"] = this->defVal.get();
 
-		if (this->failVal.has_value())
+		if (this->failVal)
 			js["fail"] = this->failVal.get();
 
-		if (this->minVal.has_value())
+		if (this->minVal)
 			js["min"] = this->minVal.get();
 
-		if (this->maxVal.has_value())
+		if (this->maxVal)
 			js["max"] = this->maxVal.get();
 	}
 
@@ -46,17 +46,17 @@ namespace CVG
 
 	bool ParamFloat::HasMin() 
 	{
-		return this->minVal.has_value();
+		return !!this->minVal;
 	}
 
 	bool ParamFloat::HasMax() 
 	{
-		return this->maxVal.has_value();
+		return !!this->maxVal;
 	}
 
 	bool ParamFloat::HasFail() 
 	{
-		return this->minVal.has_value();
+		return !!this->minVal;
 	}
 
 	bool ParamFloat::SetValue(int value, ValTy ty) 
@@ -95,28 +95,28 @@ namespace CVG
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = (int)this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = (int)this->failVal.get();
 			return true;
 
 		case ValTy::Max:
-			if (!this->maxVal.has_value())
+			if (!this->maxVal)
 				return false;
 
 			value = (int)this->maxVal.get();
 			return true;
 
 		case ValTy::Min:
-			if (!this->minVal.has_value())
+			if (!this->minVal)
 				return false;
 
 			value = (int)this->minVal.get();
@@ -161,28 +161,28 @@ namespace CVG
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = this->failVal.get();
 			return true;
 
 		case ValTy::Max:
-			if (!this->maxVal.has_value())
+			if (!this->maxVal)
 				return false;
 
 			value = this->maxVal.get();
 			return true;
 
 		case ValTy::Min:
-			if (!this->minVal.has_value())
+			if (!this->minVal)
 				return false;
 
 			value = this->minVal.get();
@@ -237,28 +237,28 @@ namespace CVG
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = this->failVal.get();
 			return true;
 
 		case ValTy::Max:
-			if (!this->maxVal.has_value())
+			if (!this->maxVal)
 				return false;
 
 			value = this->maxVal.get();
 			return true;
 
 		case ValTy::Min:
-			if (!this->minVal.has_value())
+			if (!this->minVal)
 				return false;
 
 			value = this->minVal.get();
@@ -304,21 +304,21 @@ namespace CVG
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = FloatToBool(this->failVal.get());
 			return true;
 
 		case ValTy::Max:
-			if (!this->maxVal.has_value())
+			if (!this->maxVal)
 				return false;
 
 			value = FloatToBool(this->maxVal.get());
 			return true;
 
 		case ValTy::Min:
-			if (!this->minVal.has_value())
+			if (!this->minVal)
 				return false;
 
 			value = FloatToBool(this->minVal.get());
@@ -329,7 +329,7 @@ namespace CVG
 
 	bool ParamFloat::ResetToDefault()
 	{
-		if (!this->defVal.has_value())
+		if (!this->defVal)
 			return false;
 
 		this->curVal = this->defVal.get();

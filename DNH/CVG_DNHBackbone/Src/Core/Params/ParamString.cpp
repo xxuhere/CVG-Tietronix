@@ -37,10 +37,10 @@ namespace CVG {
 	{
 		js["current"] = this->curVal;
 
-		if(this->defVal.has_value())
+		if(this->defVal)
 			js["default"] = this->defVal.get();
 
-		if (this->failVal.has_value())
+		if (this->failVal)
 			js["fail"] = this->failVal.get();
 	}
 
@@ -61,7 +61,7 @@ namespace CVG {
 
 	bool ParamString::HasFail()
 	{
-		return this->failVal.has_value();
+		return !!this->failVal;
 	}
 
 	bool ParamString::SetValue(int value, ValTy ty)
@@ -94,14 +94,14 @@ namespace CVG {
 				return true;
 
 			case ValTy::Default:
-				if (!this->defVal.has_value())
+				if (!this->defVal)
 					return false;
 
 				value = std::stoi(this->defVal.get());
 				return true;
 
 			case ValTy::Fail:
-				if (!this->failVal.has_value())
+				if (!this->failVal)
 					return false;
 
 				value = std::stoi(this->failVal.get());
@@ -150,14 +150,14 @@ namespace CVG {
 				return true;
 
 			case ValTy::Default:
-				if (!this->defVal.has_value())
+				if (!this->defVal)
 					return false;
 
 				value = std::stof(this->defVal.get());
 				return true;
 
 			case ValTy::Fail:
-				if (!this->failVal.has_value())
+				if (!this->failVal)
 					return false;
 				value = std::stof(this->failVal.get());
 				return true;
@@ -201,14 +201,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 			value = this->failVal.get();
 			return true;
@@ -246,14 +246,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal.has_value())
+			if (!this->defVal)
 				return false;
 
 			value = StringToBool(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal.has_value())
+			if (!this->failVal)
 				return false;
 
 			value = StringToBool(this->failVal.get());
@@ -265,7 +265,7 @@ namespace CVG {
 
 	bool ParamString::ResetToDefault()
 	{
-		if (!this->defVal.has_value())
+		if (!this->defVal)
 			return false;
 
 		this->curVal = this->defVal.get();

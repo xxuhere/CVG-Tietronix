@@ -25,7 +25,13 @@ int main()
     // Background app loop
     while (true)
     {
+#ifdef __linux__
+        sleep(100);
+#elif _WIN32
         Sleep(100);
+#else
+        UNSUPPORTED PLATFORM
+#endif
         dnhSys.Tick();
 
         // Every so often, we need to send a ping. It's the 
