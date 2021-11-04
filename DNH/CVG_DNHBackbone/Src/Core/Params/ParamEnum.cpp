@@ -93,4 +93,10 @@ namespace CVG {
 		std::string sb = BoolToString(value);
 		return SetValue(value, ty);
 	}
+
+	ParamSPtr ParamEnum::Clone() const
+	{
+		ParamEnum* pe = new ParamEnum(*this);
+		return ParamSPtr(pe);
+	}
 }

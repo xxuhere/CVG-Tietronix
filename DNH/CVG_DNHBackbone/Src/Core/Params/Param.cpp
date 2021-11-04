@@ -26,7 +26,7 @@ namespace CVG {
 		return ConvertToString(this->type);
 	}
 
-	json Param::GetJSON()
+	json Param::GetJSONDef()
 	{
 		json ret;
 

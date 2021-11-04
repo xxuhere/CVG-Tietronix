@@ -335,4 +335,10 @@ namespace CVG
 		this->curVal = this->defVal.get();
 		return true;
 	}
+
+	ParamSPtr ParamFloat::Clone() const
+	{
+		ParamFloat* pf = new ParamFloat(*this);
+		return ParamSPtr(pf);
+	}
 }

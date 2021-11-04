@@ -21,6 +21,9 @@ namespace CVG
 		Spectator,
 		Conductor,
 
+		// Special type reserved for the DNH Hub
+		System,
+
 		// Null should always be the second-to-last entry. It doubles as 
 		// the counter for how many valid DataType values there are.
 		Null,

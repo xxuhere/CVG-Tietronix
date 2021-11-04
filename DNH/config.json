@@ -1,0 +1,41 @@
+{
+	"params" : 
+	[
+		{
+			"id" : "patname",
+			"label" : "Patient Name",
+			"type" : "string",
+			"default" : "",
+			"current" : "",
+			"description" : "The name of the patient in the medical database. This will be filled in after init.",
+			"fillform" : true
+		},
+		{
+			"id" : "timing",
+			"label" : "Dye Timing Matched",
+			"type" : "enum",
+			"possible" : ["unchecked", "mismatch", "match", "unknown", "missing", "checking"],
+			"default" : "unchecked",
+			"default" : "unchecked",
+			"description" : "If match between the current time and the expected pre-op injection of dye in their medical record."
+		},
+		{
+			"id" : "checktime",
+			"label" : "Dye Matched Time",
+			"type" : "string",
+			"default" : "The time when timing was last set."
+		},
+		{
+			"id" : "injecttime",
+			"label" : "Injection Time",
+			"type" : "string",
+			"default" : "The time found in the patient's database."
+		}
+	],
+	"startupcmds" : [],
+	"resetcmds" : [],
+	"fatalcmds" : [],
+	"endcmds" : [],
+	"port_ws" : 5701,
+	"port_http" : 5700
+}

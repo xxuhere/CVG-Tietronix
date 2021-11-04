@@ -44,9 +44,12 @@ namespace CVG
 		/// <returns>True if qval is an alloed enum value.</returns>
 		bool ContainsAllowed(const std::string& qval);
 
+		// Override function. See base declaration of virtual functions 
+		// in Param for documentation.
 		bool SetValue(int value, ValTy ty) override;
 		bool SetValue(float value, ValTy ty) override;
 		bool SetValue(const std::string& value, ValTy ty) override;
 		bool SetValue(bool value, ValTy ty) override;
+		ParamSPtr Clone() const override;
 	};
 }

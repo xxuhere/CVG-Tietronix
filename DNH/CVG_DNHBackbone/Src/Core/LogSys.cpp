@@ -1,6 +1,7 @@
 #include "LogSys.h"
 #include <iostream>
 #include <mutex>
+
 namespace CVG
 {
 	void LogSys::Log(const std::string& message)

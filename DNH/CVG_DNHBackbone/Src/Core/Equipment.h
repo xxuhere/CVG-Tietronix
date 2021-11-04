@@ -17,6 +17,34 @@ namespace CVG
 	/// </summary>
 	class Equipment
 	{
+	
+	public:
+
+		// And iterator for the params, to allow things to
+		// traverse the Params, but also make sure the 
+		// vector is unmodifyable.
+		class iterator
+		{
+			friend Equipment;
+
+		private:
+			// We'll just borrow the actual vector iterator, but 
+			// keep direct access to it protected.
+			std::vector<ParamSPtr>::iterator it;
+
+		private:
+			iterator(std::vector<ParamSPtr>::iterator it);
+			
+		public:
+			// Iterator implementation functions to allow ranged for 
+			// loops. Other iterator functions are ignored.
+			ParamSPtr operator *();
+			void operator++();
+			void operator--();
+			bool operator == (const iterator& itOther) const;
+			bool operator != (const iterator& itOther) const;
+		};
+
 	private:
 		// The active state of the Equipment. It will only 
 		// change the first time Deactivate() is called on it.
@@ -47,6 +75,14 @@ namespace CVG
 		// The type of equipment.
 		EQType equipmentType;
 
+		// The epoch timestamp of when the Equipment registered.
+		//
+		// This is kind of misnomer, it will actually be the moment
+		// the Equipment object was created on the server - but for 
+		// all intents and purposes, they should be treated as the 
+		// same.
+		unsigned long long timestampRegistered;
+
 		// The reflective parameters of the Equipment.
 		std::vector<ParamSPtr> params;
 
@@ -64,6 +100,24 @@ namespace CVG
 
 		// The Equipment's realtime network connection to the DNH server.
 		WSConSPtr socket;
+
+	public:
+		/// <summary>
+		/// Create the basic JSON object for an Equipment definition.
+		/// 
+		/// Some things that aren't actually Equipment may wish to 
+		/// defined themselves in JSON the same way Equipments do.
+		/// </summary>
+		/// <param name="name">The Equipment type.</param>
+		/// <param name="guid">The Equipment guid.</param>
+		/// <param name="type">The Equipment type.</param>
+		/// <param name="purpose">The Equipment purpose.</param>
+		/// <returns>The barebones Equipment definition.</returns>
+		static json EquipmentJSONTemplate(
+			const std::string& name,
+			const std::string& guid,
+			EQType eqTy,
+			const std::string& purpose);
 
 	public:
 
@@ -100,6 +154,23 @@ namespace CVG
 
 		inline std::string Name()const
 		{ return this->name; }
+
+		inline unsigned long long TimestampRegistered() const
+		{ return this->timestampRegistered; }
+
+		/// <summary>
+		/// Parameter iterator to allow iteration and use of 
+		/// ranged-for loops.
+		/// </summary>
+		/// <returns>The starting iterator for contained Params.</returns>
+		iterator begin();
+
+		/// <summary>
+		/// Parameter iterator to allow iteration and use of 
+		/// ranged-for loops.
+		/// </summary>
+		/// <returns>The ending iterator for contained Params.</returns>
+		iterator end();
 
 		/// <summary>
 		/// Flag the Equipment as unregistrered.
@@ -158,21 +229,29 @@ namespace CVG
 		/// <returns>True if the unsubscription was successful. Else, false.</returns>
 		bool Unsubscribe(const std::vector<std::string>& topics);
 
-		
-
 		/// <summary>
+		/// Convenience function to unsubscribe from a single topic.
 		/// 
+		/// If multiple topics need to be unsubscribed in batch, use the
+		/// batch function, as it manages the thread mutex better for
+		/// multiple operations.
 		/// </summary>
-		/// <param name="topic"></param>
-		/// <returns></returns>
+		/// <param name="topic">The topic to unsubscribe from.</param>
+		/// <returns>True if the unsubscription was successful. Else, false.</returns>
 		bool Unsubscribe(const std::string& topic);
 
 		/// <summary>
+		/// Send a topic message to the Equipment.
 		/// 
+		/// The request will be ignored if the Equipment isn't subscribed
+		/// to the topic.
 		/// </summary>
-		/// <param name="topic"></param>
-		/// <param name="payload"></param>
-		/// <returns></returns>
+		/// <param name="topic">The topic the message is for.</param>
+		/// <param name="payload">The topic data to send. This should be a topic API message.</param>
+		/// <returns>
+		/// If true, the message was sent. Else if false, the Equipment
+		/// was not subscribed to the topic.
+		/// </returns>
 		bool TryTopicSend(const std::string& topic, const std::string& payload);
 
 		/// <summary>
@@ -207,8 +286,18 @@ namespace CVG
 		/// </returns>
 		bool SetSocket(WSConSPtr s);
 
-		inline WSConSPtr GetSocket() { return this->socket; }
+		inline WSConSPtr GetSocket() 
+		{ return this->socket; }
 
+		/// <summary>
+		/// Find a parameter in the Equipment.
+		/// </summary>
+		/// <param name="id">The id of the Parameter.</param>
+		/// <returns>
+		/// A reference to the Param in the Equipment.
+		/// nullptr will be found if a Param with a matching id was 
+		/// not found.
+		/// </returns>
 		ParamSPtr GetParam(const std::string& id);
 	};
 

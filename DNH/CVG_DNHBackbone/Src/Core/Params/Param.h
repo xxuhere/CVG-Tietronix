@@ -8,14 +8,19 @@
 
 using json = nlohmann::json;
 
-namespace CVG {
+namespace CVG 
+{
+
+	class Param;
+	typedef std::shared_ptr<Param> ParamSPtr;
 
 	/// <summary>
 	/// The base class for CVG Equipment parameters. These are
 	/// introspective values for things connected through the
 	/// DNH realtime bus.
 	/// </summary>
-	class Param {
+	class Param 
+	{
 	public:
 		/// <summary>
 		/// Each Param will contain multiple values. The actual
@@ -111,7 +116,8 @@ namespace CVG {
 		/// Public accessor to the data type.
 		/// </summary>
 		/// <returns>The Param's data type.</returns>
-		DataType Type() const {
+		DataType Type() const 
+		{
 			return this->type;
 		}
 
@@ -119,7 +125,8 @@ namespace CVG {
 		/// Public accessor to the readable label.
 		/// </summary>
 		/// <returns>The Param's label.</returns>
-		std::string GetLabel() const {
+		std::string GetLabel() const 
+		{
 			return this->label;
 		}
 
@@ -127,7 +134,8 @@ namespace CVG {
 		/// Public accessor to the API id.
 		/// </summary>
 		/// <returns>The Param's API id.</returns>
-		std::string GetID() const {
+		std::string GetID() const 
+		{
 			return this->id;
 		}
 
@@ -271,13 +279,21 @@ namespace CVG {
 		virtual bool ResetToDefault() = 0;
 
 		/// <summary>
+		/// Create a deep copy of the Param.
+		/// </summary>
+		/// <returns>
+		/// Another Param of the same id, type, value and metadata.
+		/// </returns>
+		virtual ParamSPtr Clone() const = 0;
+
+		/// <summary>
 		/// Get a detailed description of the Param (including metadata)
 		/// as a JSON object.
 		/// 
 		/// This will be the same JSON seen in the /Equipment queries.
 		/// </summary>
 		/// <returns>The Param details.</returns>
-		json GetJSON();
+		json GetJSONDef();
 
 		/// <summary>
 		/// Get the Param's current value as a JSON object.
@@ -325,6 +341,4 @@ namespace CVG {
 			return s.length() > 0 && s != "False";
 		}
 	};
-
-	typedef std::shared_ptr<Param> ParamSPtr;
 }

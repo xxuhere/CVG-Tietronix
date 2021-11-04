@@ -319,4 +319,10 @@ namespace CVG
 		this->curVal = this->defVal.get();
 		return true;
 	}
+
+	ParamSPtr ParamInt::Clone() const
+	{
+		ParamInt* pi = new ParamInt(*this);
+		return ParamSPtr(pi);
+	}
 }

@@ -14,6 +14,9 @@ using json = nlohmann::json;
 
 namespace CVG
 {
+	/// <summary>
+	/// Utilities involving the Param class.
+	/// </summary>
 	class ParamUtils
 	{
 	public:

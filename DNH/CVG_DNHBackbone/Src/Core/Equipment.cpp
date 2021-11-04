@@ -5,6 +5,7 @@
 #include <boost/uuid/uuid_generators.hpp> // generators
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/lexical_cast.hpp>
+#include <boost/chrono.hpp>
 #include "ResponseUtils.h"
 
 /// <summary>
@@ -25,14 +26,44 @@ struct GUIDGenerator
 	}
 };
 
-
 namespace CVG
 {
+
+	Equipment::iterator::iterator(std::vector<ParamSPtr>::iterator it)
+	{
+		this->it = it;
+	}
+
+	ParamSPtr Equipment::iterator::operator *()
+	{
+		return *it;
+	}
+
+	void Equipment::iterator::operator++()
+	{
+		this->it++;
+	}
+
+	void Equipment::iterator::operator--()
+	{
+		this->it--;
+	}
+
+	bool Equipment::iterator::operator == (const iterator& itOther) const
+	{
+		return this->it == itOther.it;
+	}
+
+	bool Equipment::iterator::operator != (const iterator& itOther) const
+	{
+		return this->it != itOther.it;
+	}
+
 	Equipment::Equipment(
 		const std::string& name,
 		const std::string& manufacturer,
 		const std::string& purpose,
-		const std::string & hostname,
+		const std::string& hostname,
 		EQType type,
 		std::vector<ParamSPtr> params,
 		json clientData)
@@ -42,13 +73,30 @@ namespace CVG
 		// has a unique one.
 		this->guid = GUIDGenerator::Generate();
 
-		this->name = name;
-		this->manufacturer = manufacturer;
-		this->purpose = purpose;
-		this->hostname = hostname;
-		this->equipmentType = type;
-		this->params = params;
-		this->clientData = clientData;
+		// https://stackoverflow.com/a/6012671/2680066
+		// For now we're using boost chrono, the library that std::chrono 
+		// was prototyped after, because it's a C++20 feature and the 
+		// current agreed C++ used is C++14.
+		const auto timeNow = std::chrono::system_clock::now();
+		this->timestampRegistered = timeNow.time_since_epoch().count();
+
+		this->name				= name;
+		this->manufacturer		= manufacturer;
+		this->purpose			= purpose;
+		this->hostname			= hostname;
+		this->equipmentType		= type;
+		this->params			= params;
+		this->clientData		= clientData;
+	}
+
+	Equipment::iterator Equipment::begin()
+	{
+		return Equipment::iterator(this->begin());
+	}
+
+	Equipment::iterator Equipment::end()
+	{
+		return Equipment::iterator(this->end());
 	}
 
 	bool Equipment::Deactivate()
@@ -110,22 +158,40 @@ namespace CVG
 		return this->Unsubscribe(v);
 	}
 
-	json Equipment::GetJSON() const
+	json Equipment::EquipmentJSONTemplate(
+		const std::string& name,
+		const std::string& guid,
+		EQType ty,
+		const std::string& purpose)
 	{
 		json ret;
 
-		ret["type"] = ConvertToString(this->equipmentType);
-		ret["name"] = this->name;
+		ret["name"] = name;
+		ret["guid"] = guid;
+		ret["type"] = ConvertToString(ty);
+		ret["purpose"] = purpose;
+
+		return ret;
+	}
+
+	json Equipment::GetJSON() const
+	{
+		json ret =
+			EquipmentJSONTemplate(
+				this->name,
+				this->guid,
+				this->equipmentType,
+				this->purpose);
+		
 		ret["manufacturer"] = this->manufacturer;
-		ret["guid"] = this->guid;
-		ret["purpose"] = this->purpose;
+		ret["regtime"] = this->timestampRegistered;
 
 		if(this->hostname.size() > 0)
 			ret["hostname"] = this->hostname;
 
 		json jsParams = json::array();
 		for (ParamSPtr pp : this->params)
-			jsParams.push_back(pp->GetJSON());
+			jsParams.push_back(pp->GetJSONDef());
 
 		ret["params"] = jsParams;
 

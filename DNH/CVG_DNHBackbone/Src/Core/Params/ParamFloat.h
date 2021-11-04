@@ -36,6 +36,8 @@ namespace CVG
 			boost::optional<float> minVal,
 			boost::optional<float> maxVal);
 
+		// Override function. See base declaration of virtual functions 
+		// in Param for documentation.
 		std::string StrValue() override;
 		bool HasMin() override;
 		bool HasMax() override;
@@ -49,5 +51,6 @@ namespace CVG
 		bool SetValue(bool value, ValTy ty) override;
 		bool GetValue(bool& value, ValTy ty) override;
 		bool ResetToDefault() override;
+		ParamSPtr Clone() const override;
 	};
 }

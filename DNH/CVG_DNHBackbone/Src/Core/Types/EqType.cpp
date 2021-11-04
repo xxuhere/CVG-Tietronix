@@ -26,6 +26,8 @@ namespace CVG
 			return EQType::Display;
 		if (str == "spectator")
 			return EQType::Spectator;
+		if (str == "system")
+			return EQType::System;
 
 		return EQType::Null;
 	}
@@ -56,6 +58,8 @@ namespace CVG
 			return "display";
 		case EQType::Spectator:
 			return "spectator";
+		case EQType::System:
+			return "system";
 
 		}
 		return "null";

@@ -7,6 +7,69 @@
 
 namespace CVG
 {
+	/// <summary>
+	/// A class that can branch between being an Equipment or a
+	/// ParamCacheSPtr but 
+	/// </summary>
+	class VirtualEquipment
+	{
+	public:
+		// At most, 1 of these implementation pointers should be set.
+
+		/// <summary>
+		/// If set, the VirtualEquipment redirects to an actual equipment.
+		/// </summary>
+		EquipmentSPtr eq;
+
+		/// <summary>
+		/// If set, the virtual Equipment redirects to a cache, assumed to
+		/// by the DNH system's datacache.
+		/// </summary>
+		ParamCacheSPtr cache;
+
+	public:
+		bool IsValid()
+		{
+			// Is any implementation set?
+			return eq != nullptr || cache != nullptr;
+		}
+
+		void SetEquipment(EquipmentSPtr e)
+		{
+			this->eq = e;
+			this->cache = nullptr;
+		}
+
+		void SetCache(ParamCacheSPtr c)
+		{
+			this->eq = nullptr;
+			this->cache = c;
+		}
+
+		std::string GUID()
+		{
+			if (eq != nullptr)
+				return eq->GUID();
+
+			if (cache != nullptr)
+			{
+				//Assumed to be the datacache
+				return "system";
+			}
+			return std::string();
+		}
+
+		ParamSPtr GetParam(const std::string& id)
+		{
+			if (eq != nullptr)
+				return eq->GetParam(id);
+			if (cache != nullptr)
+				return cache->Get(id);
+
+			return nullptr;
+		}
+	};
+
 	BackboneWS::BackboneWS(int port, CoreDNH* coreSys)
 	{
 		this->coreSys = coreSys;
@@ -160,6 +223,8 @@ namespace CVG
 			this->HandleRTAPI_Sub(connection, js, postage);
 		else if (apity == "publish")
 			this->HandleRTAPI_Publish(connection, js, postage);
+		else if(apity == "datacache")
+			this->HandleRTAPI_Datacache(connection, js, postage);
 		else
 			SendError(connection, ErrorTy::Error, "Unknown apity.", apity, postage);
 	}
@@ -282,6 +347,13 @@ namespace CVG
 		if (!ParseUtils::ExtractJSONString(js, "type", reqtype))
 		{
 			error = "Registration is missing equipment type.";
+			return nullptr;
+		}
+
+		const static std::string _RESERVED_system = ConvertToString(EQType::System);
+		if (reqtype == _RESERVED_system)
+		{
+			error = std::string("Equipment type ") + _RESERVED_system + " cannot be registered; it is a reserved type.";
 			return nullptr;
 		}
 
@@ -466,16 +538,18 @@ namespace CVG
 			return;
 		}
 
-		EquipmentSPtr targ;
+		VirtualEquipment targ;
 		// Make sure the guid matches a valid device. If guid "self" is 
 		// a special guid keyword that resolves the the Equipment to the
 		// one tied to the connection
 		if (guid == "self")
-			targ = sender;
+			targ.SetEquipment(sender);
+		else if (guid == "system")
+			targ.SetCache(this->coreSys->GetDataCache());
 		else
-			targ = eqlst->FindGUID(guid);
+			targ.SetEquipment(eqlst->FindGUID(guid));
 
-		if (targ == nullptr)
+		if (!targ.IsValid())
 		{
 			SendError(con, ErrorTy::Error, "Target equipment is not Registered.", _APITY, postage);
 			return;
@@ -485,7 +559,7 @@ namespace CVG
 		ret["apity"] = "valget";
 		ResponseUtils::ApplyPostage(ret, postage);
 		ret["reqguid"] = guid;
-		ret["guid"] = targ->GUID();
+		ret["guid"] = targ.GUID();
 
 
 		bool invalidGets = false;
@@ -502,7 +576,7 @@ namespace CVG
 
 			std::string paramName = (std::string)j;
 
-			ParamSPtr p = targ->GetParam(paramName);
+			ParamSPtr p = targ.GetParam(paramName);
 			if (p == nullptr)
 			{
 				unknownNames.push_back(paramName);
@@ -605,16 +679,18 @@ namespace CVG
 			return;
 		}
 
-		EquipmentSPtr targ;
+		VirtualEquipment targ;
 		// Make sure the guid matches a valid device. If guid "self" is 
 		// a special guid keyword that resolves the the Equipment to the
 		// one tied to the connection
 		if (guid == "self")
-			targ = sender;
+			targ.SetEquipment(sender);
+		else if (guid == "system")
+			targ.SetCache(this->coreSys->GetDataCache());
 		else
-			targ = eqlst->FindGUID(guid);
+			targ.SetEquipment(eqlst->FindGUID(guid));
 
-		if (targ == nullptr)
+		if (!targ.IsValid())
 		{
 			SendError(con, ErrorTy::Error, "Target equipment is not Registered.", _APITY, postage);
 			return;
@@ -634,7 +710,7 @@ namespace CVG
 		for (json::const_iterator it = jsets.begin(); it != jsets.end(); ++it)
 		{
 			std::string id = it.key();
-			ParamSPtr p = targ->GetParam(id);
+			ParamSPtr p = targ.GetParam(id);
 			if (p == nullptr)
 			{
 				successes[id] = "notexist";
@@ -677,7 +753,7 @@ namespace CVG
 			json jsvar;
 			jsvar["status"] = successes[id];
 
-			ParamSPtr p = targ->GetParam(id);
+			ParamSPtr p = targ.GetParam(id);
 			if (p != nullptr)
 				jsvar["val"] = p->GetValueJSON();
 
@@ -697,13 +773,13 @@ namespace CVG
 		{
 			json broadupdt; // Broadcasted changes
 			broadupdt["apity"] = "changedval";
-			broadupdt["guid"] = targ->GUID();
+			broadupdt["guid"] = targ.GUID();
 			broadupdt["invoker"] = sender->GUID();
 			broadupdt["ids"] = jsids;
 			json jsbrvals = json::object(); // Broadcasted values
 			for (const std::string& chid : changedids)
 			{
-				ParamSPtr p = targ->GetParam(chid);
+				ParamSPtr p = targ.GetParam(chid);
 				if (p == nullptr)
 					continue;
 
@@ -916,7 +992,7 @@ namespace CVG
 	{
 		static const std::string _APITY = "subscribe";
 
-		if(!js.contains("mode") || !js["mode"])
+		if(!js.contains("mode") || !js["mode"].is_string())
 		{
 			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add or rem.", postage, _APITY);
 			return;
@@ -980,6 +1056,115 @@ namespace CVG
 		jsresp["mode"] = mode;
 		jsresp["status"] = success ? "success" : "fail";
 		this->SendJSON(con, jsresp);
+	}
+
+	void BackboneWS::HandleRTAPI_Datacache(WSConSPtr con, const json& js, const std::string& postage)
+	{
+		// The apity datacache handler. Only adding variables is supported
+		// because modifying and querying variables is done by reusing the
+		// varset and varget with a "system" guid.
+
+		static const std::string _APITY = "datacache";
+
+		if (!js.contains("mode") || !js["mode"].is_string())
+		{
+			this->SendError(con, ErrorTy::Error, "datacache must have a mode member of add.", postage, _APITY);
+			return;
+		}
+
+		EquipmentListSPtr lst = this->coreSys->GetEquipmentCache();
+		EquipmentSPtr eqInkvoker = lst.get()->FindConnection(con);
+		if (eqInkvoker == nullptr)
+		{
+			// Sanity check, shouldn't ever happen.
+			this->SendError(con, ErrorTy::Error, "Could not validate registration.", postage, _APITY);
+			return;
+		}
+
+		std::string mode = js["mode"];
+		// A request to add datacache values
+		if (mode == "add")
+		{
+			if(!js.contains("params") || !js["params"].is_array())
+			{
+				this->SendError(con, ErrorTy::Error, "datacache adding must have a params member of type array, containing Param definitions.", postage, _APITY);
+				return;
+			}
+
+			std::vector<std::string> errors;
+			std::vector<std::string> success;
+			this->coreSys->RegisterDataCacheArray(js["params"], errors, success);
+			
+			json jsresp;
+			jsresp["apity"] = _APITY;
+			ResponseUtils::ApplyPostage(jsresp, postage);
+			jsresp["mode"] = mode;
+
+			// Three types of success statuses to chooce from, depending
+			// on if everything was success, partially successful, or if
+			// only failures.
+			if (errors.size() > 0 && success.size() == 0)
+				jsresp["status"] = "fail";
+			else if (success.size() > 0 && errors.size() == 0)
+				jsresp["status"] = "success";
+			else
+				jsresp["status"] = "mixed";
+
+			// Report successfully added Param ids
+			json jsAdded = json::array();
+			for (const std::string& s : success)
+				jsAdded.push_back(s);
+			jsresp["ids"] = jsAdded;
+
+			// And errors
+			json jsErrs = json::array();
+			for (const std::string& s : errors)
+				jsErrs.push_back(s);
+			jsresp["errors"] = jsErrs;
+
+			this->SendJSON(con, jsresp);
+
+			// Double check 1 more time that there were any successes,
+			// but validated by actually querying into the cache.
+			bool any = false;
+			// And broadcast to everybody else the added datacaches
+			if (success.size() > 0)
+			{
+				ParamCacheSPtr dataCache = this->coreSys->GetDataCache();
+				json jsNotif;
+				jsNotif["apity"] = "addedcache";
+				jsNotif["guid"] = eqInkvoker->GUID();
+
+				json jsids = json::array();
+				json jsparams;
+				for (const std::string& s : success)
+				{
+					ParamSPtr p = dataCache->Get(s);
+					if (p == nullptr)
+						continue;
+
+					jsids.push_back(s);
+					jsparams[s] = p->GetJSONDef();
+					any = true;
+				}
+				jsNotif["ids"] = jsids;
+				jsNotif["params"] = jsparams;
+
+				if (any)
+				{
+					// Update to be extra sure we're sending it to everyone relevant.
+					// Before we needed it just to get the invoker's guid.
+					lst = this->coreSys->GetEquipmentCache();
+					std::string strnotif = jsNotif.dump();
+					lst->Broadcast(strnotif, con);
+				}
+			}
+		}
+		else
+		{
+			this->SendError(con, ErrorTy::Error, "datacache must have a mode member of add", postage, _APITY);
+			return;
+		}
 	}
 
 	void BackboneWS::Ping()

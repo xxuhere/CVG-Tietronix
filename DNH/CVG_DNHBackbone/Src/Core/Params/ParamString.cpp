@@ -271,4 +271,10 @@ namespace CVG {
 		this->curVal = this->defVal.get();
 		return true;
 	}
+
+	ParamSPtr ParamString::Clone() const
+	{
+		ParamString* ps = new ParamString(*this);
+		return ParamSPtr(ps);
+	}
 }

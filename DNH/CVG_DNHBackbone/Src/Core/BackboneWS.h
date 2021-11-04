@@ -146,7 +146,7 @@ namespace CVG
 		/// </param>
 		void RemoveConnection(WSConSPtr con, const std::string& reason);
 
-		// Realtime API handlers Each apity gets its own value.
+		// Realtime API handlers Each apity gets its own handler function.
 		// See the dispatch mechanism in HandleWS_Realtime_Message()
 		// for more information on how the functions are called.
 		void HandleRTAPI_Register(WSConSPtr con, const json& js, const std::string & postage);
@@ -160,9 +160,12 @@ namespace CVG
 		void HandleRTAPI_Publish(WSConSPtr con, const json& js, const std::string& postage);
 		void HandleRTAPI_Sub(WSConSPtr con, const json& js, const std::string& postage);
 		void HandleRTAPI_Purpose(WSConSPtr con, const json& js, const std::string& postage);
+		void HandleRTAPI_Datacache(WSConSPtr con, const json& js, const std::string& postage);
 
 		/// <summary>
+		/// Broadcast a ping to all connections.
 		/// 
+		/// This also includes unregistered connections.
 		/// </summary>
 		void Ping();
 
