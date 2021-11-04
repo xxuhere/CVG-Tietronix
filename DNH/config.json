@@ -15,7 +15,7 @@
 			"label" : "Dye Timing Matched",
 			"type" : "enum",
 			"possible" : ["unchecked", "mismatch", "match", "unknown", "missing", "checking"],
-			"default" : "unchecked",
+			"current" : "unchecked",
 			"default" : "unchecked",
 			"description" : "If match between the current time and the expected pre-op injection of dye in their medical record."
 		},
@@ -23,13 +23,15 @@
 			"id" : "checktime",
 			"label" : "Dye Matched Time",
 			"type" : "string",
-			"default" : "The time when timing was last set."
+			"default" : "",
+			"description" : "The time when timing was last set."
 		},
 		{
 			"id" : "injecttime",
 			"label" : "Injection Time",
 			"type" : "string",
-			"default" : "The time found in the patient's database."
+			"default" : "",
+			"description" : "The time found in the patient's database."
 		}
 	],
 	"startupcmds" : [],

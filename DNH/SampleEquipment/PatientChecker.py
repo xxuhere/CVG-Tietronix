@@ -5,13 +5,17 @@ Validates if the patient has a record in the database of
 having the flourescent dye of the correct type injected 
 at the appropriate time in the past relative to the current
 time for the FGS surgery.
+
+The example requires the sample patient database server
+contained in subfolder PatientDBServer to be running.
 """
 
 from RegisterUtils import *
-import sys
-import requests
-import time
 import datetime
+import requests
+import sys
+import time
+
 
 EXPECTED_DYE = "LS301"
 
@@ -23,18 +27,26 @@ MIN_TIME_SECONDS = SECONDS_IN_HOURS * 15
 MAX_TIME_SECONDS = SECONDS_IN_HOURS * 30
 
 
-def SendLS301SystemStatus(dnhSocket, patname, status, checktime = None, lasttime = None):
+def SendLS301SystemStatus(dnhSocket, patname, status, checktime=None, lasttime=None):
     """
-
+    Send an updated status on the patient into the DNH bus. This function
+    expects the DNH to have certain datacache variables and that it is not
+    fighting other Equipment to use them:
+        - patname
+        - timing
+        - checktime
+        - injecttime
 
     Parameters
     ----------
-    dnhSocket : TYPE
-        DESCRIPTION.
-    patname : TYPE
-        DESCRIPTION.
-    status : TYPE
-        DESCRIPTION.
+    dnhSocket : websocket
+        The websocket that's connected to the DNH bus.
+    patname : String
+        The patient name. This should be the DNH patname value that we 
+        queried the patient DB history with.
+    status : String
+        This needs to match one of the status values,
+        ["unchecked", "mismatch", "match", "unknown", "missing", "checking"]
 
     Returns
     -------
@@ -48,33 +60,38 @@ def SendLS301SystemStatus(dnhSocket, patname, status, checktime = None, lasttime
     setdata["sets"] = {}
     setdata["sets"]["patname"] = patname
     setdata["sets"]["timing"] = status
-    
+
     if checktime != None:
-        setdata["sets"]["checktime"] = datetime.datetime.utcfromtimestamp(int(checktime)).strftime('%Y-%m-%d %H:%M:%S')
+        setdata["sets"]["checktime"] = datetime.datetime.utcfromtimestamp(
+            int(checktime)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         setdata["sets"]["checktime"] = ""
-        
+
     if lasttime != None:
-        setdata["sets"]["injecttime"] = datetime.datetime.utcfromtimestamp(int(lasttime)).strftime('%Y-%m-%d %H:%M:%S')
+        setdata["sets"]["injecttime"] = datetime.datetime.utcfromtimestamp(
+            int(lasttime)).strftime('%Y-%m-%d %H:%M:%S')
     else:
         setdata["sets"]["injecttime"] = ""
-        
-    
+
     dnhSocket.send(json.dumps(setdata))
 
 
 def VerifyPatientTime(dnhSocket, patname, databaseHost):
     """
-
+    Check a patient's DB history to see if they were given a dye injection at
+    the appropriate time to coincide with a surgery at the time the function
+    is called.
 
     Parameters
     ----------
-    dnhSocket : TYPE
-        DESCRIPTION.
-    patname : TYPE
-        DESCRIPTION.
-    databaseHost : TYPE
-        DESCRIPTION.
+    dnhSocket : websocket
+        The websocket that's connected to the DNH bus.
+    patname : String
+        The patient name. This should be teh DNH patname value that we query
+        the patient DB history with.
+    databaseHost : String
+        Hostname of the database server. This should either be a dns, 
+        localhost, or an api.
 
     Returns
     -------
@@ -96,12 +113,12 @@ def VerifyPatientTime(dnhSocket, patname, databaseHost):
     print(r.text)
     respObj = json.loads(r.text)
     lastDye = None
-    
+
     if "events" not in respObj:
         print("Patient not in database")
         SendLS301SystemStatus(dnhSocket, patname, "unknown", curTime)
         return
-        
+
     for evt in respObj["events"]:
         # If the event a relevant dye injection event?
         if evt["event"] == "preop" and evt["type"] == "injection" and evt["info"] == EXPECTED_DYE:
@@ -127,7 +144,7 @@ def VerifyPatientTime(dnhSocket, patname, databaseHost):
 
     # If they got inject and it's not too late or too recent, we've hit
     # the Goldilocks time window.
-    print("Patient is withing the proper time window.")
+    print("Patient is within the proper time window.")
     SendLS301SystemStatus(dnhSocket, patname, "match", curTime, lastDye)
 
 
