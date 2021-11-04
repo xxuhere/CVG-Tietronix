@@ -9,6 +9,16 @@ from websocket import create_connection
 import json
 
 #%% Utilities
+
+def GetDNHHostname():
+    #return "192.168.1.84"
+    return "localhost"
+
+def GetDNHHTTPPort():
+    return 5700
+    
+def GetDNHWSPort():
+    return 5701
     
 def CreateEqRegistration(name, manufacturer, ty):
     """

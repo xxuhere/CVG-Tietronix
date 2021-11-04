@@ -8,7 +8,8 @@ with various types of parameters.
 import time
 from RegisterUtils import *
 
-WSCONNECTION = "ws://192.168.1.84:5001/realtime"
+#WSCONNECTION = "ws://"192.168.1.84:5001/realtime"
+WSCONNECTION = f"ws://{GetDNHHostname()}:{GetDNHWSPort()}/realtime"
 
 # %% Registration
 
@@ -49,6 +50,11 @@ ws.send(s)
 result = ws.recv()
 print(result)
 
+#   RANDOM API TESTS
+#
+##################################################
+
+# Test valset to change a variable with the "self" guid.
 print("\nTesting changing bool")
 setv = {}
 setv["apity"] = "valset"
@@ -60,6 +66,7 @@ result = ws.recv()
 print("\tReceived:")
 print(result)
 
+# Testing valget
 print("\nTesting retrieving bool")
 setv = {}
 setv["apity"] = "valget"
@@ -72,6 +79,9 @@ print("\tReceived:")
 print(result)
 # %%
 
+#   APP LOOP
+#
+##################################################
 while True:
     time.sleep(1.0)
     result = ws.recv()

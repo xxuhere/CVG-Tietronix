@@ -3,6 +3,8 @@
 """
 GPIOLamp.py: An example of locally running a Python script on the
 RasberryPi to be a liason to an LED connected via GPIO pins.
+
+The script will register as an Equipment for the DNH bus.
 """
 
 # Note that RPi.GPIO must be manually installed if not executing on
@@ -31,7 +33,8 @@ GPIO.output(LEDPIN, toggleVal)
 ##################################################
 
 # The DNH to connect to
-WSCONNECTION = "ws://192.168.1.84:5001/realtime"
+#WSCONNECTION = "ws://"192.168.1.84:5001/realtime"
+WSCONNECTION = f"ws://{GetDNHHostname()}:{GetDNHWSPort()}/realtime"
 
 # Create registration
 reg = CreateEqRegistration("RPi GPIO LED", "Tietronix Software Inc", "lamp")
