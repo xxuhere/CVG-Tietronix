@@ -960,7 +960,7 @@ namespace CVG
 		}
 
 		bool anyrecepts = false;
-		if (recipients.size() == 0)
+		if (recipients.size() >= 0)
 		{
 			std::string respStr = jsMsg.dump();
 			for (std::string guidsrcvr : recipients)
@@ -994,17 +994,46 @@ namespace CVG
 
 		if(!js.contains("mode") || !js["mode"].is_string())
 		{
-			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add or rem.", postage, _APITY);
+			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add, rem, or report.", postage, _APITY);
 			return;
 		}
 
 		std::string mode = js["mode"];
-		if (mode != "add" && mode != "rem")
+		if (mode != "add" && mode != "rem" && mode != "report")
 		{
-			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add or rem.", postage, _APITY);
+			this->SendError(con, ErrorTy::Error, "subscribe must have a mode member of either add, rem, or report.", postage, _APITY);
 			return;
 		}
 
+		// The Equipment client may want to check it us to see which
+		// topics they are subscribed to
+		if (mode == "report")
+		{
+			EquipmentListSPtr eqLst = this->coreSys->GetEquipmentCache();
+			EquipmentSPtr eqReport = eqLst->FindConnection(con);
+
+			// Sanity check. Shouldn't ever actually happen.
+			if (eqReport == nullptr)
+			{
+				SendError(con, ErrorTy::Error, "Could not verify registration.", _APITY, postage);
+				return;
+			}
+
+			json jsResp;
+			jsResp["apity"] = _APITY;
+			jsResp["mode"] = "report";
+			// It's uncertain if we should do this just for consistency with rem and add
+			jsResp["status"] = "success"; 
+			ResponseUtils::ApplyPostage(jsResp, postage);
+			json jstopics = json::array();
+			for (const std::string& s : eqReport->Subscriptions())
+				jstopics.push_back(s);
+			jsResp["topics"] = jstopics;
+			this->SendJSON(con, jsResp);
+			return;
+		}
+
+		// Both add and rem need a "topics" array
 		if (!js.contains("topics") || !js["topics"].is_array())
 		{
 			this->SendError(con, ErrorTy::Error, "subscribe must have a mode topics member of type array.", postage, _APITY);
@@ -1021,7 +1050,7 @@ namespace CVG
 			if (!jst.is_string())
 				continue;
 
-			topics.insert((std::string)js);
+			topics.insert((std::string)jst);
 		}
 
 		bool any = false;

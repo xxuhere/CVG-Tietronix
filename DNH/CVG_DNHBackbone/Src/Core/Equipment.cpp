@@ -91,12 +91,12 @@ namespace CVG
 
 	Equipment::iterator Equipment::begin()
 	{
-		return Equipment::iterator(this->begin());
+		return Equipment::iterator(this->params.begin());
 	}
 
 	Equipment::iterator Equipment::end()
 	{
-		return Equipment::iterator(this->end());
+		return Equipment::iterator(this->params.end());
 	}
 
 	bool Equipment::Deactivate()
@@ -114,31 +114,31 @@ namespace CVG
 		return this->topics.find(channel) != this->topics.end();
 	}
 
-	bool Equipment::Subscribe(const std::vector<std::string>& channels)
+	bool Equipment::Subscribe(const std::vector<std::string>& newTopics)
 	{
 		bool ret = false;
 		const std::lock_guard<std::mutex> lock(this->topicsMutex);
-		for (const std::string& chan : topics)
+		for (const std::string& topic : newTopics)
 		{
-			if (this->topics.find(chan) != this->topics.end())
+			if (this->topics.find(topic) != this->topics.end())
 				continue;
 
-			this->topics.insert(chan);
+			this->topics.insert(topic);
 			ret = true;
 		}
 		return ret;
 	}
 
-	bool Equipment::Unsubscribe(const std::vector<std::string>& channels)
+	bool Equipment::Unsubscribe(const std::vector<std::string>& remTopics)
 	{
 		bool ret = false;
 		const std::lock_guard<std::mutex> lock(this->topicsMutex);
-		for (const std::string& chan : channels)
+		for (const std::string& topic : remTopics)
 		{
-			if (this->topics.find(chan) == this->topics.end())
+			if (this->topics.find(topic) == this->topics.end())
 				continue;
 
-			this->topics.erase(chan);
+			this->topics.erase(topic);
 			ret = true;
 		}
 		return ret;
@@ -156,6 +156,12 @@ namespace CVG
 		std::vector<std::string> v;
 		v.push_back(channel);
 		return this->Unsubscribe(v);
+	}
+
+	std::vector<std::string> Equipment::Subscriptions()
+	{
+		const std::lock_guard<std::mutex> lock(this->topicsMutex);
+		return std::vector<std::string>(this->topics.begin(), this->topics.end());
 	}
 
 	json Equipment::EquipmentJSONTemplate(

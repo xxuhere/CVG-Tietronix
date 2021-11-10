@@ -206,12 +206,12 @@ namespace CVG
 		/// over individual Subscribe() calls if there are multiple topics because
 		/// it does not thrash the topics mutex.
 		/// </summary>
-		/// <param name="topics">The topics to subscribe to.</param>
+		/// <param name="newTopics">The topics to subscribe to.</param>
 		/// <returns>
 		/// True if the Equipment was successfully subscribed to any
 		/// topics. Else, false.
 		/// </returns>
-		bool Subscribe(const std::vector<std::string>& topics);
+		bool Subscribe(const std::vector<std::string>& newTopics);
 
 		/// <summary>
 		/// Unsubscribes the Equipment from a single topic.
@@ -225,9 +225,9 @@ namespace CVG
 		/// 
 		/// Performs a batch subscription
 		/// </summary>
-		/// <param name="topics">The topic to unsubscribe to.</param>
+		/// <param name="remTopics">The topic to unsubscribe to.</param>
 		/// <returns>True if the unsubscription was successful. Else, false.</returns>
-		bool Unsubscribe(const std::vector<std::string>& topics);
+		bool Unsubscribe(const std::vector<std::string>& remTopics);
 
 		/// <summary>
 		/// Convenience function to unsubscribe from a single topic.
@@ -239,6 +239,12 @@ namespace CVG
 		/// <param name="topic">The topic to unsubscribe from.</param>
 		/// <returns>True if the unsubscription was successful. Else, false.</returns>
 		bool Unsubscribe(const std::string& topic);
+
+		/// <summary>
+		/// Get a copy of what the Equipment is subscribed to.
+		/// </summary>
+		/// <returns>The list of topics the Equipment is subscribed to.</returns>
+		std::vector<std::string> Subscriptions();
 
 		/// <summary>
 		/// Send a topic message to the Equipment.
