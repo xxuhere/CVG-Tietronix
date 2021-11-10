@@ -1,9 +1,7 @@
 
 # Visual Studio Stuff
-*.sln
 Debug
 enc_temp_filter
-*.vcxproj
 *.vcxproj.*
 x86
 x64
