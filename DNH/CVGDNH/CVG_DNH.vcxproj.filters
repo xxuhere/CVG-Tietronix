@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Src\Core\CoreDNH.cpp" />
+    <ClCompile Include="Src\Core\SEquipment.cpp" />
+    <ClCompile Include="Src\Core\SEquipmentList.cpp" />
+    <ClCompile Include="Src\Core\LogSys.cpp" />
+    <ClCompile Include="Src\Core\ResponseUtils.cpp" />
+    <ClCompile Include="Src\Core\CommandsCollection.cpp" />
+    <ClCompile Include="src\mainWin.cpp" />
+    <ClCompile Include="Src\Core\BackboneHTTP.cpp">
+      <Filter>Backbones</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Core\BackboneWS.cpp">
+      <Filter>Backbones</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Core\BackboneWS.h" />
+    <ClInclude Include="Src\Core\BackboneHTTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\BackboneStatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\CommandsCollections.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\CoreDNH.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\LogSys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\ResponseUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\SEquipment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\SEquipmentList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\SocketDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Backbones">
+      <UniqueIdentifier>{02a729c9-b555-4e70-82fa-da302a405c0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{bb5af173-58f5-4363-a047-66581797b1ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

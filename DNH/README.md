@@ -9,8 +9,8 @@ It designed to be as portable as possible. Although the biggest requirements are
 
 For Windows, only Visual Studio 2019 (aka version 16) is explicitly tested and supported.
 
-**Boost 1.68**
-The build requires Boost 1.68, as newer versions will break the HTTP and WebSockets library code.
+**Boost 1.77**
+The build expects Boost 1.77. A modern version of the Boost library is required to ensure its build scripts support Visual Studio 2019.
 https://www.boost.org/users/history/version_1_68_0.html
 Download, unzip and follow its instructions to build a 64 bit version.
 
@@ -19,6 +19,7 @@ Most of the setup process should be automated with scripts that come included in
 **OpenSSL**
 The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
 https://wiki.openssl.org/index.php/Binaries
+OpenSSL 1.1.1 is expected.
 
 ### Setting Up Visual Studio
 
@@ -43,7 +44,7 @@ Note that *.prop files are in the .gitignore. the *_props file is a template, an
 The build for Linux is centered around the RaspberryPi, specifically Ubuntu 20 for the RaspberryPi.
 
 **Boost 1.67**
-To build, make sure to get Boost 1.67. Version 1.68 is more ideal but it does not seem to be available in the package manager.
+To build, make sure to get Boost 1.67. More recent versions are ideal, but may not be available in the package manager for supported Linux systems.
 `sudo apt-get install libboost1.67-all`
 
 **OpenSSL**
@@ -70,7 +71,7 @@ make is used to detect compile dependencies and automate the compile and linking
 
 **making**
 
-In a terminal, cd to the `CVG_DNHBackbone/Src` directory. There should be a Makefile contained in it. Enter `make all` to being the compile process.
+In a terminal, cd to the `DNH` directory. There should be a Makefile contained in it. Enter `make all` to being the compile process. If successful, it will create a `DNH` executable in the directory.
 
 ## Vendored Libraries
 
