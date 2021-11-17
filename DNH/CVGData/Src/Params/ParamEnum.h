@@ -50,6 +50,7 @@ namespace CVG
 		bool SetValue(float value, ValTy ty) override;
 		bool SetValue(const std::string& value, ValTy ty) override;
 		bool SetValue(bool value, ValTy ty) override;
+		std::vector<std::string> GetPossible() const override;
 		ParamSPtr Clone() const override;
 	};
 }

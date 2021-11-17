@@ -343,14 +343,35 @@ namespace CVG
 		//
 		//////////////////////////////////////////////////
 
+		const static std::string _RESERVED_system = ConvertToString(EQType::System);
 		std::string reqtype;
-		if (!ParseUtils::ExtractJSONString(js, "type", reqtype))
+		std::string reqname;
+		std::string reqpurpose;
+		std::string reqmanu;
+		std::string reqhostname;
+		std::string _guid; // Not used, because not assigned yet.
+
+		// All things Equipment related (as opposed to SEquipment) will rely on 
+		// Equipment::ParseEquipmentFields() to extract the relevant information to
+		// make sure the parsing logic is unified. Everything else SEquipment 
+		// will be parsed in this function on top of that.
+		const json * pjsParams;
+		Equipment::ParseEquipmentFields(
+			js, 
+			_guid, 
+			reqmanu, 
+			reqname, 
+			reqtype, 
+			reqtype, 
+			reqhostname, 
+			&pjsParams);
+
+		if (reqtype.empty())
 		{
 			error = "Registration is missing equipment type.";
 			return nullptr;
 		}
 
-		const static std::string _RESERVED_system = ConvertToString(EQType::System);
 		if (reqtype == _RESERVED_system)
 		{
 			error = std::string("Equipment type ") + _RESERVED_system + " cannot be registered; it is a reserved type.";
@@ -359,41 +380,34 @@ namespace CVG
 
 		EQType eqtype = ConvertToEqType(reqtype);
 
-		std::string reqname;
-		if (!ParseUtils::ExtractJSONString(js, "name", reqname))
+		if (reqname.empty())
 		{
 			error = "Registration is missing equipment name.";
 			return nullptr;
 		}
 
-		std::string reqpurpose;
-		ParseUtils::ExtractJSONString(js, "purpose", reqpurpose);
-
-		std::string reqhostname;
-		ParseUtils::ExtractJSONString(js, "hostname", reqhostname);
-
-		std::string reqmanu;
-		ParseUtils::ExtractJSONString(js, "manufacturer", reqmanu);
-
 		// PARAMETERS
 		//
 		//////////////////////////////////////////////////
 		
+		// The extracted parameters reified from the JASON.
 		std::vector<ParamSPtr> params;
-		if (js.contains("params"))
-		{
-			json jsParams = js["params"];
 
-			if (!jsParams.is_array())
+		// Check if we need to give an error. We'll have to redundantly
+		// check js["params"] outside of ParseEquipmentFields.
+		if(pjsParams == nullptr)
+		{
+			if(js.contains("params") && !js["params"].is_array())
 			{
 				error = "Registration params must be an array of parameter definitions.";
 				return nullptr;
 			}
-
+		}
+		else if (pjsParams != nullptr)
+		{
 			std::string paramErr;
-			for (json itp : jsParams)
+			for (const json& itp : *pjsParams)
 			{
-				
 				ParamSPtr p = ParamUtils::Parse(itp, paramErr);
 				if (p == nullptr)
 				{
@@ -408,19 +422,10 @@ namespace CVG
 		//
 		//////////////////////////////////////////////////
 
-		static std::set<std::string> alreadyCovered = 
-			{"apity", "type", "name", "manufacturer", "params", "topics", "purpose", "hostname"};
-		// Everything else in the object we didn't 
-		// look at and convert to a C/C++ representation
-		// gets stored as custom client data.
+		// Everything else in the object we didn't look at and convert 
+		// to a C/C++ representation gets stored as custom client data.
 		json clientData = json::object();
-		for (json::const_iterator it = js.begin(); it != js.end(); ++it)
-		{
-			if (alreadyCovered.find(it.key()) != alreadyCovered.end())
-				continue;
-			
-			clientData[it.key()] = it.value();
-		}
+		Equipment::ExtractClientData(clientData, js);
 
 		// FINALIZATION
 		//

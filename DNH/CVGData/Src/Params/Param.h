@@ -286,6 +286,14 @@ namespace CVG
 		virtual ParamSPtr Clone() const = 0;
 
 		/// <summary>
+		/// Get the list of possible string options.
+		/// </summary>
+		/// <returns>
+		/// The list of possible string options, only relevant for enums.
+		/// </returns>
+		virtual std::vector<std::string> GetPossible() const;
+
+		/// <summary>
 		/// Get a detailed description of the Param (including metadata)
 		/// as a JSON object.
 		/// 

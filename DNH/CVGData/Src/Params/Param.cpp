@@ -101,4 +101,12 @@ namespace CVG {
 
 		return nullptr;
 	}
+
+	std::vector<std::string> Param::GetPossible() const
+	{
+		// return empty vector if not implemented by
+		// subclass (only used by ParamEnum).
+		std::vector<std::string> ret;
+		return ret;
+	}
 }

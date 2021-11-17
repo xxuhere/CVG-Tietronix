@@ -88,6 +88,11 @@ namespace CVG {
 		return ParamString::SetValue(value, ty);
 	}
 
+	std::vector<std::string> ParamEnum::GetPossible() const
+	{
+		return this->allowedValues;
+	}
+
 	bool ParamEnum::SetValue(bool value, ValTy ty)
 	{
 		std::string sb = BoolToString(value);

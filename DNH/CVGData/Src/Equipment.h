@@ -14,6 +14,7 @@ namespace CVG
 	{
 		typedef ParamCache::iterator iterator;
 		typedef ParamCache::const_iterator const_iterator;
+
 	protected:
 		// The name of the Equipment.
 		std::string name;
@@ -54,6 +55,7 @@ namespace CVG
 			const std::string & manufacturer,
 			const std::string & purpose,
 			const std::string& hostname,
+			const std::string& guid,
 			EQType type,
 			std::vector<ParamSPtr> params,
 			json clientData);
@@ -134,6 +136,48 @@ namespace CVG
 			const std::string& guid,
 			EQType eqTy,
 			const std::string& purpose);
+
+		/// <summary>
+		/// From a JSON defining an equipment, extract the relevant fields.
+		/// </summary>
+		/// <param name="js">The JSON to parse.</param>
+		/// <param name="guid">The GUID.</param>
+		/// <param name="manufacturer">The manufacturer.</param>
+		/// <param name="name">The equipment name.</param>
+		/// <param name="purpose">The equipment purpose.</param>
+		/// <param name="type">The equipment type.</param>
+		/// <param name="hostname">The equipment hostname.</param>
+		/// <param name="outParams">
+		/// Output parameter to the JSON holding the equipment parameters, or nullptr
+		/// if none was found.
+		/// </param>
+		/// <returns>
+		/// True if all mandatory expected fields were found. Else false. Note that 
+		/// the requirements of what's "mandatory" is different betwen the server and
+		/// clients. In this case, it is in respect to client usage.
+		/// </returns>
+		static bool ParseEquipmentFields(
+			const json& js,
+			std::string& guid,
+			std::string& manufacturer,
+			std::string& name,
+			std::string& purpose,
+			std::string& type,
+			std::string& hostname,
+			const json** outParams);
+
+		/// <summary>
+		/// Extract the client data of an Equipment define.
+		/// 
+		/// An Equipment data consists of several expected JSON elements. These are considered
+		/// core descriptive data to an Equipment. Every other member is considered arbitrary
+		/// user data. It does not do anything functionally in the DNH, but is kept and sent
+		/// with the rest of the Equipment data as metadata.
+		/// </summary>
+		/// <param name="jsDst">Where to transfer the found client data.</param>
+		/// <param name="jsSrc">An Equipment JSON to search for client data from.</param>
+		/// <returns>True if any user data was transferred. Else, false.</returns>
+		static bool ExtractClientData(json& jsDst, const json& jsSrc);
 	};
 
 	typedef std::shared_ptr<Equipment> BaseEqSPtr;
