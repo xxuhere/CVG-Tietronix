@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Panes">
+      <UniqueIdentifier>{a66fc14f-70a8-43f7-b8c4-f201b230e0f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Dashboard">
+      <UniqueIdentifier>{e4a81850-aec8-4892-9185-d09bc9874fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Main">
+      <UniqueIdentifier>{5ab9a111-c3bd-4c1e-ab2e-8751817f877f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Inspector">
+      <UniqueIdentifier>{6196d412-797c-4bb9-8605-80e96070c187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Inspector">
+      <UniqueIdentifier>{e3fd1948-d525-4ae0-ad34-2855f327ece1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Panes">
+      <UniqueIdentifier>{d088748a-5ef0-4835-91af-8c234c9e20c2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CVGDashBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RootWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DockedCVGPane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspectorParam.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetEnum.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetFloat.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetInt.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetParam.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetString.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="CVGBridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetBool.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspectorEquipment.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="PaneBusLog.h">
+      <Filter>Header Files\Panes</Filter>
+    </ClInclude>
+    <ClInclude Include="PaneDashboard.h">
+      <Filter>Header Files\Panes</Filter>
+    </ClInclude>
+    <ClInclude Include="PaneInspector.h">
+      <Filter>Header Files\Panes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PaneInspector.cpp">
+      <Filter>Source Files\Panes</Filter>
+    </ClCompile>
+    <ClCompile Include="PaneBusLog.cpp">
+      <Filter>Source Files\Panes</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RootWindow.cpp">
+      <Filter>Source Files\Main</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardElement.cpp">
+      <Filter>Source Files\Dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardGrid.cpp">
+      <Filter>Source Files\Dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspectorParam.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetEnum.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetFloat.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetInt.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetParam.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetString.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetBool.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="PaneDashboard.cpp">
+      <Filter>Source Files\Panes</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspectorEquipment.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CVGDashBoard.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="CVGDashBoard.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

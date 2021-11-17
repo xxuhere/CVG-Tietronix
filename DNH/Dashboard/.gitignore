@@ -1,0 +1,4 @@
+# Developers need to copy and rename DevProperties._props and fill it with 
+# developer-specific build paths.
+
+DevProperties.props
