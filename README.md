@@ -3,7 +3,10 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
 ## DNH Information
-For information on the Device Network Hub (DNH), see the DNH folder and the README.me contained in that folder.
+For information on the Device Network Hub (DNH), see the DNH folder and the README.md contained in that folder.
+
+## Dashboard Information
+For the Dashboard, see the DNH folder and the README_Dashboard.md contained in that folder.
 
 ## Desktop Setup
 Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and update conda base environment:
