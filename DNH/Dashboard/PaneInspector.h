@@ -40,18 +40,20 @@ private:
 	wxBoxSizer* inspectorSizer;
 
 	/// <summary>
-	/// The InspectorEquipment UI elements in the inspector view.
-	/// </summary>
-	std::map<std::string, InspectorEquipment*> equipmentUIGroups;
-
-	/// <summary>
 	/// If true, the UI has already been flagged as dirty, along with
 	/// a queued message to rebuild the UI.
 	/// </summary>
 	bool layoutDirty = false;
 
+	/// <summary>
+	/// The InspectorEquipment UI elements in the inspector view.
+	/// </summary>
+	std::map<std::string, InspectorEquipment*> equipmentUIGroups;
+
 public:
 	PaneInspector(wxWindow* kwin, int id, RootWindow* rootWin);
+
+	PaneType GetPaneType() override;
 
 	/// <summary>
 	/// Destroy the current layout (including the sizer) and recreate one
@@ -96,6 +98,8 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void _CVG_EVT_OnNewEquipment(CVG::BaseEqSPtr eq) override;
 	void _CVG_EVT_OnRemEquipment(CVG::BaseEqSPtr eq) override;
 	void _CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param) override;
+	void _CVG_Dash_NewBoard(DashboardGrid * addedGrid) override;
+	void _CVG_Dash_DeleteBoard(DashboardGrid * remGrid) override;
 
 	wxDECLARE_EVENT_TABLE();
 };

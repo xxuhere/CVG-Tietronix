@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Params/Param.h>
+#include <Equipment.h>
 
 /// <summary>
 /// An interface class for InspectorParam elements to send drag-and-drop and 
@@ -36,6 +37,13 @@ public:
 	/// contents of outVal should be ignored.
 	/// </returns>
 	virtual bool CVGB_GetValue(const std::string& eq, const std::string& param, std::string& outVal) = 0;
+
+	/// <summary>
+	/// Get a reference to a cached equipment via GUID.
+	/// </summary>
+	/// <param name="eq">The equipment GUID to retrieve.</param>
+	/// <returns>A reference to the found equipment, or nullptr if none was found.</returns>
+	virtual CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) = 0;
 
 	//		PARAMINSPECTOR CALLS
 	//////////////////////////////////////////////////

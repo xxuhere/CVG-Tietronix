@@ -22,7 +22,9 @@ public:
 	void DestroyUI() override;
 	wxWindow* GetWindow() override;
 
+	// Event callback for when the user modifies the checkbox.
 	void OnCheckbox(wxCommandEvent& evt);
+
 	void OnDestroy(wxWindowDestroyEvent& evt);
 
 	wxDECLARE_EVENT_TABLE();

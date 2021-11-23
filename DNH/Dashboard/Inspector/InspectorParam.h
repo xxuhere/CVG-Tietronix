@@ -67,6 +67,9 @@ public:
 	/// </summary>
 	bool visible = true;
 
+
+	wxColour origBGColor;
+
 public:
 	/// <summary>
 	/// Constructor.
@@ -77,6 +80,18 @@ public:
 	/// <param name="eqGUID">The Param's Equipment's GUID.</param>
 	/// <param name="param">A reference to the Param in the application's cache.</param>
 	InspectorParam(wxWindow * parent, PaneInspector* owner, CVGBridge* bridge, std::string eqGUID, CVG::ParamSPtr param);
+
+	inline void SetOriginalBGColor()
+	{
+		this->SetBackgroundColour(this->origBGColor);
+		this->Refresh();
+	}
+
+	inline void SetDraggedBGColor()
+	{
+		this->SetBackgroundColour(wxColour(200, 255, 200));
+		this->Refresh();
+	}
 
 	/// <summary>
 	/// Set the widget implementation

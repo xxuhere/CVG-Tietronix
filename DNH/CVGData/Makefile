@@ -83,11 +83,5 @@ UtilsClasses: $(patsubst %,$(SUBDIR_UTILSCLASSES)/%.o,$(SUBOBJ_UTILSCLASSES))
 	
 clean :
 	echo "COMPILING TARGET clean"
-	rm $(SUBDIR_MAIN)/*.o
-	rm $(SUBDIR_PARAMS)/*.o
-	rm $(SUBDIR_TYPES)/*.o
-	rm $(SUBDIR_UTILCLASSES)/*.o
-	rm Src/ParseUtils.o
-	rm Src/Equipment.o
-	rm ./data.o
-	rm *.a
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.a" -delete

@@ -5,6 +5,8 @@
 #include "nlohmann/json.hpp"
 #include "Equipment.h"
 
+class DashboardGrid;
+
 using json = nlohmann::json;
 
 /// <summary>
@@ -17,12 +19,28 @@ using json = nlohmann::json;
 class DockedCVGPane
 {
 public:
+	enum class PaneType
+	{
+		Dashboard,
+		Inspector,
+		Log,
+		Misc
+	};
+
+public:
 	/// <summary>
 	/// The title of the window.
 	/// Used as the string for the docked pane titlebar.
 	/// </summary>
 	/// <returns>The pane's titlebar text.</returns>
 	virtual std::string Title() = 0;
+
+	/// <summary>
+	/// Get the type of pane.
+	/// </summary>
+	/// <returns>The pane type. If not a type that there's a specific
+	/// enum for, PaneType.Misc will be returned.</returns>
+	virtual PaneType GetPaneType() = 0;
 
 	/// <summary>
 	/// The DockedSVGPane's window. This will almost always be a simple 
@@ -74,4 +92,16 @@ public:
 	/// <param name="eq">The Equipment the Param belongs to.</param>
 	/// <param name="param">The Param that was changed.</param>
 	virtual void _CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param) = 0;
+
+	/// <summary>
+	/// Called when a new dashboard is added to the app session.
+	/// </summary>
+	/// <param name="addedGrid">The newly added dashboard.</param>
+	virtual void _CVG_Dash_NewBoard(DashboardGrid * addedGrid) = 0;
+
+	/// <summary>
+	/// Called when a dashboard is deleted from the app session.
+	/// </summary>
+	/// <param name="remGrid">The removed dashboard.</param>
+	virtual void _CVG_Dash_DeleteBoard(DashboardGrid * remGrid) = 0;
 };

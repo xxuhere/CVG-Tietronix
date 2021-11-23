@@ -62,17 +62,16 @@ all : Src/mainWin.o Core
 	cp app.a ../app.a
 	
 %.o: %.cpp
-	echo "COMPILING TARGET %.o"
-	echo $(CC) $(CFLAGS) -c $< -o $@ $(VEND_ALLINCLUDES) -I..
+	@echo "COMPILING TARGET %.o"
+	@echo "--------------------------------------------------"
 	$(CC) $(CFLAGS) -c $< -o $@ $(VEND_ALLINCLUDES) -I..
 	
 Core: $(patsubst %,$(SUBDIR_CORE)/%.o,$(SUBOBJ_CORE))
 	
 .PHONY: clean
 clean :
-	echo "COMPILING TARGET clean"
-	rm $(SUBDIR_MAIN)/*.o
-	rm $(SUBDIR_CORE)/*.o
-	rm ./app.a
+	@ echo "COMPILING TARGET clean"
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.a" -delete
 	
 	

@@ -1,6 +1,9 @@
-
 #include "RootWindow.h"
+
+#include <fstream>
+
 #include <wx/event.h>
+#include <wx/filedlg.h>
 #include <nlohmann/json.hpp>
 #include "ParseUtils.h"
 #include "Params/ParamUtils.h"
@@ -9,16 +12,35 @@
 #include "PaneInspector.h"
 #include "PaneDashboard.h"
 
+
+#include "defines.h"
+
 wxDEFINE_EVENT(cvgWSEVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(RootWindow, wxFrame)
-EVT_SIZE(RootWindow::OnResize)
-EVT_BUTTON((int)RootWindow::IDs::Connection, RootWindow::OnButton_Connection)
-EVT_CLOSE(RootWindow::OnClose)
-wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Error,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
-wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Close,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
-wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Opened,     wxCommandEventHandler(RootWindow::OnEvent_ConChange))
-wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_OnMessage,  wxCommandEventHandler(RootWindow::OnEvent_ConChange))
+    EVT_SIZE(RootWindow::OnResize)
+    EVT_BUTTON((int)RootWindow::IDs::Connection,        RootWindow::OnButton_Connection     )
+    EVT_BUTTON((int)RootWindow::IDs::Toggle_Log,        RootWindow::OnButton_ToggleLog      )
+    EVT_BUTTON((int)RootWindow::IDs::Toggle_Inspector,  RootWindow::OnButton_ToggleInspector)
+    EVT_BUTTON((int)RootWindow::IDs::Toggle_PresetBar,  RootWindow::OnButton_TogglePresetBar)
+    EVT_BUTTON((int)RootWindow::IDs::ToggleFullscreen,  RootWindow::OnButton_ToggleFullscreen)
+
+    EVT_CLOSE(RootWindow::OnClose)
+
+    EVT_MENU((int)RootWindow::IDs::ViewOutline_Invisible,   RootWindow::OnMenu_OutlineInvisible )
+    EVT_MENU((int)RootWindow::IDs::ViewOutline_Dotted,      RootWindow::OnMenu_OutlineDotted    )
+    EVT_MENU((int)RootWindow::IDs::ViewOutline_Light,       RootWindow::OnMenu_OutlineLight     )
+    EVT_MENU((int)RootWindow::IDs::ViewOutline_Heavy,       RootWindow::OnMenu_OutlineHeavy     )
+
+    EVT_MENU((int)RootWindow::IDs::MenuNewDashView,         RootWindow::OnMenu_NewDashboardView )
+    EVT_MENU(wxID_SAVE,                                     RootWindow::OnMenu_Save             )
+    EVT_MENU(wxID_SAVEAS,                                   RootWindow::OnMenu_SaveAs           )
+    EVT_MENU(wxID_OPEN,                                     RootWindow::OnMenu_Open             )
+
+    wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Error,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
+    wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Close,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
+    wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Opened,     wxCommandEventHandler(RootWindow::OnEvent_ConChange))
+    wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_OnMessage,  wxCommandEventHandler(RootWindow::OnEvent_ConChange))
 
 wxEND_EVENT_TABLE()
 
@@ -33,7 +55,7 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     wxBoxSizer* rootSizer = new wxBoxSizer(wxVERTICAL);
 
     this->topControlbar = new wxPanel(this, -1);
-    rootSizer->Add(this->topControlbar);
+    rootSizer->Add(this->topControlbar, 0, wxGROW);
     this->sizerTopPanel = new wxBoxSizer(wxHORIZONTAL);
     this->topControlbar->SetSizer(this->sizerTopPanel);
     this->btnConnection = new wxButton(this->topControlbar, IDs::Connection, "CON");
@@ -48,6 +70,17 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     this->sizerTopPanel->Add(stPort, 0, wxALIGN_BOTTOM);
     this->sizerTopPanel->Add(this->inputPort);
 
+    this->btnToggleInspector    = new wxButton(this->topControlbar, (int)Toggle_Inspector,  "Ins");
+    this->btnToggleLog          = new wxButton(this->topControlbar, (int)Toggle_Log,        "Log");
+    this->btnToggleFullscreen   = new wxButton(this->topControlbar, (int)ToggleFullscreen,  "FullS");
+    this->btnTogglePreset       = new wxButton(this->topControlbar, (int)Toggle_PresetBar,  "Presets");
+    this->sizerTopPanel->AddStretchSpacer(1);
+    this->sizerTopPanel->Add(this->btnToggleInspector   );
+    this->sizerTopPanel->Add(this->btnToggleLog         );
+    this->sizerTopPanel->Add(this->btnToggleFullscreen  );
+    this->sizerTopPanel->Add(this->btnTogglePreset      );
+
+
     this->inputPort->SetValue("5701");
     this->inputHost->SetValue("192.168.1.110");
 
@@ -57,11 +90,16 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
 
     m_mgr.SetManagedWindow(this->dockingRgnWin);
 
-    // The dashboard is a special window, so we bypass the AUI pane registration
-    // and add it directly.
-    PaneDashboard* dashboard = new PaneDashboard(this->dockingRgnWin, -1, this);
-    this->dockedPanes.push_back(dashboard);
-    m_mgr.AddPane(dashboard, wxAuiPaneInfo().CenterPane());
+    // The MAIN dashboard is a special window, so we bypass the 
+    // AUI pane registration and add it directly.
+    //
+    // The starting grid, at least 1 grid must always be in the document.
+    this->grids.push_back(new DashboardGrid(GRIDCELLSIZE, "default"));
+    //
+    this->mainDashboard = new PaneDashboard(this->dockingRgnWin, -1, this, this->grids[0]);
+    this->dockedPanes.push_back(this->mainDashboard);
+    this->gridPanes.push_back(this->mainDashboard);
+    m_mgr.AddPane(this->mainDashboard, wxAuiPaneInfo().CenterPane());
 
 
     // Set size before adding dock pane, so the default size
@@ -71,8 +109,8 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     //  ADD DEFAULT DOCK PANES
     //
     //////////////////////////////////////////////////
-    this->RegisterDockPane(new PaneBusLog(this->dockingRgnWin, -1, this));
-    this->RegisterDockPane(new PaneInspector(this->dockingRgnWin, -1, this));
+    this->RegisterDockPane(new PaneBusLog(this->dockingRgnWin, -1, this), false);
+    this->RegisterDockPane(new PaneInspector(this->dockingRgnWin, -1, this), false);
 
     m_mgr.Update();
 }
@@ -82,13 +120,143 @@ RootWindow::~RootWindow()
     this->m_mgr.UnInit();
 }
 
-void RootWindow::RegisterDockPane(DockedCVGPane * pane)
+void RootWindow::RegisterDockPane(DockedCVGPane * pane, bool updateAUI)
 {
     assert(pane->_CVGWindow()->GetParent() == this->dockingRgnWin);
 
     this->dockedPanes.push_back(pane);
     wxString paneTitle = pane->Title().c_str();
     this->m_mgr.AddPane(pane->_CVGWindow(), wxAuiPaneInfo().Left().Name(paneTitle).Caption(paneTitle).BestSize(300, 300));
+
+    if(pane->GetPaneType() == DockedCVGPane::PaneType::Dashboard)
+        this->gridPanes.push_back((PaneDashboard*)pane);
+
+    if(updateAUI)
+        this->m_mgr.Update();
+}
+
+bool RootWindow::CloseRegistered(DockedCVGPane * pane)
+{
+    for(auto it = this->dockedPanes.begin(); it != this->dockedPanes.end(); ++it)
+    {
+        if(*it == pane)
+        {
+            // dockedPanes has all of the docked panes, but dashboard panes
+            // also have a duplicate copy in the gridPanes vector.
+            // 
+            // We need to handle this first, before we destroy the window.
+            if(pane->GetPaneType() == DockedCVGPane::PaneType::Dashboard)
+            {
+                auto itDash = std::find(
+                    this->gridPanes.begin(), 
+                    this->gridPanes.end(), 
+                    (PaneDashboard*)pane);
+
+                if(itDash != this->gridPanes.end())
+                    this->gridPanes.erase(itDash);
+            }
+
+            wxWindow * paneWin = pane->_CVGWindow();
+            this->m_mgr.DetachPane(paneWin);
+            paneWin->Destroy();
+            this->dockedPanes.erase(it);
+            this->m_mgr.Update();
+
+            return true;
+        }
+    }
+    return false;
+}
+
+DashboardGrid* RootWindow::CreateNewDashDoc(const std::string& defaultName)
+{
+    DashboardGrid * newGrid = new DashboardGrid(GRIDCELLSIZE, "New Dashboard");
+    newGrid->name = defaultName;
+    this->grids.push_back(newGrid);
+
+    this->BroadcastDashDoc_New(newGrid);
+
+    return newGrid;
+}
+
+void RootWindow::DeleteDashDoc(DashboardGrid* delTarg)
+{
+    int rmIdx = -1;
+    for(size_t i = 0; i < this->grids.size(); ++i)
+    {
+        if(this->grids[i] == delTarg)
+            rmIdx = i;
+    }
+    if(rmIdx == -1)
+        return;
+
+    // Send out of notifications before the deletion so the subscribers
+    // can receive a valid object.
+    this->BroadcastDashDoc_Deleted(delTarg);
+    // Delete and erase the document
+    this->grids.erase(this->grids.begin() + rmIdx);
+    delete delTarg;
+
+    // But wait! There's more...
+    // If all documents have been deleted, this means all non-main panes
+    // will be closed and a new default pane is created.
+    if(this->grids.size() == 0)
+    {
+        // We can't iterate over gridPanes directly, because we might
+        // be calling functions that unregister stuff from it - so a copy
+        // is needed.
+        auto itGridPanesCopy = this->gridPanes;
+        // Destroy all non-main panes
+        for(int i = 0; i < itGridPanesCopy.size(); )
+        {
+            if(itGridPanesCopy[i] == this->MainDashboardPane())
+            { 
+                ++i;
+                continue;
+            }
+
+            this->CloseRegistered(itGridPanesCopy[i]);
+        }
+
+        // Only the main pane should be left afterwards from calling 
+        // CloseRegistered on everything else.
+        assert(this->gridPanes.size() == 1);
+        assert(this->gridPanes[0] == this->MainDashboardPane());
+
+        // Create default, force the dashboard to view its only option left.
+        this->grids.push_back(new DashboardGrid(GRIDCELLSIZE, "default"));
+        this->BroadcastDashDoc_New(this->grids[0]);
+        this->MainDashboardPane()->SwitchToDashDoc(0);
+    }
+}
+
+DashboardGrid* RootWindow::DuplicateDashDoc(DashboardGrid* copyTarg)
+{
+    DashboardGrid* newGrid = new DashboardGrid(copyTarg);
+    newGrid->name = copyTarg->name + "_Copy";
+    this->grids.push_back(newGrid);
+
+    this->BroadcastDashDoc_New(newGrid);
+
+    return newGrid;
+}
+
+int RootWindow::GetDashDocIndex(DashboardGrid * dashDoc)
+{
+    for(int i = 0; i < (int)this->grids.size(); ++i)
+    {
+        if(this->grids[i] == dashDoc)
+            return i;
+    }
+    return -1;
+}
+
+DashboardGrid* RootWindow::GetDashDoc(int idx)
+{
+    if(idx < 0 || idx >= this->grids.size())
+        return nullptr;
+
+    return this->grids[idx];
 }
 
 bool RootWindow::SendToServer(const std::string& message, bool msgBoxOnInvalid)
@@ -115,15 +283,27 @@ bool RootWindow::SendToServer(const json& jsMsg, bool msgBoxOnInvalid)
 void RootWindow::_CreateMenuBar()
 {
     wxMenu* menuFile = new wxMenu;
-    //menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-    //menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-    //    "Help string shown in status bar for this menu item");
+    menuFile->Append(wxID_OPEN,     "&Open\tCtrl-O");
+    menuFile->AppendSeparator();
+    menuFile->Append(wxID_SAVE,     "&Save...\tCtrl-S");
+    menuFile->Append(wxID_SAVEAS,   "Save &As...\tCtrl-Shift-S");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT);
+
+    wxMenu* menuView = new wxMenu;
+        wxMenu* menuViewOutline = new wxMenu;
+        menuViewOutline->Append(ViewOutline_Invisible,  "Hidden");
+        menuViewOutline->Append(ViewOutline_Dotted,     "Dotted");
+        menuViewOutline->Append(ViewOutline_Light,      "Light");
+        menuViewOutline->Append(ViewOutline_Heavy,      "Heavy");
+    menuView->AppendSubMenu(menuViewOutline,            "Outlines");
+    menuView->Append((int)IDs::MenuNewDashView,         "New Dashboard View");
+
     wxMenu* menuHelp = new wxMenu;
     menuHelp->Append(wxID_ABOUT);
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(menuFile, "&File");
+    menuBar->Append(menuView, "&View");
     menuBar->Append(menuHelp, "&Help");
     SetMenuBar(menuBar);
 }
@@ -164,20 +344,140 @@ void RootWindow::OnResize(wxSizeEvent& evt)
     this->Layout();
 }
 
+void RootWindow::BroadcastDashDoc_New(DashboardGrid * grid)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_New(grid);
+}
+
+void RootWindow::BroadcastDashDoc_Deleted(DashboardGrid * grid)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_Del(grid);
+}
+
+void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_ReposElement(grid, ele);
+}
+
+void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_MovedElement(grid, ele);
+}
+
+void RootWindow::BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_NewElement(grid, ele);
+}
+
+void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_RemElement(grid, ele);
+}
+
+void RootWindow::BroadcastDashDoc_Renamed(DashboardGrid* grid)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_Renamed(grid);
+}
+
+PaneDashboard* FindDashboardDirectlyUnderMouse(const std::vector<PaneDashboard*>& allowedPanes)
+{
+    wxPoint mousePt = wxGetMousePosition();
+    wxWindow * win = wxFindWindowAtPoint(mousePt);
+
+    // Find if the application knows about the window the mouse pointer is over,
+    // and see if it's a PaneDashboard. If it is, do functionality for when
+    // an InspectorParam is being dragged over a PaneDashboard.
+    if(win == nullptr)
+        return nullptr;
+    
+    // We want to be over the child canvas, but we need to 
+    wxWindow* parentWin = win->GetParent();
+    if(parentWin == nullptr)
+        return nullptr;
+
+    // Sanity check, make sure it's a PaneDashboard we know about.
+    const auto it = 
+        std::find(
+            allowedPanes.begin(), 
+            allowedPanes.end(), 
+            (PaneDashboard*)parentWin);
+
+    if(it == allowedPanes.end())
+        return nullptr;
+
+    // The pane has multiple children window, make sure it's the canvas.
+    PaneDashboard * draggedOver = *it;
+    if(draggedOver->CanvasWin() != win)
+        return nullptr;
+    
+    return draggedOver;
+}
+
 void RootWindow::Param_OnDragStart(const std::string& eq, CVG::ParamSPtr p)
 {
+    // Sanity reset - shouldn't actually be changed yet unless there was an
+    // issue clearing it out on a previous drag.
+    assert(this->draggedDashboard == nullptr);
+
+    Param_OnDragMotion(eq, p);
 }
 
 void RootWindow::Param_OnDragEnd(const std::string& eq, CVG::ParamSPtr p)
 {
+    if(this->draggedDashboard != nullptr)
+        this->draggedDashboard->OnEndParamDrag(eq, p);
+    
+    this->draggedDashboard = nullptr;
 }
 
 void RootWindow::Param_OnDragCancel()
 {
+    if(this->draggedDashboard != nullptr)
+        this->draggedDashboard->OnCancelParamDrag();
+    
+    this->draggedDashboard = nullptr;
+    // !TODO: Reimplement
+    // this->dashboard->Refresh();
+    // this->dashboard->OnCancelParamDrag();
 }
 
 void RootWindow::Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p)
 {
+    PaneDashboard* draggedOver = FindDashboardDirectlyUnderMouse(this->gridPanes);
+    
+    if(this->draggedDashboard != nullptr && draggedOver == this->draggedDashboard)
+    {
+        // If we're dragging over what we were previously dragging.
+        //
+        this->draggedDashboard->OnParamDrag(eq, p);
+        return;
+    }
+    else if(draggedOver == nullptr)
+    {
+        // There wasn't a DashboardPane under the dragged mouse.
+        //
+        if(this->draggedDashboard != nullptr)
+        {
+            // If we're not dragging over anything but previously were, let the old
+            // dashboard know it's not being dragged over anymore.
+            //
+            this->draggedDashboard->OnCancelParamDrag();
+            this->draggedDashboard = nullptr;
+        }
+        return;
+    }
+
+    // There was a DashboardPane under the mouse when there previously
+    // was none.
+    this->draggedDashboard = draggedOver;
+    this->draggedDashboard->OnStartParamDrag(eq, p);
 }
 
 void RootWindow::OnEvent_ConChange(wxCommandEvent& event)
@@ -300,9 +600,11 @@ void RootWindow::OnButton_Connection(wxCommandEvent& event)
 {
     if(this->wsClient != nullptr)
     {
-        wsCon->send_close(0, "User requested disconnect.");
+        if(this->wsCon != nullptr)
+            this->wsCon->send_close(0, "User requested disconnect.");
+
+        this->wsClient->stop();
         this->MatchUIStateToConnection(UIConState::Transitory);
-        //this->wsClient->stop();
     }
     else
     {
@@ -364,6 +666,367 @@ void RootWindow::OnButton_Connection(wxCommandEvent& event)
         this->wsClientThread = 
             std::thread([this]{ this->wsClient->start(); });
     }
+}
+
+void RootWindow::OnButton_ToggleLog(wxCommandEvent& evt)
+{
+    for(DockedCVGPane * d : this->dockedPanes)
+    {
+        if(d->Title() == "Bus Log")
+        {
+            this->CloseRegistered(d);
+            return;
+        }
+    }
+
+    this->RegisterDockPane(new PaneBusLog(this->dockingRgnWin, -1, this));
+}
+
+void RootWindow::OnButton_ToggleInspector(wxCommandEvent& evt)
+{
+    for(DockedCVGPane * d : this->dockedPanes)
+    {
+        if(d->Title() == "Equipment Inspector")
+        {
+            this->CloseRegistered(d);
+            return;
+        }
+    }
+    
+    this->RegisterDockPane(new PaneInspector(this->dockingRgnWin, -1, this));
+}
+
+void RootWindow::OnButton_TogglePresetBar(wxCommandEvent& evt)
+{
+}
+
+void RootWindow::OnButton_ToggleFullscreen(wxCommandEvent& evt)
+{
+}
+
+void RootWindow::OnMenu_OutlineInvisible(wxCommandEvent& evt)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+    { 
+        pd->SetDrawDashboardOutline(
+            PaneDashboard::GridBoundsDrawMode::Invisible);
+    }
+}
+
+void RootWindow::OnMenu_OutlineDotted(wxCommandEvent& evt)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+    { 
+        pd->SetDrawDashboardOutline(
+            PaneDashboard::GridBoundsDrawMode::Dotted);
+    }
+}
+
+void RootWindow::OnMenu_OutlineLight(wxCommandEvent& evt)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+    { 
+        pd->SetDrawDashboardOutline(
+            PaneDashboard::GridBoundsDrawMode::Light);
+    }
+}
+
+void RootWindow::OnMenu_OutlineHeavy(wxCommandEvent& evt)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+    { 
+        pd->SetDrawDashboardOutline(
+            PaneDashboard::GridBoundsDrawMode::Heavy);
+    }
+}
+
+void RootWindow::OnMenu_NewDashboardView(wxCommandEvent& evt)
+{
+    int idView = this->mainDashboard->GetDashDocIndex();
+
+    // Sanity check
+    if(idView == -1)
+        return;
+
+    this->RegisterDockPane(
+        new PaneDashboard(
+            this->dockingRgnWin, 
+            -1, 
+            this,
+            this->grids[idView]));
+}
+
+void RootWindow::OnMenu_Save(wxCommandEvent& evt)
+{
+    if(!this->documentFullPath.empty())
+    { 
+        this->SaveDocumentAs(this->documentFullPath);
+        return;
+    }
+    this->OnMenu_SaveAs(evt);
+}
+
+void RootWindow::OnMenu_SaveAs(wxCommandEvent& evt)
+{
+    wxFileDialog saveDialog(
+        this, 
+        _("Save CVG HMI"), 
+        "", 
+        "",
+        "CVG HMI files (*.cvghmi)|*.cvghmi", 
+        wxFD_SAVE);
+
+    int ret = saveDialog.ShowModal();
+    if(ret != wxID_OK)
+        return;
+
+    std::string savePath = 
+        saveDialog.GetPath().ToStdString();
+
+    this->SaveDocumentAs(savePath);
+}
+
+void RootWindow::OnMenu_Open(wxCommandEvent& evt)
+{
+    wxFileDialog openDialog(
+        this, 
+        _("Load CVG HMI"), 
+        "", 
+        "",
+        "CVG HMI files (*.cvghmi)|*.cvghmi", 
+        wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+
+    int ret = openDialog.ShowModal();
+    if(ret != wxID_OK)
+        return;
+
+    std::string openPath = 
+        openDialog.GetPath().ToStdString();
+
+    std::ifstream fileStream(openPath);
+    if(!fileStream.is_open())
+    {
+        wxMessageBox("Loading error", "Could not read specified file.");
+        return;
+    }
+
+    std::stringstream buffer;
+    buffer << fileStream.rdbuf();
+    std::string fileDataAsStr = buffer.str();
+
+    json jsDoc = json::parse(fileDataAsStr);
+    this->LoadDocument(jsDoc);
+}
+
+json RootWindow::DocumentAsJSON()
+{
+    DashboardGrid * mainGrid = this->mainDashboard->GetGrid();
+
+    json doc;
+
+    json jsDashboards = json::array();
+    for(DashboardGrid* dg : this->grids)
+    {
+        json jsCurDash;
+        jsCurDash["main"]   = (dg == mainGrid);
+        jsCurDash["name"]   = dg->name;
+        jsCurDash["width"]  = dg->CellWidth();
+        jsCurDash["height"] = dg->CellHeight();
+        jsCurDash["cellsz"] = dg->GridCellSize();
+
+        json jsEles = json::array();
+        for(DashboardElement* ele: *dg)
+        {
+            json jse;
+            jse["posx"]     = ele->CellPos().x;
+            jse["posy"]     = ele->CellPos().y;
+            jse["dimx"]     = ele->CellSize().x;
+            jse["dimy"]     = ele->CellSize().y;
+            jse["param"]    = ele->ParamID();
+            jse["guid"]     = ele->EqGUID();
+            jse["uiimpl"]   = ele->GetUIImplName();
+            jse["label"]    = ele->Label();
+            jse["type"]     = CVG::ConvertToString(ele->Param()->Type());
+
+            jsEles.push_back(jse);
+        }
+        jsCurDash["elements"] = jsEles;
+        jsDashboards.push_back(jsCurDash);
+    }
+    doc["dashboards"] = jsDashboards;
+
+    // Another pass to get unique equipments and their
+    // purposes.
+    //
+    // The purposes need to be tracked in case equipments 
+    // need to be remapped.
+    //
+    // (Arguably this could be rolled into the loop above,
+    // but feels cleaner seperately without any significant
+    // overhead)
+    std::set<std::string> guidsAlreadySeen;
+    json jsEquips;
+    for(DashboardGrid* dg : this->grids)
+    {
+        for(DashboardElement * ele : *dg)
+        {
+            std::string guid = ele->EqGUID();
+            auto it = guidsAlreadySeen.find(guid);
+            if(it != guidsAlreadySeen.end())
+                continue;
+
+            jsEquips[guid] = ele->EqPurpose();
+        }
+    }
+    doc["equipments"] = jsEquips;
+
+    return doc;
+}
+
+bool RootWindow::SaveDocumentAs(const std::string& filePath)
+{
+    std::ofstream fileStream(filePath);
+    if(!fileStream.is_open())
+    {
+        wxMessageBox("Saving error", "Could not write to specified file.");
+        return false;
+    }
+
+    json layoutData = this->DocumentAsJSON();
+    fileStream << layoutData.dump();
+
+    this->documentDirty = 0;
+    this->documentFullPath = filePath;
+    // TODO: Get filename portion and set titlebar.
+    return true;
+}
+
+bool RootWindow::LoadDocument(const json& js, bool clearFirst)
+{
+    if(clearFirst == true)
+        this->ClearDocument();
+
+    if(!js.contains("equipments") || !js["equipments"].is_object())
+        return false;
+
+    if(!js.contains("dashboards") || !js["dashboards"].is_array())
+        return false;
+
+
+    // We store the purposes of the GUIDs in case the GUIDs don't exist
+    // anymore, then we could try to connect to some other equipment
+    // with the same parameters that matches the purpose.
+    std::map<std::string, std::string> mapGuidToPurpose;
+    const json& jsEquips = js["equipments"];
+    for(
+        json::const_iterator it = jsEquips.cbegin();
+        it != jsEquips.cend();
+        ++it)
+    {
+        mapGuidToPurpose[it.key()] = (std::string)it.value();
+    }
+
+    // The grid that should be assigned to the main dashboard panel.
+    DashboardGrid * mainGrid = nullptr;
+
+    // Create the dashboards and their individual elements
+    const json& jsDashboards = js["dashboards"];
+    for(const json& jsd : jsDashboards)
+    {
+        std::string dashName = jsd["name"];
+        int width = jsd["width"];
+        int height = jsd["height"];
+        int cellsz = jsd["cellsz"];
+
+        DashboardGrid* grid = new DashboardGrid(cellsz, dashName);
+        this->grids.push_back(grid);
+        // TODO: Set cell width and height of grid
+
+        const json& jsEles = jsd["elements"];
+        for(const json& jse : jsEles)
+        {
+            int posx            = jse["posx"];
+            int posy            = jse["posy"];
+            int dimx            = jse["dimx"];
+            int dimy            = jse["dimy"];
+            std::string paramId = jse["param"];
+            std::string guid    = jse["guid"];
+            std::string uiImpl  = jse["uiimpl"];
+            std::string label   = jse["label"];
+            std::string strTy   = jse["type"];
+            CVG::DataType ty    = CVG::ConvertToDataType(strTy);
+
+            if(ty == CVG::DataType::Unknown)
+                continue;
+            
+            // Create a placeholder param of the correct type. It will be 
+            // replaced (hopefully) with an element of the correct type 
+            // when refreshed later.
+            CVG::ParamSPtr ptr;
+            switch(ty)
+            {
+            case CVG::DataType::Bool:
+                ptr = CVG::ParamSPtr(new CVG::ParamBool(paramId, label, "", "", false, boost::none, boost::none));
+                break;
+            case CVG::DataType::Enum:
+                ptr = CVG::ParamSPtr(new CVG::ParamEnum(paramId, label, "", "", "Unknown", boost::none, boost::none, std::vector<std::string>{"Unknown"}));
+                break;
+            case CVG::DataType::Float:
+                ptr = CVG::ParamSPtr(new CVG::ParamFloat(paramId, label, "", "", 0.0, boost::none, boost::none, boost::none, boost::none));
+                break;
+            case CVG::DataType::Int:
+                ptr = CVG::ParamSPtr(new CVG::ParamInt(paramId, label, "", "", 0, boost::none, boost::none, boost::none, boost::none));
+                break;
+            case CVG::DataType::String:
+                ptr = CVG::ParamSPtr(new CVG::ParamString(paramId, label, "", "", "", boost::none, boost::none));
+                break;
+            default:
+                assert(!"Unhandled type in document load.");
+            }
+
+            grid->AddDashboardElement(
+                guid, 
+                mapGuidToPurpose[guid], 
+                ptr,
+                posx,
+                posy,
+                uiImpl,
+                dimx,
+                dimy);
+        }
+
+        if(jsd.contains("main") && (bool)jsd["main"] == true)
+            mainGrid = grid;
+    }
+    return true;
+}
+
+void RootWindow::ClearDocument()
+{
+    // All the dashboards panes (except the main one) will be closed down
+    // anyways when we start closing everything, so might as well preemptively
+    // close them.
+    std::vector<PaneDashboard*> gridPanesCpy = this->gridPanes;
+    for(PaneDashboard* pd : gridPanesCpy)
+    {
+        if(pd == this->mainDashboard)
+            continue;
+
+        this->CloseRegistered(pd);
+    }
+
+    for(DashboardGrid* dg : this->grids)
+        delete dg;
+
+    this->grids.clear();
+
+    this->documentFullPath.clear();
+    this->documentDirty = 0;
+
+    // Whatever invoked ClearDocument() is expected to know that the UI is
+    // left in a delecate situation. The main dashboard pane needs to have
+    // a default document set or else if will crash the program when it tries
+    // to access its (now deleted) refferenced DashboardGrid.
 }
 
 bool RootWindow::ProcessJSONMessage(const json& js)
@@ -528,6 +1191,15 @@ bool RootWindow::ProcessJSONMessage(const json& js)
     }
 
     return true;
+}
+
+CVG::BaseEqSPtr RootWindow::CVGB_GetEquipment(const std::string& eq)
+{
+    auto it = this->equipmentCache.find(eq);
+    if(it == this->equipmentCache.end())
+        return nullptr;
+
+    return it->second;
 }
 
 void RootWindow::CVGB_SetValue(const std::string& eqGUID, const std::string& param, const std::string& value)

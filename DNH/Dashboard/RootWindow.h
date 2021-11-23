@@ -12,6 +12,9 @@
 #include "DockedCVGPane.h"
 #include "CVGBridge.h"
 
+class PaneDashboard;
+class DashboardGrid;
+class DashboardElement;
 typedef SimpleWeb::SocketClient<SimpleWeb::WS> WsClient;
 
 /// <summary>
@@ -68,7 +71,41 @@ public:
         /// 
         /// One UI message is sent for every 
         /// </summary>
-        ConChange_OnMessage
+        ConChange_OnMessage,
+
+        /// <summary>
+        /// The button that toggles viewing the log panel.
+        /// </summary>
+        Toggle_Log,
+
+        /// <summary>
+        /// The button that toggles viewing the inspector.
+        /// </summary>
+        Toggle_Inspector,
+
+        /// <summary>
+        /// The button that toggles showing the preset bars.
+        /// 
+        /// Currently !UNIMPLEMENTED
+        /// </summary>
+        Toggle_PresetBar,
+
+        /// <summary>
+        /// The button that toggles between fullscreen operational and
+        /// windowed edit mode.
+        /// </summary>
+        ToggleFullscreen,
+
+        /// <summary>
+        /// The button to add a new dashboard.
+        /// </summary>
+        MenuNewDashView,
+
+        // Buttons to change the dashboard view.
+        ViewOutline_Invisible,
+        ViewOutline_Dotted,
+        ViewOutline_Light,
+        ViewOutline_Heavy,
     };
 
     /// <summary>
@@ -127,6 +164,20 @@ private:
     wxButton * btnConnection    = nullptr;
 
     /// <summary>
+    /// The button to toggle viewing the inspector pane.
+    /// </summary>
+    wxButton * btnToggleInspector;
+
+    /// <summary>
+    /// The button to toggle viewing the log pane.
+    /// </summary>
+    wxButton * btnToggleLog;
+
+    wxButton * btnToggleFullscreen;
+
+    wxButton * btnTogglePreset;
+
+    /// <summary>
     /// The text input field to specify the host to connect to.
     /// </summary>
     wxTextCtrl * inputHost      = nullptr;
@@ -174,15 +225,54 @@ private:
     std::queue<std::string> wsMessages;
 
     /// <summary>
-    // Client-side synced copy of the equipments.
+    /// The primary dashboard
     /// </summary>
-    std::map<std::string, CVG::BaseEqSPtr> equipmentCache;
+    PaneDashboard* mainDashboard;
 
     /// <summary>
     /// Check if any Equipment queries have been received
     /// since connection.
     /// </summary>
     bool recvdAnyEquipment = false;
+
+    /// <summary>
+    /// When dragging from somewhere into any of the multiple dashboards, 
+    /// keep track of which is currently being dragged into.
+    /// </summary>
+    PaneDashboard* draggedDashboard;
+
+    /// <summary>
+    /// All the dashboards in the open document
+    /// </summary>
+    std::vector<DashboardGrid*> grids;
+
+    /// <summary>
+    /// All the views into dashboards docked to the window.
+    /// 
+    /// Note that mainDashboard will also be included, but should not EVER 
+    /// be closed or removed unless the app session ends.
+    /// </summary>
+    std::vector<PaneDashboard*> gridPanes;
+
+    std::string documentFullPath;
+
+    std::string title;
+
+    /// <summary>
+    /// Specifies if the document is dirty. A value of 0 means the document is clean.
+    /// The integer value specifies how many changes have been recorded.
+    /// </summary>
+    int documentDirty = 0;
+
+public:
+    // THIS SHOULDN't BE PUBLIC! WE'RE BREAKING ENCAPSULATION
+    // FOR NOW.
+    //
+    /// <summary>
+    // Client-side synced copy of the equipments.
+    /// </summary>
+    std::map<std::string, CVG::BaseEqSPtr> equipmentCache;
+
 public:
 
     /// <summary>
@@ -199,10 +289,15 @@ public:
     /// Registers a DockedCVGPane subclass to the application.
     /// </summary>
     /// <param name="pane">The pane to register.</param>
-    void RegisterDockPane(DockedCVGPane * pane);
+    void RegisterDockPane(DockedCVGPane * pane, bool updateAUI = true);
+
+    bool CloseRegistered(DockedCVGPane * pane);
 
     std::string GUID() const
     { return this->selfGUID; }
+
+    PaneDashboard * MainDashboardPane()
+    { return this->mainDashboard; }
 
     /// <summary>
     /// Send a string to the connected WebSockets server.
@@ -223,6 +318,26 @@ public:
     /// </param>
     /// <returns>True if successfully sent. Else, false.</returns>
     bool SendToServer(const json& jsMsg, bool msgBoxOnInvalid = true);
+
+    DashboardGrid* CreateNewDashDoc(const std::string& defaultName);
+    void DeleteDashDoc(DashboardGrid* delTarg);
+    DashboardGrid* DuplicateDashDoc(DashboardGrid* copyTarg);
+    size_t DashdocCount() const
+    { return this->grids.size(); }
+
+    int GetDashDocIndex(DashboardGrid * dashDoc);
+    DashboardGrid* GetDashDoc(int idx);
+
+    //////////////////////////////////////////////////
+
+    void BroadcastDashDoc_New(DashboardGrid * grid);
+    void BroadcastDashDoc_Deleted(DashboardGrid * grid);
+    void BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardElement* ele);
+    void BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele);
+    void BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardElement* ele);
+    void BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* ele);
+    void BroadcastDashDoc_Renamed(DashboardGrid* grid);
+
 
 private:
     /// <summary>
@@ -280,6 +395,41 @@ private:
     // Callback for the Connect/Disconnect button.
     void OnButton_Connection(wxCommandEvent& event);
 
+    void OnButton_ToggleLog(wxCommandEvent& evt);
+
+    void OnButton_ToggleInspector(wxCommandEvent& evt);
+
+    void OnButton_TogglePresetBar(wxCommandEvent& evt);
+
+    void OnButton_ToggleFullscreen(wxCommandEvent& evt);
+
+    void OnMenu_OutlineInvisible(wxCommandEvent& evt);
+    void OnMenu_OutlineDotted(wxCommandEvent& evt);
+    void OnMenu_OutlineLight(wxCommandEvent& evt);
+    void OnMenu_OutlineHeavy(wxCommandEvent& evt);
+
+    void OnMenu_NewDashboardView(wxCommandEvent& evt);
+
+    void OnMenu_Save(wxCommandEvent& evt);
+    void OnMenu_SaveAs(wxCommandEvent& evt);
+    void OnMenu_Open(wxCommandEvent& evt);
+
+    //////////////////////////////////////////////////
+
+    json DocumentAsJSON();
+
+    bool SaveDocumentAs(const std::string& filePath);
+
+    bool LoadDocument(const json& js, bool clearFirst = true);
+
+    void ClearDocument();
+
+    inline void FlagDocumentDirty()
+    { ++this->documentDirty; }
+
+    inline bool IsDocumentDirty() const
+    { return this->documentDirty != 0;}
+
     //  VIRTUAL CVGBridge FUNCTIONS
     //////////////////////////////////////////////////
 
@@ -289,10 +439,9 @@ private:
     void Param_OnDragCancel() override;
     void Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p) override;
 
+    CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) override;
     void CVGB_SetValue(const std::string& eqGUID, const std::string& param, const std::string& value) override;
     bool CVGB_GetValue(const std::string& eqGUID, const std::string& param, std::string& outVal) override;
-
-    //////////////////////////////////////////////////
 
     wxDECLARE_EVENT_TABLE();
 };

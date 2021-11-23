@@ -12,7 +12,7 @@ import json
 
 def GetDNHHostname():
     #return "192.168.1.84"
-    return "localhost"
+    return "ubuntu"
 
 def GetDNHHTTPPort():
     return 5700

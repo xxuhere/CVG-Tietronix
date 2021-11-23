@@ -34,6 +34,7 @@ public:
 public: // DockedCVGPane OVERRIDE FUNCTIONS
 	wxWindow * _CVGWindow() override;
 	std::string Title() override;
+	PaneType GetPaneType() override;
 
 	void _CVG_OnMessage(const std::string & msg) override;
 	void _CVG_OnJSON(const json & js) override;
@@ -43,6 +44,8 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void _CVG_EVT_OnNewEquipment(CVG::BaseEqSPtr eq) override;
 	void _CVG_EVT_OnRemEquipment(CVG::BaseEqSPtr eq) override;
 	void _CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param) override;
+	void _CVG_Dash_NewBoard(DashboardGrid * addedGrid) override;
+	void _CVG_Dash_DeleteBoard(DashboardGrid * remGrid) override;
 
 	wxDECLARE_EVENT_TABLE();
 };

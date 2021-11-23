@@ -46,35 +46,40 @@ ALLHEADERS_ALLVEND = $(ALLHEADERS_WS) $(ALLHEADERS_HTTP) $(ALLHEADERS_JSON)
 
 SUBDIR_MAIN = .
 SUBDIR_INSPECTOR = Inspector
+SUBDIR_DASHELEMENTS = DashElements
 
-SUBOBJ_MAIN = App DashboardGrid DashboardElement PaneBusLog PaneDashboard PaneInspector RootWindow
+
+SUBOBJ_MAIN = App DashboardElement DashboardElementInst DashboardGrid DashboardGridInst PaneBusLog PaneDashboard PaneInspector RootWindow
 SUBOBJ_INSPECTOR = InspectorEquipment InspectorParam InsWidgetBool InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
+SUBOBJ_DASHELEMENTS = DashEleCheckbox DashEleFloat DashEleFloatSlider DashEleInt DashElePulldown DashEleSingleString IDashEle
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_INSPECTOR = $(patsubst %,$(SUBDIR_INSPECTOR)/%.o,$(SUBOBJ_INSPECTOR))
+EXPOBJS_DASHELEMENTS = $(patsubst %,$(SUBDIR_DASHELEMENTS)/%.o,$(SUBOBJ_DASHELEMENTS))
 
 all: objs
-	echo "COMPILING TARGET All"
+	@echo "COMPILING TARGET All"
 	
-	echo "Making dashboard archive"
-	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR)
+	@echo "\n\n\nMaking dashboard archive"
+	@echo "--------------------------------------------------"
+	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS)
 	
-	echo "Copying a copy of dash to parent directory."
+	@echo "\n\n\nFinished archiving"
+	@echo "--------------------------------------------------"
+	@echo "Copying a copy of dash to parent directory."
 	
-	echo "Call 'Make dash' on parent directory to finish application build with CVG Data library."
+	@echo "Call 'Make dash' on parent directory to finish application build with CVG Data library."
 	cp dash.a ../dash.a
 	
 
 %.o: %.cpp
-	echo $(CC) $(CFLAGS) `wx-config --cxxflags --libs std,aui` -c $< -o $@ -I../Vendored $(VEND_ALLINCLUDES)
 	$(CC) $(CFLAGS) `wx-config --cxxflags --libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src $(VEND_ALLINCLUDES)
 
-objs: $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN)) $(patsubst %,$(SUBDIR_INSPECTOR)/%.o,$(SUBOBJ_INSPECTOR))
-	echo "TARGET objs"
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS)
+	@echo "TARGET objs"
 
 .PHONY: clean
 clean :
-	echo "COMPILING TARGET clean"
-	rm $(SUBDIR_MAIN)/*.o
-	rm $(SUBDIR_INSPECTOR)/*.o
-	rm ./dash.a
+	@echo "COMPILING TARGET clean"
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.a" -delete

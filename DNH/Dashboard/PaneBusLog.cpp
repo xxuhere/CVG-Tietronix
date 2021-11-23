@@ -48,6 +48,11 @@ std::string PaneBusLog::Title()
 	return "Bus Log";
 }
 
+DockedCVGPane::PaneType PaneBusLog::GetPaneType()
+{
+	return PaneType::Log;
+}
+
 void PaneBusLog::_CVG_OnMessage(const std::string & msg)
 {
 	this->AddEntry(msg);
@@ -69,4 +74,10 @@ void PaneBusLog::_CVG_EVT_OnRemEquipment(CVG::BaseEqSPtr eq)
 {}
 
 void PaneBusLog::_CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param)
+{}
+
+void PaneBusLog::_CVG_Dash_NewBoard(DashboardGrid * addedGrid)
+{}
+
+void PaneBusLog::_CVG_Dash_DeleteBoard(DashboardGrid * remGrid)
 {}

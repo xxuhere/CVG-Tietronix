@@ -31,6 +31,12 @@
     <Filter Include="Header Files\Panes">
       <UniqueIdentifier>{d088748a-5ef0-4835-91af-8c234c9e20c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DashElements">
+      <UniqueIdentifier>{39f6f748-f2a8-4e7b-a039-2e97b6feda85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DashElements">
+      <UniqueIdentifier>{6cf4a826-09de-42d8-9023-7991637e9f45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -90,6 +96,42 @@
     <ClInclude Include="PaneInspector.h">
       <Filter>Header Files\Panes</Filter>
     </ClInclude>
+    <ClInclude Include="DashboardWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleFloat.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleFloatSlider.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleInt.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashElePulldown.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleSingleString.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\IDashEle.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleConstantNames.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleCheckbox.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardGridInst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardElementInst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -136,6 +178,33 @@
     </ClCompile>
     <ClCompile Include="Inspector\InspectorEquipment.cpp">
       <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleFloat.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleFloatSlider.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleInt.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashElePulldown.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleSingleString.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\IDashEle.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleCheckbox.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardGridInst.cpp">
+      <Filter>Source Files\Dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardElementInst.cpp">
+      <Filter>Source Files\Dashboard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

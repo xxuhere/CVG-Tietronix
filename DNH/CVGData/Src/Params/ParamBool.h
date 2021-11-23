@@ -25,7 +25,7 @@ namespace CVG {
 			const std::string& label,
 			const std::string& category,
 			const std::string& unit,
-			bool& value,
+			bool value,
 			boost::optional<bool> defVal,
 			boost::optional<bool> failVal);
 

@@ -151,7 +151,19 @@
     <ClInclude Include="CVGBridge.h" />
     <ClInclude Include="CVGDashBoard.h" />
     <ClInclude Include="DashboardElement.h" />
+    <ClInclude Include="DashboardElementInst.h" />
     <ClInclude Include="DashboardGrid.h" />
+    <ClInclude Include="DashboardGridInst.h" />
+    <ClInclude Include="DashboardWidget.h" />
+    <ClInclude Include="DashElements\DashEleCheckbox.h" />
+    <ClInclude Include="DashElements\DashEleConstantNames.h" />
+    <ClInclude Include="DashElements\DashEleFloat.h" />
+    <ClInclude Include="DashElements\DashEleFloatSlider.h" />
+    <ClInclude Include="DashElements\DashEleInt.h" />
+    <ClInclude Include="DashElements\DashElePulldown.h" />
+    <ClInclude Include="DashElements\DashEleSingleString.h" />
+    <ClInclude Include="DashElements\IDashEle.h" />
+    <ClInclude Include="defines.h" />
     <ClInclude Include="DockedCVGPane.h" />
     <ClInclude Include="Inspector\InspectorEquipment.h" />
     <ClInclude Include="Inspector\InspectorParam.h" />
@@ -170,7 +182,16 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="DashboardElement.cpp" />
+    <ClCompile Include="DashboardElementInst.cpp" />
     <ClCompile Include="DashboardGrid.cpp" />
+    <ClCompile Include="DashboardGridInst.cpp" />
+    <ClCompile Include="DashElements\DashEleCheckbox.cpp" />
+    <ClCompile Include="DashElements\DashEleFloat.cpp" />
+    <ClCompile Include="DashElements\DashEleFloatSlider.cpp" />
+    <ClCompile Include="DashElements\DashEleInt.cpp" />
+    <ClCompile Include="DashElements\DashElePulldown.cpp" />
+    <ClCompile Include="DashElements\DashEleSingleString.cpp" />
+    <ClCompile Include="DashElements\IDashEle.cpp" />
     <ClCompile Include="Inspector\InspectorEquipment.cpp" />
     <ClCompile Include="Inspector\InspectorParam.cpp" />
     <ClCompile Include="Inspector\InsWidgetBool.cpp" />

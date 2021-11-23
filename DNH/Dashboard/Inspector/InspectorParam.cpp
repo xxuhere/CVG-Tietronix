@@ -11,10 +11,12 @@
 wxBEGIN_EVENT_TABLE(InspectorParam, wxWindow)
 	EVT_MENU( MenuID::Toggle, InspectorParam::OnMenuToggle)
 
-	EVT_RIGHT_DOWN	( InspectorParam::OnRightMouseDown)
-	EVT_MOTION		( InspectorParam::OnMotion)
-	EVT_LEFT_DOWN	( InspectorParam::OnLeftButtonDown)
-	EVT_LEFT_UP		( InspectorParam::OnLeftButtonUp)
+	EVT_RIGHT_DOWN				( InspectorParam::OnRightMouseDown )
+	EVT_MOTION					( InspectorParam::OnMotion )
+	EVT_LEFT_DOWN				( InspectorParam::OnLeftButtonDown )
+	EVT_LEFT_UP					( InspectorParam::OnLeftButtonUp )
+	EVT_MOUSE_CAPTURE_CHANGED	( InspectorParam::OnMouseCaptureChanged )
+	EVT_MOUSE_CAPTURE_LOST		( InspectorParam::OnMouseCaptureLost )
 
 wxEND_EVENT_TABLE()
 
@@ -33,13 +35,16 @@ InspectorParam::InspectorParam(wxWindow * parent, PaneInspector* owner, CVGBridg
 
 	this->nameText = new wxStaticText(this, -1, label);
 	// Stop it from blocking mouse events.
-	this->nameText->GetEventHandler()->Connect(
-		wxEVT_RIGHT_DOWN, 
-		(wxObjectEventFunction)&InspectorParam::OnRightMouseDown, 
-		nullptr, 
-		this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_RIGHT_DOWN,			(wxObjectEventFunction)&InspectorParam::OnRightMouseDown,		nullptr, this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_MOTION,				(wxObjectEventFunction)&InspectorParam::OnMotion,				nullptr, this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_LEFT_DOWN,				(wxObjectEventFunction)&InspectorParam::OnLeftButtonDown,		nullptr, this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_LEFT_UP,				(wxObjectEventFunction)&InspectorParam::OnLeftButtonUp,			nullptr, this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_MOUSE_CAPTURE_CHANGED, (wxObjectEventFunction)&InspectorParam::OnMouseCaptureChanged,	nullptr, this);
+	this->nameText->GetEventHandler()->Connect(wxEVT_MOUSE_CAPTURE_LOST,	(wxObjectEventFunction)&InspectorParam::OnMouseCaptureLost,		nullptr, this);
 
 	this->SetDefaultWidget();
+
+	this->origBGColor = this->GetBackgroundColour();
 }
 
 void InspectorParam::SetDefaultWidget()
@@ -129,22 +134,28 @@ void InspectorParam::OnLeftButtonDown(wxMouseEvent& evt)
 {
 	this->CaptureMouse();
 	this->bridge->Param_OnDragStart(this->eqGUID, this->param);
+	this->SetDraggedBGColor();
 }
 
 void InspectorParam::OnLeftButtonUp(wxMouseEvent& evt)
 {
 	if(this->GetCapture() == this)
+	{ 
+		this->bridge->Param_OnDragEnd(this->eqGUID, this->param);
 		this->ReleaseMouse();
+	}
 
-	this->bridge->Param_OnDragEnd(this->eqGUID, this->param);
+	this->SetOriginalBGColor();
 }
 
 void InspectorParam::OnMouseCaptureChanged(wxMouseCaptureChangedEvent& evt)
 {
 	this->bridge->Param_OnDragCancel();
+	this->SetOriginalBGColor();
 }
 
 void InspectorParam::OnMouseCaptureLost(wxMouseCaptureLostEvent& evt)
 {
 	this->bridge->Param_OnDragCancel();
+	this->SetOriginalBGColor();
 }

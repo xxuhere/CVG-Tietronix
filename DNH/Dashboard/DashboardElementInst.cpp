@@ -1,0 +1,121 @@
+#include "DashboardElementInst.h"
+#include "DashboardGridInst.h"
+#include "DashElements/IDashEle.h"
+#include "PaneDashboard.h"
+
+#include "DashElements/DashEleFloat.h"
+#include "DashElements/DashEleFloatSlider.h"
+#include "DashElements/DashEleInt.h"
+#include "DashElements/DashElePulldown.h"
+#include "DashElements/DashEleSingleString.h"
+#include "DashElements/DashEleCheckbox.h"
+
+DashboardElementInst::DashboardElementInst(
+	DashboardGridInst* instOwner, 
+	CVGBridge* bridge, 
+	DashboardElement * ele)
+{
+	this->instOwner = instOwner;
+	this->bridge = bridge;
+	this->refEle = ele;
+}
+
+bool DashboardElementInst::UpdateUI()
+{
+	if(this->uiImpl == nullptr)
+		return false;
+
+	this->uiImpl->OnParamValueChanged();
+	return true;
+}
+
+bool DashboardElementInst::LayoutUIImpl()
+{
+	if(this->uiImpl == nullptr)
+		return false;
+
+	// wxScrolledWindow does something weird where the 
+	// position when manipulating children is offset by
+	// the scroll amount - so we'll need to compensate.
+	wxPoint offset;
+	wxScrolledWindow * scr = dynamic_cast<wxScrolledWindow*>(this->instOwner->GridWindow());
+	if(scr != nullptr)
+		offset = scr->GetViewStart();
+
+	this->uiImpl->Layout(
+		this->refEle->UIPos() - offset,
+		this->refEle->UISize(),
+		this->instOwner->GridCellSize());
+
+	return true;
+}
+
+bool DashboardElementInst::SwitchUIDefault()
+{
+	switch(this->refEle->Param()->Type())
+	{
+	case CVG::DataType::Bool:
+		return this->SwitchUIImplementation(DASHELENAME_DEFBOOL);
+
+	case CVG::DataType::Enum:
+		return this->SwitchUIImplementation(DASHELENAME_DEFENUM);
+
+	case CVG::DataType::Float:
+		return this->SwitchUIImplementation(DASHELENAME_DEFFLOAT);
+
+	case CVG::DataType::Int:
+		return this->SwitchUIImplementation(DASHELENAME_DEFINT);
+
+	case CVG::DataType::String:
+		return this->SwitchUIImplementation(DASHELENAME_DEFSTRING);
+	}
+
+	return false;
+}
+
+bool DashboardElementInst::SwitchUIImplementation(const std::string& implName)
+{
+	wxWindow * canvasWin = this->instOwner->GridWindow();
+
+	if(implName == DASHELENAME_DEFBOOL)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashEleCheckbox(canvasWin, this);
+	}
+	else if(implName == DASHELENAME_DEFINT)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashEleInt(canvasWin, this);
+	}
+	else if(implName == DASHELENAME_DEFFLOAT)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashEleFloat(canvasWin, this);
+	}
+	else if (implName == DASHELENAME_DEFENUM)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashElePulldown(canvasWin, this);
+	}
+	else if(implName == DASHELENAME_DEFSTRING)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashEleSingleString(canvasWin, this);
+	}
+	else
+		return false;
+	
+	this->refEle->SetUIImplName(implName);
+	return true;
+}
+
+bool DashboardElementInst::DestroyUIImpl()
+{
+	if (this->uiImpl == nullptr)
+		return false;
+
+	this->uiImpl->DestroyWindow();
+	this->uiImpl = nullptr;
+	this->instOwner = nullptr;
+	return true;
+}

@@ -189,7 +189,7 @@ namespace CVG {
 			this->failVal = value;
 		}
 
-		return false;
+		return true;
 	}
 
 	bool ParamString::GetValue(std::string& value, ValTy ty) 

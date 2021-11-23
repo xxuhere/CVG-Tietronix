@@ -20,6 +20,16 @@ PaneInspector::PaneInspector(wxWindow* win, int id, RootWindow* rootWin)
 	this->RecreateEquipmentLayout();
 
 	this->inspectorView->SetScrollRate(20, 20);
+
+	// If there's already equipment in the cache (if this was opened
+	// after already being connected) then add existing stuff.
+	for(auto it : this->rootWin->equipmentCache)
+		this->_CVG_EVT_OnNewEquipment(it.second);
+}
+
+DockedCVGPane::PaneType PaneInspector::GetPaneType()
+{
+	return PaneType::Inspector;
 }
 
 void PaneInspector::RecreateEquipmentLayout()
@@ -149,3 +159,9 @@ void PaneInspector::_CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr pa
 	if(itFindParam != paramUIMap.end())
 		itFindParam->second->UpdateWidgetValue();
 }
+
+void PaneInspector::_CVG_Dash_NewBoard(DashboardGrid * addedGrid)
+{}
+
+void PaneInspector::_CVG_Dash_DeleteBoard(DashboardGrid * remGrid)
+{}
