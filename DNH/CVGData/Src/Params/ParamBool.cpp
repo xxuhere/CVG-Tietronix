@@ -45,7 +45,7 @@ namespace CVG {
 
 	bool ParamBool::HasFail() 
 	{
-		return !!this->failVal;
+		return this->failVal != boost::none;
 	}
 
 	bool ParamBool::SetValue(int value, ValTy ty) 
@@ -76,14 +76,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal)
+			if (this->defVal == boost::none)
 				return false;
 
 			value = BoolToInt(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal)
+			if (this->failVal == boost::none)
 				return false;
 
 			value = BoolToInt(this->failVal.get());
@@ -119,14 +119,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal)
+			if (this->defVal == boost::none)
 				return false;
 
 			value = BoolToFloat(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal)
+			if (this->failVal == boost::none)
 				return false;
 
 			value = BoolToFloat(this->failVal.get());
@@ -163,14 +163,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal)
+			if (this->defVal == boost::none)
 				return false;
 
 			value = BoolToString(this->defVal.get());
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal)
+			if (this->failVal == boost::none)
 				return false;
 
 			value = BoolToString(this->failVal.get());
@@ -207,14 +207,14 @@ namespace CVG {
 			return true;
 
 		case ValTy::Default:
-			if (!this->defVal)
+			if (this->defVal == boost::none)
 				return false;
 
 			value = this->defVal.get();
 			return true;
 
 		case ValTy::Fail:
-			if (!this->failVal)
+			if (this->failVal == boost::none)
 				return false;
 
 			value = this->failVal.get();
@@ -225,7 +225,7 @@ namespace CVG {
 
 	bool ParamBool::ResetToDefault()
 	{
-		if (!this->defVal)
+		if (this->defVal == boost::none)
 			return false;
 
 		this->curVal = this->defVal.get();
