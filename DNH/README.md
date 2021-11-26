@@ -11,10 +11,12 @@ For Windows, only Visual Studio 2019 (aka version 16) is explicitly tested and s
 
 **Boost 1.77**
 The build expects Boost 1.77. A modern version of the Boost library is required to ensure its build scripts support Visual Studio 2019.
-https://www.boost.org/users/history/version_1_68_0.html
-Download, unzip and follow its instructions to build a 64 bit version.
+https://www.boost.org/users/history/version_1_77_0.html
+Download, unzip and follow its instructions (in the index html files -> getting started guide) to build a 64 bit version.
 
-Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a {BOOST_DIR}/stage/lib directory with the built *.lib and *.dll files.
+Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a {BOOST_DIR}/stage/lib directory with the built *.lib and *.dll files. 
+
+Note that at lease till release we will be using the debug variant of Boost so make sure to build it and link to it in .props later. 
 
 **OpenSSL**
 The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
