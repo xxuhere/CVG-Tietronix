@@ -59,6 +59,14 @@ public:
 	/// </summary>
 	virtual void DestroyWindow() = 0;
 
+	/// <summary>
+	/// A Refresh operation was performed.
+	/// </summary>
+	/// <param name="differentParam">
+	/// If true, the param is different than before the refresh. Else, the Param
+	/// has not changed.
+	/// </param>
+	virtual void OnRefreshInstance();
 
 	virtual ~IDashEle();
 };

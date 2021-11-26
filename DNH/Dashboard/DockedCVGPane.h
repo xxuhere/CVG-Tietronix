@@ -86,6 +86,11 @@ public:
 	/// <param name="eq">The cached equipment (about to be erased).</param>
 	virtual void _CVG_EVT_OnRemEquipment(CVG::BaseEqSPtr eq) = 0;
 
+	virtual void _CVG_EVT_OnRemapEquipmentPurpose(
+		const std::string& purpose, 
+		const std::string& prevGUID, 
+		const std::string& newGUID );
+
 	/// <summary>
 	/// Called when a cached parameter is changed.
 	/// </summary>
@@ -104,4 +109,11 @@ public:
 	/// </summary>
 	/// <param name="remGrid">The removed dashboard.</param>
 	virtual void _CVG_Dash_DeleteBoard(DashboardGrid * remGrid) = 0;
+
+	virtual void _CVG_Session_SavePre();
+	virtual void _CVG_Session_SavePost();
+	virtual void _CVG_Session_OpenPre(bool append);
+	virtual void _CVG_Session_OpenPost(bool append);
+	virtual void _CVG_Session_ClearPre();
+	virtual void _CVG_Session_ClearPost();
 };

@@ -165,3 +165,14 @@ bool DashboardGridInst::MatchEleInstLayout(DashboardElement* ele)
 	DashboardElementInst* eleInst = it->second;
 	return eleInst->LayoutUIImpl();
 }
+
+void DashboardGridInst::RefreshInstances()
+{
+	for(auto it : this->instMapping)
+		it.second->OnRefreshInstance();
+}
+
+void DashboardGridInst::RemapInstance(const std::string& guidOld, const std::string& guidNew)
+{
+	this->Grid()->RemapInstance(guidOld, guidNew, this->bridge);
+}

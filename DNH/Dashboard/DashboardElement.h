@@ -81,6 +81,10 @@ protected:
 	/// </summary>
 	DashboardGrid* gridOwner = nullptr;
 
+private:
+	// Should only be called by DashboardGrid GUID replacement function.
+	void _Reset(const std::string& guid, const std::string& purpose, CVG::ParamSPtr ptr );
+
 public:
 
 	DashboardElement(

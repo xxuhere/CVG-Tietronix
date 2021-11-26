@@ -126,6 +126,12 @@ bool DashboardGrid::DashGroup::Contains(const std::string& paramId)
 	return this->Find(paramId) != nullptr;
 }
 
+void DashboardGrid::DashGroup::Reset(const std::string& eqGUID, const std::string& eqPurpose)
+{
+	this->eqGUID	= eqGUID;
+	this->eqPurpose = eqPurpose;
+}
+
 void DashboardGrid::RedoDashLayout()
 {
 	// TODO:
@@ -392,4 +398,63 @@ bool DashboardGrid::MoveCell(
 		return false;
 
 	return toMove->SetDimensions(newCellPos, newCellSize, collisionCheck);
+}
+
+std::vector<DashboardGrid::GUIDPurposePair> DashboardGrid::GetEquipmentList() const
+{
+	std::vector<DashboardGrid::GUIDPurposePair> ret;
+	for(auto it : this->equipmentGrouping)
+	{
+		GUIDPurposePair newEntry;
+		newEntry.guid		= it.second->EqGUID();
+		newEntry.purpose	= it.second->EqPurpose();
+		ret.push_back(newEntry);
+	}
+	return ret;
+}
+
+DashboardGrid::RemapRet DashboardGrid::RemapInstance(const std::string& guidOld, const std::string& guidNew, CVGBridge * bridge)
+{
+	auto itOrig = this->equipmentGrouping.find(guidOld);
+	if(itOrig == this->equipmentGrouping.end())
+	{
+		// Nothing to remap
+		return RemapRet::NoChange;
+	}
+
+	if(this->equipmentGrouping.find(guidNew) != this->equipmentGrouping.end())
+	{
+		// Can't remap to something already known about
+		return RemapRet::Illegal;
+	}
+
+	CVG::BaseEqSPtr eq = bridge->CVGB_GetEquipment(guidNew);
+	DashGroup* dashGroupRemap = itOrig->second;
+
+	// Change the old GUID to be replaced with a new GUID
+	std::string newPurpose = eq->Purpose();
+	dashGroupRemap->Reset(guidNew, newPurpose);
+	this->equipmentGrouping.erase(itOrig);
+	this->equipmentGrouping[guidNew] = dashGroupRemap;
+
+	// And also update the Param references
+	for(int i = 0; i < dashGroupRemap->Size(); ++i)
+	{
+		DashboardElement* ele = dashGroupRemap->GetElement(i);
+		ele->_Reset(guidNew, newPurpose, eq->GetParam(ele->ParamID()));
+	}
+
+	return RemapRet::Success;
+}
+
+void DashboardGrid::RefreshAllParamInstances(CVGBridge* bridge)
+{
+	for(DashboardElement* de : this->elements)
+	{
+		CVG::BaseEqSPtr eq = bridge->CVGB_GetEquipment(de->EqGUID());
+		if(eq == nullptr)
+			continue;
+
+		de->_Reset(eq->GUID(), eq->Purpose(), eq->GetParam(de->ParamID()));
+	}
 }

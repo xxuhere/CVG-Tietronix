@@ -291,6 +291,13 @@ public:
     /// <param name="pane">The pane to register.</param>
     void RegisterDockPane(DockedCVGPane * pane, bool updateAUI = true);
 
+    /// <summary>
+    /// Close and unregister a docked pane.
+    /// 
+    /// The pane being closed must have previously been successfully registered.
+    /// </summary>
+    /// <param name="copyTarg">The pane to close.</param>
+    /// <returns>True if successful, else false.</returns>
     bool CloseRegistered(DockedCVGPane * pane);
 
     std::string GUID() const
@@ -416,12 +423,31 @@ private:
 
     //////////////////////////////////////////////////
 
+    /// <summary>
+    /// Get the current document session as a JSON representation.
+    /// </summary>
     json DocumentAsJSON();
 
+    /// <summary>
+    /// Save the current document session as a JSON file.
+    /// </summary>
     bool SaveDocumentAs(const std::string& filePath);
 
+    /// <summary>
+    /// Load the contents of a JSON at a specified file.
+    /// </summary>
+    bool LoadDocumentFromPath(const std::string& filePath, bool dlgOnErr = true);
+
+    /// <summary>
+    /// Load the contents of a JSON document.
+    /// </summary>
     bool LoadDocument(const json& js, bool clearFirst = true);
 
+    /// <summary>
+    /// Clear the document session, destroying all currently
+    /// loaded DocumentGrids as well as any attachment to a file
+    /// session.
+    /// </summary>
     void ClearDocument();
 
     inline void FlagDocumentDirty()

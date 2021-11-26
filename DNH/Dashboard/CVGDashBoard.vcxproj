@@ -196,6 +196,7 @@
     <ClCompile Include="DashElements\DashElePulldown.cpp" />
     <ClCompile Include="DashElements\DashEleSingleString.cpp" />
     <ClCompile Include="DashElements\IDashEle.cpp" />
+    <ClCompile Include="DockedCVGPane.cpp" />
     <ClCompile Include="Inspector\InspectorEquipment.cpp" />
     <ClCompile Include="Inspector\InspectorParam.cpp" />
     <ClCompile Include="Inspector\InsWidgetBool.cpp" />

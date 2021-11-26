@@ -113,6 +113,12 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     this->RegisterDockPane(new PaneInspector(this->dockingRgnWin, -1, this), false);
 
     m_mgr.Update();
+
+    // If there's a "startup.cvghmi" in the same directory as the executable 
+    // (or for the very least, the starting working directory) then automatically 
+    // open that one.
+    //////////////////////////////////////////////////
+    this->LoadDocumentFromPath("startup.cvghmi", false);
 }
 
 RootWindow::~RootWindow()
@@ -552,7 +558,7 @@ void RootWindow::OnEvent_ConChange(wxCommandEvent& event)
                 if(!js.is_null())
                 { 
                     for(DockedCVGPane * pane : this->dockedPanes)
-                        pane->_CVG_OnJSON(curMsg);
+                        pane->_CVG_OnJSON(js);
                 }
             }
 
@@ -803,19 +809,7 @@ void RootWindow::OnMenu_Open(wxCommandEvent& evt)
     std::string openPath = 
         openDialog.GetPath().ToStdString();
 
-    std::ifstream fileStream(openPath);
-    if(!fileStream.is_open())
-    {
-        wxMessageBox("Loading error", "Could not read specified file.");
-        return;
-    }
-
-    std::stringstream buffer;
-    buffer << fileStream.rdbuf();
-    std::string fileDataAsStr = buffer.str();
-
-    json jsDoc = json::parse(fileDataAsStr);
-    this->LoadDocument(jsDoc);
+    this->LoadDocumentFromPath(openPath, true);
 }
 
 json RootWindow::DocumentAsJSON()
@@ -892,17 +886,45 @@ bool RootWindow::SaveDocumentAs(const std::string& filePath)
         return false;
     }
 
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_SavePre();
+
     json layoutData = this->DocumentAsJSON();
     fileStream << layoutData.dump();
 
     this->documentDirty = 0;
     this->documentFullPath = filePath;
     // TODO: Get filename portion and set titlebar.
+
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_SavePost();
     return true;
 }
 
-bool RootWindow::LoadDocument(const json& js, bool clearFirst)
+bool RootWindow::LoadDocumentFromPath(const std::string& filePath, bool dlgOnErr)
 {
+    std::ifstream fileStream(filePath);
+    if(!fileStream.is_open())
+    {
+        if(dlgOnErr)
+            wxMessageBox("Loading error", "Could not read specified file.");
+
+        return false;
+    }
+
+    std::stringstream buffer;
+    buffer << fileStream.rdbuf();
+    std::string fileDataAsStr = buffer.str();
+
+    json jsDoc = json::parse(fileDataAsStr);
+    return this->LoadDocument(jsDoc);
+}
+
+bool RootWindow::LoadDocument(const json& js, bool clearFirst)
+{ 
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_OpenPre(clearFirst);
+
     if(clearFirst == true)
         this->ClearDocument();
 
@@ -916,18 +938,23 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
     // We store the purposes of the GUIDs in case the GUIDs don't exist
     // anymore, then we could try to connect to some other equipment
     // with the same parameters that matches the purpose.
-    std::map<std::string, std::string> mapGuidToPurpose;
+    std::map<std::string, std::string> mapLoadedGuidToPurpose;
     const json& jsEquips = js["equipments"];
     for(
         json::const_iterator it = jsEquips.cbegin();
         it != jsEquips.cend();
         ++it)
     {
-        mapGuidToPurpose[it.key()] = (std::string)it.value();
+        mapLoadedGuidToPurpose[it.key()] = (std::string)it.value();
     }
 
     // The grid that should be assigned to the main dashboard panel.
     DashboardGrid * mainGrid = nullptr;
+
+    // Record the dashboard grids that were added. While it might seem that we 
+    // could just use this->grids, remember this may be more than what was just
+    // loaded if clearFirst is false.
+    std::vector<DashboardGrid*> addedGrids;
 
     // Create the dashboards and their individual elements
     const json& jsDashboards = js["dashboards"];
@@ -986,7 +1013,7 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
 
             grid->AddDashboardElement(
                 guid, 
-                mapGuidToPurpose[guid], 
+                mapLoadedGuidToPurpose[guid], 
                 ptr,
                 posx,
                 posy,
@@ -997,12 +1024,107 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
 
         if(jsd.contains("main") && (bool)jsd["main"] == true)
             mainGrid = grid;
+
+        addedGrids.push_back(grid);
     }
+
+    // Make the new documents known.
+    for(size_t i = 0; i < this->grids.size(); ++i)
+        this->BroadcastDashDoc_New(this->grids[i]);
+    
+    if(clearFirst == true)
+    { 
+        // There needs to be a document shown in the main panel, this leads to 
+        // 3 possible cases that needs to be handled.
+        //
+        // This only needs to be done if we're not appending.
+        if(this->grids.size() == 0)
+        {
+            // Case 1: No documents were loaded, this means we need to manually
+            // create a default document.
+            DashboardGrid* defGrid = new DashboardGrid(GRIDCELLSIZE, "default");
+            this->grids.push_back(defGrid);
+            this->mainDashboard->SwitchToDashDoc(0);
+
+        }
+        else if(mainGrid == nullptr)
+        {
+            // Case 2: No starting document was defined. This means we just default to
+            // the first one found.
+            this->mainDashboard->SwitchToDashDoc(0);
+        }
+        else
+        {
+            // Case 3: Use the defined document.
+            int idx = this->GetDashDocIndex(mainGrid);
+            this->mainDashboard->SwitchToDashDoc(idx);
+        }
+    }
+
+    // Take the initiative to remap things if we don't have a GUID for them, but 
+    // where the equipment purposes match.
+    //////////////////////////////////////////////////
+
+    // Get a list of unconnected equipment
+    // Get a connection of current equipment and purpose
+    // Require where needed.
+    std::map<std::string, std::string> purposeToGUID;
+    std::map<std::string, std::string> guidToPurpose;
+    for(auto it: this->equipmentCache)
+    {
+        purposeToGUID[it.second->Purpose()] = it.first;
+        guidToPurpose[it.first] = it.second->Purpose();
+    }
+
+    // Find out all the GUIDs from the loaded document that don't have a GUID
+    // active for them.
+     
+    // Get all GUIDs loaded
+    std::set<std::string> unusedGUIDs;
+    unusedGUIDs.erase("");
+    //
+    for(auto it: mapLoadedGuidToPurpose)
+        unusedGUIDs.insert(it.first);
+    // Remove anything we know about in the cache.
+    for(auto it : guidToPurpose)
+        unusedGUIDs.erase(it.second);
+        
+    // For anything we don't have an equipment for, see if we have a matching 
+    // purpose - and use that GUID instead
+    for(const std::string& unused : unusedGUIDs)
+    {
+        auto newMappingForUnused = purposeToGUID.find(unused);
+        if(newMappingForUnused == purposeToGUID.end())
+            continue;
+
+        // For now, we're just going to brute force remap for all loaded
+        // documents.
+        for(DashboardGrid* grid : addedGrids)
+            grid->RemapInstance(unused, newMappingForUnused->second, this);
+    }
+
+    //////////////////////////////////////////////////
+
+    // The loaded DashboardGrid elements are created with placeholder Params.
+    // Get the elements to grab the active cached versions.
+    //
+    // Note that some may already may be been refreshed from the RemapInstance()
+    // directly above - this is a little redundant, but more-than-acceptable
+    // overhead.
+    for(DashboardGrid* grid : addedGrids)
+        grid->RefreshAllParamInstances(this);
+    
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_OpenPost(clearFirst);
+
     return true;
 }
 
 void RootWindow::ClearDocument()
 {
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_ClearPre();
+
     // All the dashboards panes (except the main one) will be closed down
     // anyways when we start closing everything, so might as well preemptively
     // close them.
@@ -1027,6 +1149,9 @@ void RootWindow::ClearDocument()
     // left in a delecate situation. The main dashboard pane needs to have
     // a default document set or else if will crash the program when it tries
     // to access its (now deleted) refferenced DashboardGrid.
+
+    for(DockedCVGPane* pane : this->dockedPanes)
+        pane->_CVG_Session_ClearPost();
 }
 
 bool RootWindow::ProcessJSONMessage(const json& js)
@@ -1076,6 +1201,9 @@ bool RootWindow::ProcessJSONMessage(const json& js)
 
         if(!js.contains("equipment") || !js["equipment"].is_array())
             return false;
+
+        // Store newly added equipment for purpose remapping.
+        std::vector<CVG::BaseEqSPtr> newEqs;
 
         // This is going to be very similar how to the server loads the SEquipments. 
         // Certain parts of the logic have been unified with how the server loads
@@ -1141,11 +1269,65 @@ bool RootWindow::ProcessJSONMessage(const json& js)
             CVG::Equipment * pNewEq = new CVG::Equipment(name, manufacturer, purpose, hostname, guid, eqtype, params, jsClientData);
             CVG::BaseEqSPtr eqSPtr = CVG::BaseEqSPtr(pNewEq);
             this->equipmentCache[guid] = eqSPtr;
+            newEqs.push_back(eqSPtr);
 
             for(DockedCVGPane* cvgpanes : this->dockedPanes)
                 cvgpanes->_CVG_EVT_OnNewEquipment(eqSPtr);        
         }
-        
+
+        // Refresh everything in case we receive something we already knew about.
+        // This can happen if we get disconnected and reconnect to the same server
+        // session. Note that this can even happen between app sessions if we load
+        // a dashboard (they store GUIDs).
+        for(DashboardGrid* grid : this->grids)
+            grid->RefreshAllParamInstances(this);
+
+        //  Check if there was any disconnected equipment 
+        //  that matches the purpose.
+        //////////////////////////////////////////////////
+
+        // Get everything known in all grids
+        std::map<std::string, std::string> unusedGUIDAndPurpose;
+        for(DashboardGrid* dg : this->grids)
+        {
+            std::vector<DashboardGrid::GUIDPurposePair> eqs = dg->GetEquipmentList();
+            for(DashboardGrid::GUIDPurposePair i : eqs)
+                unusedGUIDAndPurpose[i.guid] = i.purpose;
+        }
+        // Remove everything from it that's known in the cache. Whatever is left
+        // is what's unknown to the cache in the grids.
+        for(auto it : this->equipmentCache)
+            unusedGUIDAndPurpose.erase(it.first);
+
+        // See if there's anything in the created equipments that
+        // matches an unfilled purpose
+        //////////////////////////////////////////////////
+        for(CVG::BaseEqSPtr newEq : newEqs)
+        {
+            if(newEq->Purpose().empty())
+                continue;
+
+            for(auto it : unusedGUIDAndPurpose)
+            {
+                if(newEq->Purpose() != it.second)
+                    continue;
+
+                // We found a match, do the purpose remapping.
+                for(DashboardGrid* g : this->grids)
+                    g->RemapInstance(it.first, newEq->GUID(), this);
+
+                for(DockedCVGPane* pane : this->dockedPanes)
+                { 
+                    pane->_CVG_EVT_OnRemapEquipmentPurpose(
+                        newEq->Purpose(), 
+                        it.first, 
+                        newEq->GUID());
+                }
+
+                unusedGUIDAndPurpose.erase(it.first);
+                break;
+            }
+        }
     }
     else if(strAPI == "valset" || strAPI == "changedval")
     {

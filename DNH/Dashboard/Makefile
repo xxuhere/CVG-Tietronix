@@ -49,7 +49,7 @@ SUBDIR_INSPECTOR = Inspector
 SUBDIR_DASHELEMENTS = DashElements
 
 
-SUBOBJ_MAIN = App DashboardElement DashboardElementInst DashboardGrid DashboardGridInst PaneBusLog PaneDashboard PaneInspector RootWindow
+SUBOBJ_MAIN = App DashboardElement DashboardElementInst DashboardGrid DashboardGridInst DockedCVGPane PaneBusLog PaneDashboard PaneInspector RootWindow
 SUBOBJ_INSPECTOR = InspectorEquipment InspectorParam InsWidgetBool InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
 SUBOBJ_DASHELEMENTS = DashEleCheckbox DashEleFloat DashEleFloatSlider DashEleInt DashElePulldown DashEleSingleString IDashEle
 

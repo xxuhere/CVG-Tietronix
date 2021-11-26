@@ -169,6 +169,14 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void _CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param) override;
 	void _CVG_Dash_NewBoard(DashboardGrid * addedGrid) override;
 	void _CVG_Dash_DeleteBoard(DashboardGrid * remGrid) override;
+	void _CVG_EVT_OnRemapEquipmentPurpose(const std::string& purpose, const std::string& prevGUID, const std::string& newGUID ) override;
+
+	void _CVG_Session_SavePre() override;
+	void _CVG_Session_SavePost() override;
+	void _CVG_Session_OpenPre(bool append) override;
+	void _CVG_Session_OpenPost(bool append) override;
+	void _CVG_Session_ClearPre() override;
+	void _CVG_Session_ClearPost() override;
 
 	// Event handlers for Dashboard document modifications
 	void OnDashDoc_New(DashboardGrid* newGrid);

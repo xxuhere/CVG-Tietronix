@@ -14,6 +14,21 @@ class DashboardGrid
 {
 	friend DashboardGridInst;
 
+public:
+	struct GUIDPurposePair
+	{
+		std::string guid;
+		std::string purpose;
+	};
+
+	enum class RemapRet
+	{
+		Illegal,
+		NoChange,
+		Success
+	};
+
+private:
 	class DashGroup
 	{
 	private:
@@ -56,6 +71,8 @@ class DashboardGrid
 		bool Destroy(DashboardElement* ele);
 
 		bool Contains(const std::string& paramId);
+
+		void Reset(const std::string& eqGUID, const std::string& eqPurpose);
 	};
 
 	// The max grid width
@@ -145,4 +162,9 @@ public:
 
 	bool MoveCell(DashboardElement* toMove, const wxPoint& newPos, const wxSize& newSize, bool collisionCheck = true);
 
+	std::vector<GUIDPurposePair> GetEquipmentList() const;
+
+	RemapRet RemapInstance(const std::string& guidOld, const std::string& guidNew, CVGBridge * bridge);
+
+	void RefreshAllParamInstances(CVGBridge* bridge);
 };

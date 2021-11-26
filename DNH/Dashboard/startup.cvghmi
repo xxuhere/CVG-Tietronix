@@ -1,0 +1,181 @@
+{
+    "dashboards": [{
+        "cellsz": 50,
+        "elements": [{
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Dye Matched Time",
+            "param": "checktime",
+            "posx": 5,
+            "posy": 2,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Injection Time",
+            "param": "injecttime",
+            "posx": 9,
+            "posy": 2,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Patient Name",
+            "param": "patname",
+            "posx": 1,
+            "posy": 7,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Dye Timing Matched",
+            "param": "timing",
+            "posx": 1,
+            "posy": 2,
+            "type": "enum",
+            "uiimpl": "defenum"
+        }],
+        "height": 20,
+        "main": false,
+        "name": "default",
+        "width": 20
+    }, {
+        "cellsz": 50,
+        "elements": [{
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Dye Matched Time",
+            "param": "checktime",
+            "posx": 1,
+            "posy": 4,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Injection Time",
+            "param": "injecttime",
+            "posx": 1,
+            "posy": 5,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Patient Name",
+            "param": "patname",
+            "posx": 1,
+            "posy": 6,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Dye Timing Matched",
+            "param": "timing",
+            "posx": 1,
+            "posy": 7,
+            "type": "enum",
+            "uiimpl": "defenum"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "system",
+            "label": "Injection Time",
+            "param": "injecttime",
+            "posx": 1,
+            "posy": 1,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "Toggle",
+            "param": "toggle",
+            "posx": 1,
+            "posy": 2,
+            "type": "bool",
+            "uiimpl": "defbool"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "String Test",
+            "param": "str",
+            "posx": 5,
+            "posy": 4,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "String Test",
+            "param": "str",
+            "posx": 5,
+            "posy": 5,
+            "type": "string",
+            "uiimpl": "defstring"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "Toggle",
+            "param": "toggle",
+            "posx": 5,
+            "posy": 6,
+            "type": "bool",
+            "uiimpl": "defbool"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "Zoom",
+            "param": "zoom",
+            "posx": 5,
+            "posy": 7,
+            "type": "float",
+            "uiimpl": "deffloat"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "Zoom",
+            "param": "zoom",
+            "posx": 5,
+            "posy": 3,
+            "type": "float",
+            "uiimpl": "deffloat"
+        }, {
+            "dimx": 4,
+            "dimy": 1,
+            "guid": "85b1cb8b-70b2-4625-98af-c3a45b30a942",
+            "label": "Mode",
+            "param": "mode",
+            "posx": 5,
+            "posy": 2,
+            "type": "enum",
+            "uiimpl": "defenum"
+        }],
+        "height": 20,
+        "main": true,
+        "name": "default_Copy",
+        "width": 20
+    }],
+    "equipments": {
+        "85b1cb8b-70b2-4625-98af-c3a45b30a942": "",
+        "system": ""
+    }
+}

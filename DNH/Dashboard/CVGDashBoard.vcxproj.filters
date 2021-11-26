@@ -206,6 +206,9 @@
     <ClCompile Include="DashboardElementInst.cpp">
       <Filter>Source Files\Dashboard</Filter>
     </ClCompile>
+    <ClCompile Include="DockedCVGPane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CVGDashBoard.rc">

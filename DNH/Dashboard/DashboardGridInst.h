@@ -64,4 +64,13 @@ public:
 	bool RemoveElement(DashboardElement * ele, bool deleteElement);
 
 	bool MoveCell(DashboardElement* ele, const wxPoint& pos, const wxSize& size);
+
+	/// <summary>
+	/// For all widgets in the grid, recreate the connections to the UI (or just
+	/// recreate the UIs from scratch - if needed) to reconnect dead connections
+	/// that can be reestablished.
+	/// </summary>
+	void RefreshInstances();
+
+	void RemapInstance(const std::string& guidOld, const std::string& guidNew);
 };

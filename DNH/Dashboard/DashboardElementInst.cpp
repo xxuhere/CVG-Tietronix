@@ -109,6 +109,12 @@ bool DashboardElementInst::SwitchUIImplementation(const std::string& implName)
 	return true;
 }
 
+void DashboardElementInst::OnRefreshInstance()
+{
+	if(this->uiImpl != nullptr)
+		this->uiImpl->OnRefreshInstance();
+}
+
 bool DashboardElementInst::DestroyUIImpl()
 {
 	if (this->uiImpl == nullptr)

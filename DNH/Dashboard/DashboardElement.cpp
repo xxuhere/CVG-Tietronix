@@ -23,6 +23,21 @@ DashboardElement::DashboardElement(
 		this->label = param->GetID();
 }
 
+void DashboardElement::_Reset(const std::string& guid, const std::string& purpose, CVG::ParamSPtr ptr )
+{
+	this->guid = guid;
+	this->purpose = purpose;
+
+	// For right now it's assumed if we reset, the old param is no long valid. 
+	// 
+	// Another option to _Reset is to make a placeholder Param, but if a replacement
+	// isn't specified, just leaving the old one alone results in the same outcome.
+	if(ptr != nullptr)
+	{
+		this->param = ptr;
+	}
+}
+
 bool DashboardElement::SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCollisions)
 {
 	if(checkCollisions == true)

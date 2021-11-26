@@ -7,3 +7,8 @@ IDashEle::IDashEle(DashboardElementInst* eleInst)
 
 IDashEle::~IDashEle()
 {}
+
+void IDashEle::OnRefreshInstance()
+{
+	this->Reattach();
+}

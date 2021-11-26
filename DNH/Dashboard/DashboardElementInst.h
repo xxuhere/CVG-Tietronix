@@ -50,6 +50,8 @@ public:
 
 	bool SwitchUIImplementation(const std::string& implName);
 
+	void OnRefreshInstance();
+
 	/// <summary>
 	/// Destroy all UI content in the element.
 	/// </summary>

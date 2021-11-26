@@ -274,6 +274,15 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 void PaneDashboard::Canvas_OnScrollTop(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	_this->SetScrollbars(
@@ -288,6 +297,15 @@ void PaneDashboard::Canvas_OnScrollTop(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollBot(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	_this->SetScrollbars(
@@ -302,6 +320,15 @@ void PaneDashboard::Canvas_OnScrollBot(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollLineUp(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	_this->SetScrollbars(
@@ -316,6 +343,15 @@ void PaneDashboard::Canvas_OnScrollLineUp(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollLineDown(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	_this->SetScrollbars(
@@ -330,6 +366,15 @@ void PaneDashboard::Canvas_OnScrollLineDown(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollPageUp(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 	wxSize clSize = _this->GetClientSize();
 
@@ -345,6 +390,15 @@ void PaneDashboard::Canvas_OnScrollPageUp(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollPageDown(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 	wxSize clSize = _this->GetClientSize();
 
@@ -360,6 +414,15 @@ void PaneDashboard::Canvas_OnScrollPageDown(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	if (evt.GetOrientation() == wxHORIZONTAL)
@@ -387,6 +450,15 @@ void PaneDashboard::Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
+
+	// In case child window submits unhandled scrollbar message
+	wxObject * obj = evt.GetEventObject();
+	if(obj != _this)
+	{
+		evt.Skip(false);
+		return;
+	}
+
 	int cellSize = this->gridInst->GridCellSize();
 
 	if (evt.GetOrientation() == wxHORIZONTAL)
@@ -589,7 +661,14 @@ void PaneDashboard::_CVG_OnMessage(const std::string & msg)
 {}
 
 void PaneDashboard::_CVG_OnJSON(const json & js)
-{}
+{
+	if(js["apity"] == "equipment")
+	{
+		// If we process equipment and things are remapped, the underlying
+		// document is kept in sync, but we still have to refresh the UI.
+		this->gridInst->RefreshInstances();
+	}
+}
 
 void PaneDashboard::_CVG_EVT_OnConnect()
 {}
@@ -602,6 +681,11 @@ void PaneDashboard::_CVG_EVT_OnNewEquipment(CVG::BaseEqSPtr eq)
 
 void PaneDashboard::_CVG_EVT_OnRemEquipment(CVG::BaseEqSPtr eq)
 {}
+
+void PaneDashboard::_CVG_EVT_OnRemapEquipmentPurpose(const std::string& purpose, const std::string& prevGUID, const std::string& newGUID )
+{
+	this->gridInst->RemapInstance(prevGUID, newGUID);
+}
 
 void PaneDashboard::_CVG_EVT_OnParamChange(CVG::BaseEqSPtr eq, CVG::ParamSPtr param)
 {
@@ -632,6 +716,35 @@ void PaneDashboard::_CVG_Dash_DeleteBoard(DashboardGrid * remGrid)
 {
 	// TODO: If not a main dashboard and it's a doc we're viewing, auto close.
 	// If the main dashboard, switch to the closed other doc
+}
+
+void PaneDashboard::_CVG_Session_SavePre()
+{
+}
+
+void PaneDashboard::_CVG_Session_SavePost()
+{
+}
+
+void PaneDashboard::_CVG_Session_OpenPre(bool append)
+{
+	if(append == true)
+		this->presetPulldown->Clear();
+}
+
+void PaneDashboard::_CVG_Session_OpenPost(bool append)
+{
+	if(this->gridInst != nullptr)
+		this->gridInst->RefreshInstances();
+}
+
+void PaneDashboard::_CVG_Session_ClearPre()
+{
+	this->presetPulldown->Clear();
+}
+
+void PaneDashboard::_CVG_Session_ClearPost()
+{
 }
 
 void PaneDashboard::OnDashDoc_New(DashboardGrid* newGrid)
