@@ -350,6 +350,20 @@ public:
 
 private:
     /// <summary>
+    /// Call to process JSON information defining an equipment to be reified.
+    /// </summary>
+    /// <param name="jsEq">The JSON object holding the equipment information.</param>
+    CVG::BaseEqSPtr ProcessEquipmentCreationJSON(const json& jsEq);
+
+    /// <summary>
+    /// This should be call after ProcessEquipmentCreationJSON(). It only needs to be
+    /// called once if a batch of ProcessEquipmentCreationJSON() are called, but should
+    /// be called before the end of the frame.
+    /// </summary>
+    /// <param name="newEqs">All the new equipments that were recently created.</param>
+    void FinishProcessingNewEquipment(std::vector<CVG::BaseEqSPtr> newEqs);
+
+    /// <summary>
     /// Creation of the menubar is in its own dedicated function.
     /// </summary>
     void _CreateMenuBar();

@@ -288,6 +288,129 @@ bool RootWindow::SendToServer(const json& jsMsg, bool msgBoxOnInvalid)
     return this->SendToServer(jsMsg.dump(), msgBoxOnInvalid);
 }
 
+CVG::BaseEqSPtr RootWindow::ProcessEquipmentCreationJSON(const json& jsEq)
+{
+    std::string guid;
+    std::string manufacturer;
+    std::string name;
+    std::string purpose;
+    std::string type;
+    std::string hostname;
+    const json* outParams;
+
+    // TODO: Error checking should be done here
+    CVG::Equipment::ParseEquipmentFields(
+        jsEq, 
+        guid, 
+        manufacturer, 
+        name, 
+        purpose, 
+        type, 
+        hostname,
+        &outParams);
+
+    // There must be a GUID that we don't have a collision with.
+    if(guid.empty())
+        return nullptr; // TODO: Raise issue
+
+                  // Don't add duplicates.
+    if(this->equipmentCache.find(guid) != this->equipmentCache.end())
+        return nullptr;
+
+    // Extra client data
+    json jsClientData;
+    if(outParams != nullptr)
+        CVG::Equipment::ExtractClientData(jsClientData, jsEq);
+
+    // Parse params
+    CVG::EQType eqtype = CVG::ConvertToEqType(type);
+    std::vector<CVG::ParamSPtr> params;
+    if(outParams != nullptr)
+    {
+        bool paramErrs = false;
+        std::string paramErr;
+        for (const json& itp : *outParams)
+        {
+            CVG::ParamSPtr p = CVG::ParamUtils::Parse(itp, paramErr);
+            if (p == nullptr)
+            {
+                paramErrs = true;
+                break;
+            }
+            params.push_back(p);
+        }
+        if(paramErrs == true)
+            return nullptr; // TODO: Raise issue
+    }
+
+    // Create and register new equipment.
+    CVG::Equipment * pNewEq = new CVG::Equipment(name, manufacturer, purpose, hostname, guid, eqtype, params, jsClientData);
+    CVG::BaseEqSPtr eqSPtr = CVG::BaseEqSPtr(pNewEq);
+    this->equipmentCache[guid] = eqSPtr;
+
+    for(DockedCVGPane* cvgpanes : this->dockedPanes)
+        cvgpanes->_CVG_EVT_OnNewEquipment(eqSPtr); 
+
+    return eqSPtr;
+}
+
+void RootWindow::FinishProcessingNewEquipment(std::vector<CVG::BaseEqSPtr> newEqs)
+{
+    // Refresh everything in case we receive something we already knew about.
+    // This can happen if we get disconnected and reconnect to the same server
+    // session. Note that this can even happen between app sessions if we load
+    // a dashboard (they store GUIDs).
+    for(DashboardGrid* grid : this->grids)
+        grid->RefreshAllParamInstances(this);
+
+    //  Check if there was any disconnected equipment 
+    //  that matches the purpose.
+    //////////////////////////////////////////////////
+
+    // Get everything known in all grids
+    std::map<std::string, std::string> unusedGUIDAndPurpose;
+    for(DashboardGrid* dg : this->grids)
+    {
+        std::vector<DashboardGrid::GUIDPurposePair> eqs = dg->GetEquipmentList();
+        for(DashboardGrid::GUIDPurposePair i : eqs)
+            unusedGUIDAndPurpose[i.guid] = i.purpose;
+    }
+    // Remove everything from it that's known in the cache. Whatever is left
+    // is what's unknown to the cache in the grids.
+    for(auto it : this->equipmentCache)
+        unusedGUIDAndPurpose.erase(it.first);
+
+    // See if there's anything in the created equipments that
+    // matches an unfilled purpose
+    //////////////////////////////////////////////////
+    for(CVG::BaseEqSPtr newEq : newEqs)
+    {
+        if(newEq->Purpose().empty())
+            continue;
+
+        for(auto it : unusedGUIDAndPurpose)
+        {
+            if(newEq->Purpose() != it.second)
+                continue;
+
+            // We found a match, do the purpose remapping.
+            for(DashboardGrid* g : this->grids)
+                g->RemapInstance(it.first, newEq->GUID(), this);
+
+            for(DockedCVGPane* pane : this->dockedPanes)
+            { 
+                pane->_CVG_EVT_OnRemapEquipmentPurpose(
+                    newEq->Purpose(), 
+                    it.first, 
+                    newEq->GUID());
+            }
+
+            unusedGUIDAndPurpose.erase(it.first);
+            break;
+        }
+    }
+}
+
 void RootWindow::_CreateMenuBar()
 {
     wxMenu* menuFile = new wxMenu;
@@ -1219,7 +1342,6 @@ bool RootWindow::ProcessJSONMessage(const json& js)
     }
     else if(strAPI == "equipment")
     {
-        
         this->recvdAnyEquipment = true;
 
         if(!js.contains("equipment") || !js["equipment"].is_array())
@@ -1235,122 +1357,15 @@ bool RootWindow::ProcessJSONMessage(const json& js)
         const json & jsEqs = js["equipment"];
         for(const json& jseq : jsEqs)
         { 
-            std::string guid;
-            std::string manufacturer;
-            std::string name;
-            std::string purpose;
-            std::string type;
-            std::string hostname;
-            const json* outParams;
-
-            // TODO: Error checking should be done here
-            CVG::Equipment::ParseEquipmentFields(
-                jseq, 
-                guid, 
-                manufacturer, 
-                name, 
-                purpose, 
-                type, 
-                hostname,
-                &outParams);
-
-            // There must be a GUID that we don't have a collision with.
-            if(guid.empty())
-                continue; // TODO: Raise issue
-
-            // Don't add duplicates.
-            if(this->equipmentCache.find(guid) != this->equipmentCache.end())
+            CVG::BaseEqSPtr newEq = this->ProcessEquipmentCreationJSON(jseq);
+            if(newEq == nullptr)
                 continue;
 
-            // Extra client data
-            json jsClientData;
-            if(outParams != nullptr)
-                CVG::Equipment::ExtractClientData(jsClientData, jseq);
-
-            // Parse params
-            CVG::EQType eqtype = CVG::ConvertToEqType(type);
-            std::vector<CVG::ParamSPtr> params;
-            if(outParams != nullptr)
-            {
-                bool paramErrs = false;
-                std::string paramErr;
-                for (const json& itp : *outParams)
-                {
-                    CVG::ParamSPtr p = CVG::ParamUtils::Parse(itp, paramErr);
-                    if (p == nullptr)
-                    {
-                        paramErrs = true;
-                        break;
-                    }
-                    params.push_back(p);
-                }
-                if(paramErrs == true)
-                    continue; // TODO: Raise issue
-            }
-
-            // Create and register new equipment.
-            CVG::Equipment * pNewEq = new CVG::Equipment(name, manufacturer, purpose, hostname, guid, eqtype, params, jsClientData);
-            CVG::BaseEqSPtr eqSPtr = CVG::BaseEqSPtr(pNewEq);
-            this->equipmentCache[guid] = eqSPtr;
-            newEqs.push_back(eqSPtr);
-
-            for(DockedCVGPane* cvgpanes : this->dockedPanes)
-                cvgpanes->_CVG_EVT_OnNewEquipment(eqSPtr);        
+            newEqs.push_back(newEq);
         }
+        this->FinishProcessingNewEquipment(newEqs);
 
-        // Refresh everything in case we receive something we already knew about.
-        // This can happen if we get disconnected and reconnect to the same server
-        // session. Note that this can even happen between app sessions if we load
-        // a dashboard (they store GUIDs).
-        for(DashboardGrid* grid : this->grids)
-            grid->RefreshAllParamInstances(this);
-
-        //  Check if there was any disconnected equipment 
-        //  that matches the purpose.
-        //////////////////////////////////////////////////
-
-        // Get everything known in all grids
-        std::map<std::string, std::string> unusedGUIDAndPurpose;
-        for(DashboardGrid* dg : this->grids)
-        {
-            std::vector<DashboardGrid::GUIDPurposePair> eqs = dg->GetEquipmentList();
-            for(DashboardGrid::GUIDPurposePair i : eqs)
-                unusedGUIDAndPurpose[i.guid] = i.purpose;
-        }
-        // Remove everything from it that's known in the cache. Whatever is left
-        // is what's unknown to the cache in the grids.
-        for(auto it : this->equipmentCache)
-            unusedGUIDAndPurpose.erase(it.first);
-
-        // See if there's anything in the created equipments that
-        // matches an unfilled purpose
-        //////////////////////////////////////////////////
-        for(CVG::BaseEqSPtr newEq : newEqs)
-        {
-            if(newEq->Purpose().empty())
-                continue;
-
-            for(auto it : unusedGUIDAndPurpose)
-            {
-                if(newEq->Purpose() != it.second)
-                    continue;
-
-                // We found a match, do the purpose remapping.
-                for(DashboardGrid* g : this->grids)
-                    g->RemapInstance(it.first, newEq->GUID(), this);
-
-                for(DockedCVGPane* pane : this->dockedPanes)
-                { 
-                    pane->_CVG_EVT_OnRemapEquipmentPurpose(
-                        newEq->Purpose(), 
-                        it.first, 
-                        newEq->GUID());
-                }
-
-                unusedGUIDAndPurpose.erase(it.first);
-                break;
-            }
-        }
+        
     }
     else if(strAPI == "valset" || strAPI == "changedval")
     {
@@ -1382,6 +1397,50 @@ bool RootWindow::ProcessJSONMessage(const json& js)
                     cvgp->_CVG_EVT_OnParamChange(eq, param);
             }
         }
+    }
+    else if(strAPI == "changedroster")
+    {
+        if(!js.contains("change") || !js["change"].is_string())
+            return false;
+
+        std::string change = js["change"];
+        std::string guid = js["guid"];
+
+        if(change == "rem")
+        {
+            auto itEqFind = this->equipmentCache.find(guid);
+            if(itEqFind == this->equipmentCache.end())
+                return false;
+
+            for(DockedCVGPane* pane : this->dockedPanes)
+                pane->_CVG_EVT_OnRemEquipment(itEqFind->second);
+
+            this->equipmentCache.erase(itEqFind);
+            return true;
+        }
+        else if(change == "add")
+        {
+
+            // The vector will only have 1 item, but it keeps the logic unified
+            // with how the "equipment" handler creates and manages new Equipments.
+            //
+            //std::vector<CVG::BaseEqSPtr> newEqs;
+            //CVG::BaseEqSPtr newEq = this->ProcessEquipmentCreationJSON(js);
+            //if(newEq == nullptr)
+            //    return false;
+            //
+            //newEqs.push_back(newEq);
+            //this->FinishProcessingNewEquipment(newEqs);
+
+            // The changedroster message doesn't give us all the information we need,
+            // so for now we'll just download the entire equipment roster and look
+            // for new stuff in it.
+            json jsEqRequest;
+            jsEqRequest["apity"] = "equipment";
+            this->SendToServer(jsEqRequest);
+        }
+        else
+            return false;
     }
     else if(strAPI == "ping")
     {} // Eat it up
