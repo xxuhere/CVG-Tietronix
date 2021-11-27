@@ -33,9 +33,11 @@ wxBEGIN_EVENT_TABLE(RootWindow, wxFrame)
     EVT_MENU((int)RootWindow::IDs::ViewOutline_Heavy,       RootWindow::OnMenu_OutlineHeavy     )
 
     EVT_MENU((int)RootWindow::IDs::MenuNewDashView,         RootWindow::OnMenu_NewDashboardView )
+    EVT_MENU(wxID_NEW,                                      RootWindow::OnMenu_New              )
     EVT_MENU(wxID_SAVE,                                     RootWindow::OnMenu_Save             )
     EVT_MENU(wxID_SAVEAS,                                   RootWindow::OnMenu_SaveAs           )
     EVT_MENU(wxID_OPEN,                                     RootWindow::OnMenu_Open             )
+    EVT_MENU((int)RootWindow::IDs::Menu_LoadStartup,        RootWindow::OnMenu_OpenStartup)
 
     wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Error,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
     wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_Close,      wxCommandEventHandler(RootWindow::OnEvent_ConChange))
@@ -289,7 +291,10 @@ bool RootWindow::SendToServer(const json& jsMsg, bool msgBoxOnInvalid)
 void RootWindow::_CreateMenuBar()
 {
     wxMenu* menuFile = new wxMenu;
-    menuFile->Append(wxID_OPEN,     "&Open\tCtrl-O");
+    menuFile->Append(wxID_NEW,      "&New\tCtrl-N");
+    menuFile->AppendSeparator();
+    menuFile->Append(wxID_OPEN,                 "&Open\tCtrl-O");
+    menuFile->Append(IDs::Menu_LoadStartup,     "Open Startup");
     menuFile->AppendSeparator();
     menuFile->Append(wxID_SAVE,     "&Save...\tCtrl-S");
     menuFile->Append(wxID_SAVEAS,   "Save &As...\tCtrl-Shift-S");
@@ -762,6 +767,19 @@ void RootWindow::OnMenu_NewDashboardView(wxCommandEvent& evt)
             this->grids[idView]));
 }
 
+void RootWindow::OnMenu_New(wxCommandEvent& evt)
+{
+    this->ClearDocument();
+
+    assert(this->grids.size() == 0);
+
+    DashboardGrid* newDash = new DashboardGrid(GRIDCELLSIZE, "default");
+    this->grids.push_back(newDash);
+    this->mainDashboard->SwitchToDashDoc(0);
+
+    this->BroadcastDashDoc_New(newDash);
+}
+
 void RootWindow::OnMenu_Save(wxCommandEvent& evt)
 {
     if(!this->documentFullPath.empty())
@@ -810,6 +828,11 @@ void RootWindow::OnMenu_Open(wxCommandEvent& evt)
         openDialog.GetPath().ToStdString();
 
     this->LoadDocumentFromPath(openPath, true);
+}
+
+void RootWindow::OnMenu_OpenStartup(wxCommandEvent& evt)
+{
+    this->LoadDocumentFromPath("startup.cvghmi", true);
 }
 
 json RootWindow::DocumentAsJSON()

@@ -106,6 +106,8 @@ public:
         ViewOutline_Dotted,
         ViewOutline_Light,
         ViewOutline_Heavy,
+
+        Menu_LoadStartup
     };
 
     /// <summary>
@@ -417,9 +419,11 @@ private:
 
     void OnMenu_NewDashboardView(wxCommandEvent& evt);
 
+    void OnMenu_New(wxCommandEvent& evt);
     void OnMenu_Save(wxCommandEvent& evt);
     void OnMenu_SaveAs(wxCommandEvent& evt);
     void OnMenu_Open(wxCommandEvent& evt);
+    void OnMenu_OpenStartup(wxCommandEvent& evt);
 
     //////////////////////////////////////////////////
 

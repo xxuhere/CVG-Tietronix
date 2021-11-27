@@ -136,7 +136,7 @@ bool PaneDashboard::SwitchToDashDoc(int index)
 		return false;
 
 	DashboardGrid * targGrid = this->rootWin->GetDashDoc(index);
-	if(targGrid == this->gridInst->Grid())
+	if(this->gridInst != nullptr && targGrid == this->gridInst->Grid())
 		return true;
 
 	this->presetPulldown->SetValue(targGrid->name);
@@ -741,6 +741,17 @@ void PaneDashboard::_CVG_Session_OpenPost(bool append)
 void PaneDashboard::_CVG_Session_ClearPre()
 {
 	this->presetPulldown->Clear();
+
+	if(this->gridInst != nullptr)
+	{ 
+		DashboardGridInst* oldInst = this->gridInst;
+		// Null it out since the DashboardGridInst will destroy the UI elements
+		// which risks redrawing the canvas - which will crash if holding a 
+		// deleted and non-null gridInst.
+		this->gridInst = nullptr;
+		delete oldInst;
+	}
+	this->Refresh();
 }
 
 void PaneDashboard::_CVG_Session_ClearPost()
