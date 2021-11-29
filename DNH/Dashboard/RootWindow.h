@@ -488,6 +488,7 @@ private:
     void Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p) override;
 
     CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) override;
+    bool CVGB_Submit(const std::string& eq, const std::string& param) override;
     void CVGB_SetValue(const std::string& eqGUID, const std::string& param, const std::string& value) override;
     bool CVGB_GetValue(const std::string& eqGUID, const std::string& param, std::string& outVal) override;
 

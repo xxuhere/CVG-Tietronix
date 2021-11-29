@@ -1,6 +1,6 @@
 #pragma once
 #include "InsWidgetParam.h"
-#include "Params/Param.h"
+#include <Params/Param.h>
 
 /// <summary>
 /// Default implementation of a InsWidgetParam for enum Params.

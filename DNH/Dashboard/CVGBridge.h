@@ -45,6 +45,14 @@ public:
 	/// <returns>A reference to the found equipment, or nullptr if none was found.</returns>
 	virtual CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) = 0;
 
+	/// <summary>
+	/// Send an event submission.
+	/// </summary>
+	/// <param name="eq">The Equipment to invoke the event.</param>
+	/// <param name="param">The ID of the event.</param>
+	/// <returns>If true, the submit was successfully sent. Else, false.</returns>
+	virtual bool CVGB_Submit(const std::string& eq, const std::string& param) = 0;
+
 	//		PARAMINSPECTOR CALLS
 	//////////////////////////////////////////////////
 

@@ -12,3 +12,4 @@
 #define DASHELENAME_DEFENUM		"defenum"
 #define DASHELENAME_DEFBOOL		"defbool"
 #define DASHELENAME_DEFSTRING	"defstring"
+#define DASHELENAME_DEFEVENT	"defevent"

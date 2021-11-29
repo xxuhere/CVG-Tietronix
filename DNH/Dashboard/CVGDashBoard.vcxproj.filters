@@ -135,6 +135,12 @@
     <ClInclude Include="FullscreenDash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Inspector\InsWidgetButton.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashEleButton.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -214,6 +220,12 @@
     </ClCompile>
     <ClCompile Include="FullscreenDash.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsWidgetButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashEleButton.cpp">
+      <Filter>Source Files\DashElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

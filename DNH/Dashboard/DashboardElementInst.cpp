@@ -3,6 +3,7 @@
 #include "DashElements/IDashEle.h"
 #include "PaneDashboard.h"
 
+#include "DashElements/DashEleButton.h"
 #include "DashElements/DashEleFloat.h"
 #include "DashElements/DashEleFloatSlider.h"
 #include "DashElements/DashEleInt.h"
@@ -60,6 +61,9 @@ bool DashboardElementInst::SwitchUIDefault()
 	case CVG::DataType::Enum:
 		return this->SwitchUIImplementation(DASHELENAME_DEFENUM);
 
+	case CVG::DataType::Event:
+		return this->SwitchUIImplementation(DASHELENAME_DEFEVENT);
+
 	case CVG::DataType::Float:
 		return this->SwitchUIImplementation(DASHELENAME_DEFFLOAT);
 
@@ -81,6 +85,11 @@ bool DashboardElementInst::SwitchUIImplementation(const std::string& implName)
 	{
 		this->DestroyUIImpl();
 		this->uiImpl = new DashEleCheckbox(canvasWin, this);
+	}
+	else if(implName == DASHELENAME_DEFEVENT)
+	{
+		this->DestroyUIImpl();
+		this->uiImpl = new DashEleButton(canvasWin, this);
 	}
 	else if(implName == DASHELENAME_DEFINT)
 	{

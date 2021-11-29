@@ -1504,6 +1504,21 @@ CVG::BaseEqSPtr RootWindow::CVGB_GetEquipment(const std::string& eq)
     return it->second;
 }
 
+bool RootWindow::CVGB_Submit(const std::string& eq, const std::string& param)
+{
+    auto it = this->equipmentCache.find(eq);
+    
+    json jsSubmit;
+    jsSubmit["apity"] = "valset";
+    jsSubmit["guid"] = eq;
+
+    json jsSetDict;
+    jsSetDict[param] = "submit";
+    jsSubmit["sets"] = jsSetDict;
+
+    return this->SendToServer(jsSubmit);
+}
+
 void RootWindow::CVGB_SetValue(const std::string& eqGUID, const std::string& param, const std::string& value)
 {
     json js;

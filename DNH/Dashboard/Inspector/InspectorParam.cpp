@@ -4,6 +4,7 @@
 #include "InsWidgetInt.h"
 #include "InsWidgetFloat.h"
 #include "InsWidgetString.h"
+#include "InsWidgetButton.h"
 #include "InsWidgetEnum.h"
 
 #include "../PaneInspector.h"
@@ -64,6 +65,10 @@ void InspectorParam::SetDefaultWidget()
 
 	case CVG::DataType::Enum:
 		this->widgetImpl = new InsWidgetEnum(this, this->bridge);
+		break;
+
+	case CVG::DataType::Event:
+		this->widgetImpl = new InsWidgetButton(this, this->bridge);
 		break;
 
 	case CVG::DataType::Float:

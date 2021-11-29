@@ -181,15 +181,15 @@ namespace CVG {
 		{
 		case ValTy::Current:
 			this->curVal = value;
-			SetRet::Success;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = value;
-			SetRet::Success;
+			return  SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = value;
-			SetRet::Success;
+			return SetRet::Success;
 		}
 
 		return SetRet::Invalid;

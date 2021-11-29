@@ -163,7 +163,8 @@ bool DashboardGridInst::MatchEleInstLayout(DashboardElement* ele)
 		return false;
 
 	DashboardElementInst* eleInst = it->second;
-	return eleInst->LayoutUIImpl();
+	eleInst->LayoutUIImpl();
+	return true;
 }
 
 void DashboardGridInst::RefreshInstances()

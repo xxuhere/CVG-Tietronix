@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -159,6 +159,7 @@
     <ClInclude Include="DashboardGrid.h" />
     <ClInclude Include="DashboardGridInst.h" />
     <ClInclude Include="DashboardWidget.h" />
+    <ClInclude Include="DashElements\DashEleButton.h" />
     <ClInclude Include="DashElements\DashEleCheckbox.h" />
     <ClInclude Include="DashElements\DashEleConstantNames.h" />
     <ClInclude Include="DashElements\DashEleFloat.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Inspector\InspectorEquipment.h" />
     <ClInclude Include="Inspector\InspectorParam.h" />
     <ClInclude Include="Inspector\InsWidgetBool.h" />
+    <ClInclude Include="Inspector\InsWidgetButton.h" />
     <ClInclude Include="Inspector\InsWidgetEnum.h" />
     <ClInclude Include="Inspector\InsWidgetFloat.h" />
     <ClInclude Include="Inspector\InsWidgetInt.h" />
@@ -190,6 +192,7 @@
     <ClCompile Include="DashboardElementInst.cpp" />
     <ClCompile Include="DashboardGrid.cpp" />
     <ClCompile Include="DashboardGridInst.cpp" />
+    <ClCompile Include="DashElements\DashEleButton.cpp" />
     <ClCompile Include="DashElements\DashEleCheckbox.cpp" />
     <ClCompile Include="DashElements\DashEleFloat.cpp" />
     <ClCompile Include="DashElements\DashEleFloatSlider.cpp" />
@@ -202,6 +205,7 @@
     <ClCompile Include="Inspector\InspectorEquipment.cpp" />
     <ClCompile Include="Inspector\InspectorParam.cpp" />
     <ClCompile Include="Inspector\InsWidgetBool.cpp" />
+    <ClCompile Include="Inspector\InsWidgetButton.cpp" />
     <ClCompile Include="Inspector\InsWidgetEnum.cpp" />
     <ClCompile Include="Inspector\InsWidgetFloat.cpp" />
     <ClCompile Include="Inspector\InsWidgetInt.cpp" />
