@@ -942,6 +942,10 @@ void PaneDashboard::DetachCanvas()
 
 void PaneDashboard::ReattachCanvas()
 {
+	// Reparent from the fullscreen dashboard back to this dashboard.
+	// See FullscreenDash::DetachCanvas() - which is called right before
+	// this ReattachCanvas() - for more information.
+	this->canvasWin->Reparent(this);
 	this->canvasSizer->Add(this->canvasWin, 1, wxGROW);
 }
 

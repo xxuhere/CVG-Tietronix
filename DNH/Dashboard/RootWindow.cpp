@@ -303,6 +303,10 @@ void RootWindow::ToggleCanvasFullscreen(bool val)
     if(val == isfull)
         return;
 
+    // If the fullscreen window is shown, we minimize ourselves -
+    // and if the fullscreen window is being closed, we restore ourselves.
+    this->Iconize(val);
+
     if(val)
     { 
         this->mainDashboard->DetachCanvas();
@@ -310,13 +314,30 @@ void RootWindow::ToggleCanvasFullscreen(bool val)
         this->fullscreenWin = 
             new FullscreenDash(this, this->mainDashboard->CanvasWin());
 
+        // Set the new window dimensions to the size of this window so
+        // when we maximize it, the toplevel window will behave how the
+        // RootWindow would have been maximized. 
+        //
+        // The primary reason for doing this is to make sure it predictably
+        // maximizes on multi-monitor setups.
+        wxRect thisSz = this->GetScreenRect();
+        this->fullscreenWin->SetPosition(thisSz.GetPosition());
+        this->fullscreenWin->SetSize(thisSz.GetSize());
+        this->fullscreenWin->Maximize();
         this->fullscreenWin->Show();
+
+        // Minimize
+        
     }
     else
     {
         this->fullscreenWin->DetachCanvas();
         this->mainDashboard->ReattachCanvas();
         this->mainDashboard->CanvasWin()->Show();
+        this->Layout();
+        //
+        this->fullscreenWin->Destroy();
+        this->fullscreenWin = nullptr;
     }
 }
 
@@ -512,6 +533,12 @@ void RootWindow::MatchUIStateToConnection(UIConState cs)
 
 void RootWindow::OnResize(wxSizeEvent& evt)
 {
+    // The resize even is called when a minimized window is restored.
+    // If we're minimized because we have a fullscreen window, revert
+    // back to normal.
+    if(this->IsCanvasFullscreen())
+        this->ToggleCanvasFullscreen(false);
+
     this->Layout();
 }
 

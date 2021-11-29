@@ -19,8 +19,6 @@ FullscreenDash::FullscreenDash(RootWindow * parent, wxWindow* child)
 	this->SetSizer(this->canvasSizer);
 	this->canvasSizer->Add(child, 1, wxGROW);
 
-	this->Maximize();
-
 	std::vector<wxAcceleratorEntry> accelerators;
 	accelerators.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_RETURN, (int)IDs::Toggle_Fullscreen));
 
