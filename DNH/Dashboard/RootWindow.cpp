@@ -1191,6 +1191,11 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
             case CVG::DataType::String:
                 ptr = CVG::ParamSPtr(new CVG::ParamString(paramId, label, "", "", "", boost::none, boost::none));
                 break;
+
+            case CVG::DataType::Event:
+                ptr = CVG::ParamSPtr(new CVG::ParamEvent(paramId, label, "", "", false, false));
+                break;
+
             default:
                 assert(!"Unhandled type in document load.");
             }
