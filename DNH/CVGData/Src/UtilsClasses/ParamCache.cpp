@@ -117,15 +117,29 @@ namespace CVG
 	void ParamCache::Reset(
 		bool removeNoDefs, 
 		std::set<std::string>* outModified,
-		std::set<std::string>* outRemoved)
+		std::set<std::string>* outRemoved,
+		std::set<std::string>* submitted)
 	{
 		std::set<std::string> idsWithNoDefs;
 		for (auto it : this->params)
 		{
-			if (!it.second->ResetToDefault())
+			SetRet resetRet = it.second->ResetToDefault();
+			switch(resetRet)
+			{
+			case SetRet::Invalid:
 				idsWithNoDefs.insert(it.first);
-			else if (outModified != nullptr)
-				outModified->insert(it.first);
+				break;
+
+			case SetRet::Success:
+				if(outModified != nullptr)
+					outModified->insert(it.first);
+				break;
+
+			case SetRet::Submit:
+				if(submitted != nullptr)
+					submitted->insert(it.first);
+				break;
+			}	
 		}
 
 		if (removeNoDefs == true)
@@ -154,7 +168,7 @@ namespace CVG
 		return itFind->second;
 	}
 
-	bool ParamCache::Set(std::string& paramid, const json& jsVal, bool createifmissing)
+	SetRet ParamCache::Set(std::string& paramid, const json& jsVal, bool createifmissing)
 	{
 		// Go through the gauntlet of possible JSON types that match with
 		// a Param::Set(*) overload. Note that even if the type doesn't match,
@@ -175,16 +189,16 @@ namespace CVG
 		if (jsVal.is_number_float())
 			return this->Set(paramid, (float)jsVal, createifmissing);
 
-		return false;
+		return SetRet::Invalid;
 	}
 
-	bool ParamCache::Set(std::string& paramid, int iVal, bool createifmissing)
+	SetRet ParamCache::Set(std::string& paramid, int iVal, bool createifmissing)
 	{
 		ParamSPtr param = this->Get(paramid);
 		if (param == nullptr)
 		{
 			if (!createifmissing || this->Contains(paramid))
-				return false;
+				return SetRet::Invalid;
 
 			ParamInt* pi = 
 				new ParamInt(
@@ -199,19 +213,19 @@ namespace CVG
 					boost::none);
 
 			this->params[paramid] = ParamSPtr(pi);
-			return true;
+			return SetRet::Success;
 		}
 
 		return param->SetValue(iVal);
 	}
 
-	bool ParamCache::Set(std::string& paramid, float fVal, bool createifmissing)
+	SetRet ParamCache::Set(std::string& paramid, float fVal, bool createifmissing)
 	{
 		ParamSPtr param = this->Get(paramid);
 		if (param == nullptr)
 		{
 			if (!createifmissing || this->Contains(paramid))
-				return false;
+				return SetRet::Invalid;
 
 			ParamFloat* pf =
 				new ParamFloat(
@@ -226,20 +240,20 @@ namespace CVG
 					boost::none);
 
 			this->params[paramid] = ParamSPtr(pf);
-			return true;
+			return SetRet::Success;
 		}
 
 		return param->SetValue(fVal);
 	}
 
 	// String is used for both enum and strings.
-	bool ParamCache::Set(std::string& paramid, const std::string& sVal, bool createifmissing)
+	SetRet ParamCache::Set(std::string& paramid, const std::string& sVal, bool createifmissing)
 	{
 		ParamSPtr param = this->Get(paramid);
 		if (param == nullptr)
 		{
 			if (!createifmissing || this->Contains(paramid))
-				return false;
+				return SetRet::Invalid;
 
 			ParamString* ps =
 				new ParamString(
@@ -252,19 +266,19 @@ namespace CVG
 					boost::none);
 
 			this->params[paramid] = ParamSPtr(ps);
-			return true;
+			return SetRet::Success;
 		}
 
 		return param->SetValue(sVal);
 	}
 
-	bool ParamCache::Set(std::string& paramid, bool bVal, bool createifmissing)
+	SetRet ParamCache::Set(std::string& paramid, bool bVal, bool createifmissing)
 	{
 		ParamSPtr param = this->Get(paramid);
 		if (param == nullptr)
 		{
 			if (!createifmissing || this->Contains(paramid))
-				return false;
+				return SetRet::Invalid;
 
 			ParamBool* pb =
 				new ParamBool(
@@ -277,7 +291,7 @@ namespace CVG
 					boost::none);
 
 			this->params[paramid] = ParamSPtr(pb);
-			return true;
+			return SetRet::Success;
 		}
 
 		return param->SetValue(bVal);

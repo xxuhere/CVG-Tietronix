@@ -32,6 +32,12 @@ namespace CVG {
 		/// <see cref="ParamBool"/>
 		Enum,
 
+		/// <summary>
+		/// No data, but instead an event that's a recognized
+		/// command for the Equipment owning the Param.
+		/// </summary>
+		Event,
+
 		// Unknown should always be the second-to-last entry. It doubles as 
 		// the counter for how many valid DataType values there are.
 		Unknown, 

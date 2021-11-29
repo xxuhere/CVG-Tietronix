@@ -30,6 +30,7 @@ AddEqParam(reg, "incr", "Increments", "int", "mm", 1, 1)
 AddEqParam(reg, "str", "String Test", "string", "", "String Value")
 AddEqParam(reg, "mode", "Mode", "enum", "", "Thing_1",
            possibs=["Thing_1", "Thing_2", "Thing_3"])
+AddEqParam(reg, "evt", "Dummy Event", "event", "")
 reg["channels"] = ["NIR"]
 reg["topics"] = []
 print(reg)

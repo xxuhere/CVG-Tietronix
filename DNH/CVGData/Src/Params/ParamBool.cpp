@@ -48,23 +48,23 @@ namespace CVG {
 		return this->failVal != boost::none;
 	}
 
-	bool ParamBool::SetValue(int value, ValTy ty) 
+	SetRet ParamBool::SetValue(int value, ValTy ty) 
 	{
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = IntToBool(value);
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = IntToBool(value);
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = IntToBool(value);
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamBool::GetValue(int& value, ValTy ty) 
@@ -92,22 +92,23 @@ namespace CVG {
 		return false;
 	}
 
-	bool ParamBool::SetValue(float value, ValTy ty) 
+	SetRet ParamBool::SetValue(float value, ValTy ty) 
 	{
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = FloatToBool(value);
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = FloatToBool(value);
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = FloatToBool(value);
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamBool::GetValue(float& value, ValTy ty) 
@@ -135,23 +136,23 @@ namespace CVG {
 		return false;
 	}
 
-	bool ParamBool::SetValue(const std::string & value, ValTy ty) 
+	SetRet ParamBool::SetValue(const std::string & value, ValTy ty) 
 	{
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = StringToBool(value);
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = StringToBool(value);
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = StringToBool(value);
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamBool::GetValue(std::string& value, ValTy ty) 
@@ -179,23 +180,23 @@ namespace CVG {
 		return false;
 	}
 
-	bool ParamBool::SetValue(bool value, ValTy ty) 
+	SetRet ParamBool::SetValue(bool value, ValTy ty) 
 	{
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = value;
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamBool::GetValue(bool& value, ValTy ty) 
@@ -223,13 +224,13 @@ namespace CVG {
 		return false;
 	}
 
-	bool ParamBool::ResetToDefault()
+	SetRet ParamBool::ResetToDefault()
 	{
 		if (this->defVal == boost::none)
-			return false;
+			return SetRet::Invalid;
 
 		this->curVal = this->defVal.get();
-		return true;
+		return SetRet::Success;
 	}
 
 	ParamSPtr ParamBool::Clone() const

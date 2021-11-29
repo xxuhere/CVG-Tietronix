@@ -8,6 +8,7 @@
 #include "ParseUtils.h"
 #include "Params/ParamUtils.h"
 
+#include "FullscreenDash.h"
 #include "PaneBusLog.h"
 #include "PaneInspector.h"
 #include "PaneDashboard.h"
@@ -22,8 +23,7 @@ wxBEGIN_EVENT_TABLE(RootWindow, wxFrame)
     EVT_BUTTON((int)RootWindow::IDs::Connection,        RootWindow::OnButton_Connection     )
     EVT_BUTTON((int)RootWindow::IDs::Toggle_Log,        RootWindow::OnButton_ToggleLog      )
     EVT_BUTTON((int)RootWindow::IDs::Toggle_Inspector,  RootWindow::OnButton_ToggleInspector)
-    EVT_BUTTON((int)RootWindow::IDs::Toggle_PresetBar,  RootWindow::OnButton_TogglePresetBar)
-    EVT_BUTTON((int)RootWindow::IDs::ToggleFullscreen,  RootWindow::OnButton_ToggleFullscreen)
+    EVT_BUTTON((int)RootWindow::IDs::Toggle_Fullscreen, RootWindow::OnButton_ToggleFullscreen)
 
     EVT_CLOSE(RootWindow::OnClose)
 
@@ -74,14 +74,11 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
 
     this->btnToggleInspector    = new wxButton(this->topControlbar, (int)Toggle_Inspector,  "Ins");
     this->btnToggleLog          = new wxButton(this->topControlbar, (int)Toggle_Log,        "Log");
-    this->btnToggleFullscreen   = new wxButton(this->topControlbar, (int)ToggleFullscreen,  "FullS");
-    this->btnTogglePreset       = new wxButton(this->topControlbar, (int)Toggle_PresetBar,  "Presets");
+    this->btnToggleFullscreen   = new wxButton(this->topControlbar, (int)Toggle_Fullscreen,  "FullS");
     this->sizerTopPanel->AddStretchSpacer(1);
     this->sizerTopPanel->Add(this->btnToggleInspector   );
     this->sizerTopPanel->Add(this->btnToggleLog         );
     this->sizerTopPanel->Add(this->btnToggleFullscreen  );
-    this->sizerTopPanel->Add(this->btnTogglePreset      );
-
 
     this->inputPort->SetValue("5701");
     this->inputHost->SetValue("192.168.1.110");
@@ -121,6 +118,12 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     // open that one.
     //////////////////////////////////////////////////
     this->LoadDocumentFromPath("startup.cvghmi", false);
+
+    std::vector<wxAcceleratorEntry> accelerators;
+    accelerators.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_RETURN, IDs::Toggle_Fullscreen));
+    
+    wxAcceleratorTable accelTable(accelerators.size(), &accelerators[0]);
+    this->SetAcceleratorTable(accelTable);
 }
 
 RootWindow::~RootWindow()
@@ -249,6 +252,7 @@ DashboardGrid* RootWindow::DuplicateDashDoc(DashboardGrid* copyTarg)
     return newGrid;
 }
 
+
 int RootWindow::GetDashDocIndex(DashboardGrid * dashDoc)
 {
     for(int i = 0; i < (int)this->grids.size(); ++i)
@@ -286,6 +290,39 @@ bool RootWindow::SendToServer(const std::string& message, bool msgBoxOnInvalid)
 bool RootWindow::SendToServer(const json& jsMsg, bool msgBoxOnInvalid)
 {
     return this->SendToServer(jsMsg.dump(), msgBoxOnInvalid);
+}
+
+bool RootWindow::IsCanvasFullscreen()
+{
+    return this->fullscreenWin != nullptr;
+}
+
+void RootWindow::ToggleCanvasFullscreen(bool val)
+{
+    bool isfull = this->IsCanvasFullscreen();
+    if(val == isfull)
+        return;
+
+    if(val)
+    { 
+        this->mainDashboard->DetachCanvas();
+
+        this->fullscreenWin = 
+            new FullscreenDash(this, this->mainDashboard->CanvasWin());
+
+        this->fullscreenWin->Show();
+    }
+    else
+    {
+        this->fullscreenWin->DetachCanvas();
+        this->mainDashboard->ReattachCanvas();
+        this->mainDashboard->CanvasWin()->Show();
+    }
+}
+
+void RootWindow::ToggleCanvasFullscreen()
+{
+    this->ToggleCanvasFullscreen(!this->IsFullScreen());
 }
 
 CVG::BaseEqSPtr RootWindow::ProcessEquipmentCreationJSON(const json& jsEq)
@@ -836,6 +873,7 @@ void RootWindow::OnButton_TogglePresetBar(wxCommandEvent& evt)
 
 void RootWindow::OnButton_ToggleFullscreen(wxCommandEvent& evt)
 {
+    this->ToggleCanvasFullscreen();
 }
 
 void RootWindow::OnMenu_OutlineInvisible(wxCommandEvent& evt)
@@ -1391,7 +1429,7 @@ bool RootWindow::ProcessJSONMessage(const json& js)
             if(!jsSet.contains("status") || jsSet["status"] != "success" || !jsSet.contains("val"))
                 continue;
 
-            if(param->SetValue(jsSet["val"]))
+            if(param->SetValue(jsSet["val"]) == CVG::SetRet::Success)
             {
                 for(DockedCVGPane * cvgp : this->dockedPanes)
                     cvgp->_CVG_EVT_OnParamChange(eq, param);

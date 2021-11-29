@@ -132,6 +132,9 @@
     <ClInclude Include="defines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FullscreenDash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -207,6 +210,9 @@
       <Filter>Source Files\Dashboard</Filter>
     </ClCompile>
     <ClCompile Include="DockedCVGPane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FullscreenDash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -23,6 +23,7 @@
     <ClCompile Include="Src\Params\Param.cpp" />
     <ClCompile Include="Src\Params\ParamBool.cpp" />
     <ClCompile Include="Src\Params\ParamEnum.cpp" />
+    <ClCompile Include="Src\Params\ParamEvent.cpp" />
     <ClCompile Include="Src\Params\ParamFloat.cpp" />
     <ClCompile Include="Src\Params\ParamInt.cpp" />
     <ClCompile Include="Src\Params\ParamString.cpp" />
@@ -38,6 +39,7 @@
     <ClInclude Include="Src\Params\Param.h" />
     <ClInclude Include="Src\Params\ParamBool.h" />
     <ClInclude Include="Src\Params\ParamEnum.h" />
+    <ClInclude Include="Src\Params\ParamEvent.h" />
     <ClInclude Include="Src\Params\ParamFloat.h" />
     <ClInclude Include="Src\Params\ParamInt.h" />
     <ClInclude Include="Src\Params\ParamString.h" />

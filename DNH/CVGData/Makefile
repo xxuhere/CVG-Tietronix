@@ -32,7 +32,7 @@ SUBDIR_TYPES = Src/Types
 SUBDIR_UTILSCLASSES = Src/UtilsClasses
 
 SUBOBJ_MAIN = Equipment ParseUtils
-SUBOBJ_PARAMS = Param ParamBool ParamEnum ParamFloat ParamInt ParamString ParamUtils
+SUBOBJ_PARAMS = Param ParamBool ParamEnum ParamEvent ParamFloat ParamInt ParamString ParamUtils
 SUBOBJ_TYPES = DataType EqType ErrorTy
 SUBOBJ_UTILSCLASSES = ParamCache
 

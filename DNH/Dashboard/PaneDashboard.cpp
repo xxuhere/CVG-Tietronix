@@ -26,6 +26,7 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	topPanel->SetMinSize(wxSize(30, 30));
 	this->canvasWin = new wxScrolledWindow(this, -1);
 	wxBoxSizer * mainSizer = new wxBoxSizer(wxVERTICAL);
+	this->canvasSizer = new wxBoxSizer(wxVERTICAL);
 
 	topPanel->SetBackgroundColour(wxColour(220, 220, 220));
 	this->canvasWin->SetBackgroundColour(wxColour(240, 240, 240));
@@ -52,7 +53,8 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	wxFlexGridSizer * flexSizer = new wxFlexGridSizer(2);
 	flexSizer->AddGrowableCol(0);
 	flexSizer->AddGrowableRow(0);
-	flexSizer->Add(this->canvasWin, 1, wxGROW);
+	flexSizer->Add(this->canvasSizer, 1, wxGROW);
+	this->canvasSizer->Add(this->canvasWin, 1, wxGROW);
 	//flexSizer->Add(this->vertCanvasScroll, 0, wxGROW);
 	//flexSizer->Add(this->horizCanvaScroll, 0, wxGROW);
 
@@ -928,6 +930,16 @@ void PaneDashboard::OnFocusPreset(wxFocusEvent& evt)
 			this->rootWin->BroadcastDashDoc_Renamed(this->gridInst->Grid());
 		}
 	}
+}
+
+void PaneDashboard::DetachCanvas()
+{
+	this->canvasSizer->Remove(0);
+}
+
+void PaneDashboard::ReattachCanvas()
+{
+	this->canvasSizer->Add(this->canvasWin, 1, wxGROW);
 }
 
 void PaneDashboard::OnClose(wxCloseEvent& evt)

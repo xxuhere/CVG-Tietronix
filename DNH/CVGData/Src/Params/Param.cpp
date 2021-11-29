@@ -47,7 +47,7 @@ namespace CVG {
 		return ret;
 	}
 
-	bool Param::SetValue(const json& value, ValTy ty)
+	SetRet Param::SetValue(const json& value, ValTy ty)
 	{
 		if (value.is_boolean())
 			return this->SetValue((bool)value, ty);
@@ -58,7 +58,7 @@ namespace CVG {
 		else if (value.is_string())
 			return this->SetValue((std::string)value, ty);
 
-		return false;
+		return SetRet::Invalid;
 	}
 
 	json Param::GetValueJSON()
@@ -96,6 +96,12 @@ namespace CVG {
 				this->GetValue(sv, ValTy::Current);
 				return sv;
 			}
+			break;
+
+		case DataType::Event:
+			// Never has a current value.
+			// 
+			return ""; // Implicit cast from string to JSON.
 			break;
 		}
 

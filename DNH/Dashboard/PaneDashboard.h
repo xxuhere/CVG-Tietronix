@@ -72,6 +72,11 @@ private:
 
 	wxScrolledWindow * canvasWin = nullptr;
 
+	// The container of canvasWin that holds its spot if it's 
+	// detached (for fullscreen) so we know where to reattach it
+	// when the canvas exits fullscreen.
+	wxBoxSizer * canvasSizer = nullptr;
+
 	/// <summary>
 	/// The reference to the main application that owns this pane.
 	/// </summary>
@@ -223,6 +228,9 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnClose(wxCloseEvent& evt);
 
 	void _ClearMouseDragState();
+
+	void DetachCanvas();
+	void ReattachCanvas();
 
 	wxDECLARE_EVENT_TABLE();
 

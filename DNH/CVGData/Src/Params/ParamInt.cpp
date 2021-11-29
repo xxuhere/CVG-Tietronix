@@ -58,31 +58,31 @@ namespace CVG
 		return this->failVal != boost::none;
 	}
 
-	bool ParamInt::SetValue(int value, ValTy ty)
+	SetRet ParamInt::SetValue(int value, ValTy ty)
 	{
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Max:
 			this->maxVal = value;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Min:
 			this->minVal = value;
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamInt::GetValue(int& value, ValTy ty)
@@ -124,32 +124,32 @@ namespace CVG
 		return false;
 	}
 
-	bool ParamInt::SetValue(float value, ValTy ty)
+	SetRet ParamInt::SetValue(float value, ValTy ty)
 	{
 		int iv = (int)value;
 		switch (ty)
 		{
 		case ValTy::Current:
 			this->curVal = iv;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = iv;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = iv;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Max:
 			this->maxVal = iv;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Min:
 			this->minVal = iv;
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamInt::GetValue(float& value, ValTy ty)
@@ -192,7 +192,7 @@ namespace CVG
 		return false;
 	}
 
-	bool ParamInt::SetValue(const std::string & value, ValTy ty)
+	SetRet ParamInt::SetValue(const std::string & value, ValTy ty)
 	{
 		try
 		{
@@ -202,26 +202,30 @@ namespace CVG
 			{
 			case ValTy::Current:
 				this->curVal = is;
-				return true;
+				return SetRet::Success;
 
 			case ValTy::Default:
 				this->defVal = is;
+				return SetRet::Success;
 
 			case ValTy::Fail:
 				this->failVal = is;
+				return SetRet::Success;
 
 			case ValTy::Max:
 				this->maxVal = is;
+				return SetRet::Success;
 
 			case ValTy::Min:
 				this->minVal = is;
+				return SetRet::Success;
 			}
 		}
 		catch (const std::exception&) {
-			return false;
+			return SetRet::Invalid;
 		}
 
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamInt::GetValue(std::string& value, ValTy ty)
@@ -246,7 +250,7 @@ namespace CVG
 		return false;
 	}
 
-	bool ParamInt::SetValue(bool value, ValTy ty)
+	SetRet ParamInt::SetValue(bool value, ValTy ty)
 	{
 		int ib = value ? 1 : 0;
 
@@ -254,25 +258,25 @@ namespace CVG
 		{
 		case ValTy::Current:
 			this->curVal = ib;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Default:
 			this->defVal = ib;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Fail:
 			this->failVal = ib;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Max:
 			this->maxVal = ib;
-			return true;
+			return SetRet::Success;
 
 		case ValTy::Min:
 			this->minVal = ib;
-			return true;
+			return SetRet::Success;
 		}
-		return false;
+		return SetRet::Invalid;
 	}
 
 	bool ParamInt::GetValue(bool& value, ValTy ty)
@@ -311,13 +315,13 @@ namespace CVG
 		return false;
 	}
 
-	bool ParamInt::ResetToDefault()
+	SetRet ParamInt::ResetToDefault()
 	{
 		if (this->defVal == boost::none)
-			return false;
+			return SetRet::Invalid;
 
 		this->curVal = this->defVal.get();
-		return true;
+		return SetRet::Success;
 	}
 
 	ParamSPtr ParamInt::Clone() const

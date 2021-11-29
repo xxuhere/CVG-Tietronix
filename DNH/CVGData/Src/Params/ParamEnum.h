@@ -46,10 +46,10 @@ namespace CVG
 
 		// Override function. See base declaration of virtual functions 
 		// in Param for documentation.
-		bool SetValue(int value, ValTy ty) override;
-		bool SetValue(float value, ValTy ty) override;
-		bool SetValue(const std::string& value, ValTy ty) override;
-		bool SetValue(bool value, ValTy ty) override;
+		SetRet SetValue(int value, ValTy ty) override;
+		SetRet SetValue(float value, ValTy ty) override;
+		SetRet SetValue(const std::string& value, ValTy ty) override;
+		SetRet SetValue(bool value, ValTy ty) override;
 		std::vector<std::string> GetPossible() const override;
 		ParamSPtr Clone() const override;
 	};

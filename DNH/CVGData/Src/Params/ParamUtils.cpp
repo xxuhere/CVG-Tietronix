@@ -68,6 +68,9 @@ namespace CVG
 		case DataType::String:
 			return ParamUtils::ParseString(js, id, label, category, strunit, error);
 
+		case DataType::Event:
+			return ParamUtils::ParseEvent(js, id, label, category, strunit, error);
+
 		default:
 			// This would be an error on our side if there was a 
 			// DataType we were able to parse the enum for, but 
@@ -320,6 +323,44 @@ namespace CVG
 		boost::optional<float> vfail = $_anon::PullFloat(js, "fail");
 
 		ParamFloat* pf = new ParamFloat(id, label, category, unit, vcur.get(), vdef, vfail, vmin, vmax);
+		ParamSPtr ret = ParamSPtr(pf);
+		return ret;
+	}
+
+	ParamSPtr ParamUtils::ParseEvent(
+		const json& js,
+		const std::string& id,
+		const std::string& label,
+		const std::string& category,
+		const std::string& unit,
+		std::string& error)
+	{
+		struct $_anon
+		{
+			static boost::optional<std::string> PullEvent(const json& js, const std::string& name)
+			{
+				if (!js.contains(name))
+					return boost::none;
+
+				if(js[name].is_boolean())
+				{
+					const char * szret = js[name] ? "submit" : "";
+					return std::string(szret);
+				}
+
+				if(js[name].is_string())
+					return js[name];
+
+				return boost::none;
+			}
+		};
+
+		boost::optional<std::string> vfail = $_anon::PullEvent(js, "fail");
+		boost::optional<std::string> vdef = $_anon::PullEvent(js, "default");
+		bool submitOnReset	= (vfail != boost::none) && (vfail.get() == "submit");
+		bool submitOnFail	= (vdef  != boost::none) && (vdef.get()  == "submit");
+
+		ParamEvent* pf = new ParamEvent(id, label, category, unit, submitOnReset, submitOnFail);
 		ParamSPtr ret = ParamSPtr(pf);
 		return ret;
 	}

@@ -58,16 +58,16 @@ namespace CVG {
 		js["possible"] = jsPos;
 	}
 
-	bool ParamEnum::SetValue(int value, ValTy ty)
+	SetRet ParamEnum::SetValue(int value, ValTy ty)
 	{
 		std::string si = std::to_string(value);
 		if (!this->ContainsAllowed(si))
-			return false;
+			return SetRet::Invalid;
 
 		return this->SetValue(si, ty);
 	}
 
-	bool ParamEnum::SetValue(float value, ValTy ty)
+	SetRet ParamEnum::SetValue(float value, ValTy ty)
 	{
 		// This makes EXTREEMLY little sense, given how volatile
 		// and finicky string output for floats can be. But the
@@ -78,12 +78,12 @@ namespace CVG {
 		return this->SetValue(sf, ty);
 	}
 
-	bool ParamEnum::SetValue(const std::string& value, ValTy ty)
+	SetRet ParamEnum::SetValue(const std::string& value, ValTy ty)
 	{
 		// Make sure it's valid, before we delegate to the base
 		// implementation.
 		if (!this->ContainsAllowed(value))
-			return false;
+			return SetRet::Invalid;
 
 		return ParamString::SetValue(value, ty);
 	}
@@ -93,7 +93,7 @@ namespace CVG {
 		return this->allowedValues;
 	}
 
-	bool ParamEnum::SetValue(bool value, ValTy ty)
+	SetRet ParamEnum::SetValue(bool value, ValTy ty)
 	{
 		std::string sb = BoolToString(value);
 		return SetValue(value, ty);

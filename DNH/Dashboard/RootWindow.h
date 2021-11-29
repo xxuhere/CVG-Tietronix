@@ -12,6 +12,7 @@
 #include "DockedCVGPane.h"
 #include "CVGBridge.h"
 
+class FullscreenDash;
 class PaneDashboard;
 class DashboardGrid;
 class DashboardElement;
@@ -84,17 +85,10 @@ public:
         Toggle_Inspector,
 
         /// <summary>
-        /// The button that toggles showing the preset bars.
-        /// 
-        /// Currently !UNIMPLEMENTED
-        /// </summary>
-        Toggle_PresetBar,
-
-        /// <summary>
         /// The button that toggles between fullscreen operational and
         /// windowed edit mode.
         /// </summary>
-        ToggleFullscreen,
+        Toggle_Fullscreen,
 
         /// <summary>
         /// The button to add a new dashboard.
@@ -176,8 +170,6 @@ private:
     wxButton * btnToggleLog;
 
     wxButton * btnToggleFullscreen;
-
-    wxButton * btnTogglePreset;
 
     /// <summary>
     /// The text input field to specify the host to connect to.
@@ -266,6 +258,12 @@ private:
     /// </summary>
     int documentDirty = 0;
 
+    /// <summary>
+    /// The window used for the fullscreen display. We use another toplevel
+    /// derived window instead of finagling the RootWindow because it's easier.
+    /// </summary>
+    FullscreenDash * fullscreenWin;
+
 public:
     // THIS SHOULDN't BE PUBLIC! WE'RE BREAKING ENCAPSULATION
     // FOR NOW.
@@ -336,6 +334,10 @@ public:
 
     int GetDashDocIndex(DashboardGrid * dashDoc);
     DashboardGrid* GetDashDoc(int idx);
+
+    bool IsCanvasFullscreen();
+    void ToggleCanvasFullscreen(bool val);
+    void ToggleCanvasFullscreen();
 
     //////////////////////////////////////////////////
 
@@ -438,6 +440,8 @@ private:
     void OnMenu_SaveAs(wxCommandEvent& evt);
     void OnMenu_Open(wxCommandEvent& evt);
     void OnMenu_OpenStartup(wxCommandEvent& evt);
+
+    void OnAccelerator_Fullscreen(wxCommandEvent& evt);
 
     //////////////////////////////////////////////////
 

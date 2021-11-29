@@ -14,6 +14,8 @@ namespace CVG
 			return DataType::Float;
 		if (str == "enum")
 			return DataType::Enum;
+		if( str == "event")
+			return DataType::Event;
 
 		return DataType::Unknown;
 	}
@@ -36,6 +38,9 @@ namespace CVG
 
 		case DataType::Enum:
 			return "enum";
+
+		case DataType::Event:
+			return "event";
 		}
 
 		return "unknown";

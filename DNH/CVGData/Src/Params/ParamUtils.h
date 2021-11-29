@@ -5,6 +5,7 @@
 #include "Param.h"
 #include "ParamBool.h"
 #include "ParamEnum.h"
+#include "ParamEvent.h"
 #include "ParamFloat.h"
 #include "ParamInt.h"
 #include "ParamString.h"
@@ -165,6 +166,33 @@ namespace CVG
 		/// </param>
 		/// <returns>The created Param.</returns>
 		static ParamSPtr ParseFloat(
+			const json& js,
+			const std::string& id,
+			const std::string& label,
+			const std::string& category,
+			const std::string& unit,
+			std::string& error);
+
+		/// <summary>
+		/// Given a Param JSON definition known to be
+		/// of type event, create a Param of it.
+		/// 
+		/// This function assumes some known elements have already
+		/// been parsed, such as the id, label, etc. The function
+		/// will search for other non-specified definition data.
+		/// 
+		/// If the JSON is expected to be a Param definition
+		/// but the type is known, see ParamUtils::Parse().
+		/// </summary>
+		/// <param name="js">The JSON float Param definition to parse.</param>
+		/// <param name="id">The known Param id.</param>
+		/// <param name="label">The known Param label.</param>
+		/// <param name="category">The known Param category.</param>
+		/// <param name="error">
+		/// The reason for the error if the return value is nullptr.
+		/// </param>
+		/// <returns>The created Param.</returns>
+		static ParamSPtr ParseEvent(
 			const json& js,
 			const std::string& id,
 			const std::string& label,

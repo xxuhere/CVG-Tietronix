@@ -42,15 +42,15 @@ namespace CVG {
 		bool HasMin() override;
 		bool HasMax() override;
 		bool HasFail() override;
-		bool SetValue(int value, ValTy ty) override;
+		SetRet SetValue(int value, ValTy ty) override;
 		bool GetValue(int& value, ValTy ty) override;
-		bool SetValue(float value, ValTy ty) override;
+		SetRet SetValue(float value, ValTy ty) override;
 		bool GetValue(float& value, ValTy ty) override;
-		bool SetValue(const std::string& value, ValTy ty) override;
+		SetRet SetValue(const std::string& value, ValTy ty) override;
 		bool GetValue(std::string& value, ValTy ty) override;
-		bool SetValue(bool value, ValTy ty) override;
+		SetRet SetValue(bool value, ValTy ty) override;
 		bool GetValue(bool& value, ValTy ty) override;
-		bool ResetToDefault() override;
+		SetRet ResetToDefault() override;
 		ParamSPtr Clone() const override;
 	};
 }

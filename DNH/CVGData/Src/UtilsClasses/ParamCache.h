@@ -104,10 +104,14 @@ namespace CVG
 		/// with default values will be modified from a reset. If this
 		/// is not needed, nullptr can be passed in.
 		/// </param>
+		/// <param name="submitted">
+		/// A set of Param ids that should be event-submitted.
+		/// </param>
 		void Reset(
 			bool removeNoDefs, 
 			std::set<std::string> * outModified,
-			std::set<std::string>* outRemoved);
+			std::set<std::string>* outRemoved,
+			std::set<std::string>* submitted);
 
 		/// <summary>
 		/// Clear all variables in the ParamCache.
@@ -152,7 +156,7 @@ namespace CVG
 		/// True if a Param was found/created and successfully set.
 		/// Else, false.
 		/// </returns>
-		bool Set(std::string& paramid, const json& jsVal, bool createifmissing = false);
+		SetRet Set(std::string& paramid, const json& jsVal, bool createifmissing = false);
 
 		// Set() functions for each individual data types. Note that 
 		// strings and enums will use the same "set" function. 
@@ -160,10 +164,10 @@ namespace CVG
 		// And if createifmissing is used, there's  no way to create 
 		// an enum since that requires extra information (the possible
 		// entries) that it wouldn't have.
-		bool Set(std::string& paramid, int iVal,				bool createifmissing = false);
-		bool Set(std::string& paramid, float fVal,				bool createifmissing = false);
-		bool Set(std::string& paramid, const std::string& sVal, bool createifmissing = false);
-		bool Set(std::string& paramid, bool bVal,				bool createifmissing = false);
+		SetRet Set(std::string& paramid, int iVal,					bool createifmissing = false);
+		SetRet Set(std::string& paramid, float fVal,				bool createifmissing = false);
+		SetRet Set(std::string& paramid, const std::string& sVal,	bool createifmissing = false);
+		SetRet Set(std::string& paramid, bool bVal,					bool createifmissing = false);
 
 		iterator begin()
 		{

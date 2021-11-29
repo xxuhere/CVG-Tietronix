@@ -213,10 +213,11 @@ namespace CVG
 			//////////////////////////////////////////////////
 			std::set<std::string> changedCaches;
 			std::set<std::string> removedCaches;
+			std::set<std::string> submitCaches;
 			json jsCacheRm = json::array();		// data cache ids removed.
 			json jsCacheVals;					// modified datacache updated values
 			json jsCacheIds = json::array();	// array of id keys for jsCacheVals
-			this->datacache.Reset(true, &changedCaches, &removedCaches);
+			this->datacache.Reset(true, &changedCaches, &removedCaches, &submitCaches);
 			
 			for (const std::string& s : removedCaches)
 				jsCacheRm.push_back(s);
@@ -270,9 +271,15 @@ namespace CVG
 				{
 					// Except only the params that actually have defaults
 					// to reset to
-					if (p->ResetToDefault() == true)
+
+					SetRet resetRet = p->ResetToDefault();
+					if ( resetRet != SetRet::Invalid)
 					{
-						jseq[p->GetID()] = p->GetValueJSON();
+						if(resetRet == SetRet::Submit)
+							jseq[p->GetID()] = "submit";
+						else
+							jseq[p->GetID()] = p->GetValueJSON();
+
 						any = true;
 					}
 				}

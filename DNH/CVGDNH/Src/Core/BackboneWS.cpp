@@ -708,6 +708,7 @@ namespace CVG
 		// A collection of successfully changed values, whos changes
 		// will be broadcasted.
 		std::set<std::string> changedids;
+		std::set<std::string> submitids;
 
 		// Set the values
 		//////////////////////////////////////////////////
@@ -722,7 +723,7 @@ namespace CVG
 				continue;
 			}
 
-			bool setret = false;
+			SetRet setret = SetRet::Invalid;
 			if (it->is_boolean())
 				setret = p->SetValue((bool)*it);
 			else if (it->is_string())
@@ -736,8 +737,23 @@ namespace CVG
 				successes[id] = "unknownvalue";
 				continue;
 			}
-			successes[id] = "success";
-			changedids.insert(id);
+
+			if(setret == SetRet::Success)
+			{
+				successes[id] = "success";
+				changedids.insert(id);
+			}
+			else if(setret == SetRet::Submit)
+			{
+				successes[id] = "submit";
+				submitids.insert(id);
+			}
+			else if(setret == SetRet::Invalid)
+			{ 
+				successes[id] = "fail";
+			}
+			
+			
 		}
 
 		// Send response to requestor
@@ -791,6 +807,19 @@ namespace CVG
 				json jsval;
 				jsval["id"] = chid;
 				jsval["status"] = "success";
+				jsval["val"] = p->GetValueJSON();
+
+				jsbrvals[chid] = jsval;
+			}
+			for(const std::string& chid: submitids)
+			{
+				ParamSPtr p = targ.GetParam(chid);
+				if (p == nullptr)
+					continue;
+
+				json jsval;
+				jsval["id"] = chid;
+				jsval["status"] = "submit";
 				jsval["val"] = p->GetValueJSON();
 
 				jsbrvals[chid] = jsval;

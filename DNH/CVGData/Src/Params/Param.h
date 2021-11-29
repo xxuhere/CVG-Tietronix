@@ -14,6 +14,31 @@ namespace CVG
 	typedef std::shared_ptr<Param> ParamSPtr;
 
 	/// <summary>
+	/// Return value for a Param operation that has 3 
+	/// possible ending states.
+	/// </summary>
+	enum class SetRet
+	{
+		/// <summary>
+		/// The operation was successful. Nothing more
+		/// needs to be done.
+		/// </summary>
+		Success,
+
+		/// <summary>
+		/// The operation was successful. An event should
+		/// be sent.
+		/// </summary>
+		Submit,
+
+		/// <summary>
+		/// The operation was not successful. Most likely because
+		/// a type conversion was needed that is undefined.
+		/// </summary>
+		Invalid
+	};
+
+	/// <summary>
 	/// The base class for CVG Equipment parameters. These are
 	/// introspective values for things connected through the
 	/// DNH realtime bus.
@@ -186,7 +211,7 @@ namespace CVG
 		/// <param name="value">The value.</param>
 		/// <param name="ty">The part of the Param to set.</param>
 		/// <returns>If true, the value was successfully set. Else, false</returns>
-		virtual bool SetValue(int value, ValTy ty = ValTy::Current) = 0;
+		virtual SetRet SetValue(int value, ValTy ty = ValTy::Current) = 0;
 
 		/// <summary>
 		/// Get a Param value as an int.
@@ -205,7 +230,7 @@ namespace CVG
 		/// <param name="value">The value to set.</param>
 		/// <param name="ty"></param>
 		/// <returns>If true, the value was successfully set. Else, false</returns>
-		virtual bool SetValue(float value, ValTy ty = ValTy::Current) = 0;
+		virtual SetRet SetValue(float value, ValTy ty = ValTy::Current) = 0;
 
 		/// <summary>
 		/// Get a Param value as a float.
@@ -224,7 +249,7 @@ namespace CVG
 		/// <param name="value">The value to set.</param>
 		/// <param name="ty"></param>
 		/// <returns>If true, the value was successfully set. Else, false</returns>
-		virtual bool SetValue(const std::string& value, ValTy ty = ValTy::Current) = 0;
+		virtual SetRet SetValue(const std::string& value, ValTy ty = ValTy::Current) = 0;
 
 		/// <summary>
 		/// Get a Param value as a string.
@@ -243,7 +268,7 @@ namespace CVG
 		/// <param name="value">The value to set.</param>
 		/// <param name="ty"></param>
 		/// <returns>If true, the value was successfully set. Else, false</returns>
-		virtual bool SetValue(bool value, ValTy ty = ValTy::Current) = 0;
+		virtual SetRet SetValue(bool value, ValTy ty = ValTy::Current) = 0;
 
 		/// <summary>
 		/// Get a Param value as an bool.
@@ -266,7 +291,7 @@ namespace CVG
 		/// </param>
 		/// <param name="ty">The value type to set</param>
 		/// <returns></returns>
-		virtual bool SetValue(const json& value, ValTy ty = ValTy::Current);
+		virtual SetRet SetValue(const json& value, ValTy ty = ValTy::Current);
 
 		/// <summary>
 		/// Reset the Param to its default value.
@@ -275,7 +300,7 @@ namespace CVG
 		/// True if the Param was reset. False if the Param does not
 		/// have a default value.
 		/// </returns>
-		virtual bool ResetToDefault() = 0;
+		virtual SetRet ResetToDefault() = 0;
 
 		/// <summary>
 		/// Create a deep copy of the Param.
