@@ -189,11 +189,14 @@ void PaneDashboard::OnEndParamDrag(const std::string& eq, CVG::ParamSPtr param)
 	this->_ClearMouseDragState();
 	wxPoint scroll = this->canvasWin->GetViewStart();
 
-	int cellX = (wxGetMousePosition().x - this->canvasWin->GetScreenPosition().x + scroll.x) / GRIDCELLSIZE;
-	int cellY = (wxGetMousePosition().y - this->canvasWin->GetScreenPosition().y + scroll.y) / GRIDCELLSIZE;
+	wxPoint mousePos = wxGetMousePosition();
+	wxPoint canvasScreenPos = this->canvasWin->GetScreenPosition();
+	//
+	int cellX = (mousePos.x - canvasScreenPos.x + scroll.x) / GRIDCELLSIZE;
+	int cellY = (mousePos.y - canvasScreenPos.y + scroll.y) / GRIDCELLSIZE;
 
-	int cellWidth = 4; // Arbitrarily set
-	int cellHeight = 1;
+	int cellWidth = 20; // Arbitrarily set
+	int cellHeight = 5;
 
 	// TODO: Reimplement
 	if(this->gridInst->Grid()->InDocumentBounds(
@@ -576,8 +579,8 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
 		// Arbitrary for now
-		static const int defCellHeight = 1;
-		static const int defCellWidth = 4;
+		static const int defCellHeight = 5;
+		static const int defCellWidth = 20;
 
 		wxPoint cell = (wxGetMousePosition() - _this->GetScreenPosition() + scroll) / GRIDCELLSIZE;
 

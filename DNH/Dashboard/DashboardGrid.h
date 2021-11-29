@@ -76,10 +76,10 @@ private:
 	};
 
 	// The max grid width
-	int gridWidth = 20;
+	int gridWidth = 100;
 
 	// The max grid height
-	int gridHeight = 20;
+	int gridHeight = 100;
 
 	std::vector<DashboardElement *> elements;
 

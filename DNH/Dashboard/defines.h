@@ -1,3 +1,3 @@
 #pragma once
 
-#define GRIDCELLSIZE 50
+#define GRIDCELLSIZE 10
