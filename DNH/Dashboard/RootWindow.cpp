@@ -305,10 +305,14 @@ void RootWindow::ToggleCanvasFullscreen(bool val)
 
     // If the fullscreen window is shown, we minimize ourselves -
     // and if the fullscreen window is being closed, we restore ourselves.
-    this->Iconize(val);
 
     if(val)
     { 
+        // Minimize before the FullscreenDash is created, or else
+        // it will be minimized with thie RootWindow because it's
+        // a child.
+        this->Iconize(true);  
+
         this->mainDashboard->DetachCanvas();
 
         this->fullscreenWin = 
@@ -326,8 +330,9 @@ void RootWindow::ToggleCanvasFullscreen(bool val)
         this->fullscreenWin->Maximize();
         this->fullscreenWin->Show();
 
-        // Minimize
-        
+        // Give it keyboard focus so it can accept keyboard shortcuts
+        // immediately.
+        this->mainDashboard->CanvasWin()->SetFocus();
     }
     else
     {
@@ -338,6 +343,13 @@ void RootWindow::ToggleCanvasFullscreen(bool val)
         //
         this->fullscreenWin->Destroy();
         this->fullscreenWin = nullptr;
+
+        this->mainDashboard->CanvasWin()->SetFocus();
+
+        // Restore. Don't do this until the end of else the resize
+        // handler will also invoke ToggleCanvasFullscreen() before
+        // things are closed.
+        this->Iconize(false);
     }
 }
 
