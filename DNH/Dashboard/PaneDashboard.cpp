@@ -674,6 +674,11 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 					this->gridInst->Grid(), 
 					this->draggedReposEle);
 			}
+			else
+			{
+				// Immediately redraw to get rid of drag preview on the canvas.
+				this->Refresh();
+			}
 		}
 		break;
 	}
