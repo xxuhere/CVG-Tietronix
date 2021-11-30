@@ -69,6 +69,15 @@ bool DashboardElement::SetDimensions(const wxPoint& pt, const wxSize& sz, bool c
 	return true;
 }
 
+void DashboardElement::SetLabel(const std::string& newLabel)
+{
+	this->label = newLabel;
+
+	// If the label is empty, use fallbacks based on parameter values.
+	if(this->label.empty())
+		this->label = this->DefaultLabel();
+}
+
 bool DashboardElement::SwitchParam(std::string& eq, CVG::ParamSPtr param, bool resetDefault)
 {
 	//TODO:
@@ -94,3 +103,11 @@ bool DashboardElement::CellInElement(const wxPoint& cell)
 	return true;
 }
 
+std::string DashboardElement::DefaultLabel() const
+{
+	std::string lab = this->param->GetLabel();
+	if(!lab.empty())
+		return lab;
+
+	return this->param->GetID();
+}

@@ -596,6 +596,12 @@ void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* 
         pd->OnDashDoc_RemElement(grid, ele);
 }
 
+void RootWindow::BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_RelabelElement(grid, ele);
+}
+
 void RootWindow::BroadcastDashDoc_Renamed(DashboardGrid* grid)
 {
     for(PaneDashboard* pd : this->gridPanes)

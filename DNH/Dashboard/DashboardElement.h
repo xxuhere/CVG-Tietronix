@@ -110,6 +110,8 @@ public:
 
 	bool SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCollisions = true);
 
+	void SetLabel(const std::string& label);
+
 	inline wxPoint CellPos() const
 	{ return this->gridPos; }
 
@@ -161,4 +163,6 @@ public:
 
 	std::string GetUIImplName() const
 	{ return this->uiImplName; }
+
+	std::string DefaultLabel() const;
 };

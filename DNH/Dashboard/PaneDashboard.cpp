@@ -4,6 +4,7 @@
 #include "DashboardElementInst.h"
 #include "Dialogs/DlgGridSize.h"
 #include "defines.h"
+#include <wx/textdlg.h>
 #include <algorithm>
 
 // The minimum width or height dimension of a dashboard element.
@@ -11,6 +12,8 @@ int MINCELLDIM = 2;
 
 wxBEGIN_EVENT_TABLE(PaneDashboard, wxWindow)
 	EVT_MENU( CmdIDs::DeleteRClick,			PaneDashboard::OnMenuDeleteRightClicked)
+	EVT_MENU( CmdIDs::RelabelRClick,		PaneDashboard::OnMenuReLabelRightClicked)
+	EVT_MENU( CmdIDs::ResetLabelRClick,		PaneDashboard::OnMenuResetLabelRightClicked)
 	EVT_CLOSE(PaneDashboard::OnClose)
 	EVT_BUTTON(CmdIDs::AddNew,				PaneDashboard::OnBtnNewDocument			)
 	EVT_BUTTON(CmdIDs::Delete,				PaneDashboard::OnBtnDeleteCurDocument	)
@@ -338,6 +341,12 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 	{
 		wxMenu* eleRClickMenu = new wxMenu();
 		eleRClickMenu->Append(CmdIDs::DeleteRClick, "Remove");
+
+		if(this->rightClickedEle->Label() != this->rightClickedEle->DefaultLabel())
+		{
+			eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
+		}
+		eleRClickMenu->Append(CmdIDs::RelabelRClick, "Edit Label");
 	
 		this->PopupMenu(eleRClickMenu);
 	}
@@ -994,6 +1003,14 @@ void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* 
 	this->Refresh();
 }
 
+void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardElement* removedEle)
+{
+	if(this->gridInst->Grid() != grid)
+		return;
+
+	this->Refresh();
+}
+
 void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle)
 {
 	if(this->gridInst->Grid() != grid)
@@ -1059,6 +1076,35 @@ void PaneDashboard::OnMenuDeleteRightClicked(wxCommandEvent& evt)
 			this->gridInst->Grid(), 
 			this->rightClickedEle);
 	}
+}
+
+void PaneDashboard::OnMenuReLabelRightClicked(wxCommandEvent& evt)
+{
+	assert(this->rightClickedEle != nullptr);
+
+	wxTextEntryDialog dlgQueryLabel(this, "Label", "Change Label", this->rightClickedEle->Label());
+	int dlgRet = dlgQueryLabel.ShowModal();
+	if(dlgRet != wxID_OK)
+		return;
+	
+	std::string newLabel = dlgQueryLabel.GetValue().ToStdString();
+
+	if(newLabel.empty())
+	{
+		newLabel = this->rightClickedEle->Param()->GetLabel();
+		if(newLabel.empty())
+			newLabel = this->rightClickedEle->Param()->GetID();
+	}
+
+	this->rightClickedEle->SetLabel(newLabel);
+	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedEle);
+}
+
+void PaneDashboard::OnMenuResetLabelRightClicked(wxCommandEvent& evt)
+{
+	assert(this->rightClickedEle != nullptr);
+	this->rightClickedEle->SetLabel("");
+	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedEle);
 }
 
 void PaneDashboard::OnBtnNewDocument(wxCommandEvent& evt)

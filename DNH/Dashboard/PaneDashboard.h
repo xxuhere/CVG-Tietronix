@@ -65,6 +65,16 @@ public:
 		/// </summary>
 		DeleteRClick,
 
+		/// <summary>
+		/// Menu option to change an element's label to an explicitly defined value.
+		/// </summary>
+		RelabelRClick,
+
+		/// <summary>
+		/// Menu option to reset the element's label to its default value.
+		/// </summary>
+		ResetLabelRClick,
+
 		PresetCombo,
 
 		/// <summary>
@@ -297,6 +307,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnDashDoc_Del(DashboardGrid* deletedGrid);
 	void OnDashDoc_NewElement(DashboardGrid* grid, DashboardElement* newEle);
 	void OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* removedEle);
+	void OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardElement* removedEle);
 	void OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle);
 	void OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardElement* modEle);
 	void OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle);
@@ -329,6 +340,8 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void ToggleFullscreen(bool fullscreen);
 
 	void OnMenuDeleteRightClicked(wxCommandEvent& evt);
+	void OnMenuReLabelRightClicked(wxCommandEvent& evt);
+	void OnMenuResetLabelRightClicked(wxCommandEvent& evt);
 	void OnBtnNewDocument(wxCommandEvent& evt);
 	void OnBtnDeleteCurDocument(wxCommandEvent& evt);
 	void OnBtnCopyCurDocument(wxCommandEvent& evt);

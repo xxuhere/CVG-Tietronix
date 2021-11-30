@@ -348,6 +348,7 @@ public:
     void BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele);
     void BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardElement* ele);
     void BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* ele);
+    void BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardElement* ele);
     void BroadcastDashDoc_Renamed(DashboardGrid* grid);
     void BroadcastDashDoc_Resized(DashboardGrid* grid);
 
