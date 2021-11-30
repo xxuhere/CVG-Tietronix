@@ -71,6 +71,20 @@ void DashEleFloat::OnParamValueChanged()
 		this->SetValue(fval);
 }
 
+void DashEleFloat::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashEleFloat::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 void DashEleFloat::OnSpin(wxSpinDoubleEvent& evt)
 {
 	CVG::ParamSPtr param = this->Param();

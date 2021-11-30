@@ -572,6 +572,12 @@ void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardElement
         pd->OnDashDoc_ReposElement(grid, ele);
 }
 
+void RootWindow::BroadcastDashDoc_EleResize(DashboardGrid* grid, DashboardElement* ele)
+{
+    for(PaneDashboard* pd : this->gridPanes)
+        pd->OnDashDoc_ResizeElement(grid, ele);
+}
+
 void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele)
 {
     for(PaneDashboard* pd : this->gridPanes)

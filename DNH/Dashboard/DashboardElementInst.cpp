@@ -134,3 +134,11 @@ bool DashboardElementInst::DestroyUIImpl()
 	this->instOwner = nullptr;
 	return true;
 }
+
+void DashboardElementInst::DrawImplPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	if(this->uiImpl == nullptr)
+		return;
+
+	this->uiImpl->DrawPreview(dc, offset);
+}

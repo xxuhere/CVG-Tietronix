@@ -73,6 +73,20 @@ void DashEleInt::OnParamValueChanged()
 		this->SetValue(fval);
 }
 
+void DashEleInt::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashEleInt::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 void DashEleInt::OnSpin(wxSpinEvent& evt)
 {
 	CVG::ParamSPtr param = this->Param();

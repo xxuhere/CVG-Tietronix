@@ -46,6 +46,20 @@ void DashEleButton::OnParamValueChanged()
 	// Do nothing
 }
 
+void DashEleButton::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashEleButton::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 // Event handler for when the user changes the spinctrl value.
 void DashEleButton::OnButton(wxCommandEvent& evt)
 {

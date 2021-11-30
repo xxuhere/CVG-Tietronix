@@ -1,5 +1,6 @@
 #include "DashboardGridInst.h"
 #include "DashboardElementInst.h"
+#include "DashElements/IDashEle.h"
 
 DashboardGridInst::DashboardGridInst(
 	wxWindow* gridCanvasWin,
@@ -176,4 +177,16 @@ void DashboardGridInst::RefreshInstances()
 void DashboardGridInst::RemapInstance(const std::string& guidOld, const std::string& guidNew)
 {
 	this->Grid()->RemapInstance(guidOld, guidNew, this->bridge);
+}
+
+void DashboardGridInst::ToggleUIs(bool show)
+{
+	for(auto it : this->instMapping)
+	{
+		// Sanity check
+		if(it.second->uiImpl == nullptr)
+			continue;
+
+		it.second->uiImpl->Toggle(show);
+	}
 }

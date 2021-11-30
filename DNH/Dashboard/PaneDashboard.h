@@ -16,7 +16,15 @@ class PaneDashboard :
 {
 public:
 
-public:
+	// Bit flag representing the draggable edges of a dashboard element.
+	// When describing a drag operation, at least one horizontal or one vertical
+	// flag must be used. And both direction (i.e., left/right or top/bottom) cannot
+	// be used at the same time.
+	static const int RSZLEFTFLAG	= 1 << 1;
+	static const int RSZRIGHTFLAG	= 1 << 2;
+	static const int RSZTOPFLAG		= 1 << 3;
+	static const int RSZBOTFLAG		= 1 << 4;
+
 	/// <summary>
 	/// UI IDs.
 	/// </summary>
@@ -37,27 +45,98 @@ public:
 		/// </summary>
 		Copy,
 
+		/// <summary>
+		/// The vertical scrollbar for the canvas.
+		/// 
+		/// May be unused if the dashboard is using a wxScrolledWindow.
+		/// </summary>
 		HorizCanvasScroll,
 
+		/// <summary>
+		/// The horizontal scrollbar for the canvas.
+		/// 
+		/// May be unused if the dashboard is using a wxScrolledWindow.
+		/// </summary>
 		VertCanvasScroll,
 
+		/// <summary>
+		/// The menu option to delete a dashboard element - where the menu is invoked
+		/// by right clicking the element.
+		/// </summary>
 		DeleteRClick,
 
 		PresetCombo,
 
-		Menu_ResizeDash
+		/// <summary>
+		/// The mouse interaction choice - specifying which mouse drag operation is used.
+		/// </summary>
+		InteractionChoice,
+
+		/// <summary>
+		/// The menu option to resize the dashboard grid - where the menu is invoked
+		/// by right clicking the grid (where an element isn't present).
+		/// </summary>
+		Menu_ResizeDash,
 	};
 
+	/// <summary>
+	/// The current state of interaction for the mouse.
+	/// </summary>
+	enum MouseInteractMode
+	{
+		/// <summary>
+		/// GUI elements can be interacted with or moved (if non-GUI
+		/// space can be accessed with the mouse).
+		/// </summary>
+		MoveOp,
+
+		/// <summary>
+		/// GUI elements can be moved around.
+		/// </summary>
+		Move,
+
+		/// <summary>
+		/// GUI elements can be resized.
+		/// </summary>
+		Resize,
+
+		/// <summary>
+		/// GUI elements can be interacted with, but not modified.
+		/// </summary>
+		Operate
+	};
+
+	/// <summary>
+	/// Styles to draw the boundaries of individual elements.
+	/// </summary>
 	enum class GridBoundsDrawMode
 	{
+		/// <summary>
+		/// Boundary lines are not shown.
+		/// </summary>
 		Invisible,
+
+		/// <summary>
+		/// Heavy contrast lines.
+		/// </summary>
 		Heavy,
+
+		/// <summary>
+		/// An outline that more resembles the background than Heavy.
+		/// </summary>
 		Light,
+
+		/// <summary>
+		/// A dotted line pattern.
+		/// </summary>
 		Dotted
 	};
 
 	enum MouseDragMode
 	{
+		/// <summary>
+		/// No mouse drag operation is occuring.
+		/// </summary>
 		None,
 
 		/// <summary>
@@ -68,7 +147,12 @@ public:
 		/// <summary>
 		/// The user is dragging elements to reposition them.
 		/// </summary>
-		DragElement
+		DragElement,
+
+		/// <summary>
+		/// The user is dragging elements to resize them.
+		/// </summary>
+		ResizeElement
 	};
 private:
 
@@ -134,6 +218,22 @@ private:
 
 	MouseDragMode dragMode = MouseDragMode::None;
 
+	/// <summary>
+	/// The choice pulldown for the interaction modes.
+	/// </summary>
+	wxChoice* choiceInteractions = nullptr;
+
+	MouseInteractMode interactionMode = MouseInteractMode::MoveOp;
+
+	// The sides being dragged during an element resize.
+	int resizeFlags = 0;
+	// The point and size calculate for resizing. They're cached
+	// as variable so they can be calculated once on mouse moves,
+	// and shared between the OnPaint preview and the actual
+	// resizing.
+	wxPoint resizePoint;
+	wxSize resizeSize;
+
 protected:
 	void _ClearGrid();
 
@@ -148,6 +248,13 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 
 	wxWindow* CanvasWin() const
 	{ return this->canvasWin; }
+
+	bool ShouldShowWidgetUIs()
+	{ 
+		return 
+			this->interactionMode == MouseInteractMode::MoveOp || 
+			this->interactionMode == MouseInteractMode::Operate;
+	}
 
 	bool SwitchToDashDoc(int index);
 
@@ -191,6 +298,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnDashDoc_NewElement(DashboardGrid* grid, DashboardElement* newEle);
 	void OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* removedEle);
 	void OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle);
+	void OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardElement* modEle);
 	void OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle);
 	void OnDashDoc_Renamed(DashboardGrid* grid);
 	void OnDashDoc_Resized(DashboardGrid* grid);
@@ -225,6 +333,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnBtnDeleteCurDocument(wxCommandEvent& evt);
 	void OnBtnCopyCurDocument(wxCommandEvent& evt);
 	void OnComboPreset(wxCommandEvent& evt);
+	void OnChoiceInteraction(wxCommandEvent& evt);
 	void OnEnterPreset(wxCommandEvent& evt);
 	void OnFocusPreset(wxFocusEvent& evt);
 

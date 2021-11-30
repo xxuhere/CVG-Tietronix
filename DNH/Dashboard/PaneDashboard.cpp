@@ -6,15 +6,19 @@
 #include "defines.h"
 #include <algorithm>
 
+// The minimum width or height dimension of a dashboard element.
+int MINCELLDIM = 2;
+
 wxBEGIN_EVENT_TABLE(PaneDashboard, wxWindow)
-	EVT_MENU( CmdIDs::DeleteRClick,		PaneDashboard::OnMenuDeleteRightClicked)
+	EVT_MENU( CmdIDs::DeleteRClick,			PaneDashboard::OnMenuDeleteRightClicked)
 	EVT_CLOSE(PaneDashboard::OnClose)
-	EVT_BUTTON(CmdIDs::AddNew,			PaneDashboard::OnBtnNewDocument			)
-	EVT_BUTTON(CmdIDs::Delete,			PaneDashboard::OnBtnDeleteCurDocument	)
-	EVT_BUTTON(CmdIDs::Copy,			PaneDashboard::OnBtnCopyCurDocument		)
-	EVT_COMBOBOX(CmdIDs::PresetCombo,	PaneDashboard::OnComboPreset			)
-	EVT_TEXT_ENTER(CmdIDs::PresetCombo,	PaneDashboard::OnEnterPreset			)
-	EVT_MENU(CmdIDs::Menu_ResizeDash,	PaneDashboard::OnMenu_ResizeDashboardGrid)
+	EVT_BUTTON(CmdIDs::AddNew,				PaneDashboard::OnBtnNewDocument			)
+	EVT_BUTTON(CmdIDs::Delete,				PaneDashboard::OnBtnDeleteCurDocument	)
+	EVT_BUTTON(CmdIDs::Copy,				PaneDashboard::OnBtnCopyCurDocument		)
+	EVT_CHOICE(CmdIDs::InteractionChoice,	PaneDashboard::OnChoiceInteraction		)
+	EVT_COMBOBOX(CmdIDs::PresetCombo,		PaneDashboard::OnComboPreset			)
+	EVT_TEXT_ENTER(CmdIDs::PresetCombo,		PaneDashboard::OnEnterPreset			)
+	EVT_MENU(CmdIDs::Menu_ResizeDash,		PaneDashboard::OnMenu_ResizeDashboardGrid)
 wxEND_EVENT_TABLE()
 
 
@@ -76,6 +80,12 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	this->btnCpyPreset = new wxButton(topPanel, CmdIDs::Copy, "Copy");
 	this->btnCpyPreset->SetMaxSize(wxSize(50, 100));
 	//
+	// The order of the choices should match the indices of MouseInteractMode
+	wxString intrChoices[] = {"MoveOp", "Move", "Resize", "Operate"};
+	this->choiceInteractions = new wxChoice(topPanel, CmdIDs::InteractionChoice, wxDefaultPosition, wxDefaultSize, 4, intrChoices);
+	this->choiceInteractions->Select(0);
+	//
+	topSizer->Add(this->choiceInteractions);
 	topSizer->Add(0, 0, 1, wxGROW);
 	topSizer->Add(this->btnAddPreset, 0, wxGROW);
 	topSizer->Add(20, 0);
@@ -262,11 +272,57 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 	switch(this->dragMode)
 	{
 	case MouseDragMode::PalleteInsert:
+	case MouseDragMode::DragElement:
 		_this->Refresh();
 		break;
 
-	case MouseDragMode::DragElement:
-		_this->Refresh();
+	case MouseDragMode::ResizeElement:
+		{
+			int cellSz = this->gridInst->GridCellSize();
+
+			// The current cell pos and size.
+			int cpx = this->draggedReposEle->CellPos().x;
+			int cpy = this->draggedReposEle->CellPos().y;
+			int cszx = this->draggedReposEle->CellSize().GetWidth();
+			int cszy = this->draggedReposEle->CellSize().GetHeight();
+
+			wxPoint scroll = this->canvasWin->GetViewStart();
+			// The cell the mouse is at (while respecting the scrollbars)
+			int mCellX = (evt.GetPosition().x + scroll.x) / cellSz;
+			int mCellY = (evt.GetPosition().y + scroll.y) / cellSz;
+
+			// Calculating dragging to resize. It's either a horizontal drag, a 
+			// vertical drag, or both for a corner drag. The right and bottom are
+			// a bit easier to calculate with clamping - because resizing left and
+			// top require modifiying both the position and the size to make sure the
+			// other end point doesn't move.
+			if((this->resizeFlags & this->RSZTOPFLAG) != 0)
+			{
+				this->resizePoint.y = mCellY;
+				if(cpy + cszy - this->resizePoint.y < MINCELLDIM)
+					this->resizePoint.y = cpy + cszy - MINCELLDIM;
+
+				this->resizeSize.y = cpy + cszy - this->resizePoint.y;
+			}
+			else if((this->resizeFlags & this->RSZBOTFLAG) != 0)
+			{
+				this->resizeSize.y = std::max(mCellY - cpy, MINCELLDIM);
+			}
+			if((this->resizeFlags & this->RSZLEFTFLAG) != 0)
+			{
+				this->resizePoint.x = mCellX;
+				if(cpx + cszx - this->resizePoint.x < MINCELLDIM)
+					this->resizePoint.x = cpx + cszx - MINCELLDIM;
+
+				this->resizeSize.x = cpx + cszx - this->resizePoint.x;
+			}
+			else if((this->resizeFlags & this->RSZRIGHTFLAG) != 0)
+			{
+				this->resizeSize.x = std::max(mCellX - cpx, MINCELLDIM);
+			}
+
+			_this->Refresh();
+		}
 		break;
 	}
 }
@@ -517,13 +573,69 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 	this->draggedReposEle = this->gridInst->Grid()->GetDashboardAtPixel(clickPos);
 	if(this->draggedReposEle != nullptr)
 	{
-		this->dragMode = MouseDragMode::DragElement;
-		_this->CaptureMouse();
-	
 		wxPoint eleOrigin = 
 			this->draggedReposEle->CellPos() * this->gridInst->GridCellSize();
-	
+
 		this->draggOffset = evt.GetPosition() - eleOrigin;
+
+		if(
+			this->interactionMode == MouseInteractMode::Move || 
+			this->interactionMode == MouseInteractMode::MoveOp)
+		{ 
+			this->dragMode = MouseDragMode::DragElement;
+			_this->CaptureMouse();
+		}
+		else if(this->interactionMode == MouseInteractMode::Resize)
+		{
+			const int dragAreaThk	= 10;
+			int sideFlags = 0;
+
+			// Find the combination of sides it's on. 
+			// It will either be a 
+			//	- horizontal side
+			//  - vertical side
+			//	- both a horizontal and vertical (a corner)
+			//	- none (in the center).
+			// If in the center, we'll consider it a move.
+			//
+			if(clickPos.x <= eleOrigin.x + dragAreaThk)
+				sideFlags |= RSZLEFTFLAG;
+			else if(clickPos.x >= eleOrigin.x + this->draggedReposEle->PixelSize().x - dragAreaThk)
+				sideFlags |= RSZRIGHTFLAG;
+			if(clickPos.y <= eleOrigin.y + dragAreaThk)
+				sideFlags |= RSZTOPFLAG;
+			if(clickPos.y >= eleOrigin.y + this->draggedReposEle->PixelSize().y - dragAreaThk)
+				sideFlags |= RSZBOTFLAG;
+
+			// Make sure a sane combination of one of the 8 allowed configurations
+			// are allowed. If not, its either a state error or the center. Either
+			// way, we'll fallback to a move if that happens.
+			switch(sideFlags)
+			{
+			case RSZLEFTFLAG:
+			case RSZRIGHTFLAG:
+			case RSZTOPFLAG:
+			case RSZBOTFLAG:
+			case RSZLEFTFLAG|RSZTOPFLAG:
+			case RSZRIGHTFLAG|RSZTOPFLAG:
+			case RSZLEFTFLAG|RSZBOTFLAG:
+			case RSZRIGHTFLAG|RSZBOTFLAG:
+				this->dragMode = MouseDragMode::ResizeElement;
+				this->resizeFlags = sideFlags;
+				this->resizePoint = this->draggedReposEle->CellPos();
+				this->resizeSize = this->draggedReposEle->CellSize();
+				break;
+
+			default:
+				this->dragMode = MouseDragMode::DragElement;
+				break;
+			}
+			_this->CaptureMouse();
+		}
+		else
+		{
+			this->draggedReposEle = nullptr;
+		}
 	}
 }
 
@@ -592,12 +704,24 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		dc.DrawText(ele->Label(), textPos - scroll);
 	}
 
+	// If we shouldn't show widget UIs, draw their simplified
+	// proxies instead.
+	if(this->ShouldShowWidgetUIs() == false)
+	{
+		wxPoint prevOffset = scroll;
+		for( auto it : *this->gridInst)
+		{
+			it.second->DrawImplPreview(dc, prevOffset);
+		}
+	}
 
+	const int gridCellSz = this->gridInst->GridCellSize();
 	if(this->dragMode == MouseDragMode::PalleteInsert)
 	{ 
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
-		// Arbitrary for now
+		// The preview size of DashboardElements being dragged
+		// from the inspector. Arbitrary for now.
 		static const int defCellHeight = 5;
 		static const int defCellWidth = 20;
 
@@ -628,7 +752,6 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
-		const int gridCellSz = this->gridInst->GridCellSize();
 		wxPoint cell = wxGetMousePosition() - _this->GetScreenPosition() - this->draggOffset;
 		cell = (cell/gridCellSz);
 		wxPoint pixelPos = cell * gridCellSz;
@@ -637,6 +760,14 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		dc.DrawRectangle(
 			pixelPos - scroll, 
 			this->draggedReposEle->CellSize() * gridCellSz);
+	}
+	else if(this->dragMode == MouseDragMode::ResizeElement)
+	{
+		dc.SetPen(*wxTRANSPARENT_PEN);
+		dc.SetBrush(wxBrush(wxColour(200, 255, 200)));
+		dc.DrawRectangle(
+			this->resizePoint * gridCellSz - scroll, 
+			this->resizeSize * gridCellSz);
 	}
 }
 
@@ -677,6 +808,23 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 			else
 			{
 				// Immediately redraw to get rid of drag preview on the canvas.
+				this->Refresh();
+			}
+		}
+		break;
+
+	case MouseDragMode::ResizeElement:
+		if(this->draggedReposEle != nullptr)
+		{
+			// All the size calculation has already been done in Canvas_OnMotion().
+			if(this->draggedReposEle->SetDimensions(this->resizePoint, this->resizeSize))
+			{
+				rootWin->BroadcastDashDoc_EleResize(
+					this->gridInst->Grid(), 
+					this->draggedReposEle);
+			}
+			else
+			{
 				this->Refresh();
 			}
 		}
@@ -734,6 +882,7 @@ void PaneDashboard::_ClearMouseDragState()
 {
 	this->dragMode = MouseDragMode::None;
 	this->draggedReposEle = nullptr;
+	this->resizeFlags = 0;
 }
 
 void PaneDashboard::_CVG_Dash_NewBoard(DashboardGrid * addedGrid)
@@ -854,6 +1003,17 @@ void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement
 	this->canvasWin->Refresh();
 }
 
+void PaneDashboard::OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardElement* modEle)
+{
+	// Arguably we could get rid of this and just have 
+	// OnDashDoc_ReposElement() since they do the same thing.
+	if(this->gridInst->Grid() != grid)
+		return;
+
+	this->gridInst->MatchEleInstLayout(modEle);
+	this->canvasWin->Refresh();
+}
+
 void PaneDashboard::OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle)
 {
 	if(this->gridInst->Grid() != grid)
@@ -941,6 +1101,16 @@ void PaneDashboard::OnComboPreset(wxCommandEvent& evt)
 {
 	int sel = this->presetPulldown->GetSelection();
 	this->SwitchToDashDoc(sel);
+}
+
+void PaneDashboard::OnChoiceInteraction(wxCommandEvent& evt)
+{
+	this->interactionMode = 
+		(MouseInteractMode)this->choiceInteractions->GetCurrentSelection();
+
+	this->gridInst->ToggleUIs(this->ShouldShowWidgetUIs());
+
+	this->Refresh();
 }
 
 void PaneDashboard::OnEnterPreset(wxCommandEvent& evt)

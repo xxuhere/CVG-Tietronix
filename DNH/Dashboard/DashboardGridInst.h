@@ -42,6 +42,14 @@ public:
 	inline int GridCellSize() const
 	{ return this->grid->GridCellSize(); }
 
+	// Allow ranged-based for loops
+	inline auto begin()
+	{ return this->instMapping.begin();}
+
+	// Allow ranged-based for loops
+	inline auto end()
+	{ return this->instMapping.end();}
+
 	void MatchEleInstLayouts();
 
 	bool MatchEleInstLayout(DashboardElement* ele);
@@ -73,4 +81,6 @@ public:
 	void RefreshInstances();
 
 	void RemapInstance(const std::string& guidOld, const std::string& guidNew);
+
+	void ToggleUIs(bool show);
 };

@@ -57,4 +57,10 @@ public:
 	/// </summary>
 	/// <returns>True if successful. Else, there was no UI content to destroy.</returns>
 	bool DestroyUIImpl();
+
+	/// <summary>
+	/// Redirect to DrawPreview without needing to directly
+	/// access uiImpl.
+	/// </summary>
+	void DrawImplPreview(wxPaintDC& dc, const wxPoint& offset);
 };

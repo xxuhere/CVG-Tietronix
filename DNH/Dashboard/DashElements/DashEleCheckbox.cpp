@@ -53,6 +53,20 @@ void DashEleCheckbox::OnParamValueChanged()
 	}
 }
 
+void DashEleCheckbox::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashEleCheckbox::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 void DashEleCheckbox::OnValueChanged(wxCommandEvent& evt)
 {
 	CVG::ParamSPtr param = this->Param();

@@ -68,5 +68,26 @@ public:
 	/// </param>
 	virtual void OnRefreshInstance();
 
+	/// <summary>
+	/// Draw a preview of the UI on the canvas. Used for when the UI cannot be 
+	/// shown (because they might be inadvertently interacted with) but the user
+	/// should know where they would be placed and how it will look.
+	/// </summary>
+	/// <param name="dc">The paint context.</param>
+	/// <param name="offset">
+	/// A drag offset amount. Will account for the scroll offset as well as any
+	/// other offsets.
+	/// </param>
+	virtual void DrawPreview(wxPaintDC& dc, const wxPoint& offset) = 0;
+
+	/// <summary>
+	/// Toggle the visibility state of the GUI element.
+	/// 
+	/// This does not enable/disable the entire dashboard, just the
+	/// embedded (wxWidget) UI element.
+	/// </summary>
+	/// <param name="show">If true, show UI element. Else, false.</param>
+	virtual void Toggle(bool show) = 0;
+
 	virtual ~IDashEle();
 };

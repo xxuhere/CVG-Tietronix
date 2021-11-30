@@ -67,6 +67,20 @@ void DashElePulldown::OnParamValueChanged()
 	}
 }
 
+void DashElePulldown::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashElePulldown::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 void DashElePulldown::OnChanged(wxCommandEvent& evt)
 {
 	if(this->Param() != nullptr)

@@ -50,6 +50,20 @@ void DashEleSingleString::OnParamValueChanged()
 	this->SetValue(strVal);
 }
 
+void DashEleSingleString::DrawPreview(wxPaintDC& dc, const wxPoint& offset)
+{
+	dc.SetPen(*wxCYAN_PEN);
+	dc.SetBrush(*wxWHITE_BRUSH);
+
+	wxRect r = this->GetRect();
+	dc.DrawRectangle(r);
+}
+
+void DashEleSingleString::Toggle(bool show)
+{
+	this->Show(show);
+}
+
 void DashEleSingleString::OnInputEnter(wxCommandEvent& evt)
 {
 	
