@@ -185,6 +185,11 @@ bool PaneDashboard::SwitchToDashDoc(int index)
 		this->canvasWin->GetScrollPos(wxHORIZONTAL),
 		this->canvasWin->GetScrollPos(wxVERTICAL));
 
+	// UI widgets are created visible, but depending on the interaction
+	// mode, they may need to be hidden.
+	if(!this->ShouldShowWidgetUIs())
+		this->gridInst->ToggleUIs(false);
+
 	this->Refresh();
 	return true;
 }
