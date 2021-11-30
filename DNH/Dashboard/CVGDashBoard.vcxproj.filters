@@ -37,6 +37,12 @@
     <Filter Include="Header Files\DashElements">
       <UniqueIdentifier>{6cf4a826-09de-42d8-9023-7991637e9f45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Dialogs">
+      <UniqueIdentifier>{a84abe10-364d-4913-9e74-3fb245d90679}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Dialogs">
+      <UniqueIdentifier>{8a098aa8-0172-424d-9675-c1c126736266}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -141,6 +147,9 @@
     <ClInclude Include="DashElements\DashEleButton.h">
       <Filter>Header Files\DashElements</Filter>
     </ClInclude>
+    <ClInclude Include="Dialogs\DlgGridSize.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -226,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="DashElements\DashEleButton.cpp">
       <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialogs\DlgGridSize.cpp">
+      <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -169,6 +169,7 @@
     <ClInclude Include="DashElements\DashEleSingleString.h" />
     <ClInclude Include="DashElements\IDashEle.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="Dialogs\DlgGridSize.h" />
     <ClInclude Include="DockedCVGPane.h" />
     <ClInclude Include="FullscreenDash.h" />
     <ClInclude Include="Inspector\InspectorEquipment.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="DashElements\DashElePulldown.cpp" />
     <ClCompile Include="DashElements\DashEleSingleString.cpp" />
     <ClCompile Include="DashElements\IDashEle.cpp" />
+    <ClCompile Include="Dialogs\DlgGridSize.cpp" />
     <ClCompile Include="DockedCVGPane.cpp" />
     <ClCompile Include="FullscreenDash.cpp" />
     <ClCompile Include="Inspector\InspectorEquipment.cpp" />

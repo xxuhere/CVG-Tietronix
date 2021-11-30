@@ -43,7 +43,9 @@ public:
 
 		DeleteRClick,
 
-		PresetCombo
+		PresetCombo,
+
+		Menu_ResizeDash
 	};
 
 	enum class GridBoundsDrawMode
@@ -191,6 +193,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle);
 	void OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle);
 	void OnDashDoc_Renamed(DashboardGrid* grid);
+	void OnDashDoc_Resized(DashboardGrid* grid);
 
 	// Delegated event handlers for the dashboard canvas child
 	void Canvas_OnMotion(wxMouseEvent& evt);
@@ -226,6 +229,8 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnFocusPreset(wxFocusEvent& evt);
 
 	void OnClose(wxCloseEvent& evt);
+
+	void OnMenu_ResizeDashboardGrid(wxCommandEvent& evt);
 
 	void _ClearMouseDragState();
 

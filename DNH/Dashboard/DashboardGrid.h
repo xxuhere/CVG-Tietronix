@@ -167,4 +167,6 @@ public:
 	RemapRet RemapInstance(const std::string& guidOld, const std::string& guidNew, CVGBridge * bridge);
 
 	void RefreshAllParamInstances(CVGBridge* bridge);
+
+	bool SetCellSize(const wxSize& sz);
 };

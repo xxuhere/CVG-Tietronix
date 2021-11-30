@@ -584,6 +584,12 @@ void RootWindow::BroadcastDashDoc_Renamed(DashboardGrid* grid)
         pd->OnDashDoc_Renamed(grid);
 }
 
+void RootWindow::BroadcastDashDoc_Resized(DashboardGrid* grid)
+{
+    for(PaneDashboard* pd: this->gridPanes)
+        pd->OnDashDoc_Resized(grid);
+}
+
 PaneDashboard* FindDashboardDirectlyUnderMouse(const std::vector<PaneDashboard*>& allowedPanes)
 {
     wxPoint mousePt = wxGetMousePosition();
@@ -1177,8 +1183,8 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
         int cellsz = jsd["cellsz"];
 
         DashboardGrid* grid = new DashboardGrid(cellsz, dashName);
+        grid->SetCellSize(wxSize(width, height));
         this->grids.push_back(grid);
-        // TODO: Set cell width and height of grid
 
         const json& jsEles = jsd["elements"];
         for(const json& jse : jsEles)

@@ -47,22 +47,25 @@ ALLHEADERS_ALLVEND = $(ALLHEADERS_WS) $(ALLHEADERS_HTTP) $(ALLHEADERS_JSON)
 SUBDIR_MAIN = .
 SUBDIR_INSPECTOR = Inspector
 SUBDIR_DASHELEMENTS = DashElements
+SUBDIR_DIALOGS = Dialogs
 
 
 SUBOBJ_MAIN = App DashboardElement DashboardElementInst DashboardGrid DashboardGridInst DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow
 SUBOBJ_INSPECTOR = InspectorEquipment InspectorParam InsWidgetBool InsWidgetButton InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
 SUBOBJ_DASHELEMENTS = DashEleButton DashEleCheckbox DashEleFloat DashEleFloatSlider DashEleInt DashElePulldown DashEleSingleString IDashEle
+SUBOBJ_DIALOGS = DlgGridSize
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_INSPECTOR = $(patsubst %,$(SUBDIR_INSPECTOR)/%.o,$(SUBOBJ_INSPECTOR))
 EXPOBJS_DASHELEMENTS = $(patsubst %,$(SUBDIR_DASHELEMENTS)/%.o,$(SUBOBJ_DASHELEMENTS))
+EXPOBJS_DIALOGS = $(patsubst %,$(SUBDIR_DIALOGS)/%.o,$(SUBOBJ_DIALOGS))
 
 all: objs
 	@echo "COMPILING TARGET All"
 	
 	@echo "\n\n\nMaking dashboard archive"
 	@echo "--------------------------------------------------"
-	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS)
+	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -75,7 +78,7 @@ all: objs
 %.o: %.cpp
 	$(CC) $(CFLAGS) `wx-config --cxxflags --libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS)
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS)
 	@echo "TARGET objs"
 
 .PHONY: clean

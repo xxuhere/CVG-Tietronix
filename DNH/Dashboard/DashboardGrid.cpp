@@ -458,3 +458,15 @@ void DashboardGrid::RefreshAllParamInstances(CVGBridge* bridge)
 		de->_Reset(eq->GUID(), eq->Purpose(), eq->GetParam(de->ParamID()));
 	}
 }
+
+bool DashboardGrid::SetCellSize(const wxSize& sz)
+{
+	// NOTE: There's probably more that can be done here, especially 
+	// if there are elements out of bounds after the resize. 
+	//
+	// For now we're going to ignore that issue because of higher 
+	// priority issues. (wleu 11/29/2021)
+	this->gridWidth = sz.x;
+	this->gridHeight = sz.y;
+	return true;
+}

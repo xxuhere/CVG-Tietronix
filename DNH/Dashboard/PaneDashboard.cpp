@@ -2,6 +2,7 @@
 #include "PaneDashboard.h"
 #include "DashboardGridInst.h"
 #include "DashboardElementInst.h"
+#include "Dialogs/DlgGridSize.h"
 #include "defines.h"
 #include <algorithm>
 
@@ -13,6 +14,7 @@ wxBEGIN_EVENT_TABLE(PaneDashboard, wxWindow)
 	EVT_BUTTON(CmdIDs::Copy,			PaneDashboard::OnBtnCopyCurDocument		)
 	EVT_COMBOBOX(CmdIDs::PresetCombo,	PaneDashboard::OnComboPreset			)
 	EVT_TEXT_ENTER(CmdIDs::PresetCombo,	PaneDashboard::OnEnterPreset			)
+	EVT_MENU(CmdIDs::Menu_ResizeDash,	PaneDashboard::OnMenu_ResizeDashboardGrid)
 wxEND_EVENT_TABLE()
 
 
@@ -157,6 +159,15 @@ bool PaneDashboard::SwitchToDashDoc(int index)
 
 	this->gridInst->MatchEleInstLayouts();
 
+	const int cellSz = this->gridInst->GridCellSize();
+	this->canvasWin->SetScrollbars(
+		1, 
+		1, 
+		cellSz * this->gridInst->CellWidth(),
+		cellSz * this->gridInst->CellHeight(), 
+		this->canvasWin->GetScrollPos(wxHORIZONTAL),
+		this->canvasWin->GetScrollPos(wxVERTICAL));
+
 	this->Refresh();
 	return true;
 }
@@ -272,6 +283,14 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 		wxMenu* eleRClickMenu = new wxMenu();
 		eleRClickMenu->Append(CmdIDs::DeleteRClick, "Remove");
 	
+		this->PopupMenu(eleRClickMenu);
+	}
+	else
+	{
+		// If a dashboard element wasn't right clicked, open a right
+		// click menu for the dashboard context.
+		wxMenu * eleRClickMenu = new wxMenu();
+		eleRClickMenu->Append(CmdIDs::Menu_ResizeDash, "Resize Grid");
 		this->PopupMenu(eleRClickMenu);
 	}
 }
@@ -741,6 +760,15 @@ void PaneDashboard::_CVG_Session_OpenPost(bool append)
 {
 	if(this->gridInst != nullptr)
 		this->gridInst->RefreshInstances();
+
+	const int cellSz = this->gridInst->GridCellSize();
+	this->canvasWin->SetScrollbars(
+		1, 
+		1, 
+		cellSz * this->gridInst->CellWidth(),
+		cellSz * this->gridInst->CellHeight(), 
+		this->canvasWin->GetScrollPos(wxHORIZONTAL),
+		this->canvasWin->GetScrollPos(wxVERTICAL));
 }
 
 void PaneDashboard::_CVG_Session_ClearPre()
@@ -842,6 +870,12 @@ void PaneDashboard::OnDashDoc_Renamed(DashboardGrid* grid)
 	int idx = this->rootWin->GetDashDocIndex(grid);
 	this->presetPulldown->Delete(idx);
 	this->presetPulldown->Insert(grid->name, idx);
+}
+
+void PaneDashboard::OnDashDoc_Resized(DashboardGrid* grid)
+{
+	if(this->gridInst->Grid() == grid)
+		this->Refresh();
 }
 
 void PaneDashboard::OnMenuDeleteRightClicked(wxCommandEvent& evt)
@@ -953,4 +987,30 @@ void PaneDashboard::OnClose(wxCloseEvent& evt)
 {
 	evt.Skip();
 	this->_ClearGrid();
+}
+
+void PaneDashboard::OnMenu_ResizeDashboardGrid(wxCommandEvent& evt)
+{
+	wxSize gridSz = 
+		wxSize(
+			this->gridInst->Grid()->CellWidth(),
+			this->gridInst->Grid()->CellHeight());
+
+	DlgGridSize dlgGridSz(this, gridSz);
+	int modalRet = dlgGridSz.ShowModal();
+	if(modalRet == wxID_OK)
+	{
+		if(this->gridInst->Grid()->SetCellSize(dlgGridSz.size))
+			this->rootWin->BroadcastDashDoc_Resized(this->gridInst->Grid());
+
+		const int cellSz = this->gridInst->GridCellSize();
+
+		this->canvasWin->SetScrollbars(
+			1, 
+			1, 
+			cellSz * this->gridInst->CellWidth(),
+			cellSz * this->gridInst->CellHeight(), 
+			this->canvasWin->GetScrollPos(wxHORIZONTAL),
+			this->canvasWin->GetScrollPos(wxVERTICAL));
+	}
 }
