@@ -332,6 +332,9 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 
 void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 {
+	if(this->interactionMode == MouseInteractMode::Operate)
+		return;
+
 	wxScrolledWindow * _this = this->canvasWin;
 	wxPoint clickPos = evt.GetPosition();
 	clickPos += _this->GetViewStart(); // Account for scrollbar
