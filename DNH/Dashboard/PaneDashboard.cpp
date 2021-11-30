@@ -19,6 +19,7 @@ wxBEGIN_EVENT_TABLE(PaneDashboard, wxWindow)
 	EVT_BUTTON(CmdIDs::Delete,				PaneDashboard::OnBtnDeleteCurDocument	)
 	EVT_BUTTON(CmdIDs::Copy,				PaneDashboard::OnBtnCopyCurDocument		)
 	EVT_CHOICE(CmdIDs::InteractionChoice,	PaneDashboard::OnChoiceInteraction		)
+	EVT_CHECKBOX(CmdIDs::CheckboxDarkMode,	PaneDashboard::OnCheckboxDarkMode		)
 	EVT_COMBOBOX(CmdIDs::PresetCombo,		PaneDashboard::OnComboPreset			)
 	EVT_TEXT_ENTER(CmdIDs::PresetCombo,		PaneDashboard::OnEnterPreset			)
 	EVT_MENU(CmdIDs::Menu_ResizeDash,		PaneDashboard::OnMenu_ResizeDashboardGrid)
@@ -87,8 +88,11 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	wxString intrChoices[] = {"MoveOp", "Move", "Resize", "Operate"};
 	this->choiceInteractions = new wxChoice(topPanel, CmdIDs::InteractionChoice, wxDefaultPosition, wxDefaultSize, 4, intrChoices);
 	this->choiceInteractions->Select(0);
+	this->checkboxDark = new wxCheckBox(topPanel, CmdIDs::CheckboxDarkMode, "Dark Mode");
 	//
 	topSizer->Add(this->choiceInteractions);
+	topSizer->AddSpacer(10);
+	topSizer->Add(this->checkboxDark, 0, wxCENTER);
 	topSizer->Add(0, 0, 1, wxGROW);
 	topSizer->Add(this->btnAddPreset, 0, wxGROW);
 	topSizer->Add(20, 0);
@@ -666,9 +670,25 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 	//_this->PrepareDC(dc); We're going to take full control of handling the offsets.
 	wxPoint scroll = _this->GetViewStart();
 
+	// If darkmode is enabled, black out the background.
+	bool usingDarkmode = this->checkboxDark->GetValue();
+	if(usingDarkmode)
+	{ 
+		dc.SetBrush(*wxBLACK_BRUSH);
+		dc.DrawRectangle(_this->GetClientRect());
+	}
+
 	// Draw the document outline.
 	dc.SetPen(wxColour(0, 0, 0));
-	dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	if(usingDarkmode)
+	{ 
+		wxBrush bgBrush = wxBrush(this->GetBackgroundColour());
+		dc.SetBrush(bgBrush);
+	}
+	else
+	{ 
+		dc.SetBrush(*wxTRANSPARENT_BRUSH);
+	}
 	dc.DrawRectangle(
 		-scroll, 
 		wxSize(
@@ -1159,6 +1179,11 @@ void PaneDashboard::OnChoiceInteraction(wxCommandEvent& evt)
 
 	this->gridInst->ToggleUIs(this->ShouldShowWidgetUIs());
 
+	this->Refresh();
+}
+
+void PaneDashboard::OnCheckboxDarkMode(wxCommandEvent& evt)
+{
 	this->Refresh();
 }
 

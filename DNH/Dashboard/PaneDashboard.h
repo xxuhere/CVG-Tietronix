@@ -82,6 +82,8 @@ public:
 		/// </summary>
 		InteractionChoice,
 
+		CheckboxDarkMode,
+
 		/// <summary>
 		/// The menu option to resize the dashboard grid - where the menu is invoked
 		/// by right clicking the grid (where an element isn't present).
@@ -233,6 +235,8 @@ private:
 	/// </summary>
 	wxChoice* choiceInteractions = nullptr;
 
+	wxCheckBox* checkboxDark = nullptr;
+
 	MouseInteractMode interactionMode = MouseInteractMode::MoveOp;
 
 	// The sides being dragged during an element resize.
@@ -347,6 +351,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void OnBtnCopyCurDocument(wxCommandEvent& evt);
 	void OnComboPreset(wxCommandEvent& evt);
 	void OnChoiceInteraction(wxCommandEvent& evt);
+	void OnCheckboxDarkMode(wxCommandEvent& evt);
 	void OnEnterPreset(wxCommandEvent& evt);
 	void OnFocusPreset(wxFocusEvent& evt);
 
