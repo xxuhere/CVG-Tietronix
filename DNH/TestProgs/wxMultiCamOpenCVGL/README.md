@@ -1,0 +1,1 @@
+A simple demo that shows 2 local cameras displaying their video streams in a wxWindow through OpenGL textures.

@@ -23,14 +23,40 @@ The process for building OpenSSL can be complex because it involves other depend
 https://wiki.openssl.org/index.php/Binaries
 OpenSSL 1.1.1 is expected.
 
+**OpenCV (and dependencies)**
+
+OpenCV should be obtained with [vcpkg](https://github.com/microsoft/vcpkg). This is because certain features of OpenCV are required that bring in dependencies that vcpkg can help manage. The biggest dependency being FFMPEG for web streaming.
+
+The instructions below for vcpkg are modified from the CVG GAINS repo. vcpkg was used to get OpenCV for the other project, it is recommended that the old vcpkg be deleted in order to avoid issues that may occur with multiple OpenCV checkouts.
+
+```cmd
+> git clone https://github.com/microsoft/vcpkg
+> cd vcpkg
+> .\bootstrap-vcpkg.bat
+```
+
+Search for package:
+
+```cmd
+> .\vcpkg search [search term]
+```
+
+Install OpenCV x64 and dependencies with:
+
+```cmd
+> .\vcpkg .\vcpkg install opencv[ffmpeg]:x64-windows nlopt:x64-windows boost-asio:x64-windows ffmpeg[x264]:x64-windows opengl-registry[core]:x64-windows
+```
+
 ### Setting Up Visual Studio
 
 The DNH project for VisualStudio uses project property sheets. This allows each user to specify their own unique locations for Boost and OpenSSL, as well as any other dependencies that may occur in the future.
 
 1. In the DNH/CVG_DNGBackbone directory, rename the file `DevDependencies._props` to `DevDependencies.props`
 2. `DevDependencies.props` Open it in a text editor.
-3. Change the entry inside the XML tags `OPENSSL` to the correct location.
-4. Change the entry inside the XML tags `BOOST_DIR` to the correct location.
+3. Change the entry inside the XML tag `OPENSSL` to the correct location.
+4. Change the entry inside the XML tag `BOOST_DIR` to the correct location.
+4. Change the entry inside the XML tag `OPENCVINCL_DIR` to the includes directory of OpenCV brought in from vcpkg.
+4. Change the entry inside the XML tag `OPENCVLIB_DIR` to the library directory of OpenCV brought in from vcpkg.
 5. Save the DevDependencies.props file.
 6. Open the CVG_DNHBackbone.sln solution file (in the folder DNH) in Visual Studio.
 
@@ -47,11 +73,31 @@ The build for Linux is centered around the RaspberryPi, specifically Ubuntu 20 f
 
 **Boost 1.67**
 To build, make sure to get Boost 1.67. More recent versions are ideal, but may not be available in the package manager for supported Linux systems.
-`sudo apt-get install libboost1.67-all`
+
+````cmd
+sudo apt-get install libboost1.67-all
+````
 
 **OpenSSL**
 OpenSSL is also required. The expected version is 1.1.1.
-`sudo apt-get install libssl-dev`
+
+````cmd
+sudo apt-get install libssl-dev
+````
+
+**OpenCV**
+
+```cmd
+sudo apt-get install libopencv-dev
+```
+
+**OpenGL**
+
+```cmd
+apt-get install mesa-common-dev freeglut3-dev
+```
+
+
 
 ### Compiling
 
@@ -63,12 +109,20 @@ OpenSSL is also required. The expected version is 1.1.1.
 
 If needed, install g++ (the GNU C++ compiler) on the RaspberryPi. To check if g++ is installed, open a terminal and type `whereis g++`. If found, it will show an actual path to a g++ program. Or simply enter `g++` to see if anything runs.
 
-To install g++, enter `sudo apt-get install g++`.
+To install g++, enter
+
+```cmd
+sudo apt-get install g++
+```
 
 **make**
 
-If needed, install make. 
-`sugo apt-get install make`
+If not installed, install make. 
+
+```cmd
+sudo apt-get install make
+```
+
 make is used to detect compile dependencies and automate the compile and linking process.
 
 **making**

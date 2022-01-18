@@ -21,6 +21,8 @@ Copy and rename DevProperties._props to DevProperties.props. Open up the file in
 - BOOST_ROOT : The same Boost location used for DNH.
 - DNH_ROOT : Set to {CVG_REPO_ROOT}\DNH
 - OPENSSL_ROOT : The same Boost location used for DNH.
+- OPENCVINCL_DIR : The location of the OpenCV include directory. It should end with *\include.
+- OPENCVLIB_DIR : The location of the OpenCV library directory. It should end with *.\lib.
 
 ### Using CVGData
 
@@ -41,7 +43,7 @@ The instructions below are originally from https://www.binarytides.com/install-w
 3. `sudo apt-get install libgtk-3-dev build-essential`
 3. `mkdir gtk-build`
 4. `cd gtk-build/`
-5. `../configure --disable-shared --enable-unicode`
+5. `../configure --with-opengl --disable-shared --enable-unicode`
 6. `make`
 7. `make install`
 
