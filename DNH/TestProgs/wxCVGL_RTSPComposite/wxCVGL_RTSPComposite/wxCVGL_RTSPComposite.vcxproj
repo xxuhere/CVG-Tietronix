@@ -146,10 +146,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="glext.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\glew-2.1.0\src\glew.c" />
     <ClCompile Include="wxCVGL_RTSPComposite.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
