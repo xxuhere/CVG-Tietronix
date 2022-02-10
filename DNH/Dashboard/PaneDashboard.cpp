@@ -6,6 +6,8 @@
 #include "defines.h"
 #include <wx/textdlg.h>
 #include <algorithm>
+#include <wx/glcanvas.h>
+#include <GL/gl.h>
 
 // The minimum width or height dimension of a dashboard element.
 int MINCELLDIM = 2;
@@ -40,7 +42,13 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 
 	topPanel->SetBackgroundColour(wxColour(220, 220, 220));
 	this->canvasWin->SetBackgroundColour(wxColour(240, 240, 240));
-	this->canvasWin->SetDoubleBuffered(true);
+
+	// Sadly we can't double buffer the canvas. On Windows (untested
+	// for Linux UIs) it doesn't play well embedded OpenGL children - 
+	// those children OpenGL contexts will not draw at all.
+	// (wleu 01/31/2022)
+	//
+	//this->canvasWin->SetDoubleBuffered(false);
 
 	// Redirect the canvas' events to be handled by the main Dashboard class.
 	this->canvasWin->Connect(wxEVT_MOTION,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnMotion,		nullptr, this);
@@ -125,6 +133,17 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 
 		this->canvasWin->SetScrollRate(1, 1);
 	}
+
+	wxGLCanvas * displayWin = new wxGLCanvas(this, wxID_ANY);
+	static wxGLContextAttrs attrs;
+	attrs.CoreProfile().Robust().EndList();
+	wxGLContext * sharedContext = new wxGLContext(displayWin, nullptr, &attrs);
+	sharedContext->SetCurrent(*displayWin);
+	this->SetSize(0, 0, 300, 300);
+	glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	displayWin->SwapBuffers();
 }
 
 wxWindow * PaneDashboard::_CVGWindow()
@@ -177,6 +196,7 @@ bool PaneDashboard::SwitchToDashDoc(int index)
 	this->gridInst->MatchEleInstLayouts();
 
 	const int cellSz = this->gridInst->GridCellSize();
+	
 	this->canvasWin->SetScrollbars(
 		1, 
 		1, 
@@ -211,13 +231,13 @@ int PaneDashboard::GetDashDocIndex()
 	return this->rootWin->GetDashDocIndex(this->gridInst->Grid());
 }
 
-void PaneDashboard::OnStartParamDrag(const std::string& eq, CVG::ParamSPtr param)
+void PaneDashboard::OnStartParamDrag(const std::string& eq, DashDragCont dc)
 {
 	this->dragMode = MouseDragMode::PalleteInsert;
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnEndParamDrag(const std::string& eq, CVG::ParamSPtr param)
+void PaneDashboard::OnEndParamDrag(const std::string& eq, DashDragCont dc)
 {
 	this->_ClearMouseDragState();
 	wxPoint scroll = this->canvasWin->GetViewStart();
@@ -228,15 +248,15 @@ void PaneDashboard::OnEndParamDrag(const std::string& eq, CVG::ParamSPtr param)
 	int cellX = (mousePos.x - canvasScreenPos.x + scroll.x) / GRIDCELLSIZE;
 	int cellY = (mousePos.y - canvasScreenPos.y + scroll.y) / GRIDCELLSIZE;
 
-	int cellWidth = 20; // Arbitrarily set
-	int cellHeight = 5;
-
 	// TODO: Reimplement
 	if(this->gridInst->Grid()->InDocumentBounds(
 		wxPoint(cellX, cellY), 
-		wxSize(cellWidth, cellHeight)))
+		wxSize(dc.cachedWidth, dc.cachedHeight)))
 	{ 
-		this->CreateParam(cellX, cellY, cellWidth, cellHeight, eq, param);
+		if(dc.type == DashDragCont::Type::Param)
+			this->CreateParam(cellX, cellY, dc.cachedWidth, dc.cachedHeight, eq, dc.p);
+		else if(dc.type == DashDragCont::Type::Cam)
+			this->CreateCamera(cellX, cellY, dc.cachedWidth, dc.cachedHeight, eq, dc.camChan);
 	}
 
 	this->canvasWin->Refresh();
@@ -248,13 +268,19 @@ void PaneDashboard::OnCancelParamDrag()
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnParamDrag(const std::string& eq, CVG::ParamSPtr param)
+void PaneDashboard::OnParamDrag(const std::string& eq, DashDragCont dc)
 {
 	// Redraw to show potential new drag spot.
 	this->canvasWin->Refresh();
 }
 
-bool PaneDashboard::CreateParam(int cellX, int cellY, int cellWidth, int cellHeight, const std::string& eqGUID, CVG::ParamSPtr param)
+bool PaneDashboard::CreateParam(
+	int cellX, 
+	int cellY, 
+	int cellWidth, 
+	int cellHeight, 
+	const std::string& eqGUID, 
+	CVG::ParamSPtr param)
 {
 	DashboardElementInst* createdInst = 
 		this->gridInst->AddDashboardElement(
@@ -271,6 +297,33 @@ bool PaneDashboard::CreateParam(int cellX, int cellY, int cellWidth, int cellHei
 	this->rootWin->BroadcastDashDoc_EleNew(
 		this->gridInst->Grid(), 
 		createdInst->RefEle());
+
+	return true;
+}
+
+bool PaneDashboard::CreateCamera(
+	int cellX,
+	int cellY,
+	int cellWidth,
+	int cellHeight,
+	const std::string& eqGUID,
+	const CamChannel & camChan)
+{
+	DashboardCam* createdCam = 
+		this->gridInst->AddDashboardCam(
+			cellX, 
+			cellY, 
+			cellWidth,
+			cellHeight, 
+			eqGUID,
+			camChan);
+	
+	if(createdCam == nullptr)
+		return false;
+	
+	this->rootWin->BroadcastDashDoc_EleNew(
+		this->gridInst->Grid(), 
+		createdCam);
 
 	return true;
 }
@@ -293,12 +346,13 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 			int cellSz = this->gridInst->GridCellSize();
 
 			// The current cell pos and size.
-			int cpx = this->draggedReposEle->CellPos().x;
-			int cpy = this->draggedReposEle->CellPos().y;
-			int cszx = this->draggedReposEle->CellSize().GetWidth();
-			int cszy = this->draggedReposEle->CellSize().GetHeight();
+			int cpx = this->draggedReposTile->CellPos().x;
+			int cpy = this->draggedReposTile->CellPos().y;
+			int cszx = this->draggedReposTile->CellSize().GetWidth();
+			int cszy = this->draggedReposTile->CellSize().GetHeight();
 
 			wxPoint scroll = this->canvasWin->GetViewStart();
+
 			// The cell the mouse is at (while respecting the scrollbars)
 			int mCellX = (evt.GetPosition().x + scroll.x) / cellSz;
 			int mCellY = (evt.GetPosition().y + scroll.y) / cellSz;
@@ -347,16 +401,20 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 	wxScrolledWindow * _this = this->canvasWin;
 	wxPoint clickPos = evt.GetPosition();
 	clickPos += _this->GetViewStart(); // Account for scrollbar
-
-	this->rightClickedEle = this->gridInst->Grid()->GetDashboardAtPixel(clickPos);
-	if(this->rightClickedEle != nullptr)
+	
+	this->rightClickedTile = this->gridInst->Grid()->GetTileAtPixel(clickPos);
+	if(this->rightClickedTile != nullptr)
 	{
 		wxMenu* eleRClickMenu = new wxMenu();
 		eleRClickMenu->Append(CmdIDs::DeleteRClick, "Remove");
-
-		if(this->rightClickedEle->Label() != this->rightClickedEle->DefaultLabel())
-		{
-			eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
+	
+		if(this->rightClickedTile->GetType() == DashboardTile::Type::Param)
+		{ 
+			DashboardElement* ele = (DashboardElement*)this->rightClickedTile;
+			if(this->rightClickedTile->Label() != ele->DefaultLabel())
+			{
+				eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
+			}
 		}
 		eleRClickMenu->Append(CmdIDs::RelabelRClick, "Edit Label");
 	
@@ -375,7 +433,7 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 void PaneDashboard::Canvas_OnScrollTop(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -383,9 +441,9 @@ void PaneDashboard::Canvas_OnScrollTop(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -398,7 +456,7 @@ void PaneDashboard::Canvas_OnScrollTop(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollBot(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -406,9 +464,9 @@ void PaneDashboard::Canvas_OnScrollBot(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -421,7 +479,7 @@ void PaneDashboard::Canvas_OnScrollBot(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollLineUp(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -429,9 +487,9 @@ void PaneDashboard::Canvas_OnScrollLineUp(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -444,7 +502,7 @@ void PaneDashboard::Canvas_OnScrollLineUp(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollLineDown(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -452,9 +510,9 @@ void PaneDashboard::Canvas_OnScrollLineDown(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -467,7 +525,7 @@ void PaneDashboard::Canvas_OnScrollLineDown(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollPageUp(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -475,10 +533,10 @@ void PaneDashboard::Canvas_OnScrollPageUp(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
 	wxSize clSize = _this->GetClientSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -491,7 +549,7 @@ void PaneDashboard::Canvas_OnScrollPageUp(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollPageDown(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -499,10 +557,10 @@ void PaneDashboard::Canvas_OnScrollPageDown(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
 	wxSize clSize = _this->GetClientSize();
-
+	
 	_this->SetScrollbars(
 		1, 
 		1, 
@@ -515,7 +573,7 @@ void PaneDashboard::Canvas_OnScrollPageDown(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -523,9 +581,9 @@ void PaneDashboard::Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	if (evt.GetOrientation() == wxHORIZONTAL)
 	{
 		_this->SetScrollbars(
@@ -551,7 +609,7 @@ void PaneDashboard::Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt)
 void PaneDashboard::Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt)
 {
 	wxScrolledWindow * _this = this->canvasWin;
-
+	
 	// In case child window submits unhandled scrollbar message
 	wxObject * obj = evt.GetEventObject();
 	if(obj != _this)
@@ -559,9 +617,9 @@ void PaneDashboard::Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt)
 		evt.Skip(false);
 		return;
 	}
-
+	
 	int cellSize = this->gridInst->GridCellSize();
-
+	
 	if (evt.GetOrientation() == wxHORIZONTAL)
 	{
 		_this->SetScrollbars(
@@ -589,13 +647,14 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 	// Remember the handler is for this->canvasWin, not PaneDashboard, it's just
 	// being redirected for the PaneDashboard to handle.
 	wxScrolledWindow * _this = this->canvasWin;
+	
 	wxPoint clickPos = evt.GetPosition() + _this->GetViewStart();
 
-	this->draggedReposEle = this->gridInst->Grid()->GetDashboardAtPixel(clickPos);
-	if(this->draggedReposEle != nullptr)
+	this->draggedReposTile = this->gridInst->Grid()->GetTileAtPixel(clickPos);
+	if(this->draggedReposTile != nullptr)
 	{
 		wxPoint eleOrigin = 
-			this->draggedReposEle->CellPos() * this->gridInst->GridCellSize();
+			this->draggedReposTile->CellPos() * this->gridInst->GridCellSize();
 
 		this->draggOffset = evt.GetPosition() - eleOrigin;
 
@@ -621,11 +680,11 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 			//
 			if(clickPos.x <= eleOrigin.x + dragAreaThk)
 				sideFlags |= RSZLEFTFLAG;
-			else if(clickPos.x >= eleOrigin.x + this->draggedReposEle->PixelSize().x - dragAreaThk)
+			else if(clickPos.x >= eleOrigin.x + this->draggedReposTile->PixelSize().x - dragAreaThk)
 				sideFlags |= RSZRIGHTFLAG;
 			if(clickPos.y <= eleOrigin.y + dragAreaThk)
 				sideFlags |= RSZTOPFLAG;
-			if(clickPos.y >= eleOrigin.y + this->draggedReposEle->PixelSize().y - dragAreaThk)
+			if(clickPos.y >= eleOrigin.y + this->draggedReposTile->PixelSize().y - dragAreaThk)
 				sideFlags |= RSZBOTFLAG;
 
 			// Make sure a sane combination of one of the 8 allowed configurations
@@ -643,8 +702,8 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 			case RSZRIGHTFLAG|RSZBOTFLAG:
 				this->dragMode = MouseDragMode::ResizeElement;
 				this->resizeFlags = sideFlags;
-				this->resizePoint = this->draggedReposEle->CellPos();
-				this->resizeSize = this->draggedReposEle->CellSize();
+				this->resizePoint = this->draggedReposTile->CellPos();
+				this->resizeSize = this->draggedReposTile->CellSize();
 				break;
 
 			default:
@@ -655,7 +714,7 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 		}
 		else
 		{
-			this->draggedReposEle = nullptr;
+			this->draggedReposTile = nullptr;
 		}
 	}
 }
@@ -674,6 +733,7 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 	wxPaintDC dc(_this);
 	//_this->PrepareDC(dc); We're going to take full control of handling the offsets.
 	wxPoint scroll = _this->GetViewStart();
+
 
 	// If darkmode is enabled, black out the background.
 	bool usingDarkmode = this->checkboxDark->GetValue();
@@ -716,29 +776,29 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		break;
 	}
 
-	for( const DashboardElement* ele : *this->gridInst->Grid())
+	for( const DashboardTile* tile : *this->gridInst->Grid())
 	{ 
 		// If in the middle of a drag repositioning, draw visual
 		// feedback to user.
-		if(this->draggedReposEle == ele)
+		if(this->draggedReposTile == tile)
 		{
 			dc.SetPen(wxColour(0, 255, 0));
 			dc.SetBrush(wxColour(50, 200, 50));
-			dc.DrawRectangle(ele->PixelPos() - scroll, ele->PixelSize());
+			dc.DrawRectangle(tile->PixelPos() - scroll, tile->PixelSize());
 			dc.SetBrush(*wxTRANSPARENT_BRUSH);
 		}
 		else if(this->drawOutlineMode != GridBoundsDrawMode::Invisible)
 		{ 
 			dc.SetPen(outlinePen);
-			dc.DrawRectangle(ele->PixelPos() - scroll, ele->PixelSize());
+			dc.DrawRectangle(tile->PixelPos() - scroll, tile->PixelSize());
 		}
 
 		// Instead of having static text labels, we're going to
 		// manually be in charge of drawing on the canvas.
-		wxPoint textPos = ele->PixelPos();
+		wxPoint textPos = tile->PixelPos();
 		textPos.x += 10;
 		textPos.y += 2;
-		dc.DrawText(ele->Label(), textPos - scroll);
+		dc.DrawText(tile->Label(), textPos - scroll);
 	}
 
 	// If we shouldn't show widget UIs, draw their simplified
@@ -753,22 +813,22 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 	}
 
 	const int gridCellSz = this->gridInst->GridCellSize();
+	// Draw the insertion preview when dragging something 
+	// from the inspector
 	if(this->dragMode == MouseDragMode::PalleteInsert)
 	{ 
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
-		// The preview size of DashboardElements being dragged
-		// from the inspector. Arbitrary for now.
-		static const int defCellHeight = 5;
-		static const int defCellWidth = 20;
+		int defWidth = this->rootWin->globalInspectorDrag.cachedWidth;
+		int defHeight = this->rootWin->globalInspectorDrag.cachedHeight;
 
 		wxPoint cell = (wxGetMousePosition() - _this->GetScreenPosition() + scroll) / GRIDCELLSIZE;
 
 		if (this->gridInst->Grid()->InDocumentBounds(
 			cell,
-			wxSize(defCellWidth, defCellHeight)))
+			wxSize(defWidth, defHeight)))
 		{
-			dc.SetBrush(wxBrush(wxColour(200, 255, 200)));
+			dc.SetBrush(wxBrush(wxColour(200, 255, 0)));
 		}
 		else
 			dc.SetBrush(wxBrush(wxColour(255, 200, 200)));
@@ -779,13 +839,13 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		dc.DrawRectangle(
 			pixelPos - scroll, 
 			wxSize(
-				this->gridInst->GridCellSize() * defCellWidth, 
-				this->gridInst->GridCellSize() * defCellHeight));
+				this->gridInst->GridCellSize() * defWidth, 
+				this->gridInst->GridCellSize() * defHeight));
 	}
 	else if(this->dragMode == MouseDragMode::DragElement)
 	{
-		// If we're dragging the mouse the reposition an element
-		assert(this->draggedReposEle != nullptr);
+		// If we're dragging the mouse to reposition an element
+		assert(this->draggedReposTile != nullptr);
 
 		dc.SetPen(*wxTRANSPARENT_PEN);
 
@@ -796,10 +856,11 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		dc.SetBrush(wxBrush(wxColour(200, 255, 200)));
 		dc.DrawRectangle(
 			pixelPos - scroll, 
-			this->draggedReposEle->CellSize() * gridCellSz);
+			this->draggedReposTile->CellSize() * gridCellSz);
 	}
 	else if(this->dragMode == MouseDragMode::ResizeElement)
 	{
+		// If we're dragging the mouse to resize an element.
 		dc.SetPen(*wxTRANSPARENT_PEN);
 		dc.SetBrush(wxBrush(wxColour(200, 255, 200)));
 		dc.DrawRectangle(
@@ -812,7 +873,7 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 {
 	// Remember the handler is for this->canvasWin, not PaneDashboard, it's just
 	// being redirected for the PaneDashboard to handle.
-	wxScrolledWindow * _this = this->canvasWin;
+	wxWindow * _this = this->canvasWin;
 
 	if(_this->HasCapture())
 		_this->ReleaseMouse();
@@ -825,22 +886,22 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 
 	case MouseDragMode::DragElement:
 		// Is an DashboardElement was being dragged, see if we can move it.
-		if(this->draggedReposEle != nullptr)
+		if(this->draggedReposTile != nullptr)
 		{
 			wxPoint offsetPt = evt.GetPosition() - this->draggOffset;
 			wxPoint cellMove = offsetPt / this->gridInst->GridCellSize();
 
 			bool moved = 
 				this->gridInst->MoveCell(
-					this->draggedReposEle,
+					this->draggedReposTile,
 					cellMove,
-					this->draggedReposEle->CellSize());
+					this->draggedReposTile->CellSize());
 
 			if(moved)
 			{ 
 				rootWin->BroadcastDashDoc_EleMoved(
 					this->gridInst->Grid(), 
-					this->draggedReposEle);
+					this->draggedReposTile);
 			}
 			else
 			{
@@ -851,14 +912,14 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 		break;
 
 	case MouseDragMode::ResizeElement:
-		if(this->draggedReposEle != nullptr)
+		if(this->draggedReposTile != nullptr)
 		{
 			// All the size calculation has already been done in Canvas_OnMotion().
-			if(this->draggedReposEle->SetDimensions(this->resizePoint, this->resizeSize))
+			if(this->draggedReposTile->SetDimensions(this->resizePoint, this->resizeSize))
 			{
 				rootWin->BroadcastDashDoc_EleResize(
 					this->gridInst->Grid(), 
-					this->draggedReposEle);
+					this->draggedReposTile);
 			}
 			else
 			{
@@ -918,7 +979,7 @@ void PaneDashboard::SetDrawDashboardOutline(GridBoundsDrawMode outlineMode)
 void PaneDashboard::_ClearMouseDragState()
 {
 	this->dragMode = MouseDragMode::None;
-	this->draggedReposEle = nullptr;
+	this->draggedReposTile = nullptr;
 	this->resizeFlags = 0;
 }
 
@@ -953,6 +1014,7 @@ void PaneDashboard::_CVG_Session_OpenPost(bool append)
 		this->gridInst->RefreshInstances();
 
 	const int cellSz = this->gridInst->GridCellSize();
+	
 	this->canvasWin->SetScrollbars(
 		1, 
 		1, 
@@ -1010,16 +1072,26 @@ void PaneDashboard::OnDashDoc_Del(DashboardGrid* deletedGrid)
 		this->gridInst = nullptr;
 }
 
-void PaneDashboard::OnDashDoc_NewElement(DashboardGrid* grid, DashboardElement* newEle)
+void PaneDashboard::OnDashDoc_NewElement(DashboardGrid* grid, DashboardTile* newTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	this->gridInst->Implement(newEle);
+	if(newTile->GetType() == DashboardTile::Type::Param)
+	{
+		DashboardElement* ele = (DashboardElement*)newTile;
+		this->gridInst->Implement(ele);
+	}
+	else if(newTile->GetType() == DashboardTile::Type::Cam)
+	{
+		DashboardCam* cam = (DashboardCam*)newTile;
+		this->gridInst->Implement(cam);
+	}
+
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* removedEle)
+void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardTile* removedTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
@@ -1027,11 +1099,11 @@ void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* 
 	// No need to delete the actual dashboard element. This function 
 	// is being called because something else is already deleting it.
 	// Just remove the attached UI.
-	this->gridInst->RemoveElement(removedEle, false);
+	this->gridInst->RemoveTile(removedTile, false);
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardElement* removedEle)
+void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardTile* removedEle)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
@@ -1039,32 +1111,44 @@ void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardEleme
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle)
+void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, DashboardTile* modTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	this->gridInst->MatchEleInstLayout(modEle);
+	if(modTile->GetType() == DashboardTile::Type::Param)
+		this->gridInst->MatchEleInstLayout((DashboardElement*)modTile);
+	else if(modTile->GetType() == DashboardTile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((DashboardCam*)modTile);
+
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardElement* modEle)
+void PaneDashboard::OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardTile* modTile)
 {
 	// Arguably we could get rid of this and just have 
 	// OnDashDoc_ReposElement() since they do the same thing.
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	this->gridInst->MatchEleInstLayout(modEle);
+	if(modTile->GetType() == DashboardTile::Type::Param)
+		this->gridInst->MatchEleInstLayout((DashboardElement*)modTile);
+	else if(modTile->GetType() == DashboardTile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((DashboardCam*)modTile);
+
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle)
+void PaneDashboard::OnDashDoc_MovedElement(DashboardGrid* grid, DashboardTile* movedTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	this->gridInst->MatchEleInstLayout(movedEle);
+	if(movedTile->GetType() == DashboardTile::Type::Param)
+		this->gridInst->MatchEleInstLayout((DashboardElement*)movedTile);
+	else if(movedTile->GetType() == DashboardTile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((DashboardCam*)movedTile);
+
 	this->canvasWin->Refresh();
 }
 
@@ -1090,49 +1174,53 @@ void PaneDashboard::OnDashDoc_Resized(DashboardGrid* grid)
 
 void PaneDashboard::OnMenuDeleteRightClicked(wxCommandEvent& evt)
 {
-	assert(this->rightClickedEle != nullptr);
+	assert(this->rightClickedTile != nullptr);
 
-	if(this->gridInst->Grid()->Remove(this->rightClickedEle) == false)
+	if(this->gridInst->Grid()->Remove(this->rightClickedTile) == false)
 	{
 		assert(!"Could not successfully remove node.");
 		return;
 	}
 	
-	if (this->gridInst->RemoveElement(this->rightClickedEle, false))
+	if (this->gridInst->RemoveTile(this->rightClickedTile, false))
 	{
 		this->rootWin->BroadcastDashDoc_EleRem(
 			this->gridInst->Grid(), 
-			this->rightClickedEle);
+			this->rightClickedTile);
 	}
 }
 
 void PaneDashboard::OnMenuReLabelRightClicked(wxCommandEvent& evt)
 {
-	assert(this->rightClickedEle != nullptr);
+	assert(this->rightClickedTile != nullptr);
 
-	wxTextEntryDialog dlgQueryLabel(this, "Label", "Change Label", this->rightClickedEle->Label());
+	wxTextEntryDialog dlgQueryLabel(this, "Label", "Change Label", this->rightClickedTile->Label());
 	int dlgRet = dlgQueryLabel.ShowModal();
 	if(dlgRet != wxID_OK)
 		return;
 	
 	std::string newLabel = dlgQueryLabel.GetValue().ToStdString();
 
-	if(newLabel.empty())
+	if(this->rightClickedTile->GetType() == DashboardTile::Type::Param)
 	{
-		newLabel = this->rightClickedEle->Param()->GetLabel();
+		DashboardElement* ele = (DashboardElement*)this->rightClickedTile;
 		if(newLabel.empty())
-			newLabel = this->rightClickedEle->Param()->GetID();
+		{
+			newLabel = ele->Param()->GetLabel();
+			if(newLabel.empty())
+				newLabel = ele->Param()->GetID();
+		}
 	}
 
-	this->rightClickedEle->SetLabel(newLabel);
-	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedEle);
+	this->rightClickedTile->SetLabel(newLabel);
+	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedTile);
 }
 
 void PaneDashboard::OnMenuResetLabelRightClicked(wxCommandEvent& evt)
 {
-	assert(this->rightClickedEle != nullptr);
-	this->rightClickedEle->SetLabel("");
-	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedEle);
+	assert(this->rightClickedTile != nullptr);
+	this->rightClickedTile->SetLabel("");
+	this->rootWin->BroadcastDashDoc_EleRelabled(this->gridInst->Grid(), this->rightClickedTile);
 }
 
 void PaneDashboard::OnBtnNewDocument(wxCommandEvent& evt)

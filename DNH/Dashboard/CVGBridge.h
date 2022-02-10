@@ -2,6 +2,7 @@
 #include <string>
 #include <Params/Param.h>
 #include <Equipment.h>
+#include "DashDragCont.h"
 
 /// <summary>
 /// An interface class for InspectorParam elements to send drag-and-drop and 
@@ -57,40 +58,40 @@ public:
 	//////////////////////////////////////////////////
 
 	/// <summary>
-	/// Expected to be called by an InsWidgetParam implementation.
+	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
 	/// 
 	/// Called at the start of a drag operation to allow inspector entries to be
 	/// dragged into the dashboard.
 	/// </summary>
 	/// <param name="eq">The Equipment GUID that owned the Param being dragged.</param>
-	/// <param name="p">The Param being dragged.</param>
-	virtual void Param_OnDragStart(const std::string& eq, CVG::ParamSPtr p) = 0;
+	/// <param name="dc">The Inspector element being dragged.</param>
+	virtual void Param_OnDragStart(const std::string& eq, DashDragCont dc) = 0;
 
 	/// <summary>
-	/// Expected to be called by an InsWidgetParam implementation.
+	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
 	/// 
 	/// Called at the end of a drag operation to finalize an inspector entry being
 	/// dragged into the dashboard.
 	/// </summary>
 	/// <param name="eq">The Equipment GUID that owned the Param being dragged.</param>
-	/// <param name="p">The Param being dragged.</param>
-	virtual void Param_OnDragEnd(const std::string& eq, CVG::ParamSPtr p) = 0;
+	/// <param name="dc">The Inspector element being dragged.</param>
+	virtual void Param_OnDragEnd(const std::string& eq, DashDragCont dc) = 0;
 
 	/// <summary>
-	/// Expected to be called by an InsWidgetParam implementation.
+	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
 	/// 
 	/// Called to notify the bridge that the current drag session has been aborted.
 	/// </summary>
 	virtual void Param_OnDragCancel() = 0;
 
 	/// <summary>
-	/// Expected to be called by an InsWidgetParam implementation.
+	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
 	/// 
 	/// Called to notify the brige that the the mouse has been moved during the drag
 	/// session. The UI behind the bridge should update to reflect the new dragged
 	/// position.
 	/// </summary>
 	/// <param name="eq">The Equipment GUID that owned the Param being dragged.</param>
-	/// <param name="p">The Param being dragged.</param>
-	virtual void Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p) = 0;
+	/// <param name="dc">The Element being dragged.</param>
+	virtual void Param_OnDragMotion(const std::string& eq, DashDragCont dc) = 0;
 };

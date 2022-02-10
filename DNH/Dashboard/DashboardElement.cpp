@@ -6,6 +6,7 @@ DashboardElement::DashboardElement(
 	DashboardGrid* owner,
 	const std::string& eqGuid, 
 	CVG::ParamSPtr param)
+	: DashboardTile(owner, eqGuid)
 {
 	this->gridOwner = owner;
 
@@ -71,7 +72,7 @@ bool DashboardElement::SetDimensions(const wxPoint& pt, const wxSize& sz, bool c
 
 void DashboardElement::SetLabel(const std::string& newLabel)
 {
-	this->label = newLabel;
+	DashboardTile::SetLabel(newLabel);
 
 	// If the label is empty, use fallbacks based on parameter values.
 	if(this->label.empty())
@@ -84,25 +85,6 @@ bool DashboardElement::SwitchParam(std::string& eq, CVG::ParamSPtr param, bool r
 	return false;
 }
 
-
-
-bool DashboardElement::CellInElement(const wxPoint& cell)
-{
-	if(cell.x < this->gridPos.x)
-		return false;
-
-	if(cell.y < this->gridPos.y)
-		return false;
-
-	if(cell.x >= this->gridPos.x + this->gridSize.x)
-		return false;
-
-	if(cell.y >= this->gridPos.y + this->gridSize.y)
-		return false;
-
-	return true;
-}
-
 std::string DashboardElement::DefaultLabel() const
 {
 	std::string lab = this->param->GetLabel();
@@ -110,4 +92,14 @@ std::string DashboardElement::DefaultLabel() const
 		return lab;
 
 	return this->param->GetID();
+}
+
+DashboardTile::Type DashboardElement::GetType()
+{
+	return Type::Param;
+}
+
+DashboardTile* DashboardElement::Clone()
+{
+	return new DashboardElement(*this);
 }

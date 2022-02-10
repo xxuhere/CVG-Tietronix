@@ -6,7 +6,7 @@
 CC=g++
 CFLAGS=-Wall
 
-OPENCVINCL		:= -I`python3 ../paths.py --ocv_inc`
+OPENCVINCL		:= -I`python3 ../../paths.py --ocv_inc`
 OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio
 
 ##################################################

@@ -366,6 +366,9 @@ namespace CVG
 			reqhostname, 
 			&pjsParams);
 
+		// If the hostname is empty, it will be defaulted later in 
+		// SEquipment::SetSocket() invoked within Register().
+
 		if (reqtype.empty())
 		{
 			error = "Registration is missing equipment type.";

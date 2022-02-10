@@ -7,15 +7,53 @@ register and use the DNH bus.
 
 from websocket import create_connection
 import json
+import sys
 
 #%% Utilities
 
 def GetDNHHostname():
-    #return "192.168.1.84"
-    return "ubuntu"
+    """
+    A standard way to get the server host name. Either using an agreed upon 
+    hard-coded value, or through a parameter via command line.
+
+    Returns
+    -------
+    ret : String
+        The host name.
+
+    """
+    ret = "localhost"
+    
+    # Check if the host is defined as commandline arguments
+    n = len(sys.argv)
+    for i in range(1, n-1):
+        if sys.argv[i] == "--host":
+            ret = sys.argv[i + 1]
+            break
+    
+    return ret
 
 def GetDNHHTTPPort():
-    return 5700
+    """
+    A standard way to get the server port. Either using an agreed upon
+    hard-coded value, or through a parameter via command line.
+
+    Returns
+    -------
+    ret : Int
+        The port number for HTTP REST requests.
+
+    """
+    ret = 5700
+    
+    # Check if the port is defined as commandline arguments
+    n = len(sys.argv)
+    for i in range(1, n-1):
+        if sys.argv[i] == "--port":
+            ret = int(sys.argv[i+1])
+            break
+    
+    return ret
     
 def GetDNHWSPort():
     return 5701
@@ -163,6 +201,8 @@ def ConnectWS(loc, reg):
     retobj = json.loads(result)
     if( retobj["apity"] == "error"):
         return False, ws, None
+    
+    print(result)
         
     selfGUID = retobj["guid"]
     print("GUID: " + selfGUID)

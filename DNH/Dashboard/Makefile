@@ -19,6 +19,11 @@ VEND_WS = ../Vendored/Simple-WebSocket-Server
 VEND_HTTP = ../Vendored/Simple-Web-Server
 VEND_JS = ../Vendored/
 
+# Right now the path of OpenCV is hard coded with the 
+# assumption of being on the Raspberry pi
+OPENCVINCL		:= -I`python3 ../paths.py --ocv_inc`
+OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -lopencv_highgui
+
 VEND_ALLINCLUDES = -I$(VEND_WS) -I$(VEND_HTTP) -I$(VEND_JS)
 
 # All vendored header files, for listing dependencies
@@ -48,24 +53,27 @@ SUBDIR_MAIN = .
 SUBDIR_INSPECTOR = Inspector
 SUBDIR_DASHELEMENTS = DashElements
 SUBDIR_DIALOGS = Dialogs
+SUBDIR_STREAMMGR = StreamMgr
 
 
-SUBOBJ_MAIN = App DashboardElement DashboardElementInst DashboardGrid DashboardGridInst DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow
-SUBOBJ_INSPECTOR = InspectorEquipment InspectorParam InsWidgetBool InsWidgetButton InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
+SUBOBJ_MAIN = App CamChannel DashboardCam DashboardCamInst DashboardCamInstUI DashboardElement DashboardElementInst DashboardGrid DashboardGridInst DashboardInst DashboardTile DashDragCont DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow
+SUBOBJ_INSPECTOR = InsExWebCamera InspectorEquipment InspectorParam InsWidgetBool InsWidgetButton InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
 SUBOBJ_DASHELEMENTS = DashEleButton DashEleCheckbox DashEleFloat DashEleFloatSlider DashEleInt DashElePulldown DashEleSingleString IDashEle
 SUBOBJ_DIALOGS = DlgGridSize
+SUBOBJ_STREAMMGR = StreamCon StreamMgr StreamSession
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_INSPECTOR = $(patsubst %,$(SUBDIR_INSPECTOR)/%.o,$(SUBOBJ_INSPECTOR))
 EXPOBJS_DASHELEMENTS = $(patsubst %,$(SUBDIR_DASHELEMENTS)/%.o,$(SUBOBJ_DASHELEMENTS))
 EXPOBJS_DIALOGS = $(patsubst %,$(SUBDIR_DIALOGS)/%.o,$(SUBOBJ_DIALOGS))
+EXPOBJS_STREAMMGR = $(patsubst %,$(SUBDIR_STREAMMGR)/%.o,$(SUBOBJ_STREAMMGR))
 
 all: objs
 	@echo "COMPILING TARGET All"
 	
 	@echo "\n\n\nMaking dashboard archive"
 	@echo "--------------------------------------------------"
-	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS)
+	ar -rsc dash.a $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS) $(EXPOBJS_STREAMMGR)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -76,9 +84,9 @@ all: objs
 	
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) `wx-config --cxxflags --libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src $(VEND_ALLINCLUDES)
+	$(CC) $(CFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src -lGL $(OPENCVINCL) $(OPENCVLIBS) $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS)
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_INSPECTOR) $(EXPOBJS_DASHELEMENTS) $(EXPOBJS_DIALOGS) $(EXPOBJS_STREAMMGR)
 	@echo "TARGET objs"
 
 .PHONY: clean

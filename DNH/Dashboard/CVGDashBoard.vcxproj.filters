@@ -43,6 +43,15 @@
     <Filter Include="Source Files\Dialogs">
       <UniqueIdentifier>{8a098aa8-0172-424d-9675-c1c126736266}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GFXs">
+      <UniqueIdentifier>{41736aab-8805-45dd-bb70-13e66d545a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\StreamMgr">
+      <UniqueIdentifier>{2cdefa3a-f32f-4b6a-b26b-ff0f55ea0d15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\StreamMgr">
+      <UniqueIdentifier>{4ef39fb5-f82a-464b-b7b4-264c0fcc1b6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -150,6 +159,42 @@
     <ClInclude Include="Dialogs\DlgGridSize.h">
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="glext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CamChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InsExWebCamera.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="DashDragCont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardCam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardCamInst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardInst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamMgr\StreamCon.h">
+      <Filter>Header Files\StreamMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamMgr\StreamSession.h">
+      <Filter>Header Files\StreamMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamMgr\StreamMgr.h">
+      <Filter>Header Files\StreamMgr</Filter>
+    </ClInclude>
+    <ClInclude Include="DashboardCamInstUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -239,6 +284,39 @@
     <ClCompile Include="Dialogs\DlgGridSize.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="CamChannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InsExWebCamera.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="DashDragCont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardCam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardTile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardCamInst.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardInst.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamMgr\StreamCon.cpp">
+      <Filter>Source Files\StreamMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamMgr\StreamSession.cpp">
+      <Filter>Source Files\StreamMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamMgr\StreamMgr.cpp">
+      <Filter>Source Files\StreamMgr</Filter>
+    </ClCompile>
+    <ClCompile Include="DashboardCamInstUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CVGDashBoard.rc">
@@ -252,5 +330,10 @@
     <Image Include="CVGDashBoard.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GFXs\video_25x23.xpm">
+      <Filter>Header Files\GFXs</Filter>
+    </None>
   </ItemGroup>
 </Project>

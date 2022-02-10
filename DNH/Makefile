@@ -7,6 +7,8 @@
 CC=g++
 CFLAGS=-Wall
 
+OPENCVLIBS := -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -lopencv_highgui
+
 ##################################################
 #
 #		COMPILE RULES
@@ -17,7 +19,7 @@ all : hub dash
 
 hub : data.a app.a
 	@echo "COMPILING TARGET hub"
-	echo "Building DNH application"
+	@echo "Building DNH application"
 	@echo "--------------------------------------------------"
 	$(CC) $(CFLAGS) app.a data.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -Wall -o DNH
 	echo "Finished build command."
@@ -27,8 +29,7 @@ dash : data.a dash.a
 	@echo "COMPILING TARGET dash"
 	@echo "Building Dashboard application"
 	@echo "--------------------------------------------------"
-	@echo $(CC) $(CFLAGS) `wx-config --cxxflags` dash.a data.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -Wall `wx-config --libs std,aui` -o DashboardApp
-	$(CC) $(CFLAGS) `wx-config --cxxflags` dash.a data.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -Wall `wx-config --libs std,aui` -o DashboardApp
+	$(CC) $(CFLAGS) `wx-config --cxxflags` dash.a data.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -Wall `wx-config --libs std,aui --gl-libs` $(OPENCVLIBS) -lGL -o DashboardApp
 	@echo "Finished build command."
 	
 app.a : 

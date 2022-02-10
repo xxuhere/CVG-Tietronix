@@ -15,9 +15,8 @@ DashboardElementInst::DashboardElementInst(
 	DashboardGridInst* instOwner, 
 	CVGBridge* bridge, 
 	DashboardElement * ele)
+	: DashboardInst(instOwner, bridge, ele)
 {
-	this->instOwner = instOwner;
-	this->bridge = bridge;
 	this->refEle = ele;
 }
 
@@ -39,14 +38,14 @@ bool DashboardElementInst::LayoutUIImpl()
 	// position when manipulating children is offset by
 	// the scroll amount - so we'll need to compensate.
 	wxPoint offset;
-	wxScrolledWindow * scr = dynamic_cast<wxScrolledWindow*>(this->instOwner->GridWindow());
+	wxScrolledWindow * scr = dynamic_cast<wxScrolledWindow*>(this->GridInst()->GridWindow());
 	if(scr != nullptr)
 		offset = scr->GetViewStart();
 
 	this->uiImpl->Layout(
 		this->refEle->UIPos() - offset,
 		this->refEle->UISize(),
-		this->instOwner->GridCellSize());
+		this->GridInst()->GridCellSize());
 
 	return true;
 }
@@ -79,7 +78,7 @@ bool DashboardElementInst::SwitchUIDefault()
 
 bool DashboardElementInst::SwitchUIImplementation(const std::string& implName)
 {
-	wxWindow * canvasWin = this->instOwner->GridWindow();
+	wxWindow * canvasWin = this->GridCanvas();
 
 	if(implName == DASHELENAME_DEFBOOL)
 	{
@@ -131,8 +130,8 @@ bool DashboardElementInst::DestroyUIImpl()
 
 	this->uiImpl->DestroyWindow();
 	this->uiImpl = nullptr;
-	this->instOwner = nullptr;
-	return true;
+	
+	return DashboardInst::DestroyUIImpl();
 }
 
 void DashboardElementInst::DrawImplPreview(wxPaintDC& dc, const wxPoint& offset)

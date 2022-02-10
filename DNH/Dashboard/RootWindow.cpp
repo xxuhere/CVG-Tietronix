@@ -12,6 +12,7 @@
 #include "PaneBusLog.h"
 #include "PaneInspector.h"
 #include "PaneDashboard.h"
+#include <exception>
 
 
 #include "defines.h"
@@ -45,6 +46,36 @@ wxBEGIN_EVENT_TABLE(RootWindow, wxFrame)
     wx__DECLARE_EVT1(cvgWSEVENT, IDs::ConChange_OnMessage,  wxCommandEventHandler(RootWindow::OnEvent_ConChange))
 
 wxEND_EVENT_TABLE()
+
+// Specialized exception type for loading dashboard files.
+class FileLoadException : public std::exception
+{
+    std::string _what;
+public:
+    FileLoadException(const std::string& w)
+        : _what(w)
+    {}
+
+    const char * what() const noexcept override
+    {
+        return this->_what.c_str();
+    }
+};
+
+// Specialized exception type for saving dashboard files.
+class FileSaveException : public std::exception
+{
+    std::string _what;
+public:
+    FileSaveException(const std::string& w)
+        : _what(w)
+    {}
+
+    const char * what() const noexcept override
+    {
+        return this->_what.c_str();
+    }
+};
 
 RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& size)
     :   wxFrame(NULL, wxID_ANY, title, pos, size)
@@ -388,7 +419,7 @@ CVG::BaseEqSPtr RootWindow::ProcessEquipmentCreationJSON(const json& jsEq)
         return nullptr;
 
     // Extra client data
-    json jsClientData;
+    json jsClientData = json::object();
     if(outParams != nullptr)
         CVG::Equipment::ExtractClientData(jsClientData, jsEq);
 
@@ -521,6 +552,8 @@ void RootWindow::_ResetNetworkingData()
 
 void RootWindow::MatchUIStateToConnection(UIConState cs)
 {
+    this->lastState = cs;
+
     switch(cs)
     {
     case UIConState::Connected:
@@ -566,40 +599,40 @@ void RootWindow::BroadcastDashDoc_Deleted(DashboardGrid * grid)
         pd->OnDashDoc_Del(grid);
 }
 
-void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_ReposElement(grid, ele);
+        pd->OnDashDoc_ReposElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleResize(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleResize(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_ResizeElement(grid, ele);
+        pd->OnDashDoc_ResizeElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_MovedElement(grid, ele);
+        pd->OnDashDoc_MovedElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_NewElement(grid, ele);
+        pd->OnDashDoc_NewElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_RemElement(grid, ele);
+        pd->OnDashDoc_RemElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardElement* ele)
+void RootWindow::BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardTile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
-        pd->OnDashDoc_RelabelElement(grid, ele);
+        pd->OnDashDoc_RelabelElement(grid, tile);
 }
 
 void RootWindow::BroadcastDashDoc_Renamed(DashboardGrid* grid)
@@ -648,21 +681,22 @@ PaneDashboard* FindDashboardDirectlyUnderMouse(const std::vector<PaneDashboard*>
     return draggedOver;
 }
 
-void RootWindow::Param_OnDragStart(const std::string& eq, CVG::ParamSPtr p)
+void RootWindow::Param_OnDragStart(const std::string& eq, DashDragCont dc)
 {
     // Sanity reset - shouldn't actually be changed yet unless there was an
     // issue clearing it out on a previous drag.
     assert(this->draggedDashboard == nullptr);
-
-    Param_OnDragMotion(eq, p);
+    this->globalInspectorDrag = dc;
+    Param_OnDragMotion(eq, dc);
 }
 
-void RootWindow::Param_OnDragEnd(const std::string& eq, CVG::ParamSPtr p)
+void RootWindow::Param_OnDragEnd(const std::string& eq, DashDragCont dc)
 {
     if(this->draggedDashboard != nullptr)
-        this->draggedDashboard->OnEndParamDrag(eq, p);
+        this->draggedDashboard->OnEndParamDrag(eq, dc);
     
     this->draggedDashboard = nullptr;
+    this->globalInspectorDrag.Reset();
 }
 
 void RootWindow::Param_OnDragCancel()
@@ -671,12 +705,10 @@ void RootWindow::Param_OnDragCancel()
         this->draggedDashboard->OnCancelParamDrag();
     
     this->draggedDashboard = nullptr;
-    // !TODO: Reimplement
-    // this->dashboard->Refresh();
-    // this->dashboard->OnCancelParamDrag();
+    this->globalInspectorDrag.Reset();
 }
 
-void RootWindow::Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p)
+void RootWindow::Param_OnDragMotion(const std::string& eq, DashDragCont dc)
 {
     PaneDashboard* draggedOver = FindDashboardDirectlyUnderMouse(this->gridPanes);
     
@@ -684,7 +716,7 @@ void RootWindow::Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p)
     {
         // If we're dragging over what we were previously dragging.
         //
-        this->draggedDashboard->OnParamDrag(eq, p);
+        this->draggedDashboard->OnParamDrag(eq, dc);
         return;
     }
     else if(draggedOver == nullptr)
@@ -705,7 +737,7 @@ void RootWindow::Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p)
     // There was a DashboardPane under the mouse when there previously
     // was none.
     this->draggedDashboard = draggedOver;
-    this->draggedDashboard->OnStartParamDrag(eq, p);
+    this->draggedDashboard->OnStartParamDrag(eq, dc);
 }
 
 void RootWindow::OnEvent_ConChange(wxCommandEvent& event)
@@ -832,7 +864,21 @@ void RootWindow::OnButton_Connection(wxCommandEvent& event)
             this->wsCon->send_close(0, "User requested disconnect.");
 
         this->wsClient->stop();
-        this->MatchUIStateToConnection(UIConState::Transitory);
+
+        if(this->lastState == UIConState::Transitory)
+        { 
+            // We'll stop and wait for a disconnect notification. If we 
+            // fail to receive that notification and the user presses the
+            // Connect button again we'll do a hard-connect and bypass
+            // the notification channels.
+            this->lastState = UIConState::Disconnected;
+            this->wsCon = nullptr;
+        }
+        else
+        {
+            // Normal handling
+            this->MatchUIStateToConnection(UIConState::Transitory);
+        }
     }
     else
     {
@@ -1063,6 +1109,8 @@ json RootWindow::DocumentAsJSON()
     for(DashboardGrid* dg : this->grids)
     {
         json jsCurDash;
+        // Save if it's the starting grid, so it saves and
+        // loads showing the same grid on the main canvas.
         jsCurDash["main"]   = (dg == mainGrid);
         jsCurDash["name"]   = dg->name;
         jsCurDash["width"]  = dg->CellWidth();
@@ -1070,18 +1118,39 @@ json RootWindow::DocumentAsJSON()
         jsCurDash["cellsz"] = dg->GridCellSize();
 
         json jsEles = json::array();
-        for(DashboardElement* ele: *dg)
+        for(DashboardTile* tile: *dg)
         {
             json jse;
-            jse["posx"]     = ele->CellPos().x;
-            jse["posy"]     = ele->CellPos().y;
-            jse["dimx"]     = ele->CellSize().x;
-            jse["dimy"]     = ele->CellSize().y;
-            jse["param"]    = ele->ParamID();
-            jse["guid"]     = ele->EqGUID();
-            jse["uiimpl"]   = ele->GetUIImplName();
-            jse["label"]    = ele->Label();
-            jse["type"]     = CVG::ConvertToString(ele->Param()->Type());
+            jse["posx"]     = tile->CellPos().x;
+            jse["posy"]     = tile->CellPos().y;
+            jse["dimx"]     = tile->CellSize().x;
+            jse["dimy"]     = tile->CellSize().y;
+            jse["guid"]     = tile->EqGUID();
+            jse["label"]    = tile->Label();
+
+            if(tile->GetType() == DashboardTile::Type::Param)
+            { 
+                jse["tile"]     = "param";
+                DashboardElement * ele = (DashboardElement*)tile;
+
+                jse["param"]    = ele->ParamID();
+                jse["uiimpl"]   = ele->GetUIImplName();
+                jse["type"]     = CVG::ConvertToString(ele->Param()->Type());
+            }
+            else if(tile->GetType() == DashboardTile::Type::Cam)
+            {
+                jse["tile"]     = "cam";
+                DashboardCam * cam = (DashboardCam*)tile;
+                
+                jse["scheme"]   = cam->Scheme();
+                jse["endpoint"] = cam->Endpoint();
+                jse["port"]     = cam->Port();
+            }
+            else
+            {
+                throw FileSaveException("Saving unhandled tile type");
+            }
+
 
             jsEles.push_back(jse);
         }
@@ -1103,14 +1172,14 @@ json RootWindow::DocumentAsJSON()
     json jsEquips;
     for(DashboardGrid* dg : this->grids)
     {
-        for(DashboardElement * ele : *dg)
+        for(DashboardTile * tile : *dg)
         {
-            std::string guid = ele->EqGUID();
+            std::string guid = tile->EqGUID();
             auto it = guidsAlreadySeen.find(guid);
             if(it != guidsAlreadySeen.end())
                 continue;
 
-            jsEquips[guid] = ele->EqPurpose();
+            jsEquips[guid] = tile->EqPurpose();
         }
     }
     doc["equipments"] = jsEquips;
@@ -1217,55 +1286,113 @@ bool RootWindow::LoadDocument(const json& js, bool clearFirst)
             int posy            = jse["posy"];
             int dimx            = jse["dimx"];
             int dimy            = jse["dimy"];
-            std::string paramId = jse["param"];
             std::string guid    = jse["guid"];
-            std::string uiImpl  = jse["uiimpl"];
             std::string label   = jse["label"];
-            std::string strTy   = jse["type"];
-            CVG::DataType ty    = CVG::ConvertToDataType(strTy);
 
-            if(ty == CVG::DataType::Unknown)
-                continue;
-            
-            // Create a placeholder param of the correct type. It will be 
-            // replaced (hopefully) with an element of the correct type 
-            // when refreshed later.
-            CVG::ParamSPtr ptr;
-            switch(ty)
+
+            // Old formats didn't have camera information. If the tile
+            // isn't specified, assume it's an old format and default to
+            // a param tile.
+            std::string tile = "param";
+            if(jse.contains("tile"))
+                tile = jse["tile"];
+
+            if(tile == "param")
             {
-            case CVG::DataType::Bool:
-                ptr = CVG::ParamSPtr(new CVG::ParamBool(paramId, label, "", "", false, boost::none, boost::none));
-                break;
-            case CVG::DataType::Enum:
-                ptr = CVG::ParamSPtr(new CVG::ParamEnum(paramId, label, "", "", "Unknown", boost::none, boost::none, std::vector<std::string>{"Unknown"}));
-                break;
-            case CVG::DataType::Float:
-                ptr = CVG::ParamSPtr(new CVG::ParamFloat(paramId, label, "", "", 0.0, boost::none, boost::none, boost::none, boost::none));
-                break;
-            case CVG::DataType::Int:
-                ptr = CVG::ParamSPtr(new CVG::ParamInt(paramId, label, "", "", 0, boost::none, boost::none, boost::none, boost::none));
-                break;
-            case CVG::DataType::String:
-                ptr = CVG::ParamSPtr(new CVG::ParamString(paramId, label, "", "", "", boost::none, boost::none));
-                break;
+                std::string paramId = jse["param"];
+                std::string uiImpl  = jse["uiimpl"];
+                std::string strTy   = jse["type"];
+                CVG::DataType ty    = CVG::ConvertToDataType(strTy);
 
-            case CVG::DataType::Event:
-                ptr = CVG::ParamSPtr(new CVG::ParamEvent(paramId, label, "", "", false, false));
-                break;
+                if(ty == CVG::DataType::Unknown)
+                    continue;
 
-            default:
-                assert(!"Unhandled type in document load.");
+                // Create a placeholder param of the correct type. It will be 
+                // replaced (hopefully) with an element of the correct type 
+                // when refreshed later.
+                CVG::ParamSPtr ptr;
+                switch(ty)
+                {
+                case CVG::DataType::Bool:
+                    ptr = CVG::ParamSPtr(new CVG::ParamBool(paramId, label, "", "", false, boost::none, boost::none));
+                    break;
+                case CVG::DataType::Enum:
+                    ptr = CVG::ParamSPtr(new CVG::ParamEnum(paramId, label, "", "", "Unknown", boost::none, boost::none, std::vector<std::string>{"Unknown"}));
+                    break;
+                case CVG::DataType::Float:
+                    ptr = CVG::ParamSPtr(new CVG::ParamFloat(paramId, label, "", "", 0.0, boost::none, boost::none, boost::none, boost::none));
+                    break;
+                case CVG::DataType::Int:
+                    ptr = CVG::ParamSPtr(new CVG::ParamInt(paramId, label, "", "", 0, boost::none, boost::none, boost::none, boost::none));
+                    break;
+                case CVG::DataType::String:
+                    ptr = CVG::ParamSPtr(new CVG::ParamString(paramId, label, "", "", "", boost::none, boost::none));
+                    break;
+
+                case CVG::DataType::Event:
+                    ptr = CVG::ParamSPtr(new CVG::ParamEvent(paramId, label, "", "", false, false));
+                    break;
+
+                default:
+                    assert(!"Unhandled type in document load.");
+                }
+
+                grid->AddDashboardElement(
+                    guid, 
+                    mapLoadedGuidToPurpose[guid], 
+                    ptr,
+                    posx,
+                    posy,
+                    uiImpl,
+                    dimx,
+                    dimy);
             }
+            else if(tile == "cam")
+            {
+                std::string scheme      = jse["scheme"];
+                std::string endpoint    = jse["endpoint"];
 
-            grid->AddDashboardElement(
-                guid, 
-                mapLoadedGuidToPurpose[guid], 
-                ptr,
-                posx,
-                posy,
-                uiImpl,
-                dimx,
-                dimy);
+                int port = 8555;
+                if (jse.contains("port"))
+                {
+                    if(jse["port"].is_string())
+                    { 
+                        try
+                        { 
+                            
+                            std::string strport = jse["port"];
+                            port = std::stoi(strport);
+                        }
+                        catch(std::exception& ex)
+                        {
+                            throw FileLoadException("Invalid camera port. Make sure it is specified and a valid number.");
+                        }
+                    }
+                    else if(jse["port"].is_number())
+                    {
+                        port = jse["port"];
+                    }
+                }
+
+                CamChannel camChan;
+                camChan.endpoint    = endpoint;
+                camChan.label       = label;
+                camChan.port        = port;
+                camChan.proto       = scheme;
+
+                grid->AddDashboardCam(
+                    guid, 
+                    mapLoadedGuidToPurpose[guid],
+                    posx,
+                    posy,
+                    camChan,
+                    dimx,
+                    dimy);
+            }
+            else
+            {
+                throw FileLoadException("Loading unhandled tile type");
+            }
         }
 
         if(jsd.contains("main") && (bool)jsd["main"] == true)

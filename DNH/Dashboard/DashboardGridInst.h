@@ -5,6 +5,8 @@
 class wxWindow;
 class CVGBridge;
 class DashboardElementInst;
+class DashboardCamInst;
+class DashboardInst;
 
 class DashboardGridInst
 {
@@ -18,6 +20,33 @@ protected:
 	CVGBridge * bridge;
 
 	std::map<DashboardElement*, DashboardElementInst*> instMapping;
+	std::map<DashboardCam*, DashboardCamInst*> camMapping;
+
+public:
+	class iterator
+	{
+	private:
+		std::map<DashboardElement*, DashboardElementInst*>* pInstMap;
+		std::map<DashboardElement*, DashboardElementInst*>::iterator itInstMap;
+
+		std::map<DashboardCam*, DashboardCamInst*>* pCamMap;
+		std::map<DashboardCam*, DashboardCamInst*>::iterator itCamMap;
+
+	public:
+		iterator(
+			std::map<DashboardElement*, DashboardElementInst*>* pInstMap,
+			std::map<DashboardElement*, DashboardElementInst*>::iterator itInstMap,
+			std::map<DashboardCam*, DashboardCamInst*>* pCamMap,
+			std::map<DashboardCam*, DashboardCamInst*>::iterator itCamMap);
+
+		iterator(const iterator& it);
+		~iterator();
+		iterator& operator=(const iterator& it);
+		iterator* operator++();
+		std::pair<DashboardTile*, DashboardInst*> operator*() const;
+		bool operator == (const iterator& it) const;
+		bool operator != (const iterator& it) const;
+	};
 
 public:
 	DashboardGridInst(
@@ -43,16 +72,16 @@ public:
 	{ return this->grid->GridCellSize(); }
 
 	// Allow ranged-based for loops
-	inline auto begin()
-	{ return this->instMapping.begin();}
+	iterator begin();
 
 	// Allow ranged-based for loops
-	inline auto end()
-	{ return this->instMapping.end();}
+	iterator end();
 
 	void MatchEleInstLayouts();
 
 	bool MatchEleInstLayout(DashboardElement* ele);
+	bool MatchEleInstLayout(DashboardCam* cam);
+	bool MatchEleInstLayout(DashboardInst* tileInst);
 
 	DashboardElementInst* AddDashboardElement(
 		int cellX, 
@@ -63,15 +92,24 @@ public:
 		CVG::ParamSPtr param,
 		const std::string& uiImpl = "");
 
+	DashboardCam* AddDashboardCam(
+		int cellX, 
+		int cellY, 
+		int cellWidth, 
+		int cellHeight, 
+		const std::string& eqGUID, 
+		CamChannel camChan);
+
 	bool HasImpl(DashboardElement * ele);
 
 	DashboardElementInst* Implement(DashboardElement* ele);
+	DashboardCamInst* Implement(DashboardCam* cam);
 
 	bool UpdateParamValue(const std::string& eqGuid, const std::string& paramId);
 
-	bool RemoveElement(DashboardElement * ele, bool deleteElement);
+	bool RemoveTile(DashboardTile * tile, bool deleteTile);
 
-	bool MoveCell(DashboardElement* ele, const wxPoint& pos, const wxSize& size);
+	bool MoveCell(DashboardTile* tile, const wxPoint& pos, const wxSize& size);
 
 	/// <summary>
 	/// For all widgets in the grid, recreate the connections to the UI (or just

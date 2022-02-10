@@ -8,10 +8,14 @@ DashboardGrid::DashGroup::DashGroup(const std::string& eqGUID, const std::string
 	this->eqPurpose = eqPurpose;
 }
 
-DashboardElement* DashboardGrid::DashGroup::Find(const std::string& paramId)
+DashboardTile* DashboardGrid::DashGroup::Find(const std::string& paramId)
 {
-	for (DashboardElement* ele : this->group)
+	for (DashboardTile* tile : this->tiles)
 	{
+		if(tile->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement * ele = (DashboardElement*)tile;
 		if (ele->ParamID() == paramId)
 			return ele;
 	}
@@ -28,13 +32,13 @@ DashboardGrid::DashboardGrid(DashboardGrid* deepCopyTarg)
 {
 	this->gridCellSize = deepCopyTarg->gridCellSize;
 
-	std::map<DashboardElement*, DashboardElement*> origToClone;
+	std::map<DashboardTile*, DashboardTile*> origToClone;
 
-	for(DashboardElement* ele : deepCopyTarg->elements)
+	for(DashboardTile* tile : deepCopyTarg->tiles)
 	{
-		DashboardElement * cloneEle = new DashboardElement(*ele);
-		this->elements.push_back(cloneEle);
-		origToClone[ele] = cloneEle;
+		DashboardTile * clone = tile->Clone();
+		this->tiles.push_back(clone);
+		origToClone[tile] = clone;
 	}
 
 	for(auto it : deepCopyTarg->equipmentGrouping)
@@ -47,7 +51,7 @@ DashboardGrid::DashboardGrid(DashboardGrid* deepCopyTarg)
 		// copy in it - thus creating a deep copy of every group.
 		const int ct = origGroup->Size();
 		for(int i = 0; i < ct; ++i)
-			newDash->Add(origToClone[origGroup->GetElement(i)]);
+			newDash->Add(origToClone[origGroup->GetTile(i)]);
 	}
 }
 
@@ -60,61 +64,70 @@ DashboardGrid::~DashboardGrid()
 	}
 	this->equipmentGrouping.clear();
 
-	for(DashboardElement* ele : this->elements)
-		delete ele;
+	for(DashboardTile* tile : this->tiles)
+		delete tile;
 }
 
 
 bool DashboardGrid::DashGroup::Forget(const std::string& paramId)
 {
 	for (
-		auto it = this->group.begin();
-		it != this->group.end();
+		auto it = this->tiles.begin();
+		it != this->tiles.end();
 		++it)
 	{
-		if ((*it)->ParamID() == paramId)
+		if((*it)->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement * ele = (DashboardElement*)(*it);
+		if (ele->ParamID() == paramId)
 		{
-			this->group.erase(it);
+			this->tiles.erase(it);
 			return true;
 		}
 	}
 	return false;
 }
 
-bool DashboardGrid::DashGroup::Add(DashboardElement* ele)
+bool DashboardGrid::DashGroup::Add(DashboardTile* tile)
 {
-	this->group.push_back(ele);
+	this->tiles.push_back(tile);
 	return true;
 }
 
 bool DashboardGrid::DashGroup::Destroy(const std::string& paramId)
 {
 	for (
-		auto it = this->group.begin();
-		it != this->group.end();
+		auto it = this->tiles.begin();
+		it != this->tiles.end();
 		++it)
 	{
-		if ((*it)->ParamID() == paramId)
+		if((*it)->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement * ele = (DashboardElement*)*it;
+
+		if (ele->ParamID() == paramId)
 		{
-			this->group.erase(it);
+			this->tiles.erase(it);
 			return true;
 		}
 	}
 	return false;
 }
 
-bool DashboardGrid::DashGroup::Destroy(DashboardElement* ele)
+bool DashboardGrid::DashGroup::Destroy(DashboardTile* tile)
 {
 	for (
-		auto it = this->group.begin();
-		it != this->group.end();
+		auto it = this->tiles.begin();
+		it != this->tiles.end();
 		++it)
 	{
-		if ((*it) == ele)
+		if ((*it) == tile)
 		{
 			// TODO: Refactor
 			//(*it)->DestroyUIImpl();
-			this->group.erase(it);
+			this->tiles.erase(it);
 			return true;
 		}
 	}
@@ -144,7 +157,7 @@ void DashboardGrid::Clear()
 	//for (DashboardElement* de : elements)
 	//	de->DestroyUIImpl();
 
-	this->elements.clear();
+	this->tiles.clear();
 
 	// Clear the organized directory of all items.
 	for (auto it : this->equipmentGrouping)
@@ -174,30 +187,33 @@ bool DashboardGrid::Remove(
 	// If it was removed in the equipmentGrouping, it should also
 	// be removable in the elements.
 	for (
-		auto it = this->elements.begin(); 
-		it != this->elements.end(); 
+		auto it = this->tiles.begin(); 
+		it != this->tiles.end(); 
 		++it)
 	{
-		
-		if ((*it)->EqGUID() == guid && (*it)->ParamID() == paramID)
+		if((*it)->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement * ele = (DashboardElement*)(*it);
+		if ((*it)->EqGUID() == guid && ele->ParamID() == paramID)
 		{
 			// Just erase, it's already been destroyed above.
-			this->elements.erase(it);
+			this->tiles.erase(it);
 			return true;
 		}
 	}
 	return false;
 }
 
-bool DashboardGrid::Remove(DashboardElement* de)
+bool DashboardGrid::Remove(DashboardTile* tile)
 {
-	const std::string guid = de->EqGUID();
+	const std::string guid = tile->EqGUID();
 
 	auto itEqFind = this->equipmentGrouping.find(guid);
 	if (itEqFind == this->equipmentGrouping.end())
 		return false;
 
-	if (!itEqFind->second->Destroy(de))
+	if (!itEqFind->second->Destroy(tile))
 		return false;
 
 	// If we removed the DashGroup's last item, there's no 
@@ -208,15 +224,15 @@ bool DashboardGrid::Remove(DashboardElement* de)
 	// If it was removed in the equipmentGrouping, it should also
 	// be removable in the elements.
 	for (
-		auto it = this->elements.begin(); 
-		it != this->elements.end(); 
+		auto it = this->tiles.begin(); 
+		it != this->tiles.end(); 
 		++it)
 	{
 
-		if ((*it)->EqGUID() == guid && (*it) == de)
+		if ((*it)->EqGUID() == guid && (*it) == tile)
 		{
 			// Just erase, it's already been destroyed above.
-			this->elements.erase(it);
+			this->tiles.erase(it);
 			return true;
 		}
 	}
@@ -236,31 +252,31 @@ bool DashboardGrid::Contains(const std::string& guid, const std::string& paramID
 	return it->second->Contains(paramID);
 }
 
-bool DashboardGrid::ContainsDashbordElement(DashboardElement* de) const
+bool DashboardGrid::ContainsDashboardElement(DashboardElement* de) const
 {
 	return this->Contains(de->EqGUID(), de->ParamID());
 }
 
 bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz)
 {
-	std::set<DashboardElement*> ignoreFiller;
+	std::set<DashboardTile*> ignoreFiller;
 	return this->AreCellsFree(gridPt, gridSz, ignoreFiller);
 }
 
-bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardElement* ignore)
+bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardTile* ignore)
 {
-	std::set<DashboardElement*> ignores;
+	std::set<DashboardTile*> ignores;
 	ignores.insert(ignore);
 	return this->AreCellsFree(gridPt, gridSz, ignores);
 }
 
-bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardElement*> ignores)
+bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardTile*> ignores)
 {
 	const wxPoint end = gridPt + gridSz;
 	const wxPoint & start = gridPt; // For consistent naming
 
 	// Do a bound check on each existing element
-	for(DashboardElement* ele : this->elements)
+	for(DashboardTile* ele : this->tiles)
 	{
 		if(ignores.find(ele) == ignores.end())
 			continue;
@@ -334,7 +350,7 @@ DashboardElement* DashboardGrid::AddDashboardElement(
 		return nullptr;
 
 	// Add to the listing of widgets
-	this->elements.push_back(ele);
+	this->tiles.push_back(ele);
 
 	// Add to the listing of widgets grouped by equipment GUID
 	DashGroup * grouping;
@@ -357,6 +373,55 @@ DashboardElement* DashboardGrid::AddDashboardElement(
 	return ele;
 }
 
+DashboardCam* DashboardGrid::AddDashboardCam(
+	const std::string& eqGuid,
+	const std::string& eqPurpose,
+	int gridX,
+	int gridY,
+	CamChannel camChan,
+	int gridWidth, 
+	int gridHeight,
+	bool allowOverlap)
+{
+	// This function does not support creation on overlapping
+	if(!allowOverlap && 
+		!this->AreCellsFree(
+			wxPoint(gridX, gridY), 
+			wxSize(gridWidth, gridHeight)))
+	{ 
+		return nullptr;
+	}
+
+	DashboardCam* cam = 
+		new DashboardCam(
+			this, 
+			eqGuid,
+			camChan);
+
+	// Add to the listing of widgets
+	this->tiles.push_back(cam);
+
+	// Add to the listing of widgets grouped by equipment GUID
+	DashGroup * grouping;
+	auto it = this->equipmentGrouping.find(eqGuid);
+	if(it == this->equipmentGrouping.end())
+	{
+		grouping = new DashGroup(eqGuid, eqPurpose);
+		this->equipmentGrouping[eqGuid] = grouping;
+	}
+	else
+		grouping = it->second;
+
+	grouping->Add(cam);
+
+	// Layout
+	cam->SetDimensions(
+		wxPoint(gridX, gridY), 
+		wxSize(gridWidth, gridHeight));
+
+	return cam;
+}
+
 wxPoint DashboardGrid::ConvertPixelsToGridCell(const wxPoint& pixel)
 {
 	return 
@@ -365,31 +430,31 @@ wxPoint DashboardGrid::ConvertPixelsToGridCell(const wxPoint& pixel)
 			pixel.y / this->gridCellSize);
 }
 
-DashboardElement* DashboardGrid::GetDashboardAtCell(const wxPoint& cell)
+DashboardTile* DashboardGrid::GetTileAtCell(const wxPoint& cell)
 {
-	for(DashboardElement* ele : this->elements)
+	for(DashboardTile* tile : this->tiles)
 	{
-		if(ele->CellInElement(cell) == true)
-			return ele;
+		if(tile->CellInTile(cell) == true)
+			return tile;
 	}
 	return nullptr;
 }
 
-DashboardElement* DashboardGrid::GetDashboardAtPixel(const wxPoint& pixel)
+DashboardTile* DashboardGrid::GetTileAtPixel(const wxPoint& pixel)
 {
 	wxPoint cell = ConvertPixelsToGridCell(pixel);
-	return GetDashboardAtCell(cell);
+	return GetTileAtCell(cell);
 }
 
 bool DashboardGrid::MoveCell(
-	DashboardElement* toMove, 
+	DashboardTile* toMove, 
 	const wxPoint& newCellPos, 
 	const wxSize& newCellSize, 
 	bool collisionCheck)
 {
 #if _DEBUG
-	auto itFind = std::find(this->elements.begin(), this->elements.end(), toMove);
-	assert(itFind != this->elements.end());
+	auto itFind = std::find(this->tiles.begin(), this->tiles.end(), toMove);
+	assert(itFind != this->tiles.end());
 #endif
 
 	assert(newCellSize.x >= 1 && newCellSize.y >= 1);
@@ -440,7 +505,11 @@ DashboardGrid::RemapRet DashboardGrid::RemapInstance(const std::string& guidOld,
 	// And also update the Param references
 	for(int i = 0; i < dashGroupRemap->Size(); ++i)
 	{
-		DashboardElement* ele = dashGroupRemap->GetElement(i);
+		DashboardTile* tile = dashGroupRemap->GetTile(i);
+		if(tile->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement* ele = (DashboardElement*)tile;
 		ele->_Reset(guidNew, newPurpose, eq->GetParam(ele->ParamID()));
 	}
 
@@ -449,13 +518,18 @@ DashboardGrid::RemapRet DashboardGrid::RemapInstance(const std::string& guidOld,
 
 void DashboardGrid::RefreshAllParamInstances(CVGBridge* bridge)
 {
-	for(DashboardElement* de : this->elements)
+	for(DashboardTile* tile : this->tiles)
 	{
-		CVG::BaseEqSPtr eq = bridge->CVGB_GetEquipment(de->EqGUID());
+		if(tile->GetType() != DashboardTile::Type::Param)
+			continue;
+
+		DashboardElement* ele = (DashboardElement*)tile;
+
+		CVG::BaseEqSPtr eq = bridge->CVGB_GetEquipment(tile->EqGUID());
 		if(eq == nullptr)
 			continue;
 
-		de->_Reset(eq->GUID(), eq->Purpose(), eq->GetParam(de->ParamID()));
+		ele->_Reset(eq->GUID(), eq->Purpose(), eq->GetParam(ele->ParamID()));
 	}
 }
 

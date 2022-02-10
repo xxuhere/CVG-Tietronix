@@ -66,6 +66,9 @@ namespace CVG
 		std::string Purpose() const 
 		{ return this->purpose; }
 
+		std::string Hostname() const
+		{ return this->hostname; }
+
 		inline std::string TypeStr() const
 		{ return ConvertToString(this->equipmentType); };
 
@@ -74,6 +77,9 @@ namespace CVG
 
 		inline std::string Name()const
 		{ return this->name; }
+
+		inline const json ClientData() const
+		{ return this->clientData; }
 
 		/// <summary>
 		/// Parameter iterator to allow iteration and use of 

@@ -163,6 +163,35 @@ namespace CVG
 			return false;
 
 		this->socket = s;
+
+		// If no specified hostname, one is defaulted through
+		// available into in WSConSPtr.
+		std::string conEndpoint = s->remote_endpoint().address().to_string();
+		std::cout << "conEndpoint " << conEndpoint << std::endl;
+
+		// The endpoint address will often have extra formatting that 
+		// we're better off without.
+		// For example, an internal IPv4 address of 127.0.0.1 will come
+		// back as ::ffff:127.0.0.1
+		if(conEndpoint.find("::ffff:", 0) == 0)
+		{
+			std::cout << "shortening to " << conEndpoint << std::endl;
+			conEndpoint = conEndpoint.substr(7);
+		}
+
+		// Include any other loopback addresses. If they're set to loopback,
+		// it doesn't do any good to broadcast that out to other people to
+		// reference (because it won't direct to the machine, just back to
+		// itself).
+		if(conEndpoint == "127.0.0.1")
+			conEndpoint = boost::asio::ip::host_name();
+
+
+		if(this->hostname.empty())
+			this->hostname = conEndpoint;
+
+		std::cout << "Setting hostname to " << this->hostname << std::endl;
+
 		return true;
 	}
 }

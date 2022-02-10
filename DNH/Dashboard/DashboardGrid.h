@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include "DashboardElement.h"
+#include "DashboardCam.h"
 #include "CVGBridge.h"
 
 class DashboardGridInst;
@@ -39,13 +40,7 @@ private:
 
 		std::string eqPurpose;
 
-		/// <summary>
-		/// The group of UI parameter implementations
-		/// in the DashboardGrid for the Group's particular
-		/// equipment.
-		/// </summary>
-		std::vector<DashboardElement*> group;
-
+		std::vector<DashboardTile*> tiles;
 	public:
 		DashGroup(const std::string& eqGUID, const std::string& eqPurpose);
 
@@ -56,19 +51,19 @@ private:
 		{ return this->eqPurpose; }
 
 		inline int Size() const
-		{ return this->group.size();}
+		{ return this->tiles.size();}
 
-		inline DashboardElement * GetElement(int idx)
-		{ return this->group[idx]; }
+		inline DashboardTile * GetTile(int idx)
+		{ return this->tiles[idx]; }
 
-		DashboardElement* Find(const std::string& paramId);
+		DashboardTile* Find(const std::string& paramId);
 
 		bool Forget(const std::string& paramId);
 
-		bool Add(DashboardElement* ele);
+		bool Add(DashboardTile* tile);
 
 		bool Destroy(const std::string& paramId);
-		bool Destroy(DashboardElement* ele);
+		bool Destroy(DashboardTile* tile);
 
 		bool Contains(const std::string& paramId);
 
@@ -81,7 +76,7 @@ private:
 	// The max grid height
 	int gridHeight = 100;
 
-	std::vector<DashboardElement *> elements;
+	std::vector<DashboardTile *> tiles;
 
 	std::map<std::string, DashGroup*> equipmentGrouping;
 
@@ -106,24 +101,24 @@ public:
 
 	// Begin and end iterator exposed to allow ranged-for loops 
 	// on the DashoardGrid object.
-	inline std::vector<DashboardElement *>::iterator begin()
+	inline std::vector<DashboardTile *>::iterator begin()
 	{
-		return this->elements.begin();
+		return this->tiles.begin();
 	}
 	//
-	inline std::vector<DashboardElement *>::iterator end()
+	inline std::vector<DashboardTile *>::iterator end()
 	{
-		return this->elements.end();
+		return this->tiles.end();
 	}
 
-	inline std::vector<DashboardElement *>::const_iterator begin() const
+	inline std::vector<DashboardTile *>::const_iterator begin() const
 	{
-		return this->elements.begin();
+		return this->tiles.begin();
 	}
 	//
-	inline std::vector<DashboardElement *>::const_iterator end() const
+	inline std::vector<DashboardTile *>::const_iterator end() const
 	{
-		return this->elements.end();
+		return this->tiles.end();
 	}
 
 	void RedoDashLayout();
@@ -131,15 +126,15 @@ public:
 	void Clear();
 
 	bool Remove(const std::string& guid, const std::string& paramID);
-	bool Remove(DashboardElement* de);
+	bool Remove(DashboardTile* tile);
 
 	bool Contains(const std::string& guid, const std::string& paramID) const;
 
-	bool ContainsDashbordElement(DashboardElement* de) const;
+	bool ContainsDashboardElement(DashboardElement* de) const;
 
 	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz);
-	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardElement* ignore);
-	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardElement*> ignores);
+	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardTile* ignore);
+	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardTile*> ignores);
 
 	bool InDocumentBounds(const wxPoint& gridPt, const wxSize& gridSz) const;
 
@@ -154,13 +149,23 @@ public:
 		int gridHeight = 1,
 		bool allowOverlap = false);
 
+	DashboardCam* AddDashboardCam(
+		const std::string& eqGuid,
+		const std::string& eqPurpose,
+		int gridX,
+		int gridY,
+		CamChannel camChan,
+		int gridWidth = 4, 
+		int gridHeight = 1,
+		bool allowOverlap = false);
+
 	wxPoint ConvertPixelsToGridCell(const wxPoint& pixel);
 
-	DashboardElement* GetDashboardAtCell(const wxPoint& cell);
+	DashboardTile* GetTileAtCell(const wxPoint& cell);
 
-	DashboardElement* GetDashboardAtPixel(const wxPoint& pixel);
+	DashboardTile* GetTileAtPixel(const wxPoint& pixel);
 
-	bool MoveCell(DashboardElement* toMove, const wxPoint& newPos, const wxSize& newSize, bool collisionCheck = true);
+	bool MoveCell(DashboardTile* toMove, const wxPoint& newPos, const wxSize& newSize, bool collisionCheck = true);
 
 	std::vector<GUIDPurposePair> GetEquipmentList() const;
 

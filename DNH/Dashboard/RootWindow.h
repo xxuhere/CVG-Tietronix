@@ -11,11 +11,12 @@
 #include <Equipment.h>
 #include "DockedCVGPane.h"
 #include "CVGBridge.h"
+#include "DashDragCont.h"
 
 class FullscreenDash;
 class PaneDashboard;
 class DashboardGrid;
-class DashboardElement;
+class DashboardTile;
 typedef SimpleWeb::SocketClient<SimpleWeb::WS> WsClient;
 
 /// <summary>
@@ -264,6 +265,8 @@ private:
     /// </summary>
     FullscreenDash * fullscreenWin;
 
+    UIConState lastState = UIConState::Disconnected;
+
 public:
     // THIS SHOULDN't BE PUBLIC! WE'RE BREAKING ENCAPSULATION
     // FOR NOW.
@@ -272,6 +275,11 @@ public:
     // Client-side synced copy of the equipments.
     /// </summary>
     std::map<std::string, CVG::BaseEqSPtr> equipmentCache;
+
+    /// <summary>
+    /// The thing being dragged from an inspector.
+    /// </summary>
+    DashDragCont globalInspectorDrag;
 
 public:
 
@@ -341,16 +349,16 @@ public:
 
     //////////////////////////////////////////////////
 
-    void BroadcastDashDoc_New(DashboardGrid * grid);
-    void BroadcastDashDoc_Deleted(DashboardGrid * grid);
-    void BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_EleResize(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardElement* ele);
-    void BroadcastDashDoc_Renamed(DashboardGrid* grid);
-    void BroadcastDashDoc_Resized(DashboardGrid* grid);
+    void BroadcastDashDoc_New(          DashboardGrid* grid);
+    void BroadcastDashDoc_Deleted(      DashboardGrid* grid);
+    void BroadcastDashDoc_EleRepos(     DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleResize(    DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleMoved(     DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleNew(       DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleRem(       DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleRelabled(  DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_Renamed(      DashboardGrid* grid);
+    void BroadcastDashDoc_Resized(      DashboardGrid* grid);
 
 
 private:
@@ -484,11 +492,12 @@ private:
     //  VIRTUAL CVGBridge FUNCTIONS
     //////////////////////////////////////////////////
 
-    /// CVGBridge implemenations for when an InspectorParam is being dragged.
-    void Param_OnDragStart(const std::string& eq, CVG::ParamSPtr p) override;
-    void Param_OnDragEnd(const std::string& eq, CVG::ParamSPtr p) override;
+    // CVGBridge implemenations for when an InspectorParam or other
+    // Inspector element is being dragged.
+    void Param_OnDragStart(const std::string& eq, DashDragCont dc) override;
+    void Param_OnDragEnd(const std::string& eq, DashDragCont dc) override;
     void Param_OnDragCancel() override;
-    void Param_OnDragMotion(const std::string& eq, CVG::ParamSPtr p) override;
+    void Param_OnDragMotion(const std::string& eq, DashDragCont dc) override;
 
     CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) override;
     bool CVGB_Submit(const std::string& eq, const std::string& param) override;

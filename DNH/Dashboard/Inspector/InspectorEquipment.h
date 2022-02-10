@@ -4,6 +4,7 @@
 #include <Equipment.h>
 
 class InspectorParam;
+class InsExtWebCamera;
 class PaneInspector;
 class CVGBridge;
 
@@ -41,6 +42,11 @@ public:
 	/// The contained ParamUIs.
 	/// </summary>
 	std::map<std::string, InspectorParam*> paramUIs;
+
+	/// <summary>
+	/// Cammera streams
+	/// </summary>
+	std::vector<InsExtWebCamera*> paramCamChans;
 
 	/// <summary>
 	/// The text showing the Equipment's label as a titlebar.

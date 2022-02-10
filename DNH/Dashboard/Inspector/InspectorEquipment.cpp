@@ -2,6 +2,7 @@
 #include "../PaneInspector.h"
 #include "../CVGBridge.h"
 #include "InspectorParam.h"
+#include "InsExWebCamera.h"
 
 BEGIN_EVENT_TABLE(InspectorEquipment, wxWindow)
 	EVT_BUTTON(CmdIDs::ExpandCompress, InspectorEquipment::OnButtonExpandCompress)
@@ -51,6 +52,24 @@ InspectorEquipment::InspectorEquipment(
 		this->paramUIs[params->GetID()] = ip;
 		this->paramSizer->Add(ip, 0, wxGROW|wxBOTTOM, 5);
 	}
+
+	std::vector<CamChannel> camChans = 
+		CamChannel::ExtractChannels(eq->ClientData(), eq->Hostname());
+
+	for(const CamChannel & cc : camChans)
+	{
+		InsExtWebCamera * iewc = 
+			new InsExtWebCamera(
+				this->paramWinContainer,
+				eq->GUID(),
+				bridge,
+				cc);
+
+		iewc->SetSize(-1, 32);
+		this->paramCamChans.push_back(iewc);
+		this->paramSizer->Add(iewc, 0, wxGROW|wxBOTTOM, 5);
+	}
+
 }
 
 void InspectorEquipment::ClearReferences()

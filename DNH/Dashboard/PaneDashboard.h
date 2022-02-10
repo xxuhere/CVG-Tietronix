@@ -215,12 +215,12 @@ private:
 	/// It is set when a DashboardElement is right clicked, and should
 	/// only be referenced in right click menu handlers.
 	/// </summary>
-	DashboardElement* rightClickedEle = nullptr;
+	DashboardTile* rightClickedTile = nullptr;
 
 	/// <summary>
 	/// The node being moved around from a mouse drag.
 	/// </summary>
-	DashboardElement* draggedReposEle = nullptr;
+	DashboardTile* draggedReposTile = nullptr;
 
 	/// <summary>
 	/// When performing a drag operation on an element, what was 
@@ -278,12 +278,13 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 
 	// Drag and drop handlers when dropping new elements from 
 	// and InspectorParam 
-	void OnStartParamDrag(const std::string& eq, CVG::ParamSPtr param);
-	void OnEndParamDrag(const std::string& eq, CVG::ParamSPtr param);
+	void OnStartParamDrag(const std::string& eq, DashDragCont dc);
+	void OnEndParamDrag(const std::string& eq, DashDragCont dc);
 	void OnCancelParamDrag();
-	void OnParamDrag(const std::string& eq, CVG::ParamSPtr param);
+	void OnParamDrag(const std::string& eq, DashDragCont dc);
 
 	bool CreateParam(int cellX, int cellY, int cellWidth, int cellHeight, const std::string& eqGUID, CVG::ParamSPtr param);
+	bool CreateCamera(int cellX, int cellY, int cellWidth, int cellHeight, const std::string& eqGUID, const CamChannel & camChan);
 
 	// Main app messages
 	void _CVG_OnMessage(const std::string & msg) override;
@@ -307,16 +308,16 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void _CVG_Session_ClearPost() override;
 
 	// Event handlers for Dashboard document modifications
-	void OnDashDoc_New(DashboardGrid* newGrid);
-	void OnDashDoc_Del(DashboardGrid* deletedGrid);
-	void OnDashDoc_NewElement(DashboardGrid* grid, DashboardElement* newEle);
-	void OnDashDoc_RemElement(DashboardGrid* grid, DashboardElement* removedEle);
-	void OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardElement* removedEle);
-	void OnDashDoc_ReposElement(DashboardGrid* grid, DashboardElement* modEle);
-	void OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardElement* modEle);
-	void OnDashDoc_MovedElement(DashboardGrid* grid, DashboardElement* movedEle);
-	void OnDashDoc_Renamed(DashboardGrid* grid);
-	void OnDashDoc_Resized(DashboardGrid* grid);
+	void OnDashDoc_New(				DashboardGrid* newGrid);
+	void OnDashDoc_Del(				DashboardGrid* deletedGrid);
+	void OnDashDoc_NewElement(		DashboardGrid* grid,		DashboardTile* newTile);
+	void OnDashDoc_RemElement(		DashboardGrid* grid,		DashboardTile* removedTile);
+	void OnDashDoc_RelabelElement(	DashboardGrid* grid,		DashboardTile* removedTile);
+	void OnDashDoc_ReposElement(	DashboardGrid* grid,		DashboardTile* modTile);
+	void OnDashDoc_ResizeElement(	DashboardGrid* grid,		DashboardTile* modTile);
+	void OnDashDoc_MovedElement(	DashboardGrid* grid,		DashboardTile* movedTile);
+	void OnDashDoc_Renamed(			DashboardGrid* grid);
+	void OnDashDoc_Resized(			DashboardGrid* grid);
 
 	// Delegated event handlers for the dashboard canvas child
 	void Canvas_OnMotion(wxMouseEvent& evt);

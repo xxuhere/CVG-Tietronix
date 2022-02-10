@@ -6,5 +6,6 @@ bool App::OnInit()
 {
     RootWindow* frame = new RootWindow("CVG Dashboard", wxPoint(50, 50), wxSize(450, 340));
     frame->Show(true);
+
     return true;
 }

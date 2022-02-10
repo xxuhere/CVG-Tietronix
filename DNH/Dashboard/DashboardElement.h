@@ -1,9 +1,10 @@
 #pragma once
 #include <string>
-#include <wx/wx.h>
+
 #include <boost/optional.hpp>
 
 #include <Params/Param.h>
+#include "DashboardTile.h"
 
 class DashboardGrid;
 class CVGBridge;
@@ -15,50 +16,15 @@ class CVGBridge;
 /// IT IS ONLY A CONTAINER. (See usage of uiImpl for more information
 /// on the actual UI implementations).
 /// </summary>
-class DashboardElement
+class DashboardElement : public DashboardTile
 {
-	friend DashboardGrid;
+	friend class DashboardGrid;
 
 protected:
 	// It may appear that there's quite a bit of redundant information
 	// being stored, as far as holding the 
 
-	/// <summary>
-	/// The equipment ID of the parameter.
-	/// </summary>
-	std::string guid;
-
 	CVG::ParamSPtr param;
-
-	/// <summary>
-	/// The position on the dashboard, in grid cell units.
-	/// </summary>
-	wxPoint gridPos;
-
-	/// <summary>
-	/// The size of the 
-	/// </summary>
-	wxSize gridSize;
-
-	/// <summary>
-	/// The position of the element on the canvas, in pixels.
-	/// </summary>
-	wxPoint cachedPos;
-
-	/// <summary>
-	/// The size of the element on the canvas, in pixels.
-	/// </summary>
-	wxSize cachedSize;
-
-	wxPoint uiPixelPos;
-
-	wxSize uiPixelSize;
-
-	/// <summary>
-	/// The cached equipment of the parameter, when connecting an existing
-	/// element to a new connection.
-	/// </summary>
-	std::string purpose;
 
 	/// <summary>
 	/// The name of the param last connected to.
@@ -66,20 +32,9 @@ protected:
 	std::string paramID;
 
 	/// <summary>
-	/// The label currently or last used. By default this will be the 
-	/// Param's label, but may be changed.
-	/// </summary>
-	std::string label;
-
-	/// <summary>
 	/// The name of the last valid uiImplementation name assigned.
 	/// </summary>
 	std::string uiImplName;
-
-	/// <summary>
-	/// Reference to grid.
-	/// </summary>
-	DashboardGrid* gridOwner = nullptr;
 
 private:
 	// Should only be called by DashboardGrid GUID replacement function.
@@ -112,26 +67,6 @@ public:
 
 	void SetLabel(const std::string& label);
 
-	inline wxPoint CellPos() const
-	{ return this->gridPos; }
-
-	inline wxSize CellSize() const
-	{ return this->gridSize; }
-
-	inline wxPoint PixelPos() const
-	{ return this->cachedPos; }
-
-	inline wxSize PixelSize() const
-	{ return this->cachedSize; }
-
-	inline wxPoint UIPos() const
-	{ return this->uiPixelPos; }
-
-	inline wxSize UISize() const
-	{ return this->uiPixelSize; }
-
-	inline wxPoint CachedSize() const;
-
 	/// <summary>
 	/// 
 	/// </summary>
@@ -141,19 +76,8 @@ public:
 	/// <returns></returns>
 	bool SwitchParam(std::string& eq, CVG::ParamSPtr param, bool resetDefault = true);
 
-	inline const std::string& EqGUID() const
-	{ return this->guid; }
-
 	inline const std::string& ParamID() const
 	{ return this->paramID; }
-
-	inline const std::string& EqPurpose() const
-	{return this->purpose; }
-
-	inline std::string Label() const
-	{ return this->label; }
-
-	bool CellInElement(const wxPoint& cell);
 
 	inline CVG::ParamSPtr Param()
 	{ return this->param; }
@@ -165,4 +89,8 @@ public:
 	{ return this->uiImplName; }
 
 	std::string DefaultLabel() const;
+
+	Type GetType() override;
+
+	DashboardTile* Clone() override;
 };

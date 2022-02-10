@@ -3,6 +3,9 @@
 
 import cv2
 
+# For code simplicity, the assumed USB webcam 
+# paths are hard coded.
+
 vcap1 = cv2.VideoCapture("/dev/video0")
 print( vcap1.getBackendName())
 

@@ -1,3 +1,4 @@
+# DESCRIPTION:
 # A script for Makefiles to use shared compilation paths that 
 # are defined in a single place. While it's preferable to use
 # more formalized things to get these types of paths (see Makefiles
@@ -11,6 +12,12 @@
 # Where <request_path> is one of strings use in the if/elseif
 # statements below.
 #
+# MAINTENENCE:
+# For now these are hard coded which can be risky because it's
+# assuming the install location of things out of the repo and
+# out of our control. If the need arises, a template file can
+# be put in the repo and developer can copy it and specify their
+# machine-specific locations.
 
 import sys
 

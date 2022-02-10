@@ -8,7 +8,7 @@ CFLAGS=-Wall
 
 # Right now the path of OpenCV is hard coded with the 
 # assumption of being on the Raspberry pi
-OPENCVINCL		:= -I`python3 ../paths.py --ocv_inc`
+OPENCVINCL		:= -I`python3 ../../paths.py --ocv_inc`
 OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -lopencv_highgui
 
 ##################################################

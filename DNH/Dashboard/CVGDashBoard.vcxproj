@@ -124,14 +124,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_LIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE=1;_CRT_NON_CONFORMING_SWPRINTFS=1;_SCL_SECURE_NO_WARNINGS=1;__WXMSW__;_UNICODE;WXBUILDING;wxUSE_BASE=0;WXUSINGDLL;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(WXWIDGETS_ROOT)\include\msvc;$(WXWIDGETS_ROOT)\include;$(OPENSSL_ROOT)\include;$(BOOST_ROOT);$(DNH_ROOT)\CVGData\Src;$(DNH_ROOT)\Vendored;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXWIDGETS_ROOT)\include\msvc;$(WXWIDGETS_ROOT)\include;$(OPENSSL_ROOT)\include;$(BOOST_ROOT);$(DNH_ROOT)\CVGData\Src;$(DNH_ROOT)\Vendored;D:\Repos\vcpkg\installed\x64-windows\include;$(OPENCVINCL_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_ROOT)\stage\lib;$(OPENSSL_ROOT)\lib;$(DNH_ROOT)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;CVGData.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_ROOT)\stage\lib;$(OPENSSL_ROOT)\lib;$(DNH_ROOT)\$(Platform)\$(Configuration);D:\Repos\vcpkg\installed\x64-windows\debug\lib;$(OPENCVLIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;CVGData.lib;opengl32.lib;opencv_highguid.lib;opencv_mld.lib;opencv_objdetectd.lib;opencv_photod.lib;opencv_stitchingd.lib;opencv_videod.lib;opencv_videoiod.lib;opencv_imgcodecsd.lib;opencv_calib3dd.lib;opencv_dnnd.lib;opencv_features2dd.lib;opencv_flannd.lib;opencv_imgprocd.lib;opencv_cored.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,13 +152,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="CamChannel.h" />
     <ClInclude Include="CVGBridge.h" />
     <ClInclude Include="CVGDashBoard.h" />
+    <ClInclude Include="DashboardCamInst.h" />
+    <ClInclude Include="DashboardCamInstUI.h" />
+    <ClInclude Include="DashboardInst.h" />
+    <ClInclude Include="DashboardTile.h" />
     <ClInclude Include="DashboardElement.h" />
+    <ClInclude Include="DashboardCam.h" />
     <ClInclude Include="DashboardElementInst.h" />
     <ClInclude Include="DashboardGrid.h" />
     <ClInclude Include="DashboardGridInst.h" />
     <ClInclude Include="DashboardWidget.h" />
+    <ClInclude Include="DashDragCont.h" />
     <ClInclude Include="DashElements\DashEleButton.h" />
     <ClInclude Include="DashElements\DashEleCheckbox.h" />
     <ClInclude Include="DashElements\DashEleConstantNames.h" />
@@ -172,6 +179,8 @@
     <ClInclude Include="Dialogs\DlgGridSize.h" />
     <ClInclude Include="DockedCVGPane.h" />
     <ClInclude Include="FullscreenDash.h" />
+    <ClInclude Include="glext.h" />
+    <ClInclude Include="Inspector\InsExWebCamera.h" />
     <ClInclude Include="Inspector\InspectorEquipment.h" />
     <ClInclude Include="Inspector\InspectorParam.h" />
     <ClInclude Include="Inspector\InsWidgetBool.h" />
@@ -186,13 +195,23 @@
     <ClInclude Include="PaneInspector.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RootWindow.h" />
+    <ClInclude Include="StreamMgr\StreamCon.h" />
+    <ClInclude Include="StreamMgr\StreamMgr.h" />
+    <ClInclude Include="StreamMgr\StreamSession.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="CamChannel.cpp" />
+    <ClCompile Include="DashboardCamInst.cpp" />
+    <ClCompile Include="DashboardCamInstUI.cpp" />
+    <ClCompile Include="DashboardInst.cpp" />
+    <ClCompile Include="DashboardTile.cpp" />
     <ClCompile Include="DashboardElement.cpp" />
+    <ClCompile Include="DashboardCam.cpp" />
     <ClCompile Include="DashboardElementInst.cpp" />
     <ClCompile Include="DashboardGrid.cpp" />
     <ClCompile Include="DashboardGridInst.cpp" />
+    <ClCompile Include="DashDragCont.cpp" />
     <ClCompile Include="DashElements\DashEleButton.cpp" />
     <ClCompile Include="DashElements\DashEleCheckbox.cpp" />
     <ClCompile Include="DashElements\DashEleFloat.cpp" />
@@ -204,6 +223,7 @@
     <ClCompile Include="Dialogs\DlgGridSize.cpp" />
     <ClCompile Include="DockedCVGPane.cpp" />
     <ClCompile Include="FullscreenDash.cpp" />
+    <ClCompile Include="Inspector\InsExWebCamera.cpp" />
     <ClCompile Include="Inspector\InspectorEquipment.cpp" />
     <ClCompile Include="Inspector\InspectorParam.cpp" />
     <ClCompile Include="Inspector\InsWidgetBool.cpp" />
@@ -217,6 +237,9 @@
     <ClCompile Include="PaneDashboard.cpp" />
     <ClCompile Include="PaneInspector.cpp" />
     <ClCompile Include="RootWindow.cpp" />
+    <ClCompile Include="StreamMgr\StreamCon.cpp" />
+    <ClCompile Include="StreamMgr\StreamMgr.cpp" />
+    <ClCompile Include="StreamMgr\StreamSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CVGDashBoard.rc" />
@@ -224,6 +247,9 @@
   <ItemGroup>
     <Image Include="CVGDashBoard.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GFXs\video_25x23.xpm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
