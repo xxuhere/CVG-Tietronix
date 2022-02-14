@@ -64,6 +64,10 @@ std::vector<CamChannel> CamChannel::ExtractChannels(const json & clientData, con
 
 int CamChannel::GetDefaultPort(const std::string & proto)
 {
+	// The ports can be added on an as-needed basis, and should
+	// used IANA registered ports.
+	// https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
+
 	if(proto == "rtsp")
 		return 554;
 

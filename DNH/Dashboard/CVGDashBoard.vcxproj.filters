@@ -111,9 +111,6 @@
     <ClInclude Include="PaneInspector.h">
       <Filter>Header Files\Panes</Filter>
     </ClInclude>
-    <ClInclude Include="DashboardWidget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DashElements\DashEleFloat.h">
       <Filter>Header Files\DashElements</Filter>
     </ClInclude>

@@ -164,7 +164,6 @@
     <ClInclude Include="DashboardElementInst.h" />
     <ClInclude Include="DashboardGrid.h" />
     <ClInclude Include="DashboardGridInst.h" />
-    <ClInclude Include="DashboardWidget.h" />
     <ClInclude Include="DashDragCont.h" />
     <ClInclude Include="DashElements\DashEleButton.h" />
     <ClInclude Include="DashElements\DashEleCheckbox.h" />

@@ -8,7 +8,16 @@
 class StreamMgr;
 class StreamCon;
 
-///
+/// <summary>
+/// An object representing a streaming video feed to a specific
+/// URI.
+/// 
+/// This uses OpenCV's FFMPEG implementation - the features and
+/// behaviour is tied to that.
+/// </summary>
+// TODO: Make StreamSession have a private constructor, and make
+// StreamMgr a friend, so only StreamMgr can create them. This will
+// ensure the class's creation and usage is done strictly as designed.
 class StreamSession
 {
 private:
@@ -73,6 +82,14 @@ private:
 	/// </summary>
 	int height		= -1;
 
+	/// <summary>
+	/// Character ID used to define the type of file format
+	/// being streamed.
+	/// 
+	/// The value is provided from OpenCV. 
+	/// See https://en.wikipedia.org/wiki/FourCC for more information.
+	/// </summary>
+	/// TODO: May not be implemented and tested.
 	char fourc[4];
 
 	/// <summary>
@@ -86,6 +103,14 @@ private:
 	/// </summary>
 	std::vector<std::shared_ptr<StreamCon>> connections;
 
+	/// <summary>
+	/// Command for reconnecting the StreamSession network stream.
+	/// If a reset is requested, we don't reset the stream instantly or
+	/// directly. Instead, the StreamSession will poll this value (which
+	/// will be defaulted as Void to do nothing) and things can change
+	/// that value to tell the thread to perform a refresh on the next
+	/// poll cycle.
+	/// </summary>
 	Recon reconnectCmd = Recon::Void;
 
 public:
@@ -135,6 +160,11 @@ public:
 
 	typedef std::shared_ptr<StreamSession> Ptr;
 
+	/// <summary>
+	/// Request a stream reconnection.
+	/// </summary>
+	/// <param name="force">If false, the reconnection request will be
+	/// ignored if the stream is already connected.</param>
 	void Reconnect(bool force = false);
 
 	/// <summary>
@@ -150,11 +180,32 @@ public:
 	/// </param>
 	void DisconnectSession(bool unreg = true, bool joinThread = true);
 
+	/// <summary>
+	/// Disconnect a specific StreamCon.
+	/// </summary>
+	/// <param name="con">A connection that is owned by the StreamSession.</param>
+	/// <returns>True if success.</returns>
 	bool Disconnect(StreamCon* con);
 
-	// TODO: Properly encapsulate
+	/// <summary>
+	/// The running thread function for StreamSession. It's in charge
+	/// of handling the video stream and notifying StreamCons at
+	/// regular intervals.
+	/// 
+	/// This function should not be called directly,
+	/// </summary>
+	/// TODO: Properly encapsulate
 	void _ThreadFunction();
+
+	/// <summary>
+	/// Bootstrapping function for _ThreadFunction().
+	/// </summary>
 	void _StartThread();
 
+	/// <summary>
+	/// Create a new connection.
+	/// This should be the only way to create StreamCon objects.
+	/// </summary>
+	/// <returns>A new StreamCon object.</returns>
 	std::shared_ptr<StreamCon> MakeConnection();
 };

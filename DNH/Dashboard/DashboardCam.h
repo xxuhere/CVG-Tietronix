@@ -52,14 +52,25 @@ public:
 	{ return this->endpoint; }
 
 	bool SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCollisions = true) override;
-
 	void SetLabel(const std::string& label) override;
+	Type GetType() override;
+	DashboardTile* Clone() override;
 
+	/// <summary>
+	/// Update the URI from a specified hostname.
+	/// </summary>
+	/// <param name="hostname">The hostname.</param>
 	void UpdateURIFromHostname(const std::string& hostname);
 
+	/// <summary>
+	/// Generate a URI using a specific hostname.
+	/// 
+	/// More specifically, this will create a URI using the
+	/// stored port, scheme and endpoint, but uses a 
+	/// parameter for the hostname.
+	/// </summary>
+	/// <param name="hostname">The hostname.</param>
+	/// <returns>The URI if the specified hostname is used.</returns>
 	std::string URIFromHostname(const std::string& hostname) const;
 
-	Type GetType() override;
-
-	DashboardTile* Clone() override;
 };

@@ -19,6 +19,9 @@ using json = nlohmann::json;
 class DockedCVGPane
 {
 public:
+	/// <summary>
+	/// The different dockable pane types.
+	/// </summary>
 	enum class PaneType
 	{
 		Dashboard,

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "App.h"
 #include "DockedCVGPane.h"
 #include "Inspector/InspectorParam.h"
@@ -17,7 +18,6 @@ class PaneInspector :
 	public wxWindow,
 	public DockedCVGPane
 {
-
 private:
 	/// <summary>
 	/// The sizer for the highest level UI element.

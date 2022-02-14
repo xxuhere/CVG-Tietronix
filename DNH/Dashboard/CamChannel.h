@@ -17,6 +17,9 @@ struct CamChannel
 	/// </summary>
 	std::string label;
 
+	/// <summary>
+	/// The cached hostname of the camera stream URI.
+	/// </summary>
 	std::string hostname;
 
 	/// <summary>
@@ -53,6 +56,11 @@ public:
 	/// <returns>The found CamChannels.</returns>
 	static std::vector<CamChannel> ExtractChannels(const json & clientData, const std::string& hostname);
 
+	/// <summary>
+	/// Get the default port for a supported video streaming.
+	/// </summary>
+	/// <param name="proto">The scheme to retrieve the port for.</param>
+	/// <returns>The port for the scheme.</returns>
 	static int GetDefaultPort(const std::string & proto);
 };
 

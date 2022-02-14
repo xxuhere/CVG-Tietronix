@@ -16,6 +16,7 @@ class CVGBridge;
 /// IT IS ONLY A CONTAINER. (See usage of uiImpl for more information
 /// on the actual UI implementations).
 /// </summary>
+// !TODO: Rename class, use word "Param" instead of of "Element"
 class DashboardElement : public DashboardTile
 {
 	friend class DashboardGrid;
@@ -58,22 +59,29 @@ public:
 	bool SwitchUIImplementation(const std::string& implName);
 
 	/// <summary>
-	/// 
+	/// Switch the UI implementation to the Param type's default.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>True if the UI implementation was changed.</returns>
 	bool SwitchUIDefault();
 
+	/// <summary>
+	/// Set the position and dimensions of the tile.
+	/// </summary>
+	/// <param name="pt">The new cell position.</param>
+	/// <param name="sz">The new cell dimensions.</param>
+	/// <param name="checkCollisions">
+	/// If set, return false if the tile collides with another tile
+	/// in the grid.</param>
+	/// <returns>True if success.</returns>
 	bool SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCollisions = true);
 
+	/// <summary>
+	/// Set the label of the UI.
+	/// </summary>
+	/// <param name="label">The label to set.</param>
 	void SetLabel(const std::string& label);
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="eq"></param>
-	/// <param name="param"></param>
-	/// <param name="resetDefault"></param>
-	/// <returns></returns>
+	// TODO: Unused, consider removal.
 	bool SwitchParam(std::string& eq, CVG::ParamSPtr param, bool resetDefault = true);
 
 	inline const std::string& ParamID() const
@@ -91,6 +99,5 @@ public:
 	std::string DefaultLabel() const;
 
 	Type GetType() override;
-
 	DashboardTile* Clone() override;
 };

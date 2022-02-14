@@ -6,11 +6,26 @@ class CVGBridge;
 class DashboardGridInst;
 class DashboardTile;
 
+/// <summary>
+/// Base class for a tile instance.
+/// </summary>
 class DashboardInst
 {
 private:
+	/// <summary>
+	/// Reference to the dashboard that the DashboardInst
+	/// belongs to.
+	/// </summary>
 	DashboardGridInst* instOwner;
+
+	/// <summary>
+	/// Reference to the application's interface.
+	/// </summary>
 	CVGBridge* bridge;
+
+	/// <summary>
+	/// The tile whos UI is being instanciated.
+	/// </summary>
 	DashboardTile* tile;
 
 protected:
@@ -32,8 +47,24 @@ public:
 	inline DashboardGridInst* GridInst()
 	{ return this->instOwner; }
 
+	/// <summary>
+	/// Layout children UI (wxWindows) elements on the grid.
+	/// 
+	/// This should be called after any change to the tile instance's
+	/// position or dimensions.
+	/// </summary>
+	/// <returns>
+	/// True if success. The criteria for success is up to the
+	/// implementation.
+	/// </returns>
 	virtual bool LayoutUIImpl();
 
+	/// <summary>
+	/// Refresh the implementation of the tile.
+	/// 
+	/// This should be called whenever a tile intance needs to
+	/// reinitialize back-end systems.
+	/// </summary>
 	virtual void OnRefreshInstance();
 
 	/// <summary>
