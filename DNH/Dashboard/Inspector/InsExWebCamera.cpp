@@ -20,6 +20,19 @@ InsExtWebCamera::InsExtWebCamera(wxWindow * parent, const std::string & eqGUID, 
 
 	wxBitmap bmp = wxBitmap(video_25x23);
 	this->icon = new wxStaticBitmap(this, -1, bmp);
+	
+	// Stop the child UI elements from blocking mouse events
+	// If we don't, their presence will block the ability to 
+	wxWindow* rdisableInputs[] = {this->staticText, this->icon};
+	for(wxWindow * rdiswin : rdisableInputs)
+	{
+		//rdiswin->GetEventHandler()->Connect(wxEVT_RIGHT_DOWN,				(wxObjectEventFunction)&InsExtWebCamera::OnRightMouseDown,		nullptr, this);
+		rdiswin->GetEventHandler()->Connect(wxEVT_MOTION,					(wxObjectEventFunction)&InsExtWebCamera::OnMotion,				nullptr, this);
+		rdiswin->GetEventHandler()->Connect(wxEVT_LEFT_DOWN,				(wxObjectEventFunction)&InsExtWebCamera::OnLeftButtonDown,		nullptr, this);
+		rdiswin->GetEventHandler()->Connect(wxEVT_LEFT_UP,					(wxObjectEventFunction)&InsExtWebCamera::OnLeftButtonUp,		nullptr, this);
+		rdiswin->GetEventHandler()->Connect(wxEVT_MOUSE_CAPTURE_CHANGED,	(wxObjectEventFunction)&InsExtWebCamera::OnMouseCaptureChanged,	nullptr, this);
+		rdiswin->GetEventHandler()->Connect(wxEVT_MOUSE_CAPTURE_LOST,		(wxObjectEventFunction)&InsExtWebCamera::OnMouseCaptureLost,	nullptr, this);
+	}
 
 	wxBoxSizer * sizer = new wxBoxSizer(wxHORIZONTAL);
 	this->SetSizer(sizer);
