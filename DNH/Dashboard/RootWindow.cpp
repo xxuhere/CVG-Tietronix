@@ -1,9 +1,11 @@
 #include "RootWindow.h"
 
+#include <string>
 #include <fstream>
 
 #include <wx/event.h>
 #include <wx/filedlg.h>
+#include <wx/msw/registry.h>
 #include <nlohmann/json.hpp>
 #include "ParseUtils.h"
 #include "Params/ParamUtils.h"
@@ -102,6 +104,11 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     this->sizerTopPanel->Add(inputHost);
     this->sizerTopPanel->Add(stPort, 0, wxALIGN_BOTTOM);
     this->sizerTopPanel->Add(this->inputPort);
+    // If we don't set the size, they'll default to what fits 
+    // the starting strings, which is a random way to permanently
+    // size these widgets.
+    this->inputHost->SetSize(400, -1);
+    this->inputPort->SetSize(150, -1);
 
     this->btnToggleInspector    = new wxButton(this->topControlbar, (int)Toggle_Inspector,  "Ins");
     this->btnToggleLog          = new wxButton(this->topControlbar, (int)Toggle_Log,        "Log");
@@ -111,8 +118,11 @@ RootWindow::RootWindow(const wxString& title, const wxPoint& pos, const wxSize& 
     this->sizerTopPanel->Add(this->btnToggleLog         );
     this->sizerTopPanel->Add(this->btnToggleFullscreen  );
 
-    this->inputPort->SetValue("5701");
-    this->inputHost->SetValue("192.168.1.110");
+    std::string startingHost;
+    std::string startingPort;
+    GetDefaultConnectionInfo(startingHost, startingPort);
+    this->inputHost->SetValue(startingHost);
+    this->inputPort->SetValue(startingPort);
 
     this->dockingRgnWin = new wxWindow(this, -1);
     rootSizer->Add(this->dockingRgnWin, 1, wxGROW);
@@ -825,6 +835,10 @@ void RootWindow::OnEvent_ConChange(wxCommandEvent& event)
             this->_ResetNetworkingData();
             this->MatchUIStateToConnection(UIConState::Connected);
 
+            SetDefaultConnectionInfo(
+                this->inputHost->GetValue().ToStdString(),
+                this->inputPort->GetValue().ToStdString());
+
             // On connection, register as an equipment to get access to
             // listen on the data bus.
             json jsreg;
@@ -851,8 +865,14 @@ void RootWindow::OnClose(wxCloseEvent& event)
         this->wsClient->stop();
         if(this->wsClientThread.joinable())
             this->wsClientThread.join();
+
         this->wsClient = nullptr;
     }
+
+    SetDefaultConnectionInfo(
+        this->inputHost->GetValue().ToStdString(),
+        this->inputPort->GetValue().ToStdString());
+
     this->Destroy();
 }
 
@@ -1750,4 +1770,46 @@ void RootWindow::OnAbout(wxCommandEvent& event)
 void RootWindow::OnHello(wxCommandEvent& event)
 {
     wxLogMessage("");
+}
+
+static const char* REGDEFKEY = "Software\\Defs";
+static const char* REGKEY_HOST = "Host";
+static const char* REGKEY_PORT = "Port";
+
+void RootWindow::GetDefaultConnectionInfo(std::string& hostname, std::string& port)
+{
+    wxRegKey regk(wxRegKey::HKCU, REGDEFKEY);
+
+    static const std::string defHost = "localhost";
+    static const std::string defPort = "5701";
+    if(!regk.Exists())
+    {
+        hostname = defHost;
+        port = defPort;
+        return;
+    }
+
+    wxString QHost;
+    wxString QPort;
+
+    // HOST
+    if(!regk.HasValue(REGKEY_HOST) || !regk.QueryValue(REGKEY_HOST, QHost))
+        hostname = defHost; // default
+    else
+        hostname = QHost;
+
+    // PORT
+    if(!regk.HasValue(REGKEY_PORT) || !regk.QueryValue(REGKEY_PORT, QPort))
+        port = defPort; // default
+    else
+        port = QPort;
+}
+
+void RootWindow::SetDefaultConnectionInfo(const std::string& hostname, const std::string& port)
+{
+    wxRegKey regk(wxRegKey::HKCU, REGDEFKEY);
+    regk.Create();
+
+    regk.SetValue(REGKEY_HOST, hostname);
+    regk.SetValue(REGKEY_PORT, port);
 }

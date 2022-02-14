@@ -406,17 +406,30 @@ private:
     /// <returns>If true, allow panes to also process the JSON.</returns>
     bool ProcessJSONMessage(const json& js);
 
-    // To remove, event handlers from the "Hello World!" sample the project 
-    // started from. These will be removed eventually if we do not have a
-    // need for them as a reference. (wleu 11/16/2021)
-    void OnHello(wxCommandEvent& event);
-    void OnExit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
+    // REGISTRY AND PERSISTENT VALUES
+    //
+    //////////////////////////////////////////////////
 
-    /// Window resize handler.
-    void OnResize(wxSizeEvent& evt);
-    
-    // Websocket handlers.
+    /// <summary>
+    /// Get the persistent default values for the hostname and port. These 
+    /// are saved to spare the user from repeatedly typing in the same value
+    /// (assuming it will be the same more-often-than-not) every time they
+    /// start the application.
+    /// </summary>
+    /// <param name="hostname">Output parameter for the hostname.</param>
+    /// <param name="port">Output parameter for the port.</param>
+    static void GetDefaultConnectionInfo(std::string& hostname, std::string& port);
+
+    /// <summary>
+    /// Set the persistent hostname and port value.
+    /// </summary>
+    /// <param name="hostname">The new persistent hostname.</param>
+    /// <param name="port">The new persistent port.</param>
+    static void SetDefaultConnectionInfo(const std::string& hostname, const std::string& port);
+
+    // WEBSOCKET HANDLERS
+    //
+    //////////////////////////////////////////////////
     //
     // WebSocket callbacks (for wsClient) redirect to these functions on the 
     // main thread. This is done to make sure there isn't threading issues
@@ -428,15 +441,26 @@ private:
     // thread is jointed.
     void OnClose(wxCloseEvent& event);
 
+    //      UI CALLBACKS
+    //
+    //////////////////////////////////////////////////
+
+    // To remove, event handlers from the "Hello World!" sample the project 
+    // started from. These will be removed eventually if we do not have a
+    // need for them as a reference. (wleu 11/16/2021)
+    void OnHello(wxCommandEvent& event);
+    void OnExit(wxCommandEvent& event);
+    void OnAbout(wxCommandEvent& event);
+
+    /// Window resize handler.
+    void OnResize(wxSizeEvent& evt);
+    
     // Callback for the Connect/Disconnect button.
     void OnButton_Connection(wxCommandEvent& event);
 
     void OnButton_ToggleLog(wxCommandEvent& evt);
-
     void OnButton_ToggleInspector(wxCommandEvent& evt);
-
     void OnButton_TogglePresetBar(wxCommandEvent& evt);
-
     void OnButton_ToggleFullscreen(wxCommandEvent& evt);
 
     void OnMenu_OutlineInvisible(wxCommandEvent& evt);
@@ -452,6 +476,7 @@ private:
     void OnMenu_Open(wxCommandEvent& evt);
     void OnMenu_OpenStartup(wxCommandEvent& evt);
 
+    // Alt+Enter keyboard shortcut to fullscreen main dashboard canvas.
     void OnAccelerator_Fullscreen(wxCommandEvent& evt);
 
     //////////////////////////////////////////////////

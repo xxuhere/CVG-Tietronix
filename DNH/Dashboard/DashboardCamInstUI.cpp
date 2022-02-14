@@ -183,16 +183,16 @@ void DashboardCamInstUI::Redraw()
 	glEnable(GL_TEXTURE_2D);
 
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 			0.0f);
+		glTexCoord2f(1.0f, 			1.0f);
 		glVertex2f(offsX,			offsY + height);
 		//
-		glTexCoord2f(0.0f,			1.0f);
+		glTexCoord2f(1.0f,			0.0f);
 		glVertex2f(offsX,			offsY);
 		//
-		glTexCoord2f(1.0f,			1.0f);	
+		glTexCoord2f(0.0f,			0.0f);	
 		glVertex2f(offsX + width,	offsY);
 		//
-		glTexCoord2f(1.0f,			0.0f);
+		glTexCoord2f(0.0f,			1.0f);
 		glVertex2f(offsX + width,	offsY + height);
 	glEnd();
 
