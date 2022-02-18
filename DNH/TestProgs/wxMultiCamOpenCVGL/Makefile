@@ -26,3 +26,12 @@ all :
 	@printf "\n\n" 
 	$(CC) $(CFLAGS) -o TestApp wxMultiCamOpenCVGL/wxMultiCamOpenCVGL.cpp `wx-config --cxxflags --libs --gl-libs std,aui` -IwxMultiCamOpenCVGL -I/usr/include/opencv4/ -lGL $(OPENCVINCL) $(OPENCVLIBS)
 	
+.PHONY: clean
+clean :
+	@echo "\n\n"
+	@echo "COMPILING TARGET clean"
+	@echo "\n\n\nCleaning build files"
+	@echo "--------------------------------------------------"
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.a" -delete
+	

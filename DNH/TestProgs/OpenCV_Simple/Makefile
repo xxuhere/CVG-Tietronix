@@ -27,6 +27,15 @@ all :
 	@echo "Compiling test application." 
 	@printf "\n\n" 
 	$(CC) $(CFLAGS) -o OCVSimple OpenCV_Simple/OpenCV_Simple.cpp `wx-config --cxxflags --libs --gl-libs std,aui` -IwxMultiCamOpenCVGL $(OPENCVINCL) -lGL $(OPENCVLIBS)
+
+.PHONY: clean
+clean :
+	@echo "\n\n"
+	@echo "COMPILING TARGET clean"
+	@echo "\n\n\nCleaning build files"
+	@echo "--------------------------------------------------"
+	find . -type f -name "*.o" -delete
+	find . -type f -name "*.a" -delete
 	
 debug_var:
 	@echo " Printing values of evaluated variables"
