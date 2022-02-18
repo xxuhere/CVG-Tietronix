@@ -11,6 +11,12 @@ class DashboardCamInst;
 class DashboardCamInstUI : public wxWindow
 {
 public:
+	enum class Cmds
+	{
+		Menu_StopStream,
+		Menu_ReconnectStream
+	};
+
 	/// <summary>
 	/// The shared drawing context for all 
 	/// DashboardCamInstUI objects.
@@ -56,6 +62,11 @@ public:
 	/// </summary>
 	/// <param name="evt"></param>
 	void OnConnectionDirty(wxCommandEvent& evt);
+
+	void OnRightDown(wxMouseEvent& evt);
+
+	void OnMenu_StopStream(wxCommandEvent& evt);
+	void OnMenu_RestartStream(wxCommandEvent& evt);
 
 	DECLARE_EVENT_TABLE();
 };

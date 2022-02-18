@@ -20,6 +20,19 @@ class StreamCon;
 // ensure the class's creation and usage is done strictly as designed.
 class StreamSession
 {
+public:
+
+	/// <summary>
+	/// The various connection states of a session
+	/// </summary>
+	enum class ConState
+	{
+		Unknown,
+		Disconnected,
+		Connecting,
+		Connected,
+	};
+
 private:
 
 	/// <summary>
@@ -42,8 +55,15 @@ private:
 		/// <summary>
 		/// Force a reconnect, even if a valid connection is active.
 		/// </summary>
-		Hard
+		Hard,
+
+		/// <summary>
+		/// Keep the the stream and connections alive, but kill the
+		/// network connection.
+		/// </summary>
+		Halt
 	};
+
 private:
 	StreamMgr * mgr;
 
@@ -112,6 +132,11 @@ private:
 	/// poll cycle.
 	/// </summary>
 	Recon reconnectCmd = Recon::Void;
+
+	/// <summary>
+	/// Cache of the current connection state
+	/// </summary>
+	ConState conState = ConState::Disconnected;
 
 public:
 	/// <summary>
@@ -187,6 +212,8 @@ public:
 	/// <returns>True if success.</returns>
 	bool Disconnect(StreamCon* con);
 
+	void Halt();
+
 	/// <summary>
 	/// The running thread function for StreamSession. It's in charge
 	/// of handling the video stream and notifying StreamCons at
@@ -201,6 +228,9 @@ public:
 	/// Bootstrapping function for _ThreadFunction().
 	/// </summary>
 	void _StartThread();
+
+	ConState ConnectionState() const
+	{ return this->conState; }
 
 	/// <summary>
 	/// Create a new connection.

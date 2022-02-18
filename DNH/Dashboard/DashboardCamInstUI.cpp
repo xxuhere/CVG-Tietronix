@@ -7,7 +7,9 @@
 wxGLContext * DashboardCamInstUI::sharedContext = nullptr;
 
 BEGIN_EVENT_TABLE(DashboardCamInstUI, wxWindow)
-	EVT_COMMAND(-1, _MYEVT_THREADIMGCHANGE, DashboardCamInstUI::OnConnectionDirty)
+	EVT_COMMAND(-1, _MYEVT_THREADIMGCHANGE, DashboardCamInstUI::OnConnectionDirty )
+	EVT_MENU( (int)Cmds::Menu_StopStream,		DashboardCamInstUI::OnMenu_StopStream )
+	EVT_MENU( (int)Cmds::Menu_ReconnectStream,	DashboardCamInstUI::OnMenu_RestartStream )
 END_EVENT_TABLE()
 
 DashboardCamInstUI::DashboardCamInstUI(wxWindow* parent, DashboardCamInst* instOwner)
@@ -28,6 +30,11 @@ DashboardCamInstUI::DashboardCamInstUI(wxWindow* parent, DashboardCamInst* instO
 	this->SetSizer(sz);
 	sz->Add(this->displayWin, 1, wxGROW);
 	this->displayWin->SetSize(0, 0, 300, 300);
+
+	this->displayWin->Bind(
+		wxEVT_RIGHT_DOWN, 
+		&DashboardCamInstUI::OnRightDown, 
+		this);
 
 	this->Redraw();
 }
@@ -216,4 +223,24 @@ void DashboardCamInstUI::OnConnectionDirty(wxCommandEvent& evt)
 	// drawing this one.
 	this->instOwner->ClearDirty();
 	this->Redraw();
+}
+
+void DashboardCamInstUI::OnRightDown(wxMouseEvent& evt)
+{
+	// Delegated from this->displayWin
+	wxMenu rcMenu;
+	rcMenu.Append( (int)Cmds::Menu_StopStream,		"Stop Stream" );
+	rcMenu.Append( (int)Cmds::Menu_ReconnectStream, "Reconnect Stream" );
+
+	this->PopupMenu(&rcMenu);
+}
+
+void DashboardCamInstUI::OnMenu_StopStream(wxCommandEvent& evt)
+{
+	this->instOwner->streamCon->Halt();
+}
+
+void DashboardCamInstUI::OnMenu_RestartStream(wxCommandEvent& evt)
+{
+	this->instOwner->streamCon->Reconnect(true);
 }

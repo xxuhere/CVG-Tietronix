@@ -5,9 +5,9 @@
 #include <string>
 #include <mutex>
 #include "StreamCon.h"
+#include "StreamSession.h"
 
 class StreamMgr;
-class StreamSession;
 
 /// <summary>
 /// Stream connection data.
@@ -101,6 +101,10 @@ public:
 	/// be disconnected first, before reconnecting the video stream. If false, the
 	/// StreamSession will only be reconnected if it is currently disconnected.</param>
 	void Reconnect(bool force);
+
+	void Halt();
+
+	StreamSession::ConState QueryConnectionState();
 
 	/// <summary>
 	/// Invalidate the connection.

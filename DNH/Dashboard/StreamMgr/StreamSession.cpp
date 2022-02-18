@@ -103,8 +103,18 @@ bool StreamSession::Disconnect(StreamCon* con)
 	return true;
 }
 
+void StreamSession::Halt()
+{
+	if(this->active == false)
+		return;
+
+	this->reconnectCmd = Recon::Halt;
+}
+
 void StreamSession::_ThreadFunction()
 {
+	this->conState = ConState::Disconnected;
+
 	cv::VideoCapture cv;
 
 	// Note that a stream can be inactive, but still have its
@@ -114,6 +124,7 @@ void StreamSession::_ThreadFunction()
 	// This loop allows us to return to connecting on a hard reset.
 	while(this->active)
 	{ 
+		this->conState = ConState::Connecting;
 		cv.open(this->streamURI, cv::CAP_FFMPEG);
 
 		if(!cv.isOpened())
@@ -124,15 +135,21 @@ void StreamSession::_ThreadFunction()
 
 		this->width	= (int)cv.get(cv::CAP_PROP_FRAME_WIDTH);
 		this->height= (int)cv.get(cv::CAP_PROP_FRAME_HEIGHT);
-		//
-		double dfc = cv.get(cv::CAP_PROP_FOURCC);
-		*(int*)&this->fourc = *(int*)&dfc;
 
 		// The loop for handling the video streaming when connected
 		while(this->active && cv.isOpened())
 		{
-			if(this->reconnectCmd == Recon::Hard)
+			this->conState = ConState::Connected;
+
+			// Polling for a connection command. A hard reconnect
+			// or connection halt will interrupt the current 
+			// play/streaming loop.
+			if(
+				this->reconnectCmd == Recon::Hard || 
+				this->reconnectCmd == Recon::Halt)
+			{
 				break;
+			}
 			else if(this->reconnectCmd == Recon::Soft)
 				this->reconnectCmd = Recon::Void;
 
@@ -169,12 +186,21 @@ void StreamSession::_ThreadFunction()
 #endif
 		}
 
+		this->conState = ConState::Disconnected;
+
 		// If not connected, keep the connection open but poll to
 		// see if a reset command has occured to attempt to reconnect.
 		while(this->active)
 		{
-			if(this->reconnectCmd != Recon::Void)
+			// If disconnected and there's no reconnect command,
+			// stay in a disconnected holding pattern.
+			if(
+				this->reconnectCmd != Recon::Void && 
+				this->reconnectCmd != Recon::Halt)
+			{
+				this->reconnectCmd = Recon::Void;
 				break;
+			}
 #if WIN32
 			Sleep(30);
 #else
@@ -182,6 +208,8 @@ void StreamSession::_ThreadFunction()
 #endif
 		}
 	}
+
+	this->conState = ConState::Unknown;
 }
 
 void StreamSession::_StartThread()

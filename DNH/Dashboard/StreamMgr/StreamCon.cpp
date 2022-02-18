@@ -24,6 +24,28 @@ void StreamCon::Reconnect(bool force)
 	strsess->Reconnect(force);
 }
 
+void StreamCon::Halt()
+{
+	std::lock_guard<std::mutex> disownGuard(this->disownMutex);
+
+	StreamSession * strsess = this->parentSession;
+	if( strsess == nullptr)
+		return;
+
+	strsess->Halt();
+}
+
+StreamSession::ConState StreamCon::QueryConnectionState()
+{
+	std::lock_guard<std::mutex> disownGuard(this->disownMutex);
+
+	StreamSession * strsess = this->parentSession;
+	if( strsess == nullptr)
+		return StreamSession::ConState::Unknown;
+
+	return strsess->ConnectionState();
+}
+
 bool StreamCon::Disconnect()
 {
 	if(this->parentSession)
