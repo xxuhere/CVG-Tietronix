@@ -70,22 +70,13 @@ bool TileParam::SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCol
 	return true;
 }
 
-void TileParam::SetLabel(const std::string& newLabel)
-{
-	Tile::SetLabel(newLabel);
-
-	// If the label is empty, use fallbacks based on parameter values.
-	if(this->label.empty())
-		this->label = this->DefaultLabel();
-}
-
 bool TileParam::SwitchParam(std::string& eq, CVG::ParamSPtr param, bool resetDefault)
 {
 	//TODO:
 	return false;
 }
 
-std::string TileParam::DefaultLabel() const
+std::string TileParam::DefaultLabel()
 {
 	std::string lab = this->param->GetLabel();
 	if(!lab.empty())

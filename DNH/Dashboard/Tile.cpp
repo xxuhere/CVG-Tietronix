@@ -6,9 +6,12 @@ Tile::Tile(DashboardGrid * gridOwner, const std::string& eqGuid)
 	this->guid = eqGuid;
 }
 
-void Tile::SetLabel(const std::string& label)
+void Tile::SetLabel(const std::string& newLabel)
 {
-	this->label = label;
+	if(newLabel.empty())
+		this->label = this->DefaultLabel();
+	else
+		this->label = newLabel;
 }
 
 bool Tile::CellInTile(const wxPoint& cell)

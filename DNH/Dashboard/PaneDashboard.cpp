@@ -408,14 +408,11 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 		wxMenu* eleRClickMenu = new wxMenu();
 		eleRClickMenu->Append(CmdIDs::DeleteRClick, "Remove");
 	
-		if(this->rightClickedTile->GetType() == Tile::Type::Param)
-		{ 
-			TileParam* ele = (TileParam*)this->rightClickedTile;
-			if(this->rightClickedTile->Label() != ele->DefaultLabel())
-			{
-				eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
-			}
+		if(this->rightClickedTile->Label() != this->rightClickedTile->DefaultLabel())
+		{
+			eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
 		}
+		
 		eleRClickMenu->Append(CmdIDs::RelabelRClick, "Edit Label");
 	
 		this->PopupMenu(eleRClickMenu);

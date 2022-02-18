@@ -11,6 +11,9 @@ TileCam::TileCam(
 	this->endpoint	= camChan.endpoint;
 	this->scheme	= camChan.proto;
 
+	this->label = camChan.label;
+	this->defaultLabel = camChan.label;
+
 	this->UpdateURIFromHostname(camChan.hostname);
 }
 
@@ -81,4 +84,9 @@ Tile::Type TileCam::GetType()
 Tile* TileCam::Clone()
 {
 	return new TileCam(*this);
+}
+
+std::string TileCam::DefaultLabel()
+{
+	return this->defaultLabel;
 }

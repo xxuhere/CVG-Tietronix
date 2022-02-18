@@ -133,8 +133,8 @@ if __name__ == "__main__":
     
     print("\tRegistering")
     reg = CreateEqRegistration("WebcamStream", "WUSTL/TIE", "camera")
-    reg["channels"] = [ {"label":"RGB", "port":STREAMPORT1, "type":"RGB", "proto":"rtsp", "endpoint":"unicast"}, 
-                        {"label":"RGB", "port":STREAMPORT2, "type":"RGB", "proto":"rtsp", "endpoint":"unicast"}]
+    reg["channels"] = [ {"label":"Normal", "port":STREAMPORT1, "type":"RGB", "proto":"rtsp", "endpoint":"unicast"}, 
+                        {"label":"Complementary", "port":STREAMPORT2, "type":"RGB", "proto":"rtsp", "endpoint":"unicast"}]
     success, ws, guid = ConnectWS(WSCONNECTION, reg)
     if not success:
         print("\tRegistering failed")

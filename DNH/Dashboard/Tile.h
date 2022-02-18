@@ -140,6 +140,8 @@ public:
 	/// </summary>
 	virtual Type GetType() = 0;
 
+	virtual std::string DefaultLabel() = 0;
+
 	/// <summary>
 	/// Query if a cell occupies a specific tile.
 	/// </summary>

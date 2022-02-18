@@ -75,12 +75,6 @@ public:
 	/// <returns>True if success.</returns>
 	bool SetDimensions(const wxPoint& pt, const wxSize& sz, bool checkCollisions = true);
 
-	/// <summary>
-	/// Set the label of the UI.
-	/// </summary>
-	/// <param name="label">The label to set.</param>
-	void SetLabel(const std::string& label);
-
 	// TODO: Unused, consider removal.
 	bool SwitchParam(std::string& eq, CVG::ParamSPtr param, bool resetDefault = true);
 
@@ -96,7 +90,7 @@ public:
 	std::string GetUIImplName() const
 	{ return this->uiImplName; }
 
-	std::string DefaultLabel() const;
+	std::string DefaultLabel() override;
 
 	Type GetType() override;
 	Tile* Clone() override;

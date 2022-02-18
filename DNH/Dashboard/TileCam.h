@@ -30,6 +30,11 @@ protected:
 	/// </summary>
 	std::string endpoint;
 
+	/// <summary>
+	/// A cache of the camera's label, used as the default.
+	/// </summary>
+	std::string defaultLabel;
+
 public:
 	TileCam(
 		DashboardGrid* owner,  
@@ -73,4 +78,5 @@ public:
 	/// <returns>The URI if the specified hostname is used.</returns>
 	std::string URIFromHostname(const std::string& hostname) const;
 
+	std::string DefaultLabel() override;
 };
