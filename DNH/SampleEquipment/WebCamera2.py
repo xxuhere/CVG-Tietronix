@@ -41,9 +41,41 @@ def Init():
     global STREAMPORT2
     global PREKILLPORT
     
-    # See if there are command line options
+    # Default values. We set them ahead of parsing params
+    # in case we need to display them for --help.
+    PORT = GetDNHWSPort()
+    HOSTNAME = GetDNHHostname()
+    
     argc = len(sys.argv)
+    
+    #Check if there's a --help
+    # This is a separate parsed option from the others because after it
+    # displays the help, the application exits.
     i = 1
+    while i < argc:
+        if sys.argv[i] == "--help":
+            print("WebCamera.py, opens a test webcamera equipment. It both opens a streaming camera and registers to a DNH bus.")
+            print("")
+            print("usage: python[3] WebCamera.py [options]");
+            print("");
+            print("options:");
+            print("   --host");
+            print(f"      Specify the DNH host. Defaulted to {HOSTNAME}.");
+            print("   --port");
+            print(f"      Specify the DNH port. Defaulted to {PORT}.");
+            print("   --device1");
+            print(f"      Specify path of the first camera to host a video stream for. Defaulted to {DEVICE1}.");
+            print("   --device2");
+            print(f"      Specify path of the second camera to host a video stream for. Defaulted to {DEVICE2}.");
+            print("   --strport1");
+            print(f"      Specify RTSP port of the first camera to host a video stream for. Defaulted to {STREAMPORT1}.");
+            print("   --strport2");
+            print(f"      Specify RTSP port of the second camera to host a video stream for. Defaulted to {STREAMPORT2}.");
+            exit()
+        i += 1
+    
+    # See if there are command line options
+    i = 1;
     while i < argc:
         if sys.argv[i] == "--host":
             i += 1
@@ -65,13 +97,6 @@ def Init():
             STREAMPORT2 = sys.argv[i]
             
         i += 1
-
-    # Default values for unspecified parameters
-    if not PORT:
-        PORT = GetDNHWSPort()
-        
-    if not HOSTNAME:
-        HOSTNAME = GetDNHHostname()
         
     # Create final connection path
     WSCONNECTION = f"ws://{HOSTNAME}:{PORT}/realtime"

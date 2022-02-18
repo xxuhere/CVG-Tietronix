@@ -37,8 +37,36 @@ def Init():
     global STREAMPORT
     global PREKILLPORT
     
-    # See if there are command line options
+    # Default values. We set them ahead of parsing params
+    # in case we need to display them for --help.
+    PORT = GetDNHWSPort()
+    HOSTNAME = GetDNHHostname()
+    
     argc = len(sys.argv)
+    
+    # Check if there's a --help
+    # This is a separate parsed option from the others because after it
+    # displays the help, the application exits.
+    i = 1
+    while i < argc:
+        if sys.argv[i] == "--help":
+            print("WebCamera.py, opens a test webcamera equipment. It both opens a streaming camera and registers to a DNH bus.")
+            print("")
+            print("usage: python[3] WebCamera.py [options]");
+            print("");
+            print("options:");
+            print("   --host");
+            print(f"      Specify the DNH host. Defaulted to {HOSTNAME}.");
+            print("   --port");
+            print(f"      Specify the DNH port. Defaulted to {PORT}.");
+            print("   --device");
+            print(f"      Specify path of the camera to host a video stream for. Defaulted to {DEVICE}.");
+            print("   --strport");
+            print(f"      Specify RTSP port to host a video stream stream for. Defaulted to {STREAMPORT}.");
+            exit()
+        i += 1
+    
+    # See if there are command line options
     i = 1
     while i < argc:
         if sys.argv[i] == "--host":
@@ -55,13 +83,6 @@ def Init():
             STREAMPORT = sys.argv[i]
             
         i += 1
-
-    # Default values for unspecified parameters
-    if not PORT:
-        PORT = GetDNHWSPort()
-        
-    if not HOSTNAME:
-        HOSTNAME = GetDNHHostname()
         
     # Create final connection path
     WSCONNECTION = f"ws://{HOSTNAME}:{PORT}/realtime"
