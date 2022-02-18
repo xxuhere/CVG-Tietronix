@@ -234,7 +234,7 @@ private:
     /// When dragging from somewhere into any of the multiple dashboards, 
     /// keep track of which is currently being dragged into.
     /// </summary>
-    PaneDashboard* draggedDashboard;
+    PaneDashboard* draggedDashboard = nullptr;
 
     /// <summary>
     /// All the dashboards in the open document
