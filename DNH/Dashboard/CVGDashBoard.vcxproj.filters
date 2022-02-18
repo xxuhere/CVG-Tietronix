@@ -63,9 +63,6 @@
     <ClInclude Include="DashboardGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DashboardElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,29 +72,8 @@
     <ClInclude Include="DockedCVGPane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inspector\InspectorParam.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetEnum.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetFloat.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetInt.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetParam.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetString.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
     <ClInclude Include="CVGBridge.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetBool.h">
-      <Filter>Header Files\Inspector</Filter>
     </ClInclude>
     <ClInclude Include="Inspector\InspectorEquipment.h">
       <Filter>Header Files\Inspector</Filter>
@@ -111,30 +87,6 @@
     <ClInclude Include="PaneInspector.h">
       <Filter>Header Files\Panes</Filter>
     </ClInclude>
-    <ClInclude Include="DashElements\DashEleFloat.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleFloatSlider.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleInt.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashElePulldown.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleSingleString.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\IDashEle.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleConstantNames.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleCheckbox.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
     <ClInclude Include="DashboardGridInst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -147,12 +99,6 @@
     <ClInclude Include="FullscreenDash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inspector\InsWidgetButton.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="DashElements\DashEleButton.h">
-      <Filter>Header Files\DashElements</Filter>
-    </ClInclude>
     <ClInclude Include="Dialogs\DlgGridSize.h">
       <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
@@ -162,16 +108,7 @@
     <ClInclude Include="CamChannel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Inspector\InsExWebCamera.h">
-      <Filter>Header Files\Inspector</Filter>
-    </ClInclude>
     <ClInclude Include="DashDragCont.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DashboardCam.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DashboardTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DashboardCamInst.h">
@@ -192,6 +129,69 @@
     <ClInclude Include="DashboardCamInstUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Tile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TileParam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TileCam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplParam.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplInt.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplFloat.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplEnum.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplBool.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplButton.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspUIImplString.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspBarVideoStream.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Inspector\InspBarParam.h">
+      <Filter>Header Files\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImpl.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplSingleString.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplPulldown.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplInt.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplButton.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplFloatSlider.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplCheckbox.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamUIImplFloat.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
+    <ClInclude Include="DashElements\DashParamConstantNames.h">
+      <Filter>Header Files\DashElements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PaneInspector.cpp">
@@ -206,59 +206,14 @@
     <ClCompile Include="RootWindow.cpp">
       <Filter>Source Files\Main</Filter>
     </ClCompile>
-    <ClCompile Include="DashboardElement.cpp">
-      <Filter>Source Files\Dashboard</Filter>
-    </ClCompile>
     <ClCompile Include="DashboardGrid.cpp">
       <Filter>Source Files\Dashboard</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InspectorParam.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetEnum.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetFloat.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetInt.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetParam.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetString.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetBool.cpp">
-      <Filter>Source Files\Inspector</Filter>
     </ClCompile>
     <ClCompile Include="PaneDashboard.cpp">
       <Filter>Source Files\Panes</Filter>
     </ClCompile>
     <ClCompile Include="Inspector\InspectorEquipment.cpp">
       <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleFloat.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleFloatSlider.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleInt.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashElePulldown.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleSingleString.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\IDashEle.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleCheckbox.cpp">
-      <Filter>Source Files\DashElements</Filter>
     </ClCompile>
     <ClCompile Include="DashboardGridInst.cpp">
       <Filter>Source Files\Dashboard</Filter>
@@ -272,28 +227,13 @@
     <ClCompile Include="FullscreenDash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Inspector\InsWidgetButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DashElements\DashEleButton.cpp">
-      <Filter>Source Files\DashElements</Filter>
-    </ClCompile>
     <ClCompile Include="Dialogs\DlgGridSize.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="CamChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Inspector\InsExWebCamera.cpp">
-      <Filter>Source Files\Inspector</Filter>
-    </ClCompile>
     <ClCompile Include="DashDragCont.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DashboardCam.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DashboardTile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DashboardCamInst.cpp">
@@ -313,6 +253,66 @@
     </ClCompile>
     <ClCompile Include="DashboardCamInstUI.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TileParam.cpp">
+      <Filter>Source Files\Dashboard</Filter>
+    </ClCompile>
+    <ClCompile Include="TileCam.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplParam.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplInt.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplFloat.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplEnum.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplBool.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspUIImplString.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspBarVideoStream.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Inspector\InspBarParam.cpp">
+      <Filter>Source Files\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImpl.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplSingleString.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplPulldown.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplInt.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplButton.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplFloatSlider.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplCheckbox.cpp">
+      <Filter>Source Files\DashElements</Filter>
+    </ClCompile>
+    <ClCompile Include="DashElements\DashParamUIImplFloat.cpp">
+      <Filter>Source Files\DashElements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

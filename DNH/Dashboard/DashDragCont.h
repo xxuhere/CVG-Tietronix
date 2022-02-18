@@ -20,7 +20,7 @@ public:
 	/// </summary>
 	/// <remarks>
 	/// This may be a DRY violation because of how similar this
-	/// is to DashboardTile::Type.
+	/// is to Tile::Type.
 	/// </remarks>
 	enum class Type
 	{

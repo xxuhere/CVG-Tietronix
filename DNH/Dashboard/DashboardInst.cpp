@@ -1,9 +1,7 @@
+#include "Tile.h"
 #include "DashboardInst.h"
 
-DashboardInst::DashboardInst(
-	DashboardGridInst*	instOwner,
-	CVGBridge*			bridge,
-	DashboardTile*		tile )
+DashboardInst::DashboardInst(DashboardGridInst*	instOwner, CVGBridge* bridge, Tile*	tile)
 {
 	this->instOwner = instOwner;
 	this->bridge	= bridge;

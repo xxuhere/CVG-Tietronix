@@ -8,7 +8,7 @@ wxDEFINE_EVENT(_MYEVT_THREADIMGCHANGE, wxCommandEvent);
 DashboardCamInst::DashboardCamInst(
 	DashboardGridInst* instOwner,
 	CVGBridge* bridge,
-	DashboardCam* cam)
+	TileCam* cam)
 	: DashboardInst(instOwner, bridge, cam)
 {
 	this->refCam = cam;
@@ -40,7 +40,7 @@ void DashboardCamInst::OnRefreshInstance()
 
 	if(eq != nullptr)
 	{
-		DashboardCam* cam = this->Cam();
+		TileCam* cam = this->Cam();
 		std::string curURI = cam->URI();
 		std::string newURI = cam->URIFromHostname(eq->Hostname()); // Misnomer, may not be actual URI (yet)
 

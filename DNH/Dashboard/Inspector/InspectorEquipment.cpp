@@ -1,8 +1,8 @@
 ﻿#include "InspectorEquipment.h"
 #include "../PaneInspector.h"
 #include "../CVGBridge.h"
-#include "InspectorParam.h"
-#include "InsExWebCamera.h"
+#include "InspBarParam.h"
+#include "InspBarVideoStream.h"
 
 BEGIN_EVENT_TABLE(InspectorEquipment, wxWindow)
 	EVT_BUTTON(CmdIDs::ExpandCompress, InspectorEquipment::OnButtonExpandCompress)
@@ -41,8 +41,8 @@ InspectorEquipment::InspectorEquipment(
 	// Add params to body
 	for(CVG::ParamSPtr params : *eq)
 	{
-		InspectorParam * ip = 
-			new InspectorParam(
+		InspBarParam * ip = 
+			new InspBarParam(
 				this->paramWinContainer, 
 				owner,
 				bridge,
@@ -58,8 +58,8 @@ InspectorEquipment::InspectorEquipment(
 
 	for(const CamChannel & cc : camChans)
 	{
-		InsExtWebCamera * iewc = 
-			new InsExtWebCamera(
+		InspBarVideoStream * iewc = 
+			new InspBarVideoStream(
 				this->paramWinContainer,
 				eq->GUID(),
 				bridge,

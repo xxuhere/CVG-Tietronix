@@ -2,8 +2,8 @@
 #include <vector>
 #include <map>
 #include <set>
-#include "DashboardElement.h"
-#include "DashboardCam.h"
+#include "TileParam.h"
+#include "TileCam.h"
 #include "CVGBridge.h"
 
 class DashboardGridInst;
@@ -77,7 +77,7 @@ private:
 		/// <summary>
 		/// The tiles in the DashboardGrid that belong to the Equipment.
 		/// </summary>
-		std::vector<DashboardTile*> tiles;
+		std::vector<Tile*> tiles;
 	public:
 
 		DashGroup(const std::string& eqGUID, const std::string& eqPurpose);
@@ -91,7 +91,7 @@ private:
 		inline int Size() const
 		{ return this->tiles.size();}
 
-		inline DashboardTile * GetTile(int idx)
+		inline Tile * GetTile(int idx)
 		{ return this->tiles[idx]; }
 
 		/// <summary>
@@ -99,7 +99,7 @@ private:
 		/// </summary>
 		/// <param name="paramId">The ID of the parameter to find..</param>
 		/// <returns>The found tile, or nullptr if none was found.</returns>
-		DashboardTile* Find(const std::string& paramId);
+		Tile* Find(const std::string& paramId);
 
 		/// <summary>
 		/// Unregister the tile that is mapped to a specific parameter ID.
@@ -113,7 +113,7 @@ private:
 		/// </summary>
 		/// <param name="tile">The tile being added.</param>
 		/// <returns>True if success.</returns>
-		bool Add(DashboardTile* tile);
+		bool Add(Tile* tile);
 
 		/// <summary>
 		/// Destroy a parameter tile contained in the DashGroup.
@@ -131,7 +131,7 @@ private:
 		/// </summary>
 		/// <param name="tile">The tile to delete.</param>
 		/// <returns>True if successful.</returns>
-		bool Destroy(DashboardTile* tile);
+		bool Destroy(Tile* tile);
 
 		/// <summary>
 		/// Query if a parameter tile is contained in the DashGroup.
@@ -158,7 +158,7 @@ private:
 	/// A listing of all the tiles. This should be in sync
 	/// with the data in equipmentGrouping.
 	/// </summary>
-	std::vector<DashboardTile *> tiles;
+	std::vector<Tile *> tiles;
 
 	/// <summary>
 	/// A listing of all the tiles grouped by equipment. This
@@ -194,22 +194,22 @@ public:
 
 	// Begin and end iterator exposed to allow ranged-for loops 
 	// on the DashoardGrid object.
-	inline std::vector<DashboardTile *>::iterator begin()
+	inline std::vector<Tile *>::iterator begin()
 	{
 		return this->tiles.begin();
 	}
 	//
-	inline std::vector<DashboardTile *>::iterator end()
+	inline std::vector<Tile *>::iterator end()
 	{
 		return this->tiles.end();
 	}
 	//
-	inline std::vector<DashboardTile *>::const_iterator begin() const
+	inline std::vector<Tile *>::const_iterator begin() const
 	{
 		return this->tiles.begin();
 	}
 	//
-	inline std::vector<DashboardTile *>::const_iterator end() const
+	inline std::vector<Tile *>::const_iterator end() const
 	{
 		return this->tiles.end();
 	}
@@ -235,7 +235,7 @@ public:
 	/// </summary>
 	/// <param name="tile">The tile to remove.</param>
 	/// <returns>True if success.</returns>
-	bool Remove(DashboardTile* tile);
+	bool Remove(Tile* tile);
 
 	/// <summary>
 	/// Query if a Param is contained in the document.
@@ -250,7 +250,7 @@ public:
 	/// </summary>
 	/// <param name="de">The Param to query for.</param>
 	/// <returns>True if the Param was found in the document.</returns>
-	bool ContainsDashboardElement(DashboardElement* de) const;
+	bool ContainsDashboardElement(TileParam* de) const;
 
 	/// <summary>
 	/// Check if a region of the document if empty.
@@ -267,7 +267,7 @@ public:
 	/// <param name="gridSz">The dimensions of the query region, in cell units.</param>
 	/// <param name="ignore">A tile that should be ignored from the query.</param>
 	/// <returns>If true, the queried region does not overlap any tiles.</returns>
-	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardTile* ignore);
+	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, Tile* ignore);
 
 	/// <summary>
 	/// Check if a region of the document if empty.
@@ -276,7 +276,7 @@ public:
 	/// <param name="gridSz">The dimensions of the query region, in cell units.</param>
 	/// <param name="ignores">A set of tiles that should be ignored from the query.</param>
 	/// <returns>If true, the queried region does not overlap any tiles.</returns>
-	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardTile*> ignores);
+	bool AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<Tile*> ignores);
 
 	/// <summary>
 	/// Check if a region is completly in the bound of the document.
@@ -304,7 +304,7 @@ public:
 	/// specified creation region overlaps another tile in the document.
 	/// </param>
 	/// <returns>The created Param tile.</returns>
-	DashboardElement* AddDashboardElement(
+	TileParam* AddDashboardElement(
 		const std::string& eqGuid, 
 		const std::string& eqPurpose,
 		CVG::ParamSPtr ptr, 
@@ -330,7 +330,7 @@ public:
 	/// specified creation region overlaps another tile in the document.
 	/// </param>
 	/// <returns>The created camera tile.</returns>
-	DashboardCam* AddDashboardCam(
+	TileCam* AddDashboardCam(
 		const std::string& eqGuid,
 		const std::string& eqPurpose,
 		int gridX,
@@ -354,14 +354,14 @@ public:
 	/// <returns>
 	/// The tile found at the coordinate, or nullptr if nothing was found.
 	/// </returns>
-	DashboardTile* GetTileAtCell(const wxPoint& cell);
+	Tile* GetTileAtCell(const wxPoint& cell);
 
 	/// <summary>
 	/// Check the tile in a pixel position.
 	/// </summary>
 	/// <param name="pixel">The pixel position to query for.</param>
 	/// <returns>The tile found at the pixel, or nullptr if nothing was found.</returns>
-	DashboardTile* GetTileAtPixel(const wxPoint& pixel);
+	Tile* GetTileAtPixel(const wxPoint& pixel);
 
 	/// <summary>
 	/// Move and resize a cell.
@@ -378,7 +378,7 @@ public:
 	/// the collisionCheck set, or if the move results in an invalid size,
 	/// or if the tile will end up out of bounds.
 	/// </returns>
-	bool MoveCell(DashboardTile* toMove, const wxPoint& newPos, const wxSize& newSize, bool collisionCheck = true);
+	bool MoveCell(Tile* toMove, const wxPoint& newPos, const wxSize& newSize, bool collisionCheck = true);
 
 	/// <summary>
 	/// Get a list of all Equipments referenced in the document.

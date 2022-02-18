@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DashboardCam.h"
+#include "TileCam.h"
 #include "DashboardInst.h"
 #include "StreamMgr/StreamCon.h"
 
@@ -29,7 +29,7 @@ public:
 	/// <summary>
 	/// Camera stream whose UI is being implemented.
 	/// </summary>
-	DashboardCam* refCam;
+	TileCam* refCam;
 
 	/// <summary>
 	/// The wxWidget implementation.
@@ -52,9 +52,9 @@ public:
 	DashboardCamInst(
 		DashboardGridInst* instOwner,
 		CVGBridge* bridge,
-		DashboardCam* cam);
+		TileCam* cam);
 
-	inline DashboardCam* Cam()
+	inline TileCam* Cam()
 	{ return this->refCam; }
 
 	// !TODO: Check if used, delete if it's not.

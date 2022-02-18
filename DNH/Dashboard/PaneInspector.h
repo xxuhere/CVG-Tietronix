@@ -2,7 +2,7 @@
 
 #include "App.h"
 #include "DockedCVGPane.h"
-#include "Inspector/InspectorParam.h"
+#include "Inspector/InspBarParam.h"
 #include <Params/Param.h>
 #include <Equipment.h>
 #include <map>

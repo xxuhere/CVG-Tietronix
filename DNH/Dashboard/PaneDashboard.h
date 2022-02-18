@@ -217,12 +217,12 @@ private:
 	/// It is set when a DashboardElement is right clicked, and should
 	/// only be referenced in right click menu handlers.
 	/// </summary>
-	DashboardTile* rightClickedTile = nullptr;
+	Tile* rightClickedTile = nullptr;
 
 	/// <summary>
 	/// The node being moved around from a mouse drag.
 	/// </summary>
-	DashboardTile* draggedReposTile = nullptr;
+	Tile* draggedReposTile = nullptr;
 
 	/// <summary>
 	/// When performing a drag operation on an element, what was 
@@ -315,7 +315,7 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	DashboardGrid* GetGrid();
 
 	// Drag and drop handlers when dropping new elements from 
-	// and InspectorParam.
+	// and InspBarParam.
 	void OnStartParamDrag(const std::string& eq, DashDragCont dc);
 	void OnEndParamDrag(const std::string& eq, DashDragCont dc);
 	void OnCancelParamDrag();
@@ -357,12 +357,12 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	// Event handlers for Dashboard document modifications
 	void OnDashDoc_New(				DashboardGrid* newGrid);
 	void OnDashDoc_Del(				DashboardGrid* deletedGrid);
-	void OnDashDoc_NewElement(		DashboardGrid* grid,		DashboardTile* newTile);
-	void OnDashDoc_RemElement(		DashboardGrid* grid,		DashboardTile* removedTile);
-	void OnDashDoc_RelabelElement(	DashboardGrid* grid,		DashboardTile* removedTile);
-	void OnDashDoc_ReposElement(	DashboardGrid* grid,		DashboardTile* modTile);
-	void OnDashDoc_ResizeElement(	DashboardGrid* grid,		DashboardTile* modTile);
-	void OnDashDoc_MovedElement(	DashboardGrid* grid,		DashboardTile* movedTile);
+	void OnDashDoc_NewElement(		DashboardGrid* grid,		Tile* newTile);
+	void OnDashDoc_RemElement(		DashboardGrid* grid,		Tile* removedTile);
+	void OnDashDoc_RelabelElement(	DashboardGrid* grid,		Tile* removedTile);
+	void OnDashDoc_ReposElement(	DashboardGrid* grid,		Tile* modTile);
+	void OnDashDoc_ResizeElement(	DashboardGrid* grid,		Tile* modTile);
+	void OnDashDoc_MovedElement(	DashboardGrid* grid,		Tile* movedTile);
 	void OnDashDoc_Renamed(			DashboardGrid* grid);
 	void OnDashDoc_Resized(			DashboardGrid* grid);
 

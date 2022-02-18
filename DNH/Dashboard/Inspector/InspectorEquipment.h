@@ -3,14 +3,14 @@
 #include <Params/Param.h>
 #include <Equipment.h>
 
-class InspectorParam;
-class InsExtWebCamera;
+class InspBarParam;
+class InspBarVideoStream;
 class PaneInspector;
 class CVGBridge;
 
 /// <summary>
 /// A UI element in the PaneInspector that contains the listing of all
-/// the Params known (the params are shown as InspectorParams).
+/// the Params known (the params are shown as InspBarParam).
 /// </summary>
 class InspectorEquipment : public wxWindow
 {
@@ -41,12 +41,12 @@ public:
 	/// <summary>
 	/// The contained ParamUIs.
 	/// </summary>
-	std::map<std::string, InspectorParam*> paramUIs;
+	std::map<std::string, InspBarParam*> paramUIs;
 
 	/// <summary>
 	/// Cammera streams
 	/// </summary>
-	std::vector<InsExtWebCamera*> paramCamChans;
+	std::vector<InspBarVideoStream*> paramCamChans;
 
 	/// <summary>
 	/// The text showing the Equipment's label as a titlebar.
@@ -59,12 +59,12 @@ public:
 	wxBoxSizer * outerSizer		= nullptr;
 
 	/// <summary>
-	/// The window containing the InspectorParams.
+	/// The window containing the InspBarParam.
 	/// </summary>
 	wxWindow* paramWinContainer = nullptr;
 
 	/// <summary>
-	/// The sizer for the contained InspectorParams.
+	/// The sizer for the contained InspBarParam.
 	/// </summary>
 	wxBoxSizer * paramSizer		= nullptr;
 

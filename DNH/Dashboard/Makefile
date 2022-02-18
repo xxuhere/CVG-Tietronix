@@ -50,16 +50,16 @@ ALLHEADERS_ALLVEND = $(ALLHEADERS_WS) $(ALLHEADERS_HTTP) $(ALLHEADERS_JSON)
 ##################################################
 
 SUBDIR_MAIN = .
-SUBDIR_INSPECTOR = Inspector
 SUBDIR_DASHELEMENTS = DashElements
 SUBDIR_DIALOGS = Dialogs
+SUBDIR_INSPECTOR = Inspector
 SUBDIR_STREAMMGR = StreamMgr
 
 
-SUBOBJ_MAIN = App CamChannel DashboardCam DashboardCamInst DashboardCamInstUI DashboardElement DashboardElementInst DashboardGrid DashboardGridInst DashboardInst DashboardTile DashDragCont DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow
-SUBOBJ_INSPECTOR = InsExWebCamera InspectorEquipment InspectorParam InsWidgetBool InsWidgetButton InsWidgetEnum InsWidgetFloat InsWidgetInt InsWidgetParam InsWidgetString
-SUBOBJ_DASHELEMENTS = DashEleButton DashEleCheckbox DashEleFloat DashEleFloatSlider DashEleInt DashElePulldown DashEleSingleString IDashEle
+SUBOBJ_MAIN = App CamChannel DashboardCamInst DashboardCamInstUI DashboardElementInst DashboardGrid DashboardGridInst DashboardInst DashDragCont DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow Tile TileCam TileParam
+SUBOBJ_DASHELEMENTS = DashParamUIImpl DashParamUIImplButton DashParamUIImplCheckbox DashParamUIImplFloat DashParamUIImplInt DashParamUIImplPulldown DashParamUIImplSingleString
 SUBOBJ_DIALOGS = DlgGridSize
+SUBOBJ_INSPECTOR = InspBarParam InspBarVideoStream InspectorEquipment InspUIImplBool InspUIImplButton InspUIImplEnum InspUIImplFloat InspUIImplInt InspUIImplParam InspUIImplString
 SUBOBJ_STREAMMGR = StreamCon StreamMgr StreamSession
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))

@@ -1,20 +1,20 @@
 #include "DashboardElementInst.h"
 #include "DashboardGridInst.h"
-#include "DashElements/IDashEle.h"
+#include "DashElements/DashParamUIImpl.h"
 #include "PaneDashboard.h"
 
-#include "DashElements/DashEleButton.h"
-#include "DashElements/DashEleFloat.h"
-#include "DashElements/DashEleFloatSlider.h"
-#include "DashElements/DashEleInt.h"
-#include "DashElements/DashElePulldown.h"
-#include "DashElements/DashEleSingleString.h"
-#include "DashElements/DashEleCheckbox.h"
+#include "DashElements/DashParamUIImplButton.h"
+#include "DashElements/DashParamUIImplFloat.h"
+#include "DashElements/DashParamUIImplFloatSlider.h"
+#include "DashElements/DashParamUIImplInt.h"
+#include "DashElements/DashParamUIImplPulldown.h"
+#include "DashElements/DashParamUIImplSingleString.h"
+#include "DashElements/DashParamUIImplCheckbox.h"
 
 DashboardElementInst::DashboardElementInst(
 	DashboardGridInst* instOwner, 
 	CVGBridge* bridge, 
-	DashboardElement * ele)
+	TileParam * ele)
 	: DashboardInst(instOwner, bridge, ele)
 {
 	this->refEle = ele;
@@ -83,32 +83,32 @@ bool DashboardElementInst::SwitchUIImplementation(const std::string& implName)
 	if(implName == DASHELENAME_DEFBOOL)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashEleCheckbox(canvasWin, this);
+		this->uiImpl = new DashParamUIImplCheckbox(canvasWin, this);
 	}
 	else if(implName == DASHELENAME_DEFEVENT)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashEleButton(canvasWin, this);
+		this->uiImpl = new DashParamUIImplButton(canvasWin, this);
 	}
 	else if(implName == DASHELENAME_DEFINT)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashEleInt(canvasWin, this);
+		this->uiImpl = new DashParamUIImplInt(canvasWin, this);
 	}
 	else if(implName == DASHELENAME_DEFFLOAT)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashEleFloat(canvasWin, this);
+		this->uiImpl = new DashParamUIImplFloat(canvasWin, this);
 	}
 	else if (implName == DASHELENAME_DEFENUM)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashElePulldown(canvasWin, this);
+		this->uiImpl = new DashParamUIImplPulldown(canvasWin, this);
 	}
 	else if(implName == DASHELENAME_DEFSTRING)
 	{
 		this->DestroyUIImpl();
-		this->uiImpl = new DashEleSingleString(canvasWin, this);
+		this->uiImpl = new DashParamUIImplSingleString(canvasWin, this);
 	}
 	else
 		return false;

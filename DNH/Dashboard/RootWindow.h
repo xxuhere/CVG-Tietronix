@@ -16,7 +16,7 @@
 class FullscreenDash;
 class PaneDashboard;
 class DashboardGrid;
-class DashboardTile;
+class Tile;
 typedef SimpleWeb::SocketClient<SimpleWeb::WS> WsClient;
 
 /// <summary>
@@ -351,12 +351,12 @@ public:
 
     void BroadcastDashDoc_New(          DashboardGrid* grid);
     void BroadcastDashDoc_Deleted(      DashboardGrid* grid);
-    void BroadcastDashDoc_EleRepos(     DashboardGrid* grid,    DashboardTile* tile);
-    void BroadcastDashDoc_EleResize(    DashboardGrid* grid,    DashboardTile* tile);
-    void BroadcastDashDoc_EleMoved(     DashboardGrid* grid,    DashboardTile* tile);
-    void BroadcastDashDoc_EleNew(       DashboardGrid* grid,    DashboardTile* tile);
-    void BroadcastDashDoc_EleRem(       DashboardGrid* grid,    DashboardTile* tile);
-    void BroadcastDashDoc_EleRelabled(  DashboardGrid* grid,    DashboardTile* tile);
+    void BroadcastDashDoc_EleRepos(     DashboardGrid* grid,    Tile* tile);
+    void BroadcastDashDoc_EleResize(    DashboardGrid* grid,    Tile* tile);
+    void BroadcastDashDoc_EleMoved(     DashboardGrid* grid,    Tile* tile);
+    void BroadcastDashDoc_EleNew(       DashboardGrid* grid,    Tile* tile);
+    void BroadcastDashDoc_EleRem(       DashboardGrid* grid,    Tile* tile);
+    void BroadcastDashDoc_EleRelabled(  DashboardGrid* grid,    Tile* tile);
     void BroadcastDashDoc_Renamed(      DashboardGrid* grid);
     void BroadcastDashDoc_Resized(      DashboardGrid* grid);
 

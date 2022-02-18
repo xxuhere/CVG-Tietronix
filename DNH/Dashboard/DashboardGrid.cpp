@@ -1,21 +1,19 @@
 #include "DashboardGrid.h"
 
-
-
 DashboardGrid::DashGroup::DashGroup(const std::string& eqGUID, const std::string& eqPurpose)
 {
 	this->eqGUID = eqGUID;
 	this->eqPurpose = eqPurpose;
 }
 
-DashboardTile* DashboardGrid::DashGroup::Find(const std::string& paramId)
+Tile* DashboardGrid::DashGroup::Find(const std::string& paramId)
 {
-	for (DashboardTile* tile : this->tiles)
+	for (Tile* tile : this->tiles)
 	{
-		if(tile->GetType() != DashboardTile::Type::Param)
+		if(tile->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement * ele = (DashboardElement*)tile;
+		TileParam * ele = (TileParam*)tile;
 		if (ele->ParamID() == paramId)
 			return ele;
 	}
@@ -32,11 +30,11 @@ DashboardGrid::DashboardGrid(DashboardGrid* deepCopyTarg)
 {
 	this->gridCellSize = deepCopyTarg->gridCellSize;
 
-	std::map<DashboardTile*, DashboardTile*> origToClone;
+	std::map<Tile*, Tile*> origToClone;
 
-	for(DashboardTile* tile : deepCopyTarg->tiles)
+	for(Tile* tile : deepCopyTarg->tiles)
 	{
-		DashboardTile * clone = tile->Clone();
+		Tile * clone = tile->Clone();
 		this->tiles.push_back(clone);
 		origToClone[tile] = clone;
 	}
@@ -64,7 +62,7 @@ DashboardGrid::~DashboardGrid()
 	}
 	this->equipmentGrouping.clear();
 
-	for(DashboardTile* tile : this->tiles)
+	for(Tile* tile : this->tiles)
 		delete tile;
 }
 
@@ -76,10 +74,10 @@ bool DashboardGrid::DashGroup::Forget(const std::string& paramId)
 		it != this->tiles.end();
 		++it)
 	{
-		if((*it)->GetType() != DashboardTile::Type::Param)
+		if((*it)->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement * ele = (DashboardElement*)(*it);
+		TileParam * ele = (TileParam*)(*it);
 		if (ele->ParamID() == paramId)
 		{
 			this->tiles.erase(it);
@@ -89,7 +87,7 @@ bool DashboardGrid::DashGroup::Forget(const std::string& paramId)
 	return false;
 }
 
-bool DashboardGrid::DashGroup::Add(DashboardTile* tile)
+bool DashboardGrid::DashGroup::Add(Tile* tile)
 {
 	this->tiles.push_back(tile);
 	return true;
@@ -102,10 +100,10 @@ bool DashboardGrid::DashGroup::Destroy(const std::string& paramId)
 		it != this->tiles.end();
 		++it)
 	{
-		if((*it)->GetType() != DashboardTile::Type::Param)
+		if((*it)->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement * ele = (DashboardElement*)*it;
+		TileParam * ele = (TileParam*)*it;
 
 		if (ele->ParamID() == paramId)
 		{
@@ -116,7 +114,7 @@ bool DashboardGrid::DashGroup::Destroy(const std::string& paramId)
 	return false;
 }
 
-bool DashboardGrid::DashGroup::Destroy(DashboardTile* tile)
+bool DashboardGrid::DashGroup::Destroy(Tile* tile)
 {
 	for (
 		auto it = this->tiles.begin();
@@ -191,10 +189,10 @@ bool DashboardGrid::Remove(
 		it != this->tiles.end(); 
 		++it)
 	{
-		if((*it)->GetType() != DashboardTile::Type::Param)
+		if((*it)->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement * ele = (DashboardElement*)(*it);
+		TileParam * ele = (TileParam*)(*it);
 		if ((*it)->EqGUID() == guid && ele->ParamID() == paramID)
 		{
 			// Just erase, it's already been destroyed above.
@@ -205,7 +203,7 @@ bool DashboardGrid::Remove(
 	return false;
 }
 
-bool DashboardGrid::Remove(DashboardTile* tile)
+bool DashboardGrid::Remove(Tile* tile)
 {
 	const std::string guid = tile->EqGUID();
 
@@ -252,31 +250,31 @@ bool DashboardGrid::Contains(const std::string& guid, const std::string& paramID
 	return it->second->Contains(paramID);
 }
 
-bool DashboardGrid::ContainsDashboardElement(DashboardElement* de) const
+bool DashboardGrid::ContainsDashboardElement(TileParam* de) const
 {
 	return this->Contains(de->EqGUID(), de->ParamID());
 }
 
 bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz)
 {
-	std::set<DashboardTile*> ignoreFiller;
+	std::set<Tile*> ignoreFiller;
 	return this->AreCellsFree(gridPt, gridSz, ignoreFiller);
 }
 
-bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, DashboardTile* ignore)
+bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, Tile* ignore)
 {
-	std::set<DashboardTile*> ignores;
+	std::set<Tile*> ignores;
 	ignores.insert(ignore);
 	return this->AreCellsFree(gridPt, gridSz, ignores);
 }
 
-bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<DashboardTile*> ignores)
+bool DashboardGrid::AreCellsFree(const wxPoint& gridPt, const wxSize& gridSz, std::set<Tile*> ignores)
 {
 	const wxPoint end = gridPt + gridSz;
 	const wxPoint & start = gridPt; // For consistent naming
 
 	// Do a bound check on each existing element
-	for(DashboardTile* ele : this->tiles)
+	for(Tile* ele : this->tiles)
 	{
 		if(ignores.find(ele) == ignores.end())
 			continue;
@@ -315,7 +313,7 @@ bool DashboardGrid::InDocumentBounds(const wxPoint& gridPt, const wxSize& gridSz
 	return true;
 }
 
-DashboardElement* DashboardGrid::AddDashboardElement(
+TileParam* DashboardGrid::AddDashboardElement(
 	const std::string& eqGuid, 
 	const std::string& eqPurpose,
 	CVG::ParamSPtr ptr, 
@@ -339,8 +337,8 @@ DashboardElement* DashboardGrid::AddDashboardElement(
 		return nullptr;
 	}
 
-	DashboardElement* ele = 
-		new DashboardElement(
+	TileParam* ele = 
+		new TileParam(
 			this, 
 			eqGuid,
 			ptr);
@@ -373,7 +371,7 @@ DashboardElement* DashboardGrid::AddDashboardElement(
 	return ele;
 }
 
-DashboardCam* DashboardGrid::AddDashboardCam(
+TileCam* DashboardGrid::AddDashboardCam(
 	const std::string& eqGuid,
 	const std::string& eqPurpose,
 	int gridX,
@@ -392,8 +390,8 @@ DashboardCam* DashboardGrid::AddDashboardCam(
 		return nullptr;
 	}
 
-	DashboardCam* cam = 
-		new DashboardCam(
+	TileCam* cam = 
+		new TileCam(
 			this, 
 			eqGuid,
 			camChan);
@@ -430,9 +428,9 @@ wxPoint DashboardGrid::ConvertPixelsToGridCell(const wxPoint& pixel)
 			pixel.y / this->gridCellSize);
 }
 
-DashboardTile* DashboardGrid::GetTileAtCell(const wxPoint& cell)
+Tile* DashboardGrid::GetTileAtCell(const wxPoint& cell)
 {
-	for(DashboardTile* tile : this->tiles)
+	for(Tile* tile : this->tiles)
 	{
 		if(tile->CellInTile(cell) == true)
 			return tile;
@@ -440,14 +438,14 @@ DashboardTile* DashboardGrid::GetTileAtCell(const wxPoint& cell)
 	return nullptr;
 }
 
-DashboardTile* DashboardGrid::GetTileAtPixel(const wxPoint& pixel)
+Tile* DashboardGrid::GetTileAtPixel(const wxPoint& pixel)
 {
 	wxPoint cell = ConvertPixelsToGridCell(pixel);
 	return GetTileAtCell(cell);
 }
 
 bool DashboardGrid::MoveCell(
-	DashboardTile* toMove, 
+	Tile* toMove, 
 	const wxPoint& newCellPos, 
 	const wxSize& newCellSize, 
 	bool collisionCheck)
@@ -505,11 +503,11 @@ DashboardGrid::RemapRet DashboardGrid::RemapInstance(const std::string& guidOld,
 	// And also update the Param references
 	for(int i = 0; i < dashGroupRemap->Size(); ++i)
 	{
-		DashboardTile* tile = dashGroupRemap->GetTile(i);
-		if(tile->GetType() != DashboardTile::Type::Param)
+		Tile* tile = dashGroupRemap->GetTile(i);
+		if(tile->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement* ele = (DashboardElement*)tile;
+		TileParam* ele = (TileParam*)tile;
 		ele->_Reset(guidNew, newPurpose, eq->GetParam(ele->ParamID()));
 	}
 
@@ -518,12 +516,12 @@ DashboardGrid::RemapRet DashboardGrid::RemapInstance(const std::string& guidOld,
 
 void DashboardGrid::RefreshAllParamInstances(CVGBridge* bridge)
 {
-	for(DashboardTile* tile : this->tiles)
+	for(Tile* tile : this->tiles)
 	{
-		if(tile->GetType() != DashboardTile::Type::Param)
+		if(tile->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement* ele = (DashboardElement*)tile;
+		TileParam* ele = (TileParam*)tile;
 
 		CVG::BaseEqSPtr eq = bridge->CVGB_GetEquipment(tile->EqGUID());
 		if(eq == nullptr)

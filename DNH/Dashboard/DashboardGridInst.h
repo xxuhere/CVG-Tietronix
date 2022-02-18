@@ -36,12 +36,12 @@ protected:
 	/// <summary>
 	/// Parameter tiles.
 	/// </summary>
-	std::map<DashboardElement*, DashboardElementInst*> instMapping;
+	std::map<TileParam*, DashboardElementInst*> instMapping;
 
 	/// <summary>
 	/// Camera tiles.
 	/// </summary>
-	std::map<DashboardCam*, DashboardCamInst*> camMapping;
+	std::map<TileCam*, DashboardCamInst*> camMapping;
 
 public:
 	/// <summary>
@@ -52,26 +52,26 @@ public:
 	{
 	private:
 		// Members to iterate the Param tile instances.
-		std::map<DashboardElement*, DashboardElementInst*>* pInstMap;
-		std::map<DashboardElement*, DashboardElementInst*>::iterator itInstMap;
+		std::map<TileParam*, DashboardElementInst*>* pInstMap;
+		std::map<TileParam*, DashboardElementInst*>::iterator itInstMap;
 
 		// Members to iterate the camera tile intances.
-		std::map<DashboardCam*, DashboardCamInst*>* pCamMap;
-		std::map<DashboardCam*, DashboardCamInst*>::iterator itCamMap;
+		std::map<TileCam*, DashboardCamInst*>* pCamMap;
+		std::map<TileCam*, DashboardCamInst*>::iterator itCamMap;
 
 	public:
 		iterator(
-			std::map<DashboardElement*, DashboardElementInst*>* pInstMap,
-			std::map<DashboardElement*, DashboardElementInst*>::iterator itInstMap,
-			std::map<DashboardCam*, DashboardCamInst*>* pCamMap,
-			std::map<DashboardCam*, DashboardCamInst*>::iterator itCamMap);
+			std::map<TileParam*, DashboardElementInst*>* pInstMap,
+			std::map<TileParam*, DashboardElementInst*>::iterator itInstMap,
+			std::map<TileCam*, DashboardCamInst*>* pCamMap,
+			std::map<TileCam*, DashboardCamInst*>::iterator itCamMap);
 
 		// C++ iterator functions.
 		iterator(const iterator& it);
 		~iterator();
 		iterator& operator=(const iterator& it);
 		iterator* operator++();
-		std::pair<DashboardTile*, DashboardInst*> operator*() const;
+		std::pair<Tile*, DashboardInst*> operator*() const;
 		bool operator == (const iterator& it) const;
 		bool operator != (const iterator& it) const;
 	};
@@ -118,8 +118,8 @@ public:
 	/// <param name="tileInst">The tile to update the layout for.</param>
 	/// <returns>True if success.</returns>
 	bool MatchEleInstLayout(DashboardInst* tileInst);
-	bool MatchEleInstLayout(DashboardElement* ele);
-	bool MatchEleInstLayout(DashboardCam* cam);
+	bool MatchEleInstLayout(TileParam* ele);
+	bool MatchEleInstLayout(TileCam* cam);
 
 	DashboardElementInst* AddDashboardElement(
 		int cellX, 
@@ -130,7 +130,7 @@ public:
 		CVG::ParamSPtr param,
 		const std::string& uiImpl = "");
 
-	DashboardCam* AddDashboardCam(
+	TileCam* AddDashboardCam(
 		int cellX, 
 		int cellY, 
 		int cellWidth, 
@@ -146,21 +146,21 @@ public:
 	/// True if the grid contains a UI instance for the
 	/// specified tile.
 	/// </returns>
-	bool HasImpl(DashboardElement * ele);
+	bool HasImpl(TileParam * ele);
 
 	/// <summary>
 	/// Create an UI instance of a Param Tile.
 	/// </summary>
 	/// <param name="ele">The Param Tile to instantiate.</param>
 	/// <returns>The created mapped instance.</returns>
-	DashboardElementInst* Implement(DashboardElement* ele);
+	DashboardElementInst* Implement(TileParam* ele);
 	
 	/// <summary>
 	/// Create a DashboardCamInst to instantiate a DashboardCam.
 	/// </summary>
 	/// <param name="cam">The DashboardCam to instantiate.</param>
 	/// <returns>The created mapped instance.</returns>
-	DashboardCamInst* Implement(DashboardCam* cam);
+	DashboardCamInst* Implement(TileCam* cam);
 
 	/// <summary>
 	/// Update the content in a UI for a specified Param.
@@ -171,10 +171,10 @@ public:
 	bool UpdateParamValue(const std::string& eqGuid, const std::string& paramId);
 
 	/// See DashboardGrid.Remove() for details.
-	bool RemoveTile(DashboardTile * tile, bool deleteTile);
+	bool RemoveTile(Tile * tile, bool deleteTile);
 
 	/// See DashboardGrid.MoveCell() for details.
-	bool MoveCell(DashboardTile* tile, const wxPoint& pos, const wxSize& size);
+	bool MoveCell(Tile* tile, const wxPoint& pos, const wxSize& size);
 
 	/// <summary>
 	/// For all widgets in the grid, recreate the connections to the UI (or just

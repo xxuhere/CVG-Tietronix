@@ -609,37 +609,37 @@ void RootWindow::BroadcastDashDoc_Deleted(DashboardGrid * grid)
         pd->OnDashDoc_Del(grid);
 }
 
-void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleRepos(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_ReposElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleResize(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleResize(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_ResizeElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleMoved(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_MovedElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleNew(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleNew(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_NewElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleRem(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_RemElement(grid, tile);
 }
 
-void RootWindow::BroadcastDashDoc_EleRelabled(DashboardGrid* grid, DashboardTile* tile)
+void RootWindow::BroadcastDashDoc_EleRelabled(DashboardGrid* grid, Tile* tile)
 {
     for(PaneDashboard* pd : this->gridPanes)
         pd->OnDashDoc_RelabelElement(grid, tile);
@@ -664,7 +664,7 @@ PaneDashboard* FindDashboardDirectlyUnderMouse(const std::vector<PaneDashboard*>
 
     // Find if the application knows about the window the mouse pointer is over,
     // and see if it's a PaneDashboard. If it is, do functionality for when
-    // an InspectorParam is being dragged over a PaneDashboard.
+    // an InspBarParam is being dragged over a PaneDashboard.
     if(win == nullptr)
         return nullptr;
     
@@ -1138,7 +1138,7 @@ json RootWindow::DocumentAsJSON()
         jsCurDash["cellsz"] = dg->GridCellSize();
 
         json jsEles = json::array();
-        for(DashboardTile* tile: *dg)
+        for(Tile* tile: *dg)
         {
             json jse;
             jse["posx"]     = tile->CellPos().x;
@@ -1148,19 +1148,19 @@ json RootWindow::DocumentAsJSON()
             jse["guid"]     = tile->EqGUID();
             jse["label"]    = tile->Label();
 
-            if(tile->GetType() == DashboardTile::Type::Param)
+            if(tile->GetType() == Tile::Type::Param)
             { 
                 jse["tile"]     = "param";
-                DashboardElement * ele = (DashboardElement*)tile;
+                TileParam * ele = (TileParam*)tile;
 
                 jse["param"]    = ele->ParamID();
                 jse["uiimpl"]   = ele->GetUIImplName();
                 jse["type"]     = CVG::ConvertToString(ele->Param()->Type());
             }
-            else if(tile->GetType() == DashboardTile::Type::Cam)
+            else if(tile->GetType() == Tile::Type::Cam)
             {
                 jse["tile"]     = "cam";
-                DashboardCam * cam = (DashboardCam*)tile;
+                TileCam * cam = (TileCam*)tile;
                 
                 jse["scheme"]   = cam->Scheme();
                 jse["endpoint"] = cam->Endpoint();
@@ -1192,7 +1192,7 @@ json RootWindow::DocumentAsJSON()
     json jsEquips;
     for(DashboardGrid* dg : this->grids)
     {
-        for(DashboardTile * tile : *dg)
+        for(Tile * tile : *dg)
         {
             std::string guid = tile->EqGUID();
             auto it = guidsAlreadySeen.find(guid);

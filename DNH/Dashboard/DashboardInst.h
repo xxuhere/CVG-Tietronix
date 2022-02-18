@@ -4,7 +4,7 @@
 
 class CVGBridge;
 class DashboardGridInst;
-class DashboardTile;
+class Tile;
 
 /// <summary>
 /// Base class for a tile instance.
@@ -26,7 +26,7 @@ private:
 	/// <summary>
 	/// The tile whos UI is being instanciated.
 	/// </summary>
-	DashboardTile* tile;
+	Tile* tile;
 
 protected:
 	inline wxWindow* GridCanvas()
@@ -36,12 +36,12 @@ public:
 	DashboardInst(
 		DashboardGridInst* instOwner,
 		CVGBridge* bridge,
-		DashboardTile* tile);
+		Tile* tile);
 
 	inline CVGBridge* Bridge()
 	{ return this->bridge; }
 
-	inline DashboardTile* Tile()
+	inline Tile* GetTile()
 	{ return this->tile; }
 
 	inline DashboardGridInst* GridInst()

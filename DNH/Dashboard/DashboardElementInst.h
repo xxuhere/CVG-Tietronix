@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DashboardElement.h"
+#include "TileParam.h"
 #include "DashboardInst.h"
 
-class IDashEle;
+class DashParamUIImpl;
 class CVGBridge;
 class DashboardGridInst;
 
@@ -17,12 +17,12 @@ public:
 	/// <summary>
 	/// Reference to the typed tile the DashboardInst.
 	/// </summary>
-	DashboardElement* refEle;
+	TileParam* refEle;
 
 	/// <summary>
 	/// The UI implementation.
 	/// </summary>
-	IDashEle* uiImpl = nullptr;
+	DashParamUIImpl* uiImpl = nullptr;
 
 	/// <summary>
 	/// Updates the UI implementation.
@@ -35,7 +35,7 @@ public:
 	DashboardElementInst(
 		DashboardGridInst* instOwner, 
 		CVGBridge* bridge, 
-		DashboardElement* ele);
+		TileParam* ele);
 
 	inline CVG::ParamSPtr Param()
 	{ return this->refEle->Param(); }
@@ -43,7 +43,7 @@ public:
 	inline std::string EqGUID() const
 	{ return this->refEle->EqGUID(); }
 
-	inline DashboardElement * RefEle()
+	inline TileParam * RefEle()
 	{ return this->refEle; }
 
 	/// <summary>

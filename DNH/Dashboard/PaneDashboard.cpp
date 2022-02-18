@@ -309,7 +309,7 @@ bool PaneDashboard::CreateCamera(
 	const std::string& eqGUID,
 	const CamChannel & camChan)
 {
-	DashboardCam* createdCam = 
+	TileCam* createdCam = 
 		this->gridInst->AddDashboardCam(
 			cellX, 
 			cellY, 
@@ -408,9 +408,9 @@ void PaneDashboard::Canvas_OnRightDown(wxMouseEvent& evt)
 		wxMenu* eleRClickMenu = new wxMenu();
 		eleRClickMenu->Append(CmdIDs::DeleteRClick, "Remove");
 	
-		if(this->rightClickedTile->GetType() == DashboardTile::Type::Param)
+		if(this->rightClickedTile->GetType() == Tile::Type::Param)
 		{ 
-			DashboardElement* ele = (DashboardElement*)this->rightClickedTile;
+			TileParam* ele = (TileParam*)this->rightClickedTile;
 			if(this->rightClickedTile->Label() != ele->DefaultLabel())
 			{
 				eleRClickMenu->Append(CmdIDs::ResetLabelRClick, "Reset Label");
@@ -776,7 +776,7 @@ void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
 		break;
 	}
 
-	for( const DashboardTile* tile : *this->gridInst->Grid())
+	for( const Tile* tile : *this->gridInst->Grid())
 	{ 
 		// If in the middle of a drag repositioning, draw visual
 		// feedback to user.
@@ -1072,26 +1072,26 @@ void PaneDashboard::OnDashDoc_Del(DashboardGrid* deletedGrid)
 		this->gridInst = nullptr;
 }
 
-void PaneDashboard::OnDashDoc_NewElement(DashboardGrid* grid, DashboardTile* newTile)
+void PaneDashboard::OnDashDoc_NewElement(DashboardGrid* grid, Tile* newTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	if(newTile->GetType() == DashboardTile::Type::Param)
+	if(newTile->GetType() == Tile::Type::Param)
 	{
-		DashboardElement* ele = (DashboardElement*)newTile;
+		TileParam* ele = (TileParam*)newTile;
 		this->gridInst->Implement(ele);
 	}
-	else if(newTile->GetType() == DashboardTile::Type::Cam)
+	else if(newTile->GetType() == Tile::Type::Cam)
 	{
-		DashboardCam* cam = (DashboardCam*)newTile;
+		TileCam* cam = (TileCam*)newTile;
 		this->gridInst->Implement(cam);
 	}
 
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardTile* removedTile)
+void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, Tile* removedTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
@@ -1103,7 +1103,7 @@ void PaneDashboard::OnDashDoc_RemElement(DashboardGrid* grid, DashboardTile* rem
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardTile* removedEle)
+void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, Tile* removedEle)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
@@ -1111,43 +1111,43 @@ void PaneDashboard::OnDashDoc_RelabelElement(DashboardGrid* grid, DashboardTile*
 	this->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, DashboardTile* modTile)
+void PaneDashboard::OnDashDoc_ReposElement(DashboardGrid* grid, Tile* modTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	if(modTile->GetType() == DashboardTile::Type::Param)
-		this->gridInst->MatchEleInstLayout((DashboardElement*)modTile);
-	else if(modTile->GetType() == DashboardTile::Type::Cam)
-		this->gridInst->MatchEleInstLayout((DashboardCam*)modTile);
+	if(modTile->GetType() == Tile::Type::Param)
+		this->gridInst->MatchEleInstLayout((TileParam*)modTile);
+	else if(modTile->GetType() == Tile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((TileCam*)modTile);
 
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_ResizeElement(DashboardGrid* grid, DashboardTile* modTile)
+void PaneDashboard::OnDashDoc_ResizeElement(DashboardGrid* grid, Tile* modTile)
 {
 	// Arguably we could get rid of this and just have 
 	// OnDashDoc_ReposElement() since they do the same thing.
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	if(modTile->GetType() == DashboardTile::Type::Param)
-		this->gridInst->MatchEleInstLayout((DashboardElement*)modTile);
-	else if(modTile->GetType() == DashboardTile::Type::Cam)
-		this->gridInst->MatchEleInstLayout((DashboardCam*)modTile);
+	if(modTile->GetType() == Tile::Type::Param)
+		this->gridInst->MatchEleInstLayout((TileParam*)modTile);
+	else if(modTile->GetType() == Tile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((TileCam*)modTile);
 
 	this->canvasWin->Refresh();
 }
 
-void PaneDashboard::OnDashDoc_MovedElement(DashboardGrid* grid, DashboardTile* movedTile)
+void PaneDashboard::OnDashDoc_MovedElement(DashboardGrid* grid, Tile* movedTile)
 {
 	if(this->gridInst->Grid() != grid)
 		return;
 
-	if(movedTile->GetType() == DashboardTile::Type::Param)
-		this->gridInst->MatchEleInstLayout((DashboardElement*)movedTile);
-	else if(movedTile->GetType() == DashboardTile::Type::Cam)
-		this->gridInst->MatchEleInstLayout((DashboardCam*)movedTile);
+	if(movedTile->GetType() == Tile::Type::Param)
+		this->gridInst->MatchEleInstLayout((TileParam*)movedTile);
+	else if(movedTile->GetType() == Tile::Type::Cam)
+		this->gridInst->MatchEleInstLayout((TileCam*)movedTile);
 
 	this->canvasWin->Refresh();
 }
@@ -1201,9 +1201,9 @@ void PaneDashboard::OnMenuReLabelRightClicked(wxCommandEvent& evt)
 	
 	std::string newLabel = dlgQueryLabel.GetValue().ToStdString();
 
-	if(this->rightClickedTile->GetType() == DashboardTile::Type::Param)
+	if(this->rightClickedTile->GetType() == Tile::Type::Param)
 	{
-		DashboardElement* ele = (DashboardElement*)this->rightClickedTile;
+		TileParam* ele = (TileParam*)this->rightClickedTile;
 		if(newLabel.empty())
 		{
 			newLabel = ele->Param()->GetLabel();

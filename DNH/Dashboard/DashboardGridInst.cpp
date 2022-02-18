@@ -2,13 +2,13 @@
 #include "DashboardElementInst.h"
 #include "DashboardCamInst.h"
 #include "DashboardCamInstUI.h"
-#include "DashElements/IDashEle.h"
+#include "DashElements/DashParamUIImpl.h"
 
 DashboardGridInst::iterator::iterator(
-	std::map<DashboardElement*, DashboardElementInst*>* pInstMap,
-	std::map<DashboardElement*, DashboardElementInst*>::iterator itInstMap,
-	std::map<DashboardCam*, DashboardCamInst*>* pCamMap,
-	std::map<DashboardCam*, DashboardCamInst*>::iterator itCamMap)
+	std::map<TileParam*, DashboardElementInst*>* pInstMap,
+	std::map<TileParam*, DashboardElementInst*>::iterator itInstMap,
+	std::map<TileCam*, DashboardCamInst*>* pCamMap,
+	std::map<TileCam*, DashboardCamInst*>::iterator itCamMap)
 {
 	this->pInstMap	= pInstMap;
 	this->itInstMap = itInstMap;
@@ -58,12 +58,12 @@ DashboardGridInst::iterator* DashboardGridInst::iterator::operator++()
 	return this;
 }
 
-std::pair<DashboardTile*, DashboardInst*> DashboardGridInst::iterator::operator*() const
+std::pair<Tile*, DashboardInst*> DashboardGridInst::iterator::operator*() const
 {
 	if(this->itInstMap != pInstMap->end())
-		return std::pair<DashboardTile*, DashboardInst*>(this->itInstMap->first, this->itInstMap->second);
+		return std::pair<Tile*, DashboardInst*>(this->itInstMap->first, this->itInstMap->second);
 	
-	return std::pair<DashboardTile*, DashboardInst*>(this->itCamMap->first, this->itCamMap->second);
+	return std::pair<Tile*, DashboardInst*>(this->itCamMap->first, this->itCamMap->second);
 }
 
 bool DashboardGridInst::iterator::operator == (const DashboardGridInst::iterator& it) const
@@ -93,11 +93,11 @@ DashboardGridInst::DashboardGridInst(
 	this->bridge = bridge;
 	this->grid = attachedGrid;
 
-	for(DashboardTile* tile : *attachedGrid)
+	for(Tile* tile : *attachedGrid)
 	{
-		if(tile->GetType() == DashboardTile::Type::Param)
+		if(tile->GetType() == Tile::Type::Param)
 		{ 
-			DashboardElement* ele = (DashboardElement*)tile;
+			TileParam* ele = (TileParam*)tile;
 
 			DashboardElementInst* eleWrapper = 
 				new DashboardElementInst(this, this->bridge, ele);
@@ -109,9 +109,9 @@ DashboardGridInst::DashboardGridInst(
 				eleWrapper->SwitchUIDefault();
 			}
 		}
-		else if(tile->GetType() == DashboardTile::Type::Cam)
+		else if(tile->GetType() == Tile::Type::Cam)
 		{
-			DashboardCam* cam = (DashboardCam*)tile;
+			TileCam* cam = (TileCam*)tile;
 			DashboardCamInst* camInst = this->Implement(cam);
 		}
 	}
@@ -151,7 +151,7 @@ DashboardElementInst* DashboardGridInst::AddDashboardElement(
 	if(eqPtr == nullptr)
 		return nullptr;
 
-	DashboardElement * dashEle = 
+	TileParam * tileParam = 
 		this->grid->AddDashboardElement(
 			eqGUID,
 			eqPtr->Purpose(),
@@ -162,13 +162,13 @@ DashboardElementInst* DashboardGridInst::AddDashboardElement(
 			cellWidth, 
 			cellHeight);
 
-	if(dashEle == nullptr)
+	if(tileParam == nullptr)
 		return nullptr;
 
-	return this->Implement(dashEle);
+	return this->Implement(tileParam);
 }
 
-DashboardCam* DashboardGridInst::AddDashboardCam(
+TileCam* DashboardGridInst::AddDashboardCam(
 	int cellX, 
 	int cellY, 
 	int cellWidth, 
@@ -180,7 +180,7 @@ DashboardCam* DashboardGridInst::AddDashboardCam(
 	if(eqPtr == nullptr)
 		return nullptr;
 
-	DashboardCam * dashCam = 
+	TileCam * dashCam = 
 		this->grid->AddDashboardCam(
 			eqGUID,
 			eqPtr->Purpose(),
@@ -196,13 +196,13 @@ DashboardCam* DashboardGridInst::AddDashboardCam(
 	return dashCam;
 }
 
-bool DashboardGridInst::HasImpl(DashboardElement * ele)
+bool DashboardGridInst::HasImpl(TileParam * ele)
 {
 	auto it = this->instMapping.find(ele);
 	return it != this->instMapping.end();
 }
 
-DashboardElementInst* DashboardGridInst::Implement(DashboardElement* ele)
+DashboardElementInst* DashboardGridInst::Implement(TileParam* ele)
 {
 	auto it = this->instMapping.find(ele);
 	if( it != this->instMapping.end() )
@@ -228,7 +228,7 @@ DashboardElementInst* DashboardGridInst::Implement(DashboardElement* ele)
 	return eleWrapper;
 }
 
-DashboardCamInst* DashboardGridInst::Implement(DashboardCam* cam)
+DashboardCamInst* DashboardGridInst::Implement(TileCam* cam)
 {
 	auto it = this->camMapping.find(cam);
 	if(it != this->camMapping.end() )
@@ -257,11 +257,11 @@ bool DashboardGridInst::UpdateParamValue(const std::string& eqGuid, const std::s
 	const int ct = grp->Size();
 	for(int i = 0; i < ct; ++i)
 	{
-		DashboardTile* tile = grp->GetTile(i);
-		if(tile->GetType() != DashboardTile::Type::Param)
+		Tile* tile = grp->GetTile(i);
+		if(tile->GetType() != Tile::Type::Param)
 			continue;
 
-		DashboardElement* ele = (DashboardElement*)tile;
+		TileParam* ele = (TileParam*)tile;
 		auto itFindInst = this->instMapping.find(ele);
 		if(itFindInst == this->instMapping.end())
 			continue;
@@ -275,11 +275,11 @@ bool DashboardGridInst::UpdateParamValue(const std::string& eqGuid, const std::s
 	return true;
 }
 
-bool DashboardGridInst::RemoveTile(DashboardTile * tile, bool deleteTile)
+bool DashboardGridInst::RemoveTile(Tile * tile, bool deleteTile)
 {
-	if(tile->GetType() == DashboardTile::Type::Param)
+	if(tile->GetType() == Tile::Type::Param)
 	{
-		DashboardElement * ele = (DashboardElement*)tile;
+		TileParam * ele = (TileParam*)tile;
 
 		auto it = this->instMapping.find(ele);
 		if(it != this->instMapping.end())
@@ -296,7 +296,7 @@ bool DashboardGridInst::RemoveTile(DashboardTile * tile, bool deleteTile)
 	return this->grid->Remove(tile);
 }
 
-bool DashboardGridInst::MoveCell(DashboardTile* tile, const wxPoint& pos, const wxSize& size)
+bool DashboardGridInst::MoveCell(Tile* tile, const wxPoint& pos, const wxSize& size)
 {
 	if( !this->grid->MoveCell(tile, pos, size))
 		return false;
@@ -305,13 +305,13 @@ bool DashboardGridInst::MoveCell(DashboardTile* tile, const wxPoint& pos, const 
 	// only to eventually deffer to the tile version of MatchEleInstLayout
 	// is admittedly clunky. There's probably a more elegant way to do this.
 
-	if (tile->GetType() == DashboardTile::Type::Param)
+	if (tile->GetType() == Tile::Type::Param)
 	{
-		return this->MatchEleInstLayout((DashboardElement*)tile);
+		return this->MatchEleInstLayout((TileParam*)tile);
 	}
-	else if(tile->GetType() == DashboardTile::Type::Cam)
+	else if(tile->GetType() == Tile::Type::Cam)
 	{
-		return this->MatchEleInstLayout((DashboardCam*)tile);
+		return this->MatchEleInstLayout((TileCam*)tile);
 	}
 
 	return false;
@@ -350,7 +350,7 @@ void DashboardGridInst::MatchEleInstLayouts()
 	}
 }
 
-bool DashboardGridInst::MatchEleInstLayout(DashboardElement* ele)
+bool DashboardGridInst::MatchEleInstLayout(TileParam* ele)
 {
 	auto it = this->instMapping.find(ele);
 	if(it == this->instMapping.end())
@@ -360,7 +360,7 @@ bool DashboardGridInst::MatchEleInstLayout(DashboardElement* ele)
 	return this->MatchEleInstLayout(tileInst);
 }
 
-bool DashboardGridInst::MatchEleInstLayout(DashboardCam* cam)
+bool DashboardGridInst::MatchEleInstLayout(TileCam* cam)
 {
 	auto it = this->camMapping.find(cam);
 	if(it == this->camMapping.end())

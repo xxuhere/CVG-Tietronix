@@ -5,7 +5,7 @@
 #include "DashDragCont.h"
 
 /// <summary>
-/// An interface class for InspectorParam elements to send drag-and-drop and 
+/// An interface class for InspBarParam elements to send drag-and-drop and 
 /// Param edit notifications.
 /// </summary>
 class CVGBridge
@@ -58,7 +58,7 @@ public:
 	//////////////////////////////////////////////////
 
 	/// <summary>
-	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
+	/// Expected to be called by an Inspector element (e.g., InspUIImplParam implementation).
 	/// 
 	/// Called at the start of a drag operation to allow inspector entries to be
 	/// dragged into the dashboard.
@@ -68,7 +68,7 @@ public:
 	virtual void Param_OnDragStart(const std::string& eq, DashDragCont dc) = 0;
 
 	/// <summary>
-	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
+	/// Expected to be called by an Inspector element (e.g., InspUIImplParam implementation).
 	/// 
 	/// Called at the end of a drag operation to finalize an inspector entry being
 	/// dragged into the dashboard.
@@ -78,7 +78,7 @@ public:
 	virtual void Param_OnDragEnd(const std::string& eq, DashDragCont dc) = 0;
 
 	/// <summary>
-	/// Expected to be called by an Inspector element (e.g., InsWidgetParam implementation).
+	/// Expected to be called by an Inspector element (e.g., InspUIImplParam implementation).
 	/// 
 	/// Called to notify the bridge that the current drag session has been aborted.
 	/// </summary>
