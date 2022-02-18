@@ -5,7 +5,7 @@
 
 #include <wx/event.h>
 #include <wx/filedlg.h>
-#include <wx/msw/registry.h>
+#include <wx/config.h>
 #include <nlohmann/json.hpp>
 #include "ParseUtils.h"
 #include "Params/ParamUtils.h"
@@ -1772,44 +1772,28 @@ void RootWindow::OnHello(wxCommandEvent& event)
     wxLogMessage("");
 }
 
-static const char* REGDEFKEY = "Software\\Defs";
+static const char* REGDEFKEY = "Dashboard";
 static const char* REGKEY_HOST = "Host";
 static const char* REGKEY_PORT = "Port";
 
 void RootWindow::GetDefaultConnectionInfo(std::string& hostname, std::string& port)
 {
-    wxRegKey regk(wxRegKey::HKCU, REGDEFKEY);
+    wxConfig regk(REGDEFKEY);
 
-    static const std::string defHost = "localhost";
-    static const std::string defPort = "5701";
-    if(!regk.Exists())
-    {
-        hostname = defHost;
-        port = defPort;
-        return;
-    }
+    static const wxString defHost = "localhost";
+    static const wxString defPort = "5701";
 
-    wxString QHost;
-    wxString QPort;
+    wxString QHost  = regk.Read(REGKEY_HOST, defHost);
+    wxString QPort  = regk.Read(REGKEY_PORT, defPort);
 
-    // HOST
-    if(!regk.HasValue(REGKEY_HOST) || !regk.QueryValue(REGKEY_HOST, QHost))
-        hostname = defHost; // default
-    else
-        hostname = QHost;
-
-    // PORT
-    if(!regk.HasValue(REGKEY_PORT) || !regk.QueryValue(REGKEY_PORT, QPort))
-        port = defPort; // default
-    else
-        port = QPort;
+    hostname        = QHost.ToStdString();
+    port            = QPort.ToStdString();
 }
 
 void RootWindow::SetDefaultConnectionInfo(const std::string& hostname, const std::string& port)
 {
-    wxRegKey regk(wxRegKey::HKCU, REGDEFKEY);
-    regk.Create();
+    wxConfig regk(REGDEFKEY);
 
-    regk.SetValue(REGKEY_HOST, hostname);
-    regk.SetValue(REGKEY_PORT, port);
+    regk.Write(REGKEY_HOST, hostname.c_str());
+    regk.Write(REGKEY_PORT, port.c_str());
 }
