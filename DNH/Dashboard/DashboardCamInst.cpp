@@ -99,6 +99,16 @@ void DashboardCamInst::SetURI(const std::string& uri)
 	this->streamCon->fnOnChange = [this](){ this->ConOnUpdate(); };
 	this->streamCon->fnOnDC		= [this](){ this->ConOnDisconnect(); };
 	this->streamCon->fnOnErr	= [this](){ this->ConOnError(); };
+
+	// Cache in case we want to use ReconnectToURI() later. We can't rely
+	// on streamCon->streamURI because streamCon will be disconnected
+	// on disconnect.
+	this->cachedLastURI = useStr;
+}
+
+void DashboardCamInst::ReconnectToURI()
+{
+	this->SetURI(this->cachedLastURI);
 }
 
 void DashboardCamInst::ConOnUpdate()
@@ -135,4 +145,17 @@ bool DashboardCamInst::FlagDirty()
 void DashboardCamInst::ClearDirty()
 {
 	this->dirty = false;
+}
+
+void DashboardCamInst::OnConnect()
+{
+	this->ReconnectToURI();
+}
+
+void DashboardCamInst::OnDisconnect()
+{
+	if(this->streamCon != nullptr)
+		this->streamCon->Disconnect();
+
+	this->streamCon = nullptr;
 }

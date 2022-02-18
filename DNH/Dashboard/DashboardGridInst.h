@@ -196,4 +196,7 @@ public:
 	/// Set to false to turn off all tile UIs.
 	/// </param>
 	void ToggleUIs(bool show);
+
+	void BroadcastConnect();
+	void BroadcastDisconnect();
 };

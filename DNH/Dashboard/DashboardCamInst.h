@@ -47,6 +47,8 @@ public:
 	/// </summary>
 	StreamCon::Ptr streamCon;
 
+	std::string cachedLastURI;
+
 public:
 
 	DashboardCamInst(
@@ -87,6 +89,8 @@ public:
 	/// <param name="uri">The new URI.</param>
 	void SetURI(const std::string & uri);
 
+	void ReconnectToURI();
+
 	/// <summary>
 	/// Connection callback for when the camera updates
 	/// the video frame.
@@ -120,4 +124,7 @@ public:
 	/// Clear the redraw dirty flag.
 	/// </summary>
 	void ClearDirty();
+
+	void OnConnect() override;
+	void OnDisconnect() override;
 };

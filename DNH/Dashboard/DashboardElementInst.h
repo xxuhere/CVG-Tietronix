@@ -67,4 +67,7 @@ public:
 	void OnRefreshInstance() override;
 	bool DestroyUIImpl() override;
 	void DrawImplPreview(wxPaintDC& dc, const wxPoint& offset) override;
+
+	void OnConnect() override;
+	void OnDisconnect() override;
 };

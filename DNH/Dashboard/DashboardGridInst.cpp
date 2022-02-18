@@ -408,3 +408,21 @@ void DashboardGridInst::ToggleUIs(bool show)
 			it.second->uiWindow->Redraw();
 	}
 }
+
+void DashboardGridInst::BroadcastConnect()
+{
+	for(auto it : this->instMapping)
+		it.second->OnConnect();
+
+	for(auto it : this->camMapping)
+		it.second->OnConnect();
+}
+
+void DashboardGridInst::BroadcastDisconnect()
+{
+	for(auto it : this->instMapping)
+		it.second->OnDisconnect();
+
+	for(auto it : this->camMapping)
+		it.second->OnDisconnect();
+}

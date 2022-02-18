@@ -943,10 +943,14 @@ void PaneDashboard::_CVG_OnJSON(const json & js)
 }
 
 void PaneDashboard::_CVG_EVT_OnConnect()
-{}
+{
+	this->gridInst->BroadcastConnect();
+}
 
 void PaneDashboard::_CVG_EVT_OnDisconnect()
-{}
+{
+	this->gridInst->BroadcastDisconnect();
+}
 
 void PaneDashboard::_CVG_EVT_OnNewEquipment(CVG::BaseEqSPtr eq)
 {}

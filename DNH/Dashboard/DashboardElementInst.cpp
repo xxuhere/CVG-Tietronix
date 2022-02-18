@@ -141,3 +141,9 @@ void DashboardElementInst::DrawImplPreview(wxPaintDC& dc, const wxPoint& offset)
 
 	this->uiImpl->DrawPreview(dc, offset);
 }
+
+void DashboardElementInst::OnConnect()
+{}
+
+void DashboardElementInst::OnDisconnect()
+{}

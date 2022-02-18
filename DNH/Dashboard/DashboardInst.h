@@ -78,4 +78,14 @@ public:
 	/// access uiImpl.
 	/// </summary>
 	virtual void DrawImplPreview(wxPaintDC& dc, const wxPoint& offset);
+
+	/// <summary>
+	/// Signal sent when the application is connected from the DNH.
+	/// </summary>
+	virtual void OnConnect() = 0;
+
+	/// <summary>
+	/// Signal sent when the application is disconnected from the DNH.
+	/// </summary>
+	virtual void OnDisconnect() = 0;
 };
