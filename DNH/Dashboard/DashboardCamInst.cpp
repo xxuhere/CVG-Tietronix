@@ -105,6 +105,9 @@ void DashboardCamInst::ConOnUpdate()
 {
 	if(this->FlagDirty())
 	{ 
+		// !TODO: This can fail the window is closing, or has closed
+		// but the session hasn't fully shut down yet.
+		// This should probably be mutex protected.
 		wxCommandEvent event(_MYEVT_THREADIMGCHANGE, -1);
 		wxPostEvent(this->uiWindow, event);
 	}
