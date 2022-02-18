@@ -56,10 +56,23 @@ SUBDIR_INSPECTOR = Inspector
 SUBDIR_STREAMMGR = StreamMgr
 
 
-SUBOBJ_MAIN = App CamChannel DashboardCamInst DashboardCamInstUI DashboardElementInst DashboardGrid DashboardGridInst DashboardInst DashDragCont DockedCVGPane FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow Tile TileCam TileParam
-SUBOBJ_DASHELEMENTS = DashParamUIImpl DashParamUIImplButton DashParamUIImplCheckbox DashParamUIImplFloat DashParamUIImplInt DashParamUIImplPulldown DashParamUIImplSingleString
+SUBOBJ_MAIN = \
+	App CamChannel DashboardCamInst DashboardCamInstUI DashboardElementInst \
+	DashboardGrid DashboardGridInst DashboardInst DashDragCont DockedCVGPane \
+	FullscreenDash PaneBusLog PaneDashboard PaneInspector RootWindow Tile TileCam TileParam
+	
+SUBOBJ_DASHELEMENTS = \
+	DashParamUIImpl DashParamUIImplButton DashParamUIImplCheckbox \
+	DashParamUIImplFloat DashParamUIImplInt DashParamUIImplPulldown \
+	DashParamUIImplSingleString
+	
 SUBOBJ_DIALOGS = DlgGridSize
-SUBOBJ_INSPECTOR = InspBarParam InspBarVideoStream InspectorEquipment InspUIImplBool InspUIImplButton InspUIImplEnum InspUIImplFloat InspUIImplInt InspUIImplParam InspUIImplString
+
+SUBOBJ_INSPECTOR = \
+	InspBarParam InspBarVideoStream InspectorEquipment InspUIImplBool \
+	InspUIImplButton InspUIImplEnum InspUIImplFloat InspUIImplInt \
+	InspUIImplParam InspUIImplString
+	
 SUBOBJ_STREAMMGR = StreamCon StreamMgr StreamSession
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
