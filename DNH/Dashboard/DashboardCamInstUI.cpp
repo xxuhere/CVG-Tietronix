@@ -227,6 +227,18 @@ void DashboardCamInstUI::OnConnectionDirty(wxCommandEvent& evt)
 
 void DashboardCamInstUI::OnRightDown(wxMouseEvent& evt)
 {
+	if(!this->instOwner->Bridge()->IsDNHConnected())
+	{
+		// If not connected to DNH, don't give the user
+		// any controls.
+		wxMenu rcCaveatMenu;
+		wxMenuItem * itm = rcCaveatMenu.Append(-1, "Not connected to DNH.");
+		itm->Enable(false);
+		this->PopupMenu(&rcCaveatMenu);
+		return;
+	}
+	
+
 	// Delegated from this->displayWin
 	wxMenu rcMenu;
 	rcMenu.Append( (int)Cmds::Menu_StopStream,		"Stop Stream" );

@@ -94,4 +94,11 @@ public:
 	/// <param name="eq">The Equipment GUID that owned the Param being dragged.</param>
 	/// <param name="dc">The Element being dragged.</param>
 	virtual void Param_OnDragMotion(const std::string& eq, DashDragCont dc) = 0;
+
+
+	// Ability to query app-connectivity.
+	//
+	// Having this implemented in CVGBridge is seen somewhat as a design hack,
+	// but is incredibly convenient right now.
+	virtual bool IsDNHConnected() = 0;
 };

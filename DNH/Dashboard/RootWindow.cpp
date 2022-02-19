@@ -750,6 +750,11 @@ void RootWindow::Param_OnDragMotion(const std::string& eq, DashDragCont dc)
     this->draggedDashboard->OnStartParamDrag(eq, dc);
 }
 
+bool RootWindow::IsDNHConnected()
+{
+    return this->lastState == UIConState::Connected;
+}
+
 void RootWindow::OnEvent_ConChange(wxCommandEvent& event)
 {
     switch(event.GetId())

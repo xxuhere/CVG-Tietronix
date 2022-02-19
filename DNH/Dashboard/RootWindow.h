@@ -523,6 +523,7 @@ private:
     void Param_OnDragEnd(const std::string& eq, DashDragCont dc) override;
     void Param_OnDragCancel() override;
     void Param_OnDragMotion(const std::string& eq, DashDragCont dc) override;
+    bool IsDNHConnected() override;
 
     CVG::BaseEqSPtr CVGB_GetEquipment(const std::string& eq) override;
     bool CVGB_Submit(const std::string& eq, const std::string& param) override;
