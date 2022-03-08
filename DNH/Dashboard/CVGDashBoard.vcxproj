@@ -59,20 +59,20 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\DevDependencies.props" />
+    <Import Project="..\CoreDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\DevDependencies.props" />
+    <Import Project="..\CoreDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="DevProperties.props" />
-    <Import Project="..\DevDependencies.props" />
+    <Import Project="Dashboard.props" />
+    <Import Project="..\CoreDependencies.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\DevDependencies.props" />
+    <Import Project="..\CoreDependencies.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -124,13 +124,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_LIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE=1;_CRT_NON_CONFORMING_SWPRINTFS=1;_SCL_SECURE_NO_WARNINGS=1;__WXMSW__;_UNICODE;WXBUILDING;wxUSE_BASE=0;WXUSINGDLL;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(WXWIDGETS_ROOT)\include\msvc;$(WXWIDGETS_ROOT)\include;$(OPENSSL_ROOT)\include;$(BOOST_ROOT);$(DNH_ROOT)\CVGData\Src;$(DNH_ROOT)\Vendored;D:\Repos\vcpkg\installed\x64-windows\include;$(OPENCVINCL_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXWIDGETS_ROOT)\include\msvc;$(WXWIDGETS_ROOT)\include;$(OPENSSL_ROOT)\include;$(BOOST_ROOT);$(DNH_ROOT)\CVGData\Src;$(DNH_ROOT)\Vendored;$(VCPKG)\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_ROOT)\stage\lib;$(OPENSSL_ROOT)\lib;$(DNH_ROOT)\$(Platform)\$(Configuration);D:\Repos\vcpkg\installed\x64-windows\debug\lib;$(OPENCVLIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_ROOT)\stage\lib;$(OPENSSL_ROOT)\lib;$(DNH_ROOT)\$(Platform)\$(Configuration);$(VCPKG)\installed\x64-windows\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;CVGData.lib;opengl32.lib;opencv_highguid.lib;opencv_mld.lib;opencv_objdetectd.lib;opencv_photod.lib;opencv_stitchingd.lib;opencv_videod.lib;opencv_videoiod.lib;opencv_imgcodecsd.lib;opencv_calib3dd.lib;opencv_dnnd.lib;opencv_features2dd.lib;opencv_flannd.lib;opencv_imgprocd.lib;opencv_cored.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

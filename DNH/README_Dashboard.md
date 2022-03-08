@@ -14,15 +14,14 @@ The library can be download from https://www.wxwidgets.org/downloads/. Download 
 
 ### Setting up Visual Studio
 
-For Visual Studio, property sheets are used. See the instructions for "Setting Up Visual Studio" for more information on property sheets. 
+For Visual Studio, property sheets are used. See the instructions for "Setting Up Visual Studio" for more information on property sheets.
 
-Copy and rename DevProperties._props to DevProperties.props. Open up the file in a text editor and set these values for the UserMacros:
+Copy and rename Dashboard._props to Dashboard.props. Open up the file in a text editor and set these values for the UserMacros:
 - WXWIDGETS_ROOT : The root directory for the wxWidgets codebase.
 - BOOST_ROOT : The same Boost location used for DNH.
 - DNH_ROOT : Set to {CVG_REPO_ROOT}\DNH
 - OPENSSL_ROOT : The same Boost location used for DNH.
-- OPENCVINCL_DIR : The location of the OpenCV include directory. It should end with *\include.
-- OPENCVLIB_DIR : The location of the OpenCV library directory. It should end with *.\lib.
+
 
 ### Using CVGData
 
@@ -33,7 +32,7 @@ Before building, make sure the CVGData project (in CVG_DNHBackbone.sln) has been
 Perform the the instructions in README.md.
 
 ### wxWidgets
-wxWidgets will also need to be installed. 
+wxWidgets will also need to be installed.
 Download and unpack the wxWidgets on the Linux machine or a location network accessible to the Linux machine.
 
 The instructions below are originally from https://www.binarytides.com/install-wxwidgets-ubuntu/, but have been modified.
