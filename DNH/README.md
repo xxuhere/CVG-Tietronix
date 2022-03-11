@@ -14,9 +14,9 @@ The build expects Boost 1.77. A modern version of the Boost library is required 
 https://www.boost.org/users/history/version_1_77_0.html
 Download, unzip and follow its instructions (in the index html files -> getting started guide) to build a 64 bit version.
 
-Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a {BOOST_DIR}/stage/lib directory with the built *.lib and *.dll files. 
+Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a {BOOST_DIR}/stage/lib directory with the built *.lib and *.dll files.
 
-Note that at lease till release we will be using the debug variant of Boost so make sure to build it and link to it in .props later. 
+Note that at lease till release we will be using the debug variant of Boost so make sure to build it and link to it in .props later.
 
 **OpenSSL**
 The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
@@ -44,21 +44,22 @@ Search for package:
 Install OpenCV x64 and dependencies with:
 
 ```cmd
-> .\vcpkg .\vcpkg install opencv[ffmpeg]:x64-windows nlopt:x64-windows boost-asio:x64-windows ffmpeg[x264]:x64-windows opengl-registry[core]:x64-windows
+> .\vcpkg .\vcpkg install opencv[ffmpeg]:x64-windows-static-md  nlopt:x64-windows-static-md  boost-asio:x64-windows-static-md  ffmpeg[x264]:x64-windows-static-md  opengl-registry[core]:x64-windows-static-md
 ```
+Note, this may take a while
+
 
 ### Setting Up Visual Studio
 
 The DNH project for VisualStudio uses project property sheets. This allows each user to specify their own unique locations for Boost and OpenSSL, as well as any other dependencies that may occur in the future.
 
-1. In the DNH/CVG_DNGBackbone directory, rename the file `DevDependencies._props` to `DevDependencies.props`
-2. `DevDependencies.props` Open it in a text editor.
+1. In the DNH/CVG_DNGBackbone directory, rename the file `CoreDependencies._props` to `CoreDependencies.props`
+2. `CoreDependencies.props` Open it in a text editor.
 3. Change the entry inside the XML tag `OPENSSL` to the correct location.
 4. Change the entry inside the XML tag `BOOST_DIR` to the correct location.
-4. Change the entry inside the XML tag `OPENCVINCL_DIR` to the includes directory of OpenCV brought in from vcpkg.
-4. Change the entry inside the XML tag `OPENCVLIB_DIR` to the library directory of OpenCV brought in from vcpkg.
-5. Save the DevDependencies.props file.
-6. Open the CVG_DNHBackbone.sln solution file (in the folder DNH) in Visual Studio.
+5. Change the entry inside the XML tag `VCPKG` to the correct location
+6. Save the CoreDependencies.props file.
+7. Open the CVG_DNHBackbone.sln solution file (in the folder DNH) in Visual Studio.
 
 The OpenSSL folder should have a `.lib` files in it, and an `include` directory.
 The Boost directory should have a child `boost` directory in it, and a `libs/stage` directory filled with link objects files (dlls and libs).
@@ -101,7 +102,7 @@ apt-get install mesa-common-dev freeglut3-dev
 
 ### Compiling
 
- The best way to ensure the build will run on the RaspberryPi is to actually build it on the RaspberryPi. 
+ The best way to ensure the build will run on the RaspberryPi is to actually build it on the RaspberryPi.
 
  This will mean the repository (or maye just the codebase without Git history) will either need to be on the RaspberryPi storage, or available to the RPi via network drive.
 
@@ -117,7 +118,7 @@ sudo apt-get install g++
 
 **make**
 
-If not installed, install make. 
+If not installed, install make.
 
 ```cmd
 sudo apt-get install make
