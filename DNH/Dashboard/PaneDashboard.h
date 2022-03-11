@@ -385,6 +385,8 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void Canvas_OnMouseEnter(wxMouseEvent& evt);
 	void Canvas_OnMouseLeave(wxMouseEvent& evt);
 
+	void Canvas_OnKeyDown(wxKeyEvent& evt);
+
 	/// <summary>
 	/// Changes the outline mode of how tile boundaries are drawn.
 	/// The function also triggers a redraw of the canvas.

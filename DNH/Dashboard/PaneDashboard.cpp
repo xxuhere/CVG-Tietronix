@@ -68,6 +68,7 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	this->canvasWin->Connect(wxEVT_LEAVE_WINDOW,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseLeave,			nullptr, this);
 	this->canvasWin->Connect(wxEVT_MOUSE_CAPTURE_CHANGED,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseCaptureChanged,nullptr, this);
 	this->canvasWin->Connect(wxEVT_MOUSE_CAPTURE_LOST,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseCaptureLost,	nullptr, this);
+	this->canvasWin->Connect(wxEVT_KEY_DOWN,				(wxObjectEventFunction)&PaneDashboard::Canvas_OnKeyDown,			nullptr, this);
 	//this->vertCanvasScroll = new wxScrollBar(this, CmdIDs::VertCanvasScroll, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
 	//this->horizCanvaScroll = new wxScrollBar(this, CmdIDs::HorizCanvasScroll, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL);
 	
@@ -714,6 +715,10 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 				this->resizeFlags));
 
 		_this->CaptureMouse();
+
+		// Give the window keyboard focus so we can detect if the 
+		// escape key is pressed to abort the operations.
+		_this->SetFocusIgnoringChildren();
 	}
 	else
 	{
@@ -737,6 +742,22 @@ void PaneDashboard::Canvas_OnMouseLeave(wxMouseEvent& evt)
 	_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 }
 
+void PaneDashboard::Canvas_OnKeyDown(wxKeyEvent& evt)
+{
+	wxScrolledWindow * _this = this->canvasWin;
+
+	switch(evt.GetKeyCode())
+	{
+	case WXK_ESCAPE:
+		if(_this->HasCapture())
+		{
+			// Cancel the capture. Without a mouse up handler, this will exit the 
+			// operation.
+			_this->ReleaseMouse();
+			_this->Refresh();
+		}
+		break;
+	}
 }
 
 void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
