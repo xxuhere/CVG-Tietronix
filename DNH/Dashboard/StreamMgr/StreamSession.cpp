@@ -126,6 +126,9 @@ void StreamSession::_ThreadFunction()
 	{ 
 		this->conState = ConState::Connecting;
 		cv.open(this->streamURI, cv::CAP_FFMPEG);
+		// As little buffering as possible, we're more focused on
+		// low-latency than we are smoothness.
+		cv.set(cv::CAP_PROP_BUFFERSIZE, 1);
 
 		if(!cv.isOpened())
 		{
@@ -133,6 +136,8 @@ void StreamSession::_ThreadFunction()
 			return;
 		}
 
+		// Not currently used except for getting this information
+		// during breakpoint debugging
 		this->width	= (int)cv.get(cv::CAP_PROP_FRAME_WIDTH);
 		this->height= (int)cv.get(cv::CAP_PROP_FRAME_HEIGHT);
 
