@@ -340,12 +340,12 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 	switch(this->dragMode)
 	{
 	case MouseDragMode::PalleteInsert:
-		this->SetCursor(wxStockCursor::wxCURSOR_BULLSEYE  );
+		_this->SetCursor(wxStockCursor::wxCURSOR_BULLSEYE  );
 		_this->Refresh();
 		break;
 
 	case MouseDragMode::DragElement:
-		this->SetCursor(wxStockCursor::wxCURSOR_HAND );
+		_this->SetCursor(wxStockCursor::wxCURSOR_HAND );
 		_this->Refresh();
 		break;
 
@@ -365,7 +365,7 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 			int mCellX = (evt.GetPosition().x + scroll.x) / cellSz;
 			int mCellY = (evt.GetPosition().y + scroll.y) / cellSz;
 
-			this->SetCursor(GetResizeDirectionCursor(this->resizeFlags));
+			_this->SetCursor(GetResizeDirectionCursor(this->resizeFlags));
 
 			// Calculating dragging to resize. It's either a horizontal drag, a 
 			// vertical drag, or both for a corner drag. The right and bottom are
@@ -406,7 +406,7 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 		break;
 
 	default:
-		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+		_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 		break;
 	}
 }
@@ -659,22 +659,26 @@ void PaneDashboard::Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt)
 
 void PaneDashboard::Canvas_OnMouseCaptureLost(wxMouseCaptureLostEvent& evt)
 {
+	wxScrolledWindow * _this = this->canvasWin;
+
 	// During a mouse drag, the mouse was lost because it was stolen.
 	// i.e., during a mouse drag the user presses Alt+Tab
 	//
 	// This function must exist if the window does a mouse capture or else
 	// it will throw an exception that crashes the program (by design).
-	this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+	_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 	this->_ClearMouseDragState();
-	this->Refresh();
+	_this->Refresh();
 }
 
 void PaneDashboard::Canvas_OnMouseCaptureChanged(wxMouseCaptureChangedEvent& evt)
 {
+	wxScrolledWindow * _this = this->canvasWin;
+
 	// This function must exist if the window does a mouse capture or else
 	// it will throw an exception that crashes the program (by design).
 	this->_ClearMouseDragState();
-	this->Refresh();
+	_this->Refresh();
 }
 
 void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
@@ -704,7 +708,7 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 			this->resizeSize = this->draggedReposTile->CellSize();
 		}
 
-		this->SetCursor(
+		_this->SetCursor(
 			GetMouseOperationCursor(
 				this->dragMode, 
 				this->resizeFlags));
@@ -718,7 +722,7 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 		this->dragMode = MouseDragMode::None;
 		this->draggedReposTile = nullptr;
 
-		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+		_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 	}
 }
 
@@ -729,7 +733,10 @@ void PaneDashboard::Canvas_OnMouseEnter(wxMouseEvent& evt)
 
 void PaneDashboard::Canvas_OnMouseLeave(wxMouseEvent& evt)
 {
-	this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+	wxScrolledWindow * _this = this->canvasWin;
+	_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+}
+
 }
 
 void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
@@ -1459,6 +1466,8 @@ bool PaneDashboard::QueryMouseOperationDetails(
 void PaneDashboard::UpdateProperOperationMouseCursor(const wxPoint& mousePt)
 {
 
+	wxScrolledWindow * _this = this->canvasWin;
+
 	// Note we don't want this to create side-effects, so we pass in dummy
 	// output variables that will be thrown away.
 	Tile* t;
@@ -1478,9 +1487,9 @@ void PaneDashboard::UpdateProperOperationMouseCursor(const wxPoint& mousePt)
 			outResize);
 
 	if(!queryRet)
-		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+		_this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 	else
-		this->SetCursor(GetMouseOperationCursor(dragMode, outResize));
+		_this->SetCursor(GetMouseOperationCursor(dragMode, outResize));
 }
 
 wxStockCursor PaneDashboard::GetResizeDirectionCursor(int resizeFlag)
