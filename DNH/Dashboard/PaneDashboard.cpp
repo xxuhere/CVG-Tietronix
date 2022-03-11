@@ -51,20 +51,23 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 	//this->canvasWin->SetDoubleBuffered(false);
 
 	// Redirect the canvas' events to be handled by the main Dashboard class.
-	this->canvasWin->Connect(wxEVT_MOTION,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnMotion,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_LEFT_DOWN,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnLeftDown,	nullptr, this);
-	this->canvasWin->Connect(wxEVT_LEFT_UP,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnLeftUp,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_PAINT,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnPaint,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_RIGHT_DOWN,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnRightDown,	nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_TOP,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollTop,			nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_BOTTOM,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollBot,			nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_LINEUP,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollLineUp,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_LINEDOWN,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollLineDown,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_PAGEUP,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollPageUp,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_PAGEDOWN,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollPageDown,		nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_THUMBTRACK,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollThumbTrack,	nullptr, this);
-	this->canvasWin->Connect(wxEVT_SCROLL_THUMBRELEASE,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollThumbRelease,	nullptr, this);
-
+	this->canvasWin->Connect(wxEVT_MOTION,					(wxObjectEventFunction)&PaneDashboard::Canvas_OnMotion,				nullptr, this);
+	this->canvasWin->Connect(wxEVT_LEFT_DOWN,				(wxObjectEventFunction)&PaneDashboard::Canvas_OnLeftDown,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_LEFT_UP,					(wxObjectEventFunction)&PaneDashboard::Canvas_OnLeftUp,				nullptr, this);
+	this->canvasWin->Connect(wxEVT_PAINT,					(wxObjectEventFunction)&PaneDashboard::Canvas_OnPaint,				nullptr, this);
+	this->canvasWin->Connect(wxEVT_RIGHT_DOWN,				(wxObjectEventFunction)&PaneDashboard::Canvas_OnRightDown,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_TOP,				(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollTop,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_BOTTOM,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollBot,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_LINEUP,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollLineUp,		nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_LINEDOWN,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollLineDown,		nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_PAGEUP,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollPageUp,		nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_PAGEDOWN,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollPageDown,		nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_THUMBTRACK,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollThumbTrack,	nullptr, this);
+	this->canvasWin->Connect(wxEVT_SCROLL_THUMBRELEASE,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnScrollThumbRelease,	nullptr, this);
+	this->canvasWin->Connect(wxEVT_ENTER_WINDOW,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseEnter,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_LEAVE_WINDOW,			(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseLeave,			nullptr, this);
+	this->canvasWin->Connect(wxEVT_MOUSE_CAPTURE_CHANGED,	(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseCaptureChanged,nullptr, this);
+	this->canvasWin->Connect(wxEVT_MOUSE_CAPTURE_LOST,		(wxObjectEventFunction)&PaneDashboard::Canvas_OnMouseCaptureLost,	nullptr, this);
 	//this->vertCanvasScroll = new wxScrollBar(this, CmdIDs::VertCanvasScroll, wxDefaultPosition, wxDefaultSize, wxSB_VERTICAL);
 	//this->horizCanvaScroll = new wxScrollBar(this, CmdIDs::HorizCanvasScroll, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL);
 	
@@ -337,7 +340,12 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 	switch(this->dragMode)
 	{
 	case MouseDragMode::PalleteInsert:
+		this->SetCursor(wxStockCursor::wxCURSOR_BULLSEYE  );
+		_this->Refresh();
+		break;
+
 	case MouseDragMode::DragElement:
+		this->SetCursor(wxStockCursor::wxCURSOR_HAND );
 		_this->Refresh();
 		break;
 
@@ -356,6 +364,8 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 			// The cell the mouse is at (while respecting the scrollbars)
 			int mCellX = (evt.GetPosition().x + scroll.x) / cellSz;
 			int mCellY = (evt.GetPosition().y + scroll.y) / cellSz;
+
+			this->SetCursor(GetResizeDirectionCursor(this->resizeFlags));
 
 			// Calculating dragging to resize. It's either a horizontal drag, a 
 			// vertical drag, or both for a corner drag. The right and bottom are
@@ -389,6 +399,14 @@ void PaneDashboard::Canvas_OnMotion(wxMouseEvent& evt)
 
 			_this->Refresh();
 		}
+		break;
+
+	case MouseDragMode::None:
+		this->UpdateProperOperationMouseCursor(evt.GetPosition());
+		break;
+
+	default:
+		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 		break;
 	}
 }
@@ -639,6 +657,26 @@ void PaneDashboard::Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt)
 	}
 }
 
+void PaneDashboard::Canvas_OnMouseCaptureLost(wxMouseCaptureLostEvent& evt)
+{
+	// During a mouse drag, the mouse was lost because it was stolen.
+	// i.e., during a mouse drag the user presses Alt+Tab
+	//
+	// This function must exist if the window does a mouse capture or else
+	// it will throw an exception that crashes the program (by design).
+	this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+	this->_ClearMouseDragState();
+	this->Refresh();
+}
+
+void PaneDashboard::Canvas_OnMouseCaptureChanged(wxMouseCaptureChangedEvent& evt)
+{
+	// This function must exist if the window does a mouse capture or else
+	// it will throw an exception that crashes the program (by design).
+	this->_ClearMouseDragState();
+	this->Refresh();
+}
+
 void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 {
 	// Remember the handler is for this->canvasWin, not PaneDashboard, it's just
@@ -647,73 +685,51 @@ void PaneDashboard::Canvas_OnLeftDown(wxMouseEvent& evt)
 	
 	wxPoint clickPos = evt.GetPosition() + _this->GetViewStart();
 
-	this->draggedReposTile = this->gridInst->Grid()->GetTileAtPixel(clickPos);
-	if(this->draggedReposTile != nullptr)
+	bool mouseQuery = 
+		this->QueryMouseOperationDetails(
+			this->gridInst,
+			this->canvasWin->GetClientAreaOrigin(),
+			evt.GetPosition(),
+			this->interactionMode,
+			this->draggedReposTile,
+			this->draggOffset,
+			this->dragMode,
+			this->resizeFlags);
+
+	if(mouseQuery)
 	{
-		wxPoint eleOrigin = 
-			this->draggedReposTile->CellPos() * this->gridInst->GridCellSize();
-
-		this->draggOffset = evt.GetPosition() - eleOrigin;
-
-		if(
-			this->interactionMode == MouseInteractMode::Move || 
-			this->interactionMode == MouseInteractMode::MoveOp)
-		{ 
-			this->dragMode = MouseDragMode::DragElement;
-			_this->CaptureMouse();
-		}
-		else if(this->interactionMode == MouseInteractMode::Resize)
+		if(this->interactionMode == MouseInteractMode::Resize)
 		{
-			const int dragAreaThk	= 10;
-			int sideFlags = 0;
-
-			// Find the combination of sides it's on. 
-			// It will either be a 
-			//	- horizontal side
-			//  - vertical side
-			//	- both a horizontal and vertical (a corner)
-			//	- none (in the center).
-			// If in the center, we'll consider it a move.
-			//
-			if(clickPos.x <= eleOrigin.x + dragAreaThk)
-				sideFlags |= RSZLEFTFLAG;
-			else if(clickPos.x >= eleOrigin.x + this->draggedReposTile->PixelSize().x - dragAreaThk)
-				sideFlags |= RSZRIGHTFLAG;
-			if(clickPos.y <= eleOrigin.y + dragAreaThk)
-				sideFlags |= RSZTOPFLAG;
-			if(clickPos.y >= eleOrigin.y + this->draggedReposTile->PixelSize().y - dragAreaThk)
-				sideFlags |= RSZBOTFLAG;
-
-			// Make sure a sane combination of one of the 8 allowed configurations
-			// are allowed. If not, its either a state error or the center. Either
-			// way, we'll fallback to a move if that happens.
-			switch(sideFlags)
-			{
-			case RSZLEFTFLAG:
-			case RSZRIGHTFLAG:
-			case RSZTOPFLAG:
-			case RSZBOTFLAG:
-			case RSZLEFTFLAG|RSZTOPFLAG:
-			case RSZRIGHTFLAG|RSZTOPFLAG:
-			case RSZLEFTFLAG|RSZBOTFLAG:
-			case RSZRIGHTFLAG|RSZBOTFLAG:
-				this->dragMode = MouseDragMode::ResizeElement;
-				this->resizeFlags = sideFlags;
-				this->resizePoint = this->draggedReposTile->CellPos();
-				this->resizeSize = this->draggedReposTile->CellSize();
-				break;
-
-			default:
-				this->dragMode = MouseDragMode::DragElement;
-				break;
-			}
-			_this->CaptureMouse();
+			this->resizePoint = this->draggedReposTile->CellPos();
+			this->resizeSize = this->draggedReposTile->CellSize();
 		}
-		else
-		{
-			this->draggedReposTile = nullptr;
-		}
+
+		this->SetCursor(
+			GetMouseOperationCursor(
+				this->dragMode, 
+				this->resizeFlags));
+
+		_this->CaptureMouse();
 	}
+	else
+	{
+		// Redundant, because this state should be the result at this point from
+		// QueryMouseOperationDetails, but just for sanity.
+		this->dragMode = MouseDragMode::None;
+		this->draggedReposTile = nullptr;
+
+		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+	}
+}
+
+void PaneDashboard::Canvas_OnMouseEnter(wxMouseEvent& evt)
+{
+	this->UpdateProperOperationMouseCursor(evt.GetPosition());
+}
+
+void PaneDashboard::Canvas_OnMouseLeave(wxMouseEvent& evt)
+{
+	this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
 }
 
 void PaneDashboard::Canvas_OnPaint(wxPaintDC& evt)
@@ -872,9 +888,6 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 	// being redirected for the PaneDashboard to handle.
 	wxWindow * _this = this->canvasWin;
 
-	if(_this->HasCapture())
-		_this->ReleaseMouse();
-
 	switch(this->dragMode)
 	{
 	// PalleteInsert Handled in OnEndParamDrag()
@@ -925,6 +938,11 @@ void PaneDashboard::Canvas_OnLeftUp(wxMouseEvent& evt)
 		}
 		break;
 	}
+
+	if(_this->HasCapture())
+		_this->ReleaseMouse();
+
+	this->UpdateProperOperationMouseCursor(evt.GetPosition());
 	this->_ClearMouseDragState();
 }
 
@@ -1356,4 +1374,148 @@ void PaneDashboard::OnMenu_ResizeDashboardGrid(wxCommandEvent& evt)
 			this->canvasWin->GetScrollPos(wxHORIZONTAL),
 			this->canvasWin->GetScrollPos(wxVERTICAL));
 	}
+}
+
+bool PaneDashboard::QueryMouseOperationDetails(
+	DashboardGridInst* grid,
+	const wxPoint& scrollOffs,
+	const wxPoint& mousePt, 
+	MouseInteractMode interactionMode,
+	Tile*& outTile, 
+	wxPoint& tileInsideHit,
+	MouseDragMode& outMouseMode, 
+	int& outResizeFlag)
+{
+	wxScrolledWindow * _this = this->canvasWin;
+
+	// Convert mouse points to dashboard document position
+	wxPoint docPt = mousePt + _this->GetViewStart();
+	outTile = grid->Grid()->GetTileAtPixel(docPt);
+
+	if(outTile == nullptr)
+		return false;
+
+	wxPoint tOrigin = outTile->CellPos() * grid->GridCellSize();
+	tileInsideHit = mousePt - tOrigin;
+
+	if(
+		this->interactionMode == MouseInteractMode::Move || 
+		this->interactionMode == MouseInteractMode::MoveOp)
+	{
+		outMouseMode = MouseDragMode::DragElement;
+		outResizeFlag = 0;
+		return true;
+	}
+
+	if(this->interactionMode == MouseInteractMode::Resize)
+	{
+		const int dragAreaThk	= 10;
+		outResizeFlag = 0;
+
+		// Find the combination of sides it's on. 
+		// It will either be a 
+		//	- horizontal side
+		//  - vertical side
+		//	- both a horizontal and vertical (a corner)
+		//	- none (in the center).
+		// If in the center, we'll consider it a move.
+		//
+		if(docPt.x <= tOrigin.x + dragAreaThk)
+			outResizeFlag |= RSZLEFTFLAG;
+		else if(docPt.x >= tOrigin.x + outTile->PixelSize().x - dragAreaThk)
+			outResizeFlag |= RSZRIGHTFLAG;
+		if(docPt.y <= tOrigin.y + dragAreaThk)
+			outResizeFlag |= RSZTOPFLAG;
+		if(docPt.y >= tOrigin.y + outTile->PixelSize().y - dragAreaThk)
+			outResizeFlag |= RSZBOTFLAG;
+
+		// Make sure a sane combination of one of the 8 allowed configurations
+		// are allowed. If not, its either a state error or the center. Either
+		// way, we'll fallback to a move if that happens.
+		switch(outResizeFlag)
+		{
+		case RSZLEFTFLAG:
+		case RSZRIGHTFLAG:
+		case RSZTOPFLAG:
+		case RSZBOTFLAG:
+		case RSZLEFTFLAG|RSZTOPFLAG:
+		case RSZRIGHTFLAG|RSZTOPFLAG:
+		case RSZLEFTFLAG|RSZBOTFLAG:
+		case RSZRIGHTFLAG|RSZBOTFLAG:
+			outMouseMode = MouseDragMode::ResizeElement;
+			return true;
+			break;
+
+		default:
+			outMouseMode = MouseDragMode::DragElement;
+			return true;
+		}
+	}
+
+	outMouseMode = MouseDragMode::None;
+	return false;
+}
+
+void PaneDashboard::UpdateProperOperationMouseCursor(const wxPoint& mousePt)
+{
+
+	// Note we don't want this to create side-effects, so we pass in dummy
+	// output variables that will be thrown away.
+	Tile* t;
+	wxPoint inT;
+	MouseDragMode dragMode;
+	int outResize;
+
+	bool queryRet = 
+		PaneDashboard::QueryMouseOperationDetails(
+			this->gridInst,
+			this->canvasWin->GetClientAreaOrigin(),
+			mousePt, 
+			this->interactionMode,
+			t, 
+			inT,
+			dragMode, 
+			outResize);
+
+	if(!queryRet)
+		this->SetCursor(wxStockCursor::wxCURSOR_ARROW);
+	else
+		this->SetCursor(GetMouseOperationCursor(dragMode, outResize));
+}
+
+wxStockCursor PaneDashboard::GetResizeDirectionCursor(int resizeFlag)
+{
+	switch(resizeFlag)
+	{
+	case RSZLEFTFLAG:
+	case RSZRIGHTFLAG:
+		return wxStockCursor::wxCURSOR_SIZEWE;
+
+	case RSZTOPFLAG:
+	case RSZBOTFLAG:
+		return wxStockCursor::wxCURSOR_SIZENS;
+
+	case RSZTOPFLAG|RSZLEFTFLAG:
+	case RSZBOTFLAG|RSZRIGHTFLAG:
+		return wxStockCursor::wxCURSOR_SIZENWSE;
+
+	case RSZTOPFLAG|RSZRIGHTFLAG:
+	case RSZBOTFLAG|RSZLEFTFLAG:
+		return wxStockCursor::wxCURSOR_SIZENESW;
+	}
+	return wxStockCursor::wxCURSOR_ARROW;
+}
+
+wxStockCursor PaneDashboard::GetMouseOperationCursor(MouseDragMode mdm, int resizeFlag)
+{
+	if(mdm == MouseDragMode::ResizeElement)
+		return GetResizeDirectionCursor(resizeFlag);
+
+	if(mdm == MouseDragMode::PalleteInsert)
+		return wxStockCursor::wxCURSOR_CROSS;
+
+	if(mdm == MouseDragMode::DragElement)
+		return wxStockCursor::wxCURSOR_HAND;
+
+	return wxStockCursor::wxCURSOR_ARROW;
 }

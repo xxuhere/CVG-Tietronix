@@ -94,7 +94,7 @@ public:
 	/// <summary>
 	/// The current state of interaction for the mouse.
 	/// </summary>
-	enum MouseInteractMode
+	enum class MouseInteractMode
 	{
 		/// <summary>
 		/// GUI elements can be interacted with or moved (if non-GUI
@@ -144,7 +144,7 @@ public:
 		Dotted
 	};
 
-	enum MouseDragMode
+	enum class MouseDragMode
 	{
 		/// <summary>
 		/// No mouse drag operation is occuring.
@@ -277,7 +277,6 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	/// shown because proxies are down in their place (to allow mouse editing to happen 
 	/// where the child windows are).
 	/// 
-	/// When the 
 	/// </summary>
 	/// <returns>
 	/// True if widgets should be shown. 
@@ -380,6 +379,11 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	void Canvas_OnScrollPageDown(wxScrollWinEvent& evt);
 	void Canvas_OnScrollThumbTrack(wxScrollWinEvent& evt);
 	void Canvas_OnScrollThumbRelease(wxScrollWinEvent& evt);
+	void Canvas_OnMouseCaptureLost(wxMouseCaptureLostEvent& evt);
+	void Canvas_OnMouseCaptureChanged(wxMouseCaptureChangedEvent& evt);
+	//
+	void Canvas_OnMouseEnter(wxMouseEvent& evt);
+	void Canvas_OnMouseLeave(wxMouseEvent& evt);
 
 	/// <summary>
 	/// Changes the outline mode of how tile boundaries are drawn.
@@ -439,8 +443,67 @@ public: // DockedCVGPane OVERRIDE FUNCTIONS
 	/// </summary>
 	void ReattachCanvas();
 
-	wxDECLARE_EVENT_TABLE();
+
+	/// <summary>
+	/// Given a mouse mode and an interaction mode, get details on
+	/// what kind of operation would occur with a mouse click.
+	///
+	/// This is used to unify mouse icon assignment in various places
+	/// with actual mouse interaction in Canvas_OnLeftDown().
+	/// </summary>
+	/// <param name="grid">The grid to query.</param>
+	/// <param name="scrollOffs">The offset of the view. i.e., the scroll bars.</param>
+	/// <param name="mousePt">The local mouse position.</param>
+	/// <param name="interactionMode">The mouse interaction mode being considered.</param>
+	/// <param name="outTile">If returns true, the position was over a tile which is returned here. Else, ignore.</param>
+	/// <param name="tileInsideHit">The point inside outTile where the mouse is at.</param>
+	/// <param name="outMouseMode">The type of operation that was discovered.</param>
+	/// <param name="outResizeFlag">If MouseDragMode is resize, the edge or corner to resize.</param>
+	/// <returns>If true, the mouse was found over a tile. Else, false.</returns>
+	/// <remarks>
+	/// We may want to just take in the transformed mouse position instead of
+	/// taking the local mouse and scroll to apply the addition inside the function.
+	/// </remarks>
+	bool QueryMouseOperationDetails(
+		DashboardGridInst* grid,
+		const wxPoint& scrollOffs,
+		const wxPoint& mousePt, 
+		MouseInteractMode interactionMode,
+		Tile*& outTile, 
+		wxPoint& tileInsideHit,
+		MouseDragMode& outMouseMode, 
+		int& outResizeFlag);
+
+	/// <summary>
+	/// Update the icon to match what the cursor is under, without performing
+	/// any actual operation.
+	/// </summary>
+	/// <param name="mousePt">
+	/// The mouse point to get the proper cursor for. The point should be local
+	/// to this->canvasWin, and not the dashboard itself.</param>
+	void UpdateProperOperationMouseCursor(const wxPoint& mousePt);
+
+	/// <summary>
+	/// Given resize bitflags (see the declaration of RSZLEFTFLAG for more details)
+	/// decide the proper mouse cursor to convey that resize operation.
+	/// </summary>
+	/// <param name="resizeFlag">The collection of edges being resized.</param>
+	/// <returns>The cursor representing the resize.</returns>
+	static wxStockCursor GetResizeDirectionCursor(int resizeFlag);
+
+	/// <summary>
+	/// Given the state of the mouse operation, return a cursor properly conveys
+	/// that mouse operation.
+	/// </summary>
+	/// <param name="mdm">The mouse drag operation.</param>
+	/// <param name="resizeFlag">
+	/// The collection of edges being resized, only used if the drag operation
+	/// is resize.
+	/// </param>
+	/// <returns>The cursor representing the mouse mode.</returns>
+	static wxStockCursor GetMouseOperationCursor(MouseDragMode mdm, int resizeFlag);
 
 	// !TODO: destroy gridInst on close
+	wxDECLARE_EVENT_TABLE();
 };
 
