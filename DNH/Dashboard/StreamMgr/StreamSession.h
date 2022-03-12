@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <mutex>
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 
