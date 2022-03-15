@@ -37,14 +37,14 @@ Download and unpack the wxWidgets on the Linux machine or a location network acc
 
 The instructions below are originally from https://www.binarytides.com/install-wxwidgets-ubuntu/, but have been modified.
 
-1. Download wxWidget and unpack it. (It is recommended to NOT put it in the CVG repo.)
-2. Open a terminal and cd into the wxWidget directory.
+1. Download wxWidgets and unpack it. (It is recommended to NOT put it in the CVG repo.)
+2. Open a terminal and cd into the wxWidgets directory.
 3. `sudo apt-get install libgtk-3-dev build-essential`
 3. `mkdir gtk-build`
 4. `cd gtk-build/`
 5. `../configure --with-opengl --disable-shared --enable-unicode`
 6. `make`
-7. `make install`
+7. `sudo make install`
 
 To test that wxWidgets has been installed, type `wx-config`, which should run an installed script.
 
