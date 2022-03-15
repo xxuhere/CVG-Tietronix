@@ -48,7 +48,7 @@ SUBDIR_MAIN = Src
 SUBDIR_CORE = Src/Core
 
 SUBOBJ_MAIN = mainWin
-SUBOBJ_CORE = BackboneHTTP BackboneWS CoreDNH SEquipment SEquipmentList LogSys ResponseUtils CommandsCollection
+SUBOBJ_CORE = BackboneHTTP BackboneWS CoreDNH SEquipment SEquipmentList LogSys ResponseUtils CommandsCollection Utils
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_CORE = $(patsubst %,$(SUBDIR_CORE)/%.o,$(SUBOBJ_CORE))

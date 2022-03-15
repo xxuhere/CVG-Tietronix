@@ -140,7 +140,7 @@ PaneDashboard::PaneDashboard(wxWindow * win, int id, RootWindow * rootWin, Dashb
 
 	wxGLCanvas * displayWin = new wxGLCanvas(this, wxID_ANY);
 	static wxGLContextAttrs attrs;
-	attrs.CoreProfile().Robust().EndList();
+	attrs.MajorVersion(2).EndList();
 	wxGLContext * sharedContext = new wxGLContext(displayWin, nullptr, &attrs);
 	sharedContext->SetCurrent(*displayWin);
 	this->SetSize(0, 0, 300, 300);

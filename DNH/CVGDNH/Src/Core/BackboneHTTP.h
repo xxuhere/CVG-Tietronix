@@ -1,4 +1,5 @@
 #pragma once
+#include "CompatabilityHacks.h" // Suppress 4996
 
 #include <string>
 #include "BackboneStatus.h"

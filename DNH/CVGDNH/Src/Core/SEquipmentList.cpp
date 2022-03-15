@@ -22,7 +22,10 @@ namespace CVG
 		return ret;
 	}
 
-	bool SEquipmentList::Register(WSConSPtr con, SEquipmentSPtr eq)
+	bool SEquipmentList::Register(
+		WSConSPtr con, 
+		SEquipmentSPtr eq, 
+		const std::string& loopbackAddr)
 	{
 		// We only register if it's doesn't currently exist.
 		//
@@ -31,7 +34,7 @@ namespace CVG
 		if (this->itemsByGUID.find(eq->GUID()) != this->itemsByGUID.end())
 			return false;
 
-		eq->SetSocket(con);
+		eq->SetSocket(con, loopbackAddr);
 
 		this->itemsByGUID[eq->GUID()] = eq;
 		this->itemsBySocket[con] = eq;

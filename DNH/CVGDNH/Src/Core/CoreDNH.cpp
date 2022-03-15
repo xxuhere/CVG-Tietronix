@@ -93,7 +93,7 @@ namespace CVG
 		bool ret = false;
 		this->equipmentMutex.lock();
 
-		if (this->equipment->Register(con, eq))
+		if (this->equipment->Register(con, eq, this->wsServer.SelfHostnameStr()))
 		{
 			this->FlagEquipmentCacheDirty();
 			ret = true;

@@ -58,10 +58,11 @@ namespace CVG
 		/// </summary>
 		/// <param name="con">The connection the Equipment is tied to.</param>
 		/// <param name="eq">The Equipment to register.</param>
+		/// <param name="loopbackAddr">The address to use if con is a loopback.</param>
 		/// <returns>
 		/// A JSON array.
 		/// </returns>
-		bool Register(WSConSPtr con, SEquipmentSPtr eq);
+		bool Register(WSConSPtr con, SEquipmentSPtr eq, const std::string& loopbackAddr);
 
 		/// <summary>
 		/// Remove an Equipment from the list that is 

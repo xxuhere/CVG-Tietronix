@@ -3,6 +3,7 @@
 #include <set>
 #include <map>
 #include <memory>
+#include <boost/asio.hpp>
 #include "SocketDefines.h"
 
 #include "SEquipment.h"
@@ -40,7 +41,10 @@ namespace CVG
 		// All successfully registered connections are converted to 
 		// Equipments and registered with coreSys's Equipment list.
 		std::set< WSConSPtr> unregistered;
+
 		std::mutex unregisteredMutex;
+
+		boost::asio::ip::address usableSelfIP;
 
 	public:
 		/// <summary>
@@ -61,6 +65,9 @@ namespace CVG
 		/// already running).
 		/// </returns>
 		bool StartServer();
+
+		inline std::string SelfHostnameStr() const
+		{ return this->usableSelfIP.to_string(); }
 
 		/// <summary>
 		/// Shutdown the server.

@@ -165,11 +165,14 @@ namespace CVG
 		/// <param name="s">
 		/// The WebSocket connection that is networked with the Equipment.
 		/// </param>
+		/// <param name="loopbackSub">
+		/// The address to use if s is found to be a loopback address.
+		/// </param>
 		/// <returns>
 		/// True if the network connection was successfuly set. 
 		/// False if the socket was already set.
 		/// </returns>
-		bool SetSocket(WSConSPtr s);
+		bool SetSocket(WSConSPtr s, const std::string& loopbackSub);
 
 		inline WSConSPtr GetSocket() 
 		{ return this->socket; }

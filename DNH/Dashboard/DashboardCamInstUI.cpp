@@ -21,7 +21,7 @@ DashboardCamInstUI::DashboardCamInstUI(wxWindow* parent, DashboardCamInst* instO
 	if(sharedContext == nullptr)
 	{
 		static wxGLContextAttrs attrs;
-		attrs.CoreProfile().Robust().EndList();
+		attrs.MajorVersion(2).EndList(); 
 		sharedContext = new wxGLContext(this->displayWin, nullptr, &attrs);
 		sharedContext->SetCurrent(*this->displayWin);
 	}

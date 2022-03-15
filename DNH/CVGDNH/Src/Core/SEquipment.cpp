@@ -157,7 +157,7 @@ namespace CVG
 		return this->Equipment::GetJSONSummary();
 	}
 
-	bool SEquipment::SetSocket(WSConSPtr s)
+	bool SEquipment::SetSocket(WSConSPtr s, const std::string& loopbackSub)
 	{
 		if (this->socket.get() != nullptr)
 			return false;
@@ -166,29 +166,39 @@ namespace CVG
 
 		// If no specified hostname, one is defaulted through
 		// available into in WSConSPtr.
-		std::string conEndpoint = s->remote_endpoint().address().to_string();
-		std::cout << "conEndpoint " << conEndpoint << std::endl;
+		std::string conHost = "";
+		
+		if(s->remote_endpoint().address().is_loopback())
+			conHost = loopbackSub;
+		else
+			conHost = s->remote_endpoint().address().to_string();
+
+		std::cout << "conEndpoint " << conHost << std::endl;
 
 		// The endpoint address will often have extra formatting that 
 		// we're better off without.
 		// For example, an internal IPv4 address of 127.0.0.1 will come
 		// back as ::ffff:127.0.0.1
-		if(conEndpoint.find("::ffff:", 0) == 0)
+		if(conHost.find("::ffff:", 0) == 0)
 		{
-			std::cout << "shortening to " << conEndpoint << std::endl;
-			conEndpoint = conEndpoint.substr(7);
+			std::cout << "shortening to " << conHost << std::endl;
+			conHost = conHost.substr(7);
 		}
 
 		// Include any other loopback addresses. If they're set to loopback,
 		// it doesn't do any good to broadcast that out to other people to
 		// reference (because it won't direct to the machine, just back to
 		// itself).
-		if(conEndpoint == "127.0.0.1")
-			conEndpoint = boost::asio::ip::host_name();
-
+		if(conHost == "127.0.0.1")
+		{
+			// Depending on the platform and libraries this was compiled on,
+			// this may not give a useful name. But this is a sanity fallback
+			// if loopbackSub fails - but it really shouldn't.
+			conHost = boost::asio::ip::host_name();
+		}
 
 		if(this->hostname.empty())
-			this->hostname = conEndpoint;
+			this->hostname = conHost;
 
 		std::cout << "Setting hostname to " << this->hostname << std::endl;
 

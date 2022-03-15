@@ -4,7 +4,7 @@
 #include "ResponseUtils.h"
 #include "CVGData/Src/Params/ParamUtils.h"
 #include "CVGData/Src/ParseUtils.h"
-
+#include "Utils.h"
 namespace CVG
 {
 	/// <summary>
@@ -116,6 +116,38 @@ namespace CVG
 		this->server_thread = 
 			std::thread([this]() 
 			{
+				// Get the IP address to the server's machine
+				// in case we get equipment connecting to ourselves -
+				// because a loopback address is useless to other equipment.
+				std::cout << "Searching for loopback substitute" << std::endl;
+				std::cout << "---------------------------------" << std::endl;
+				//
+				std::vector<boost::asio::ip::address> selfAddrs = get_local_interfaces();
+				// Output for diagnostic purposes.
+				std::cout << selfAddrs.size() << " results:" << std::endl;
+				for(int i = 0; i < selfAddrs.size(); ++i)
+				{
+					const boost::asio::ip::address & ad = selfAddrs[i];
+					std::cout << i << " : " << ad.to_string() << std::endl;
+				}
+				std::cout << "\n\n";
+				
+				this->usableSelfIP = GetBestSelfAddress(selfAddrs);
+					
+				std::cout << "Using IP " << this->usableSelfIP.to_string() << "  --  ";
+				if(this->usableSelfIP.is_v4())
+					std::cout << "Type IPv4" << std::endl;
+				else if(this->usableSelfIP.is_v6())
+					std::cout << "Type IPv6" << std::endl;
+				else
+				{
+					// It's hard to say what to actually do if this is 
+					// encountered (if even possible). For now probably the
+					// most-plausible thing is to treat it like a v4 and hope
+					// it's still a valid hostname.
+					std::cout << "ERROR: Unknown IPv type!" << std::endl;
+				}
+
 				// Start WS-server
 				server.start();
 			});
@@ -434,7 +466,16 @@ namespace CVG
 		//
 		//////////////////////////////////////////////////
 
-		SEquipment* eq = new SEquipment(reqname, reqmanu, reqpurpose, reqhostname, eqtype, params, clientData);
+		SEquipment* eq = 
+			new SEquipment(
+				reqname, 
+				reqmanu, 
+				reqpurpose, 
+				reqhostname, 
+				eqtype, 
+				params, 
+				clientData);
+
 		return SEquipmentSPtr(eq);
 	}
 

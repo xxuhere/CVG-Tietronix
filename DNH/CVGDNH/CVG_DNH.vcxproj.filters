@@ -14,6 +14,7 @@
     <ClCompile Include="Src\Core\BackboneWS.cpp">
       <Filter>Backbones</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Core\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Core\BackboneHTTP.h">
@@ -44,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Core\BackboneWS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\CompatabilityHacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Core\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
