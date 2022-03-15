@@ -16,7 +16,7 @@ Download, unzip and follow its instructions (in the index html files -> getting 
 
 Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a {BOOST_DIR}/stage/lib directory with the built *.lib and *.dll files.
 
-Note that at lease till release we will be using the debug variant of Boost so make sure to build it and link to it in .props later.
+Note that at least until, release we will be using the debug variant of Boost so make sure to build it and link to it in .props later.
 
 **OpenSSL**
 The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
@@ -153,3 +153,12 @@ Samples on how browsers and web technologies can connect to it can be found in t
 ## Coding
 
 The DNH codebase uses C++14. The general rule being applied is that the C++ standard being used should be the most recent one that's at least 5 years  old. While this is somewhat arbitrary, this is done to make sure the project uses a version of C++ that available on all supported platforms, as well as helping to make sure the C++ compilers have a certain level of maturity.
+
+## Utility Scripts
+
+There is quite a bit of setup work that can be involved with running the DNH. Because of that, there are scripts designed to make starting and restarting the DNH and camera servers as trouble-free as possible. They are the files `cvgserverboot.sh` and `cvgclearsession.sh`.
+
+* **cvgserverboot.sh** will stop any python scripts, and run/restart the DNH and v4l2rtspserver instances. For more information, access its help by running `. cvgserverboot.sh --help`. 
+* **cvgclearsession.sh** will stop all python scripts, v4l2rtspserver instances and the DNH server. It will not restart any of those programs. For more information, access its help by running `. cvgclearsession.sh`.
+
+They are designed to be convenient when starting the system from an ssh terminal. An ssh session will start the terminal in the user's home directory. Because of that, the scripts have features to add symlinks of themselves into the user's home directory. To add the symlink references of these scripts to your home directory, in the DNH folder, run `. cvgserverboot.sh --install; . cvgclearsession.sh --install`.
