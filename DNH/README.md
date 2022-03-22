@@ -3,7 +3,7 @@
 
 The Device Network Hub (DNH) is a central communication piece for different hardware, software and IT elements to comunicate and form the CVG system.
 
-It designed to be as portable as possible. Although the biggest requirements are that is compiles for Ubuntu 20 for RaspberryPi, and Windows 10.  Both for 64 bit instruction sets. Instructions for Windows and Lunix (both ubuntu and pi) are as follows.
+It designed to be as portable as possible. Although the biggest requirements are that is compiles for Raspbian Buster for RaspberryPi, and Windows 10.  Both for 64 bit instruction sets. Instructions for Windows and Linux are as follows.
 
 ## Building on Windows
 
@@ -129,8 +129,9 @@ make is used to detect compile dependencies and automate the compile and linking
 **making**
 
 In a terminal, cd to the `DNH` directory. There should be a Makefile contained in it.
-If any Make attempt fails or you want to `make all` after having made just the hub `make clean` first.
-To make just the hub and not the dashboard interface enter `make hub`. If you want to make both the hub and the dashboard install wxWidgets as described in the README_Dashboard.md first and then enter `make all` to being the compile process.  
+* If any Make attempt fails or you want to `make all` after having made just the hub `make clean` first.
+* To make just the hub and not the dashboard interface enter `make hub`. 
+* If you want to make both the hub and the dashboard install wxWidgets as described in the README_Dashboard.md first and then enter `make all` to being the compile process.  
 
 If successful no errors will be show and, it will create a `DNH` executable in the directory.
 
@@ -162,7 +163,7 @@ The DNH codebase uses C++14. The general rule being applied is that the C++ stan
 
 There is quite a bit of setup work that can be involved with running the DNH. Because of that, there are scripts designed to make starting and restarting the DNH and camera servers as trouble-free as possible. They are the files `cvgserverboot.sh` and `cvgclearsession.sh`.
 
-* **cvgserverboot.sh** will stop any python scripts, and run/restart the DNH and v4l2rtspserver instances. For more information, access its help by running `. cvgserverboot.sh --help`.
-* **cvgclearsession.sh** will stop all python scripts, v4l2rtspserver instances and the DNH server. It will not restart any of those programs. For more information, access its help by running `. cvgclearsession.sh`.
+* **cvgserverboot.sh** will stop all Python scripts, and run/restart the DNH and v4l2rtspserver instances. For more information, access its help by running `. cvgserverboot.sh --help`.
+* **cvgclearsession.sh** will stop all Python scripts, v4l2rtspserver instances and the DNH server. It will not restart any of those programs. For more information, access its help by running `. cvgclearsession.sh`.
 
 They are designed to be convenient when starting the system from an ssh terminal. An ssh session will start the terminal in the user's home directory. Because of that, the scripts have features to add symlinks of themselves into the user's home directory. To add the symlink references of these scripts to your home directory, in the DNH folder, run `. cvgserverboot.sh --install; . cvgclearsession.sh --install`.
