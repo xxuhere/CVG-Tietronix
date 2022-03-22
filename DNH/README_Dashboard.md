@@ -37,7 +37,7 @@ Download and unpack the wxWidgets on the Linux machine or a location network acc
 
 The instructions below are originally from https://www.binarytides.com/install-wxwidgets-ubuntu/, but have been modified.
 
-1. Download wxWidgets and unpack it. (It is recommended to NOT put it in the CVG repo.)
+1. Download wxWidgets 3.1.5 and unpack it. (It is recommended to NOT put it in the CVG repo.)
 2. Open a terminal and cd into the wxWidgets directory.
 3. `sudo apt-get install libgtk-3-dev build-essential`
 3. `mkdir gtk-build`
@@ -49,7 +49,7 @@ The instructions below are originally from https://www.binarytides.com/install-w
 To test that wxWidgets has been installed, type `wx-config`, which should run an installed script.
 
 ### Building
-
+Follow compilation instructions in the README.md till the `make hub` where you would instead `make dash`. If any make attempt fails or you want to `make all` after having made anything `make clean` first.
 In {CVG_REPO_ROOT}/DNH, run `make dash`. This will build DashboardApp in the same folder.
 
 ## Using the Dashboard
