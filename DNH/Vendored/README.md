@@ -13,6 +13,15 @@ currently vendored.
 Only relevant files need to be included (not the entire repository).
 This includes the library version's README file and LICENSE file.
 
+## glm
+
+https://github.com/g-truc/glm
+**Name:** OpenGL Mathematics
+**Version:** 0.9.9.8
+**License:** MIT License
+**Justification:**
+A vector math library designed for use with OpenGL.
+
 ## json
 
 https://github.com/nlohmann/json
