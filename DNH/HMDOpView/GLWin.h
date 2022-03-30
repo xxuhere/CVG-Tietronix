@@ -4,6 +4,8 @@
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 class MainWin;
 class BaseState;
 
@@ -26,6 +28,7 @@ private:
 	wxGLContext* ctx = nullptr;
 	wxTimer redrawTimer;
 
+	boost::posix_time::ptime lastStopwatch;
 
 public:
 	GLWin(MainWin* parent);
@@ -35,6 +38,8 @@ public:
 	{return this->typedParent;}
 
 	BaseState* CurrState();
+
+	void SetGLCurrent();
 
 	void DrawGraphics(const wxSize& sz);
 

@@ -78,6 +78,13 @@ public:
 	std::thread* camStreamThread = nullptr;
 
 	/// <summary>
+	/// When testing mode is turned on, camera streaming will be replaced with
+	/// showing a canned image. This allows us to iterate faster by not 
+	/// requiring the camera video feed to fully initialize before starting up.
+	/// </summary>
+	bool testingMode = false;
+
+	/// <summary>
 	/// This should match with the number of times curCamFrame has been updated,
 	/// so we if need track of the last time we polled curCamFrame and the 
 	/// change counter, we know if we can expect a change if we poll again.
@@ -142,6 +149,17 @@ public:
 
 	inline State GetState() { return this->conState; }
 
+	void ToggleTesting();
+
 private:
+	/// <summary>
+	/// Adjust the streaming state to disable streaming.
+	/// </summary>
+	/// <param name="deactivateShould">
+	/// If true, the shouldBeStreaming will also be modified. This should NOT
+	/// be set if the streaming needs to be disabled (because of an error) but 
+	/// the application still wants to stream.</param>
+	void _DeactivateStreamState(bool deactivateShould = false);
+
 	CamStreamMgr();
 };

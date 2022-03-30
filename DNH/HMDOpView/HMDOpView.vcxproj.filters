@@ -19,6 +19,18 @@
     <Filter Include="Header Files\States">
       <UniqueIdentifier>{1fefb7fc-9c8f-4378-85b6-f4bbbb6a0ca6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{22e14985-3d0d-4fa5-b72e-87d592c992cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{8809c427-8d75-4bf2-b22d-854820fa5447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lodePNG">
+      <UniqueIdentifier>{ebe9f9a7-af6d-4296-bbe2-587cf1693092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lodePNG">
+      <UniqueIdentifier>{d9381087-dbdb-4053-86b0-f11376d3c49f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -63,6 +75,15 @@
     <ClInclude Include="TexObj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\cvgRect.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\cvgShapes.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lodePNG\lodepng.h">
+      <Filter>Header Files\lodePNG</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -94,6 +115,15 @@
     </ClCompile>
     <ClCompile Include="TexObj.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgRect.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgShapes.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="lodePNG\lodepng.cpp">
+      <Filter>Source Files\lodePNG</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

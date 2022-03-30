@@ -5,6 +5,11 @@
 #include "../CamStreamMgr.h"
 #include "../TexObj.h"
 
+/// <summary>
+/// The application state for when the application is loading and
+/// ensuring the camera is sucessfully connected and streaming 
+/// before proceeding the application to the main HMD Operator state.
+/// </summary>
 class StateInitCameras : public BaseState
 {
 public:
@@ -31,7 +36,7 @@ public:
 	//////////////////////////////////////////////////
 
 	void Draw(const wxSize& sz) override;
-	void Update() override;
+	void Update(double dt) override;
 
 	void EnteredActive() override;
 	void ExitedActive() override;

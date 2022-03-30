@@ -7,11 +7,7 @@
 
 bool HMDOpApp::OnInit()
 {
-    std::cout << "hello!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-
     MainWin *frame = new MainWin( "CVG HMD Operator View", wxPoint(50, 50), wxSize(450, 340) );
-
-    std::cout << "hello!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     return true;
 }
 

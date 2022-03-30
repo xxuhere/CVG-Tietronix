@@ -2,6 +2,11 @@
 #include "BaseState.h"
 #include "../FontMgr.h"
 
+/// <summary>
+/// The first application state. The application is hard-coded
+/// to go to the intro state. It doesn't do much except show a
+/// title screen and flash some logos.
+/// </summary>
 class StateIntro : public BaseState
 {
 public:
@@ -16,7 +21,15 @@ public:
 public:
 	StateIntro(HMDOpApp* app, GLWin* view, MainWin* core);
 
+	/// <summary>
+	/// Reset the interaction flag.
+	/// </summary>
 	void ResetInteraction() { this->interacted = false; }
+
+	/// <summary>
+	/// When the user interacts with the application to go to
+	/// the next screen, call this.
+	/// </summary>
 	void FlagInteracted() { this->interacted = true; }
 
 	~StateIntro();
@@ -28,7 +41,7 @@ public:
 	//////////////////////////////////////////////////
 
 	void Draw(const wxSize& sz) override;
-	void Update() override;
+	void Update(double dt) override;
 
 	void EnteredActive() override;
 	void ExitedActive() override;

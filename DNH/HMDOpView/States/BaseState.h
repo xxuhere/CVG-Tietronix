@@ -38,7 +38,7 @@ private:
 public:
 	BaseState(AppState state, HMDOpApp* app, GLWin* view, MainWin* core);
 
-	inline AppState GetState(){return this->_state;}
+	inline AppState GetState() {return this->_state;}
 	inline HMDOpApp* GetApp() {return this->_app;}
 	inline GLWin* GetView() {return this->_view;}
 	inline MainWin* GetCoreWindow() {return this->_core;}
@@ -46,7 +46,7 @@ public:
 public:
 	// TODO: Docstrings
 	virtual void Draw(const wxSize& sz) = 0;
-	virtual void Update() = 0;
+	virtual void Update(double dt) = 0;
 
 	virtual void EnteredActive() = 0;
 	virtual void ExitedActive() = 0;

@@ -60,6 +60,9 @@ public:
 	/// The y position, in screen coordinates, to render the text.
 	/// </param>
 	void RenderFont(const char * sz, float x, float y);
+	void RenderFontCenter(const char * sz, float x, float y);
+
+	float GetAdvance(const char* sz);
 };
 
 /// <summary>

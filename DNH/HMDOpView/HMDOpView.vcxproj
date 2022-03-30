@@ -152,6 +152,7 @@
     <ClInclude Include="glext.h" />
     <ClInclude Include="GLWin.h" />
     <ClInclude Include="HMDOpApp.h" />
+    <ClInclude Include="lodePNG\lodepng.h" />
     <ClInclude Include="MainWin.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="States\BaseState.h" />
@@ -161,18 +162,23 @@
     <ClInclude Include="States\StateIntro.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TexObj.h" />
+    <ClInclude Include="Utils\cvgRect.h" />
+    <ClInclude Include="Utils\cvgShapes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CamStreamMgr.cpp" />
     <ClCompile Include="FontMgr.cpp" />
     <ClCompile Include="GLWin.cpp" />
     <ClCompile Include="HMDOpApp.cpp" />
+    <ClCompile Include="lodePNG\lodepng.cpp" />
     <ClCompile Include="MainWin.cpp" />
     <ClCompile Include="States\BaseState.cpp" />
     <ClCompile Include="States\StateHMDOp.cpp" />
     <ClCompile Include="States\StateInitCameras.cpp" />
     <ClCompile Include="States\StateIntro.cpp" />
     <ClCompile Include="TexObj.cpp" />
+    <ClCompile Include="Utils\cvgRect.cpp" />
+    <ClCompile Include="Utils\cvgShapes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HMDOpView.rc" />

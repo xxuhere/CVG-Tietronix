@@ -28,7 +28,7 @@ void StateIntro::Draw(const wxSize& sz)
 	this->mainFont.RenderFont("Press any key to continue",	500, 200);
 }
 
-void StateIntro::Update()
+void StateIntro::Update(double dt)
 {
 	if(this->interacted)
 	{

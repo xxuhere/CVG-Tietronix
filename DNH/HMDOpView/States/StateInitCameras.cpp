@@ -90,8 +90,9 @@ void StateInitCameras::Draw(const wxSize& sz)
 	}
 }
 
-void StateInitCameras::Update()
+void StateInitCameras::Update(double dt)
 {
+	
 	if(this->nextState)
 		this->GetCoreWindow()->ChangeState(BaseState::AppState::MainOp);
 }
@@ -99,6 +100,7 @@ void StateInitCameras::Update()
 void StateInitCameras::EnteredActive()
 {
 	this->nextState = false;
+	CamStreamMgr::GetInstance().BootConnectionToCamera();
 }
 
 void StateInitCameras::ExitedActive() 
@@ -109,7 +111,6 @@ void StateInitCameras::ExitedActive()
 void StateInitCameras::Initialize() 
 {
 	this->mainFont = FontMgr::GetInstance().GetFont(24);
-	CamStreamMgr::GetInstance().BootConnectionToCamera();
 }
 
 void StateInitCameras::ClosingApp() 

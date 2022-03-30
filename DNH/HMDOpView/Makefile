@@ -14,6 +14,9 @@ CFLAGS=-Wall
 ##################################################
 
 # Vendored Library as Makefile variables
+#
+# These are coppied from other Makefiles, and may eventually
+# be relevant, but if not, feel free to remove!
 VEND = ../Vendored
 VEND_WS = ../Vendored/Simple-WebSocket-Server
 VEND_HTTP = ../Vendored/Simple-Web-Server
@@ -22,7 +25,7 @@ VEND_JS = ../Vendored/
 # Right now the path of OpenCV is hard coded with the 
 # assumption of being on the Raspberry pi
 OPENCVINCL		:= -I`python3 ../paths.py --ocv_inc`
-OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -lopencv_highgui
+OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
 
 VEND_ALLINCLUDES = -I$(VEND_WS) -I$(VEND_HTTP) -I$(VEND_JS)
 
@@ -51,15 +54,25 @@ ALLHEADERS_ALLVEND = $(ALLHEADERS_WS) $(ALLHEADERS_HTTP) $(ALLHEADERS_JSON)
 
 SUBDIR_MAIN = .
 SUBDIR_STATES = States
+SUBDIR_LODEPNG = lodePNG
+SUBDIR_UTILS = Utils
 
 SUBOBJ_MAIN = \
 	CamStreamMgr FontMgr GLWin HMDOpApp MainWin TexObj
 	
 SUBOBJ_STATES = \
 	BaseState StateHMDOp StateInitCameras StateIntro
+	
+SUBOBJ_LODEPNG = \
+	lodepng
+	
+SUBOBJ_UTILS = \
+	cvgRect cvgShapes
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))
+EXPOBJS_LODEPNG = $(patsubst %,$(SUBDIR_LODEPNG)/%.o,$(SUBOBJ_LODEPNG))
+EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
 
 ##################################################
 #
@@ -82,7 +95,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking dashboard archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES)
+	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -94,7 +107,7 @@ hmdopview: objs
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(OPENCVLIBS) $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES)
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS)
 	@echo "TARGET objs"
 
 .PHONY: clean

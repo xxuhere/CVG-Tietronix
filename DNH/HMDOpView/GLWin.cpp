@@ -1,6 +1,7 @@
 #include "GLWin.h"
 #include "MainWin.h"
 #include <iostream>
+#include "CamStreamMgr.h"
 
 wxBEGIN_EVENT_TABLE(GLWin, wxGLCanvas)
 	EVT_SIZE		(GLWin::OnResize)
@@ -38,6 +39,7 @@ GLWin::GLWin(MainWin* parent)
 	this->SetBackgroundStyle(wxBG_STYLE_PAINT);
 
 	int expectedMS = (int)(1000.0 / (double)targetFramerate);
+	this->lastStopwatch = boost::posix_time::microsec_clock::local_time();
 	this->redrawTimer.Start(expectedMS, false);
 }
 
@@ -50,6 +52,11 @@ GLWin::~GLWin()
 BaseState* GLWin::CurrState()
 {
 	return this->Parent()->CurrState();
+}
+
+void GLWin::SetGLCurrent()
+{
+	this->SetCurrent(*this->ctx);
 }
 
 void GLWin::DrawGraphics(const wxSize& sz)
@@ -131,9 +138,13 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 {
 	this->Refresh(false);
 
+	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration diff = this->lastStopwatch - now;
+	this->lastStopwatch = now;
+
 	BaseState* cur = this->Parent()->CurrState();
 	if(cur != nullptr)
-		cur->Update();
+		cur->Update((double)diff.total_microseconds() / 1000000.0);
 }
 
 #define GET_CURR_STATE_OR_RETURN(varname) \
@@ -142,6 +153,15 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 
 void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
+	if(evt.GetKeyCode() == WXK_PAUSE)
+	{
+		CamStreamMgr::GetInstance().ToggleTesting();
+
+#if _WIN32
+		MessageBeep(MB_OK);
+#endif
+	}
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnKeydown((wxKeyCode)evt.GetKeyCode());
 }

@@ -1,4 +1,5 @@
 #include "CamStreamMgr.h"
+#include <opencv2/imgcodecs.hpp>
 
 CamStreamMgr CamStreamMgr::_inst;
 
@@ -40,42 +41,68 @@ void CamStreamMgr::ThreadFn()
 		
 		if(this->_shouldStreamBeActive)
 		{
-			this->conState = State::Connecting;
-
-			this->_isStreamActive = false;
-
-			cv::VideoCapture vc;
-			if(vc.open(0, 0) == true)
+			if(this->testingMode == false)
 			{
-				this->_isStreamActive = true;
-				vc.set(cv::CAP_PROP_BUFFERSIZE, 1);
+				this->conState = State::Connecting;
+				this->_isStreamActive = false;
 
-				this->streamWidth	= (int)vc.get(cv::CAP_PROP_FRAME_WIDTH);
-				this->streamHeight	= (int)vc.get(cv::CAP_PROP_FRAME_HEIGHT);
-
-				// Camera frames polling loop
-				while(
-					vc.isOpened() && 
-					this->_sentShutdown == false &&
-					this->_shouldStreamBeActive == true)
+				cv::VideoCapture vc;
+				if(vc.open(0, 0) == true)
 				{
-					this->conState = State::Polling;
+					this->_isStreamActive = true;
+					vc.set(cv::CAP_PROP_BUFFERSIZE, 1);
 
-					cv::Mat* pmat = new cv::Mat();
-					cv::Ptr<cv::Mat> ptr(pmat);
+					this->streamWidth	= (int)vc.get(cv::CAP_PROP_FRAME_WIDTH);
+					this->streamHeight	= (int)vc.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-					vc >> *pmat;
-					if(!pmat->empty())
-						this->SetCurrentFrame(ptr);
+					// Camera frames polling loop
+					while(
+						vc.isOpened() && 
+						this->_sentShutdown == false &&
+						this->_shouldStreamBeActive == true &&
+						this->testingMode == false)
+					{
+						this->conState = State::Polling;
+
+						cv::Mat* pmat = new cv::Mat();
+						cv::Ptr<cv::Mat> ptr(pmat);
+
+						vc >> *pmat;
+						if(!pmat->empty())
+							this->SetCurrentFrame(ptr);
+
+						MSSleep(30);
+					}
+				}
+				this->_DeactivateStreamState();
+			}
+			if(this->testingMode == true)
+			{
+				// Simulate the feed with a static test image. This is useful in a
+				// handful of situations:
+				// - Deterministic and stable image to diagnose
+				// - Iterating without having to wait for the webcam feed to initialize streaming.
+				// - Testing the rest of the application without needing a webcam.
+				this->_isStreamActive = true;
+				this->conState = State::Polling;
+
+				cv::Mat* decoy = new cv::Mat();
+				*decoy = cv::imread("TestImg.png");
+				cv::Ptr<cv::Mat> sprtDecoy(decoy);
+
+				while(
+					this->_sentShutdown == false &&
+					this->_shouldStreamBeActive == true &&
+					this->testingMode == true)
+				{
+					if(!decoy->empty())
+						this->SetCurrentFrame(sprtDecoy);
 
 					MSSleep(30);
 				}
-			}
 
-			this->_shouldStreamBeActive = false;
-			this->_isStreamActive		= false;
-			this->streamWidth			= -1;
-			this->streamHeight			= -1;
+				this->_DeactivateStreamState();
+			}			
 		}
 		else
 		{
@@ -139,6 +166,21 @@ bool CamStreamMgr::SetCurrentFrame(cv::Ptr<cv::Mat> mat)
 	this->curCamFrame = mat;
 	++this->camFeedChanges;
 	return true;
+}
+
+void CamStreamMgr::ToggleTesting()
+{
+	this->testingMode = !this->testingMode;
+	this->_shouldStreamBeActive = true;
+}
+
+void CamStreamMgr::_DeactivateStreamState(bool deactivateShould)
+{
+	if(deactivateShould)
+		this->_shouldStreamBeActive = false;
+	this->_isStreamActive		= false;
+	this->streamWidth			= -1;
+	this->streamHeight			= -1;
 }
 
 bool CamStreamMgr::Shutdown()

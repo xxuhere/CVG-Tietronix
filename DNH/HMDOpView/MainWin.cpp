@@ -38,6 +38,8 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxBoxSizer* szrMain = new wxBoxSizer(wxVERTICAL);
 	szrMain->Add(this->innerGLWin, 1, wxEXPAND, 0);
 	this->SetSizer(szrMain);
+	this->Layout();
+	this->innerGLWin->SetGLCurrent();
 
 	this->PopulateStates();
 	this->States_Initialize();
@@ -52,7 +54,8 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxAcceleratorTable accelTable(entries.size(), &entries[0]);
 	this->SetAcceleratorTable(accelTable);
 
-	this->Layout();
+	this->innerGLWin->SetFocus();
+
 }
 
 void MainWin::PopulateStates()
