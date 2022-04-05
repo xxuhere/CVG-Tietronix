@@ -31,8 +31,24 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 #else
 	this->ShowFullScreen(true, wxFULLSCREEN_ALL);
 #endif
+	//
+	//		HARDWARE INIT AND MANAGEMENT	
+	//
+	//////////////////////////////////////////////////
+	// Add all known hardware that's going to be used.
+	// We keep references to we have typed access, but also we 
+	// can now leave cleanup and management to the manager.
+	this->hwLaser = new LaserSys();
+	this->hmgr.Add(this->hwLaser);
+	// When we actually initialize and validate, and how errors
+	// are presented is something still TBD.
+	this->hmgr.Initialize(std::cerr);
+	this->hmgr.Validate(std::cerr);
 
-
+	//
+	//		GRAPHICS RENDERING RESOURCES
+	//
+	//////////////////////////////////////////////////
 	this->innerGLWin = new GLWin(this);
 
 	wxBoxSizer* szrMain = new wxBoxSizer(wxVERTICAL);
@@ -41,10 +57,18 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->Layout();
 	this->innerGLWin->SetGLCurrent();
 
+	//
+	//		APP STATE MACHINES
+	//
+	//////////////////////////////////////////////////
 	this->PopulateStates();
 	this->States_Initialize();
 	this->ChangeState(BaseState::AppState::Intro);
 
+	//
+	//		KEYBOARD SHORTCUTS AND INIT FINALIZATIONS
+	//
+	//////////////////////////////////////////////////
 	std::vector<wxAcceleratorEntry> entries;
 	entries.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_F4, wxID_EXIT));
 
@@ -55,7 +79,6 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->SetAcceleratorTable(accelTable);
 
 	this->innerGLWin->SetFocus();
-
 }
 
 void MainWin::PopulateStates()

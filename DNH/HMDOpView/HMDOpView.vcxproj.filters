@@ -31,6 +31,12 @@
     <Filter Include="Source Files\lodePNG">
       <UniqueIdentifier>{d9381087-dbdb-4053-86b0-f11376d3c49f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Hardware">
+      <UniqueIdentifier>{2f6c4203-ccf2-4816-963d-772917907a8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hardware">
+      <UniqueIdentifier>{4ca90c26-3cc4-49d1-b49a-ab6034d85edb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -84,6 +90,15 @@
     <ClInclude Include="lodePNG\lodepng.h">
       <Filter>Header Files\lodePNG</Filter>
     </ClInclude>
+    <ClInclude Include="Hardware\LaserSys.h">
+      <Filter>Header Files\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Hardware\IHardware.h">
+      <Filter>Header Files\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Hardware\HardwareMgr.h">
+      <Filter>Header Files\Hardware</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -124,6 +139,15 @@
     </ClCompile>
     <ClCompile Include="lodePNG\lodepng.cpp">
       <Filter>Source Files\lodePNG</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardware\LaserSys.cpp">
+      <Filter>Source Files\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardware\IHardware.cpp">
+      <Filter>Source Files\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardware\HardwareMgr.cpp">
+      <Filter>Source Files\Hardware</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

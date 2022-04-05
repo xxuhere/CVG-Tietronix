@@ -151,6 +151,9 @@
     <ClInclude Include="FontMgr.h" />
     <ClInclude Include="glext.h" />
     <ClInclude Include="GLWin.h" />
+    <ClInclude Include="Hardware\HardwareMgr.h" />
+    <ClInclude Include="Hardware\IHardware.h" />
+    <ClInclude Include="Hardware\LaserSys.h" />
     <ClInclude Include="HMDOpApp.h" />
     <ClInclude Include="lodePNG\lodepng.h" />
     <ClInclude Include="MainWin.h" />
@@ -169,6 +172,9 @@
     <ClCompile Include="CamStreamMgr.cpp" />
     <ClCompile Include="FontMgr.cpp" />
     <ClCompile Include="GLWin.cpp" />
+    <ClCompile Include="Hardware\HardwareMgr.cpp" />
+    <ClCompile Include="Hardware\IHardware.cpp" />
+    <ClCompile Include="Hardware\LaserSys.cpp" />
     <ClCompile Include="HMDOpApp.cpp" />
     <ClCompile Include="lodePNG\lodepng.cpp" />
     <ClCompile Include="MainWin.cpp" />

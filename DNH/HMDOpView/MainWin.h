@@ -6,6 +6,9 @@
 #include <map>
 #include "States/BaseState.h"
 
+#include "Hardware/HardwareMgr.h"
+#include "Hardware/LaserSys.h"
+
 class MainWin: public wxFrame
 {
 private:
@@ -20,6 +23,9 @@ private:
 public:
     inline BaseState* CurrState()
     { return this->curState; }
+
+    HardwareMgr hmgr;
+    LaserSys * hwLaser = nullptr;
 
 public:
     MainWin(const wxString& title, const wxPoint& pos, const wxSize& size);
