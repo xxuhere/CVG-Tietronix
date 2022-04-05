@@ -15,4 +15,5 @@ CoreDependencies.props
 *.o
 DNH
 DashboardApp
+hmdopapp
 *.a
