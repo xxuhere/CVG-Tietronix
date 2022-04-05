@@ -8,6 +8,17 @@
 #include <thread>
 #include <memory>
 
+/// <summary>
+/// Manages camera streaming. Note that this is expected to
+/// happen in its own thread.
+/// 
+/// CamStreamMgr::GetInstance().BootConnectionToCamera() should
+/// be called once in the app to initialize the main processing 
+/// thread.
+/// 
+/// Shutdown() should be called once, when the application is
+/// ready to shutdown and take the CamStreamMgr thread with it.
+/// </summary>
 class CamStreamMgr
 {
 public:

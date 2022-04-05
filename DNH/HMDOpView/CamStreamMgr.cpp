@@ -46,18 +46,18 @@ void CamStreamMgr::ThreadFn()
 				this->conState = State::Connecting;
 				this->_isStreamActive = false;
 
-				cv::VideoCapture vc;
-				if(vc.open(0, 0) == true)
+				cv::VideoCapture videoCapture;
+				if(videoCapture.open(0, 0) == true)
 				{
 					this->_isStreamActive = true;
-					vc.set(cv::CAP_PROP_BUFFERSIZE, 1);
+					videoCapture.set(cv::CAP_PROP_BUFFERSIZE, 1);
 
-					this->streamWidth	= (int)vc.get(cv::CAP_PROP_FRAME_WIDTH);
-					this->streamHeight	= (int)vc.get(cv::CAP_PROP_FRAME_HEIGHT);
+					this->streamWidth	= (int)videoCapture.get(cv::CAP_PROP_FRAME_WIDTH);
+					this->streamHeight	= (int)videoCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
 					// Camera frames polling loop
 					while(
-						vc.isOpened() && 
+						videoCapture.isOpened() && 
 						this->_sentShutdown == false &&
 						this->_shouldStreamBeActive == true &&
 						this->testingMode == false)
@@ -67,7 +67,8 @@ void CamStreamMgr::ThreadFn()
 						cv::Mat* pmat = new cv::Mat();
 						cv::Ptr<cv::Mat> ptr(pmat);
 
-						vc >> *pmat;
+						videoCapture >> *pmat;
+
 						if(!pmat->empty())
 							this->SetCurrentFrame(ptr);
 
