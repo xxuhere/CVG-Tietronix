@@ -66,8 +66,9 @@ void CamStreamMgr::ThreadFn()
 
 						cv::Mat* pmat = new cv::Mat();
 						cv::Ptr<cv::Mat> ptr(pmat);
-
 						videoCapture >> *pmat;
+
+						ptr = this->ProcessImage(ptr);
 
 						if(!pmat->empty())
 							this->SetCurrentFrame(ptr);
@@ -179,6 +180,7 @@ void CamStreamMgr::_DeactivateStreamState(bool deactivateShould)
 {
 	if(deactivateShould)
 		this->_shouldStreamBeActive = false;
+
 	this->_isStreamActive		= false;
 	this->streamWidth			= -1;
 	this->streamHeight			= -1;
@@ -200,8 +202,10 @@ bool CamStreamMgr::Shutdown()
 
 	if(this->camStreamThread != nullptr)
 	{
+		// Signal the thread to shutdown
 		this->_sentShutdown = true;
 		this->_shouldStreamBeActive = false;
+		// Cleanup the thread resources
 		this->camStreamThread->join();
 		delete this->camStreamThread;
 		this->camStreamThread = nullptr;

@@ -22,12 +22,36 @@
 class CamStreamMgr
 {
 public:
+
+	/// <summary>
+	/// The various running states of the manager.
+	/// </summary>
 	enum class State
 	{
+		/// <summary>
+		/// The manager has not been started yet.
+		/// </summary>
 		Unknown,
+
+		/// <summary>
+		/// The manager's thread is running, but not idling.
+		/// </summary>
 		Idling,
+
+		/// <summary>
+		/// The manager is connecting to the video streaming source.
+		/// </summary>
 		Connecting,
+
+		/// <summary>
+		/// The manager is actively polling video frames from the
+		/// streaming source.
+		/// </summary>
 		Polling,
+
+		/// <summary>
+		/// The manager has been permanently shut down.
+		/// </summary>
 		Shutdown
 	};
 
@@ -51,40 +75,43 @@ public:
 	static bool ShutdownMgr();
 
 public:
+	// OpenCV streaming class.
 	cv::VideoCapture stream;
 
 	/// <summary>
-	/// 
+	/// Mutex to guard against multiple thread simultaneously
+	/// working with curCamFrame.
 	/// </summary>
 	std::mutex imageAccess;
 
 	/// <summary>
-	/// 
+	/// Shared pointer of the most recent video frame.
 	/// </summary>
 	cv::Ptr<cv::Mat> curCamFrame;
 
 	/// <summary>
-	/// 
+	/// Has there been a request to shut down the manager?
 	/// </summary>
 	bool _sentShutdown = false;
 
 	/// <summary>
-	/// 
+	/// Has the manager been fully shut down?
 	/// </summary>
 	bool _isShutdown = false;
 
 	/// <summary>
-	/// 
+	/// Is the manager expected to be streaming?
 	/// </summary>
 	bool _shouldStreamBeActive = false;
 
 	/// <summary>
-	/// 
+	/// Is the manger streaming?
 	/// </summary>
 	bool _isStreamActive = false;
 
 	/// <summary>
-	/// 
+	/// The working thread for polling and other CamStreamMgr
+	/// tasks. This will only be non-null if 
 	/// </summary>
 	std::thread* camStreamThread = nullptr;
 
@@ -115,6 +142,12 @@ public:
 	/// </summary>
 	int streamHeight = -1;
 
+	/// <summary>
+	/// The last known connection state.
+	/// 
+	/// This will only be set by the CamStreamMgr but is freely 
+	/// accessible to read by anything on any thread.
+	/// </summary>
 	State conState = State::Unknown;
 
 public:
@@ -128,38 +161,57 @@ public:
 	void ThreadFn();
 
 	/// <summary>
+	/// Perform image processing on the target image.
 	/// 
+	/// Note that the parameter and return value can be the same, but 
+	/// they don't have to be. And it's expected that the shared pointer
+	/// class will perform all the memory management needs.
 	/// </summary>
-	/// <param name="inImg"></param>
-	/// <returns></returns>
+	/// <param name="inImg">The image to process.</param>
+	/// <returns>The process image.</returns>
 	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg);
 
 	/// <summary>
-	/// 
+	/// Startup the working thread.
 	/// </summary>
 	void BootConnectionToCamera();
 
 	/// <summary>
+	/// Get access to the shared pointer of the last polled image.
 	/// 
+	/// This function will use imageAccess for thread saftey.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>
+	/// The last polled image. This pointer can be null if an image
+	/// has not been polled yet.
+	/// </returns>
 	cv::Ptr<cv::Mat> GetCurrentFrame();
 
 	/// <summary>
+	/// Set the current cached frame.
 	/// 
+	/// The frame cache is used to pass images between the CamStreamMgr and
+	/// other threads that will request to see the current one.
 	/// </summary>
-	/// <param name="mat"></param>
+	/// <param name="mat">The frame to cache.</param>
 	/// <returns></returns>
 	bool SetCurrentFrame(cv::Ptr<cv::Mat> mat);
 
 	/// <summary>
+	/// Shutdown the camera manager.
 	/// 
+	/// This should be called only once, at the end of the app's
+	/// lifetime.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>True, if successful.</returns>
 	bool Shutdown();
 
-	inline State GetState() { return this->conState; }
+	inline State GetState() 
+	{ return this->conState; }
 
+	/// <summary>
+	/// Toggle the polling method to be the test image.
+	/// </summary>
 	void ToggleTesting();
 
 private:
