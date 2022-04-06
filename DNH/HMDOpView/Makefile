@@ -57,9 +57,10 @@ SUBDIR_STATES = States
 SUBDIR_LODEPNG = lodePNG
 SUBDIR_UTILS = Utils
 SUBDIR_HARDWARE = Hardware
+SUBDIR_CAMVIDEO = CamVideo
 
 SUBOBJ_MAIN = \
-	CamStreamMgr FontMgr GLWin HMDOpApp MainWin TexObj
+	FontMgr GLWin HMDOpApp MainWin TexObj OpSession
 	
 SUBOBJ_STATES = \
 	BaseState StateHMDOp StateInitCameras StateIntro
@@ -72,12 +73,16 @@ SUBOBJ_UTILS = \
 	
 SUBOBJ_HARDWARE = \
 	HardwareMgr IHardware LaserSys
+	
+SUBOBJ_CAMVIDEO = \
+	CamStreamMgr SnapRequest
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))
 EXPOBJS_LODEPNG = $(patsubst %,$(SUBDIR_LODEPNG)/%.o,$(SUBOBJ_LODEPNG))
 EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
 EXPOBJS_HARDWARE = $(patsubst %,$(SUBDIR_HARDWARE)/%.o,$(SUBOBJ_HARDWARE))
+EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
 
 ##################################################
 #
@@ -100,7 +105,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking dashboard archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE)
+	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -112,7 +117,7 @@ hmdopview: objs
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(OPENCVLIBS) $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE)
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO)
 	@echo "TARGET objs"
 
 .PHONY: clean

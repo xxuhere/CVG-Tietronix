@@ -64,9 +64,38 @@ void CamStreamMgr::ThreadFn()
 					{
 						this->conState = State::Polling;
 
+						// Poll the current frame from OpenCV.
 						cv::Mat* pmat = new cv::Mat();
 						cv::Ptr<cv::Mat> ptr(pmat);
 						videoCapture >> *pmat;
+
+						// If there's anything in the snap requests, swap this empty
+						// one with a copy of the requests and claim ownership.
+						//
+						// Possibly more overhead to always create the vector, but the
+						// swap minimized the amount of time the mutex is active.
+						std::vector<SnapRequest::SPtr> sptrSwap;
+						{
+							std::lock_guard<std::mutex> guardReqs(this->snapReqsAccess);
+							std::swap(sptrSwap, this->snapReqs);
+						}
+						// Attempt to save file and report the success status back to 
+						// the shared pointer.
+						for(SnapRequest::SPtr snreq : sptrSwap)
+						{
+							if(cv::imwrite(snreq->filename, *ptr))
+							{
+								snreq->frameID = this->camFeedChanges;
+								snreq->status = SnapRequest::Status::Filled;
+							}
+							else
+							{
+								// Not the most in-depth error message, but using OpenCV
+								// this way doesn't give us too much grainularity.
+								snreq->err = "Error attempting to save file.";
+								snreq->status = SnapRequest::Status::Error;
+							}
+						}
 
 						ptr = this->ProcessImage(ptr);
 
@@ -174,6 +203,24 @@ void CamStreamMgr::ToggleTesting()
 {
 	this->testingMode = !this->testingMode;
 	this->_shouldStreamBeActive = true;
+}
+
+SnapRequest::SPtr CamStreamMgr::RequestSnapshot(const std::string& filename)
+{
+	SnapRequest::SPtr req = SnapRequest::MakeRequest(filename);
+	{
+		// Thread protected add to the to-process list.
+		std::lock_guard<std::mutex> guard(this->snapReqsAccess);
+		req->status = SnapRequest::Status::Requested;
+		this->snapReqs.push_back(req);
+	}
+	return req;
+}
+
+void CamStreamMgr::ClearSnapshotRequests()
+{
+	std::lock_guard<std::mutex> guard(this->snapReqsAccess);
+	this->snapReqs.clear();
 }
 
 void CamStreamMgr::_DeactivateStreamState(bool deactivateShould)

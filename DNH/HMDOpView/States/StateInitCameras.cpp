@@ -1,6 +1,6 @@
 #include "StateInitCameras.h"
 #include "StateIncludes.h"
-#include "../CamStreamMgr.h"
+#include "../CamVideo/CamStreamMgr.h"
 
 
 StateInitCameras::StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core)

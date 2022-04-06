@@ -3,6 +3,7 @@
 #include <wx/menu.h>
 #include "HMDOpApp.h"
 #include <vector>
+#include <sstream>
 
 #include "States/StateIntro.h"
 #include "States/StateInitCameras.h"
@@ -17,13 +18,20 @@ wxEND_EVENT_TABLE()
 MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
+	this->cameraSnap.Create("Audio/camera-13695.wav");
+	if(!this->cameraSnap.IsOk())
+		wxMessageBox("Could not load camera snap audio", "Audio Err");
+
+	this->opSession.SetName("William", "McGillicuddy", "Leu");
+	this->opSession.SetSession("__TEST_SESSION__");
+
 	this->Show();
 	
 	// The process of making the window fullscreen is different
 	// between WinOS and Linux. 
 	// - For Windows, if ShowFullscreen() is used, a white border
 	// along the outside edges may show.
-	// - Fow Linux, if we change the window style of 0, it behaves
+	// - For Linux, if we change the window style of 0, it behaves
 	// weird and won't fullscreen or draw correctly.
 #if _WIN32
 	this->SetWindowStyle(0);
@@ -79,6 +87,42 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->SetAcceleratorTable(accelTable);
 
 	this->innerGLWin->SetFocus();
+}
+
+void MainWin::ClearWaitingSnaps()
+{
+	this->waitingSnaps.clear();
+}
+
+void MainWin::ClearFinishedSnaps()
+{
+	if(this->waitingSnaps.empty())
+		return;
+
+	for(int i = this->waitingSnaps.size() - 1; i >= 0; --i)
+	{
+		if(this->waitingSnaps[i]->GetStatus() != SnapRequest::Status::Requested)
+			this->waitingSnaps.erase(this->waitingSnaps.begin() + i);
+	}
+}
+
+SnapRequest::SPtr MainWin::RequestSnap()
+{
+	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
+	if(camMgr.GetState() != CamStreamMgr::State::Polling)
+		return SnapRequest::MakeRequest("_badreq_");
+
+	// Build snapshot image filename
+	std::stringstream sstrmFilepath;
+	sstrmFilepath << "Snap_" << this->opSession.sessionName << this->snapCtr << ".png";
+	std::string filepath = sstrmFilepath.str();
+
+	++this->snapCtr;
+
+	SnapRequest::SPtr snreq = camMgr.RequestSnapshot(filepath);
+	this->waitingSnaps.push_back(snreq);
+	this->cameraSnap.Play();
+	return snreq;
 }
 
 void MainWin::PopulateStates()

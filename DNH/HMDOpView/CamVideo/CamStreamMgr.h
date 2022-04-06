@@ -1,12 +1,16 @@
 #pragma once
 
 #include "CamStreamMgr.h"
+#include "SnapRequest.h"
+
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 
 #include <mutex>
 #include <thread>
 #include <memory>
+#include <vector>
+
 
 /// <summary>
 /// Manages camera streaming. Note that this is expected to
@@ -74,7 +78,7 @@ public:
 	/// <returns>Success value. This can be ignored.</returns>
 	static bool ShutdownMgr();
 
-public:
+private:
 	// OpenCV streaming class.
 	cv::VideoCapture stream;
 
@@ -83,6 +87,20 @@ public:
 	/// working with curCamFrame.
 	/// </summary>
 	std::mutex imageAccess;
+
+	/// <summary>
+	/// The requests for saving the next saved image. 
+	/// 
+	/// While chances are there will only be a single image request
+	/// per image, we'll be conservative and handle the possibility
+	/// of a small unique batch.
+	/// </summary>
+	std::vector<SnapRequest::SPtr> snapReqs;
+
+	/// <summary>
+	/// Mutex to guard single thread access to the snap requests.
+	/// </summary>
+	std::mutex snapReqsAccess;
 
 	/// <summary>
 	/// Shared pointer of the most recent video frame.
@@ -109,12 +127,14 @@ public:
 	/// </summary>
 	bool _isStreamActive = false;
 
+
 	/// <summary>
 	/// The working thread for polling and other CamStreamMgr
 	/// tasks. This will only be non-null if 
 	/// </summary>
 	std::thread* camStreamThread = nullptr;
 
+public:
 	/// <summary>
 	/// When testing mode is turned on, camera streaming will be replaced with
 	/// showing a canned image. This allows us to iterate faster by not 
@@ -149,6 +169,7 @@ public:
 	/// accessible to read by anything on any thread.
 	/// </summary>
 	State conState = State::Unknown;
+
 
 public:
 	~CamStreamMgr();
@@ -213,6 +234,21 @@ public:
 	/// Toggle the polling method to be the test image.
 	/// </summary>
 	void ToggleTesting();
+
+	/// <summary>
+	/// Queue a request to save the next polled frame as a snapshot.
+	/// </summary>
+	/// <param name="filename">The filename to save.</param>
+	/// <returns>
+	/// The request object. This can be kept and observed to view the success
+	/// status when the request is fullfilled.
+	/// </returns>
+	SnapRequest::SPtr RequestSnapshot(const std::string& filename);
+
+	/// <summary>
+	/// Clear all currently queued snapshot requests.
+	/// </summary>
+	void ClearSnapshotRequests();
 
 private:
 	/// <summary>

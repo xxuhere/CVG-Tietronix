@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Hardware">
       <UniqueIdentifier>{4ca90c26-3cc4-49d1-b49a-ab6034d85edb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CamVideo">
+      <UniqueIdentifier>{ac56372d-a067-41b1-9c9b-15c28e3f385f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CamVideo">
+      <UniqueIdentifier>{870f3fcc-1cd4-419c-b95f-b3c9bfc62ea2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -69,9 +75,6 @@
     <ClInclude Include="States\StateIncludes.h">
       <Filter>Header Files\States</Filter>
     </ClInclude>
-    <ClInclude Include="CamStreamMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FontMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -99,6 +102,15 @@
     <ClInclude Include="Hardware\HardwareMgr.h">
       <Filter>Header Files\Hardware</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\CamStreamMgr.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\SnapRequest.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="OpSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -121,9 +133,6 @@
     </ClCompile>
     <ClCompile Include="States\StateInitCameras.cpp">
       <Filter>Source Files\States</Filter>
-    </ClCompile>
-    <ClCompile Include="CamStreamMgr.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FontMgr.cpp">
       <Filter>Source Files</Filter>
@@ -148,6 +157,15 @@
     </ClCompile>
     <ClCompile Include="Hardware\HardwareMgr.cpp">
       <Filter>Source Files\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamStreamMgr.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\SnapRequest.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="OpSession.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

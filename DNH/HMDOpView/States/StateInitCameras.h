@@ -2,7 +2,7 @@
 #include "BaseState.h"
 #include "StateIncludes.h"
 #include "../FontMgr.h"
-#include "../CamStreamMgr.h"
+#include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
 
 /// <summary>

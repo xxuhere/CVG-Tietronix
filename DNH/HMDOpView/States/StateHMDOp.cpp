@@ -1,6 +1,6 @@
 #include "StateHMDOp.h"
 #include "StateIncludes.h"
-#include "../CamStreamMgr.h"
+#include "../CamVideo/CamStreamMgr.h"
 #include "../Utils/cvgShapes.h"
 
 
@@ -171,6 +171,12 @@ void StateHMDOp::ExitedActive()
 void StateHMDOp::Initialize() 
 {
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
+}
+
+void StateHMDOp::OnKeydown(wxKeyCode key)
+{
+	if(key == 'S')
+		this->GetCoreWindow()->RequestSnap();
 }
 
 void StateHMDOp::ClosingApp() 

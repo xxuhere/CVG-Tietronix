@@ -1,7 +1,7 @@
 #include "HMDOpApp.h"
 #include "MainWin.h"
 
-#include "CamStreamMgr.h"
+#include "CamVideo/CamStreamMgr.h"
 #include "FontMgr.h"
 #include <iostream>
 

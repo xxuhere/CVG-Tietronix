@@ -1,7 +1,7 @@
 #include "GLWin.h"
 #include "MainWin.h"
 #include <iostream>
-#include "CamStreamMgr.h"
+#include "CamVideo/CamStreamMgr.h"
 
 wxBEGIN_EVENT_TABLE(GLWin, wxGLCanvas)
 	EVT_SIZE		(GLWin::OnResize)
@@ -138,15 +138,25 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 {
 	this->Refresh(false);
 
+	// Find the time since the last update, the delta time,
+	// which some Update() functions may need for animations
+	// and other realtime things.
 	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 	boost::posix_time::time_duration diff = this->lastStopwatch - now;
+	double deltaTimeSecs = (double)diff.total_microseconds() / 1000000.0;
 	this->lastStopwatch = now;
 
 	BaseState* cur = this->Parent()->CurrState();
 	if(cur != nullptr)
-		cur->Update((double)diff.total_microseconds() / 1000000.0);
+		cur->Update(deltaTimeSecs);
+
+	// Any one individual state shouldn't be left in charge of cleaning
+	// the snaps, so its done at the outer level.
+	this->typedParent->ClearFinishedSnaps();
 }
 
+// All the state delegation functions have the same boilerplate
+// checks for the current state.
 #define GET_CURR_STATE_OR_RETURN(varname) \
 	BaseState * varname = this->CurrState(); \
 	if(varname == nullptr ){ return; }
