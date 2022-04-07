@@ -1,7 +1,6 @@
 # Visual Studio Stuff
 Debug
 enc_temp_filter
-*.vcxproj.user
 x86
 x64
 .vs/
