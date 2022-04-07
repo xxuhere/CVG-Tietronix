@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseState.h"
 #include "../FontMgr.h"
-#include "../CamStreamMgr.h"
+#include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
 #include "../Utils/cvgRect.h"
 
@@ -17,7 +17,7 @@ public:
 	bool inspectorShow = false;
 	float maxInspectorWidth = 200.0f;
 
-	TexObj ico_MenuAlign;
+	TexObj ico_MenuAlign ;
 	TexObj ico_MenuSliders;
 	TexObj ico_MenuLaser;
 	TexObj ico_MenuReturn;
@@ -35,6 +35,8 @@ public:
 
 	void EnteredActive() override;
 	void ExitedActive() override;
+
+	void OnKeydown(wxKeyCode key) override;
 
 	void Initialize() override;
 	void ClosingApp() override;
