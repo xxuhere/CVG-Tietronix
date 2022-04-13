@@ -70,6 +70,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//
 	//////////////////////////////////////////////////
 	this->PopulateStates();
+	this->ReloadAppOptions();
 	this->States_Initialize();
 	this->ChangeState(BaseState::AppState::Intro);
 
@@ -106,10 +107,10 @@ void MainWin::ClearFinishedSnaps()
 	}
 }
 
-SnapRequest::SPtr MainWin::RequestSnap()
+SnapRequest::SPtr MainWin::RequestSnap(int idx)
 {
 	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
-	if(camMgr.GetState() != CamStreamMgr::State::Polling)
+	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
 		return SnapRequest::MakeRequest("_badreq_");
 
 	// Build snapshot image filename
@@ -119,10 +120,15 @@ SnapRequest::SPtr MainWin::RequestSnap()
 
 	++this->snapCtr;
 
-	SnapRequest::SPtr snreq = camMgr.RequestSnapshot(filepath);
+	SnapRequest::SPtr snreq = camMgr.RequestSnapshot(idx, filepath);
 	this->waitingSnaps.push_back(snreq);
 	this->cameraSnap.Play();
 	return snreq;
+}
+
+void MainWin::ReloadAppOptions()
+{
+	this->innerGLWin->InitializeOptions();
 }
 
 void MainWin::PopulateStates()

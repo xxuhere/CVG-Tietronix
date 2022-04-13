@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
+#include "Utils/cvgOptions.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -28,7 +29,35 @@ private:
 	wxGLContext* ctx = nullptr;
 	wxTimer redrawTimer;
 
+	/// <summary>
+	/// The app is in a draw loop (i.e., redraw once every 30 seconds).
+	/// In order to idle for the correct amount of time between loops,
+	/// we need to stopwatch how much time application processing
+	/// has already taken.
+	/// </summary>
 	boost::posix_time::ptime lastStopwatch;
+
+	/// <summary>
+	/// The application preferences. This cache should not be
+	/// used directly for anything except saving and loading.
+	/// 
+	/// If the values from the option are used in systems, they 
+	/// should be pulled into variables of the actual systems 
+	/// they're relevant for.
+	/// </summary>
+	cvgOptions cachedOptions;
+
+public:
+	// The viewport size will need to be set in an initial call
+	// to ApplyOptions.
+	//
+	// Depending on where/how we actually use these values, these
+	// variables may be moved into a more relevant location, such
+	// as a state.
+	int viewportX = 640;
+	int viewportY = 480;
+	int viewportOfsX = 0;
+	int viewportOfsY = 0;
 
 public:
 	GLWin(MainWin* parent);
@@ -43,6 +72,15 @@ public:
 
 	void DrawGraphics(const wxSize& sz);
 
+	void InitializeOptions();
+	void LoadHMDAppOptions();
+	void LoadHMDAppOptions(const cvgOptions& opts);
+
+public:
+
+	//		WX EVENT CALLBACKS
+	//
+	//////////////////////////////////////////////////
 	void OnResize(wxSizeEvent& evt);
 	void OnPaint(wxPaintEvent& evt);
 	void OnClose(wxCloseEvent& evt);

@@ -4,6 +4,8 @@
 #include "../FontMgr.h"
 #include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
+#include "../Utils/cvgCamTextureRegistry.h"
+#include <map>
 
 /// <summary>
 /// The application state for when the application is loading and
@@ -13,19 +15,26 @@
 class StateInitCameras : public BaseState
 {
 public:
-	FontWU mainFont;
-	CamStreamMgr::State lastObsrvState = CamStreamMgr::State::Unknown;
-	bool nextState = false;
 
-	TexObj camFrame;
-	long long lastFrameSeen = -1;
+	struct CamTextureReg
+	{
+		int id;
+		int lastSeem = -1;
+		int GLuint = -1;
+	};
+
+	FontWU mainFont;
+	bool nextState = false;
+	bool allCamsReady = false;
+
+	cvgCamTextureRegistry camTextureRegistry;
 
 public:
 	StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core);
 
 	bool FlagTransitionNextState();
 
-	void ClearVideoTexture();
+	void ClearVideoTextures();
 
 	~StateInitCameras();
 

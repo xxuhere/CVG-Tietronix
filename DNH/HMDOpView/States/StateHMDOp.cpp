@@ -10,36 +10,65 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 }
 
 void StateHMDOp::Draw(const wxSize& sz)
-{
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	long long camMgrFrameID = CamStreamMgr::GetInstance().camFeedChanges;
-	if(camMgrFrameID != this->lastFrameSeen)
-	{
-		this->lastFrameSeen = camMgrFrameID;
-		cv::Ptr<cv::Mat> matptr = CamStreamMgr::GetInstance().GetCurrentFrame();
-		this->camFrame.TransferFromCVMat(matptr);
-	}
-	if(!this->camFrame.IsValid())
-		return;
-
+{	
+	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
 	float cx = sz.x / 2;
 	float cy = sz.y / 2;
-	cvgRect viewRegion = cvgRect::MakeWidthAspect(500.0f, this->camFrame.VAspect());
-	viewRegion.x = cx - viewRegion.w * 0.5f;
-	viewRegion.y = cy - viewRegion.h * 0.5f;
-	
+
+	float vrWidth = (float)this->GetView()->viewportX;
+	float vrHeight = (float)this->GetView()->viewportY;
+
+	cvgRect cameraWindowRgn = 
+		cvgRect(
+			cx - vrWidth * 0.5f, 
+			cy - vrHeight * 0.5f, 
+			vrWidth, 
+			vrHeight);
+
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
-	this->camFrame.GLBind();
+	glDisable(GL_DEPTH_TEST);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive blending
 
-	glBegin(GL_QUADS);
-		viewRegion.GLVerts_Textured();
-	glEnd();
+	for(int camIt = 0; camIt < 2; ++camIt)
+	{
+		cv::Ptr<cv::Mat> curImg = camMgr.GetCurrentFrame(camIt);
+		if(curImg == nullptr)
+			continue;
+	
+		long long feedCtr = camMgr.GetCameraFeedChanges(camIt);
+		this->camTextureRegistry.LoadTexture(camIt, curImg, feedCtr);
+	
+		cvgCamTextureRegistry::Entry texInfo = 
+			this->camTextureRegistry.GetInfoCopy(camIt);
+	
+		if(texInfo.IsEmpty())
+			continue;
 
-	this->DrawMenuSystemAroundRect(viewRegion);
+		// The image can keep its aspect ratio, but it should respect the
+		// region dedicated for rendering camera feeds (cameraWindowRgn).
+		float vaspect = 0.0f;
+		if(texInfo.cachedWidth != 0.0f)
+			vaspect = (float)texInfo.cachedHeight / (float)texInfo.cachedWidth;
+
+		cvgRect viewRegion = cvgRect::MakeWidthAspect(cameraWindowRgn.w, vaspect);
+		viewRegion.x = cx - viewRegion.w * 0.5f;
+		viewRegion.y = cy - viewRegion.h * 0.5f;
+
+		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glBegin(GL_QUADS);
+			viewRegion.GLVerts_Textured();
+		glEnd();
+	}
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
+	
+
+	this->DrawMenuSystemAroundRect(cameraWindowRgn);
 }
 
 void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
@@ -166,6 +195,7 @@ void StateHMDOp::EnteredActive()
 
 void StateHMDOp::ExitedActive() 
 {
+	this->camTextureRegistry.ClearTextures();
 }
 
 void StateHMDOp::Initialize() 
@@ -175,8 +205,10 @@ void StateHMDOp::Initialize()
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
 {
-	if(key == 'S')
-		this->GetCoreWindow()->RequestSnap();
+	if(key == WXK_NUMPAD7)
+		this->GetCoreWindow()->RequestSnap(0);
+	if(key == WXK_NUMPAD8)
+		this->GetCoreWindow()->RequestSnap(1);
 }
 
 void StateHMDOp::ClosingApp() 

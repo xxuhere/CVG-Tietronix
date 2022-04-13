@@ -69,13 +69,13 @@ SUBOBJ_LODEPNG = \
 	lodepng
 	
 SUBOBJ_UTILS = \
-	cvgRect cvgShapes
+	cvgCamTextureRegistry cvgOptions cvgRect cvgShapes multiplatform
 	
 SUBOBJ_HARDWARE = \
 	HardwareMgr IHardware LaserSys
 	
 SUBOBJ_CAMVIDEO = \
-	CamStreamMgr SnapRequest
+	CamStreamMgr ManagedCam SnapRequest VideoRequest
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))

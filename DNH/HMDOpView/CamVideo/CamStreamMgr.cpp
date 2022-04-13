@@ -1,15 +1,10 @@
 #include "CamStreamMgr.h"
-#include <opencv2/imgcodecs.hpp>
+#include <thread>
+#include <mutex>
+#include "ManagedCam.h"
+#include "../Utils/multiplatform.h"
 
 CamStreamMgr CamStreamMgr::_inst;
-
-#if WIN32
-	#include <windows.h>
-	void MSSleep(int ms) { Sleep(ms); }
-#else
-	#include <unistd.h>
-	void MSSleep(int ms) { usleep(ms); }
-#endif
 
 CamStreamMgr& CamStreamMgr::GetInstance()
 {
@@ -23,240 +18,125 @@ bool CamStreamMgr::ShutdownMgr()
 
 CamStreamMgr::CamStreamMgr()
 {
+	// Note: this is just the construction of the object. Remember
+	// it's not up-and-running until it's initialized with
+	// BootConnectionToCamera() by outside code.
 }
 
 CamStreamMgr::~CamStreamMgr()
 {
+	// Shutdown should only be called once, but it's designed
+	// to be safe to call multiple times and ignore further
+	// requests.
+	this->Shutdown();
 }
 
-void CamStreamMgr::ThreadFn()
+bool CamStreamMgr::BootConnectionToCamera(
+	int camCt, 
+	ManagedCam::PollType allDefaultPoll)
 {
-	this->_isStreamActive = false;
+	if(camCt <= 0)
+		return false;
 
-	// This will be the loop for the thread for the lifetime of the app
-	// once booted. This should NOT be confused with the polling loop
-	// of the camera, which will be an inner loop.
-	while(this->_sentShutdown == false)
+	std::lock_guard<std::mutex> guard(this->camAccess);
+
+	// Initializing threads to run in the background can only
+	// be allowed if there aren't already background threads
+	// running.
+	if(!this->cams.empty())
+		return false;
+
+	for(int i = 0; i < camCt; ++i)
 	{
-		
-		if(this->_shouldStreamBeActive)
-		{
-			if(this->testingMode == false)
-			{
-				this->conState = State::Connecting;
-				this->_isStreamActive = false;
-
-				cv::VideoCapture videoCapture;
-				if(videoCapture.open(0, 0) == true)
-				{
-					this->_isStreamActive = true;
-					videoCapture.set(cv::CAP_PROP_BUFFERSIZE, 1);
-
-					this->streamWidth	= (int)videoCapture.get(cv::CAP_PROP_FRAME_WIDTH);
-					this->streamHeight	= (int)videoCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
-
-					// Camera frames polling loop
-					while(
-						videoCapture.isOpened() && 
-						this->_sentShutdown == false &&
-						this->_shouldStreamBeActive == true &&
-						this->testingMode == false)
-					{
-						this->conState = State::Polling;
-
-						// Poll the current frame from OpenCV.
-						cv::Mat* pmat = new cv::Mat();
-						cv::Ptr<cv::Mat> ptr(pmat);
-						videoCapture >> *pmat;
-
-						// If there's anything in the snap requests, swap this empty
-						// one with a copy of the requests and claim ownership.
-						//
-						// Possibly more overhead to always create the vector, but the
-						// swap minimized the amount of time the mutex is active.
-						std::vector<SnapRequest::SPtr> sptrSwap;
-						{
-							std::lock_guard<std::mutex> guardReqs(this->snapReqsAccess);
-							std::swap(sptrSwap, this->snapReqs);
-						}
-						// Attempt to save file and report the success status back to 
-						// the shared pointer.
-						for(SnapRequest::SPtr snreq : sptrSwap)
-						{
-							if(cv::imwrite(snreq->filename, *ptr))
-							{
-								snreq->frameID = this->camFeedChanges;
-								snreq->status = SnapRequest::Status::Filled;
-							}
-							else
-							{
-								// Not the most in-depth error message, but using OpenCV
-								// this way doesn't give us too much grainularity.
-								snreq->err = "Error attempting to save file.";
-								snreq->status = SnapRequest::Status::Error;
-							}
-						}
-
-						ptr = this->ProcessImage(ptr);
-
-						if(!pmat->empty())
-							this->SetCurrentFrame(ptr);
-
-						MSSleep(30);
-					}
-				}
-				this->_DeactivateStreamState();
-			}
-			if(this->testingMode == true)
-			{
-				// Simulate the feed with a static test image. This is useful in a
-				// handful of situations:
-				// - Deterministic and stable image to diagnose
-				// - Iterating without having to wait for the webcam feed to initialize streaming.
-				// - Testing the rest of the application without needing a webcam.
-				this->_isStreamActive = true;
-				this->conState = State::Polling;
-
-				cv::Mat* decoy = new cv::Mat();
-				*decoy = cv::imread("TestImg.png");
-				cv::Ptr<cv::Mat> sprtDecoy(decoy);
-
-				while(
-					this->_sentShutdown == false &&
-					this->_shouldStreamBeActive == true &&
-					this->testingMode == true)
-				{
-					if(!decoy->empty())
-						this->SetCurrentFrame(sprtDecoy);
-
-					MSSleep(30);
-				}
-
-				this->_DeactivateStreamState();
-			}			
-		}
-		else
-		{
-			this->conState = State::Idling;
-			MSSleep(500);
-		}
+		ManagedCam* newMc = new ManagedCam(allDefaultPoll, i);
+		this->cams.push_back(newMc);
+		newMc->BootupPollingThread(i);
 	}
-
-	this->conState = State::Shutdown;
-}
-
-cv::Ptr<cv::Mat> CamStreamMgr::ProcessImage(cv::Ptr<cv::Mat> inImg)
-{
-	return inImg;
-}
-
-void CamStreamMgr::BootConnectionToCamera()
-{
-	// Once sometime tries to shutdown the camera system for the app,
-	// for the given app session, that's it- it's kaputskies for the 
-	// rest of the lifetime's app.
-	if(this->_sentShutdown)
-		return;
-
-	// If the camera stream is already running, there's nothing that
-	// need booting.
-	if(this->camStreamThread != nullptr)
-		return;
-
-	this->camStreamThread = 
-		new std::thread(
-			[this]
-			{
-				// This thread is expected to run until 
-				// CamStreamMgr::Shutdown() is called at the end
-				// of the app's lifetime.
-
-				// Flag the command to start the video capturing for the thread
-				this->_shouldStreamBeActive = true;
-				this->ThreadFn();
-				this->_isShutdown = true;
-			});
-}
-
-cv::Ptr<cv::Mat> CamStreamMgr::GetCurrentFrame()
-{
-	// Get a copy of the shared ptr in a controlled manner, when we
-	// know it's stable.
-	cv::Ptr<cv::Mat> cpyRet;
-
-	{ // Mutex guard scope
-		std::lock_guard<std::mutex> guard(this->imageAccess);
-		cpyRet = this->curCamFrame;
-	}
-	return cpyRet;
-}
-
-bool CamStreamMgr::SetCurrentFrame(cv::Ptr<cv::Mat> mat)
-{
-	std::lock_guard<std::mutex> guard(this->imageAccess);
-	this->curCamFrame = mat;
-	++this->camFeedChanges;
 	return true;
 }
 
-void CamStreamMgr::ToggleTesting()
+cv::Ptr<cv::Mat> CamStreamMgr::GetCurrentFrame(int idx)
 {
-	this->testingMode = !this->testingMode;
-	this->_shouldStreamBeActive = true;
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return cv::Ptr<cv::Mat>();
+
+	return this->cams[idx]->GetCurrentFrame();
 }
 
-SnapRequest::SPtr CamStreamMgr::RequestSnapshot(const std::string& filename)
+long long CamStreamMgr::GetCameraFeedChanges(int idx)
 {
-	SnapRequest::SPtr req = SnapRequest::MakeRequest(filename);
-	{
-		// Thread protected add to the to-process list.
-		std::lock_guard<std::mutex> guard(this->snapReqsAccess);
-		req->status = SnapRequest::Status::Requested;
-		this->snapReqs.push_back(req);
-	}
-	return req;
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return -1;
+
+	return this->cams[idx]->camFeedChanges;
 }
 
-void CamStreamMgr::ClearSnapshotRequests()
+void CamStreamMgr::SetPollType(int idx, ManagedCam::PollType pty)
 {
-	std::lock_guard<std::mutex> guard(this->snapReqsAccess);
-	this->snapReqs.clear();
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return;
+
+	this->cams[idx]->SetPoll(pty);
 }
 
-void CamStreamMgr::_DeactivateStreamState(bool deactivateShould)
+void CamStreamMgr::ClearAllSnapshotRequests()
 {
-	if(deactivateShould)
-		this->_shouldStreamBeActive = false;
+	std::lock_guard<std::mutex> guard(this->camAccess);
 
-	this->_isStreamActive		= false;
-	this->streamWidth			= -1;
-	this->streamHeight			= -1;
+	for(ManagedCam* mc : this->cams)
+		mc->ClearSnapshotRequests();
+}
+
+SnapRequest::SPtr CamStreamMgr::RequestSnapshot(int idx, const std::string& filename)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+
+	return this->cams[idx]->RequestSnapshot(filename);
+}
+
+void CamStreamMgr::ClearSnapshotRequests(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return;
+
+	this->cams[idx]->ClearSnapshotRequests();
+}
+
+ManagedCam::State CamStreamMgr::GetState(int idx) 
+{ 
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return ManagedCam::State::Unknown;
+
+	return this->cams[idx]->GetState();
 }
 
 bool CamStreamMgr::Shutdown()
 {
-	// We should only send ShutdownMgr and perform
-	// the inner operations once per app session, and
-	// only when the app is shutting down.
-	if(this->_sentShutdown == false)
-		return false;
+	std::lock_guard<std::mutex> guard(this->camAccess);
 
-	if(this->_isShutdown == false)
-		return false;
+	for(ManagedCam* mc : this->cams)
+		mc->ShutdownThread();
 
-	this->_sentShutdown = true;
-	this->_shouldStreamBeActive = false;
-
-	if(this->camStreamThread != nullptr)
-	{
-		// Signal the thread to shutdown
-		this->_sentShutdown = true;
-		this->_shouldStreamBeActive = false;
-		// Cleanup the thread resources
-		this->camStreamThread->join();
-		delete this->camStreamThread;
-		this->camStreamThread = nullptr;
+	// The threads have been signaled to shutdown, but they still
+	// take a while to shutdown. We wait for them to finish before
+	// joining.
+	for(ManagedCam* mc : this->cams)
+	{ 
+		while(!mc->_isShutdown)
+			MSSleep(10);
 	}
 
-	return true;
+	for(ManagedCam* mc : this->cams)
+		mc->_JoinThread();
+
+	for(ManagedCam* mc : this->cams)
+		delete mc;
+
+	this->cams.clear();
+	 return true;
 }

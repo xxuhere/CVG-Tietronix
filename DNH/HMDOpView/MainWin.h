@@ -67,7 +67,9 @@ public:
     /// Request a snapshot and cache the request in waitingSnaps.
     /// </summary>
     /// <returns></returns>
-    SnapRequest::SPtr RequestSnap();
+    SnapRequest::SPtr RequestSnap(int idx);
+
+    void ReloadAppOptions();
 
     void PopulateStates();
     void States_Initialize();

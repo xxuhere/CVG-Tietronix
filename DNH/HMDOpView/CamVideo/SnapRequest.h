@@ -8,9 +8,9 @@ class CamStreamMgr;
 /// The representation of a camera picture request
 /// for CamStreamMgr.
 /// </summary>
-struct SnapRequest
+class SnapRequest
 {
-	friend class CamStreamMgr;
+	friend class ManagedCam;
 
 public:
 
@@ -57,6 +57,11 @@ private:
 	/// it is.
 	/// </summary>
 	long long frameID = -1;
+
+	/// <summary>
+	/// The cameara manager id of the camera handling the request.
+	/// </summary>
+	int camId = -1;
 
 	/// <summary>
 	/// The status of the request.

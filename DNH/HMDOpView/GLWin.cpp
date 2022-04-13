@@ -85,6 +85,35 @@ void GLWin::DrawGraphics(const wxSize& sz)
 	}
 }
 
+void GLWin::InitializeOptions()
+{
+	const char* szConfigLocation = "AppOptions.json";
+
+	if(!this->cachedOptions.LoadFromFile(szConfigLocation))
+	{
+		// If there's no configuration file, make one. Chances
+		// are this->cachedOptions will be the default object,
+		// but either way if we save whatever is inside of it,
+		// the file and our options will match.
+		std::cout << "Creating default options file at " << szConfigLocation << std::endl;
+		this->cachedOptions.SaveToFile(szConfigLocation);
+	}
+	this->LoadHMDAppOptions();
+}
+
+void GLWin::LoadHMDAppOptions()
+{
+	this->LoadHMDAppOptions(this->cachedOptions);
+}
+
+void GLWin::LoadHMDAppOptions(const cvgOptions& opts)
+{
+	this->viewportX = opts.viewportX;
+	this->viewportY = opts.viewportY;
+
+	// NOTE: Viewport offsets are not implemented yet.
+}
+
 void GLWin::OnResize(wxSizeEvent& evt)
 {
 	if(this->ctx == nullptr)
@@ -165,11 +194,17 @@ void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
 	if(evt.GetKeyCode() == WXK_PAUSE)
 	{
-		CamStreamMgr::GetInstance().ToggleTesting();
+		// !TODO: Replace
+		//CamStreamMgr::GetInstance().ToggleTesting();
 
 #if _WIN32
 		MessageBeep(MB_OK);
 #endif
+	}
+	else if(evt.GetKeyCode() == WXK_HOME)
+	{
+		// Reload options during runtime.
+		this->InitializeOptions();
 	}
 
 	GET_CURR_STATE_OR_RETURN(cur);

@@ -148,7 +148,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CamVideo\CamStreamMgr.h" />
+    <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\SnapRequest.h" />
+    <ClInclude Include="CamVideo\VideoRequest.h" />
     <ClInclude Include="FontMgr.h" />
     <ClInclude Include="glext.h" />
     <ClInclude Include="GLWin.h" />
@@ -167,12 +169,17 @@
     <ClInclude Include="States\StateIntro.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TexObj.h" />
+    <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
+    <ClInclude Include="Utils\cvgOptions.h" />
     <ClInclude Include="Utils\cvgRect.h" />
     <ClInclude Include="Utils\cvgShapes.h" />
+    <ClInclude Include="Utils\multiplatform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
+    <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\SnapRequest.cpp" />
+    <ClCompile Include="CamVideo\VideoRequest.cpp" />
     <ClCompile Include="FontMgr.cpp" />
     <ClCompile Include="GLWin.cpp" />
     <ClCompile Include="Hardware\HardwareMgr.cpp" />
@@ -187,8 +194,11 @@
     <ClCompile Include="States\StateInitCameras.cpp" />
     <ClCompile Include="States\StateIntro.cpp" />
     <ClCompile Include="TexObj.cpp" />
+    <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
+    <ClCompile Include="Utils\cvgOptions.cpp" />
     <ClCompile Include="Utils\cvgRect.cpp" />
     <ClCompile Include="Utils\cvgShapes.cpp" />
+    <ClCompile Include="Utils\multiplatform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HMDOpView.rc" />

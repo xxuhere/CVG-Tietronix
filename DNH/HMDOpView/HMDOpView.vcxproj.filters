@@ -111,6 +111,21 @@
     <ClInclude Include="OpSession.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\ManagedCam.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\multiplatform.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\VideoRequest.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\cvgOptions.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\cvgCamTextureRegistry.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -166,6 +181,21 @@
     </ClCompile>
     <ClCompile Include="OpSession.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\ManagedCam.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\multiplatform.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\VideoRequest.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgOptions.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgCamTextureRegistry.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
