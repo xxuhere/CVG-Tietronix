@@ -5,6 +5,8 @@
 
 #include "SnapRequest.h"
 #include "VideoRequest.h"
+#include "../Utils/VideoPollType.h"
+#include "../Utils/cvgCamFeedSource.h"
 
 #include <mutex>
 #include <thread>
@@ -47,43 +49,14 @@ public:
 		Shutdown
 	};
 
-	/// <summary>
-	/// Specify where the polled image should come from.
-	/// </summary>
-	enum class PollType
-	{
-		/// <summary>
-		/// Do not poll - camera thread will idle until the poll type is reset.
-		/// </summary>
-		Deactivated,
-
-		/// <summary>
-		/// Poll from OpenCV for USB webcams.
-		/// </summary>
-		OpenCVUSB,
-
-		/// <summary>
-		/// Poll from OpenCV through a RTSP internet stream.
-		/// </summary>
-		Web,
-
-		/// <summary>
-		/// Poll from an external application.
-		/// </summary>
-		External,
-
-		/// <summary>
-		/// Simulate polling by showing a text image.
-		/// </summary>
-		Image
-	};
-
 public:
 
 	/// <summary>
-	/// Cache what index we're in, in the CamStreamMgr.
+	/// The camera id to differentiate it from other cameras.
+	/// 
+	/// Do NOT confuse this with the OpenCV VideoCapture ID.
 	/// </summary>
-	int index;
+	int cameraId = -1;
 
 	/// <summary>
 	/// This should match with the number of times curCamFrame has been updated,
@@ -183,7 +156,10 @@ public:
 	/// </summary>
 	State conState = State::Unknown;
 
-	PollType pollType = PollType::OpenCVUSB;
+	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
+
+
+	cvgCamFeedLocs pollLocations;
 
 private:
 
@@ -236,7 +212,7 @@ private:
 	bool _DumpImageToVideofile(const cv::Mat& img);
 public:
 
-	ManagedCam(PollType pt, int idx);
+	ManagedCam(VideoPollType pt, int camId, const cvgCamFeedLocs& pollLocs);
 	~ManagedCam();
 
 	/// <summary>
@@ -326,5 +302,5 @@ public:
 	/// the application still wants to stream.</param>
 	void _DeactivateStreamState(bool deactivateShould = false);
 
-	void SetPoll(PollType pollTy);
+	void SetPoll(VideoPollType pollTy);
 };

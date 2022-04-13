@@ -33,9 +33,26 @@ CamStreamMgr::~CamStreamMgr()
 
 bool CamStreamMgr::BootConnectionToCamera(
 	int camCt, 
-	ManagedCam::PollType allDefaultPoll)
+	VideoPollType allDefaultPoll)
 {
 	if(camCt <= 0)
+		return false;
+
+	std::vector<cvgCamFeedSource> delegVec;
+	// Make a form we can delegate to the finer-control overload.
+	for(int i = 0; i < camCt; ++i)
+	{
+		cvgCamFeedSource src;
+		src.camIndex = i;
+		src.defPoll = allDefaultPoll;
+	}
+
+	return this->BootConnectionToCamera(delegVec);
+}
+
+bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& sources)
+{
+	if(sources.size() == 0)
 		return false;
 
 	std::lock_guard<std::mutex> guard(this->camAccess);
@@ -46,9 +63,9 @@ bool CamStreamMgr::BootConnectionToCamera(
 	if(!this->cams.empty())
 		return false;
 
-	for(int i = 0; i < camCt; ++i)
+	for(int i = 0; i < sources.size(); ++i)
 	{
-		ManagedCam* newMc = new ManagedCam(allDefaultPoll, i);
+		ManagedCam* newMc = new ManagedCam(sources[i].defPoll, i, sources[i]);
 		this->cams.push_back(newMc);
 		newMc->BootupPollingThread(i);
 	}
@@ -73,7 +90,7 @@ long long CamStreamMgr::GetCameraFeedChanges(int idx)
 	return this->cams[idx]->camFeedChanges;
 }
 
-void CamStreamMgr::SetPollType(int idx, ManagedCam::PollType pty)
+void CamStreamMgr::SetPollType(int idx, VideoPollType pty)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
 	if(this->cams.empty())

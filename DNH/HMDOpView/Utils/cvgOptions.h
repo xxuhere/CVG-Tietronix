@@ -1,9 +1,12 @@
 #pragma once
 
 #include "nlohmann/json.hpp"
+#include "cvgCamFeedSource.h"
 #include <string>
+#include <vector>
 
 using json = nlohmann::json;
+
 
 /// <summary>
 /// Funtion to manage options in the HMD app that can be
@@ -37,14 +40,27 @@ public:
 	/// <summary>
 	/// The width of the video viewport.
 	/// </summary>
-	int viewportX;
+	int viewportX = 640;
 
 	/// <summary>
 	/// The height of the video viewport.
 	/// </summary>
-	int viewportY;
+	int viewportY = 480;
+
+	/// <summary>
+	/// X pixel offset of the viewport from the center.
+	/// </summary>
+	int viewportOffsX = 0;
+
+	/// <summary>
+	/// Y pixel offset of the viewport from the center.
+	/// </summary>
+	int viewportOffsY = 0;
+
+	std::vector<cvgCamFeedSource> feedOpts;
+
 public:
-	cvgOptions();
+	cvgOptions(int defSources);
 
 	/// <summary>
 	/// 

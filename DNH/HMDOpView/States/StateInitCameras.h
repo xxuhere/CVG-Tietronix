@@ -5,6 +5,7 @@
 #include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
 #include "../Utils/cvgCamTextureRegistry.h"
+#include "../Utils/VideoPollType.h"
 #include <map>
 
 /// <summary>

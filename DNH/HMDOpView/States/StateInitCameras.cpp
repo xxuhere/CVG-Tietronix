@@ -186,8 +186,7 @@ void StateInitCameras::EnteredActive()
 
 	this->nextState = false;
 	CamStreamMgr::GetInstance().BootConnectionToCamera(
-		2, 
-		ManagedCam::PollType::OpenCVUSB);
+		this->GetView()->cachedOptions.feedOpts);
 }
 
 void StateInitCameras::ExitedActive() 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ManagedCam.h"
+#include "../Utils/VideoPollType.h"
+#include "../Utils/cvgCamFeedSource.h"
 
 /// <summary>
 /// Manages camera streaming. Note that this is expected to
@@ -55,7 +57,9 @@ public:
 	/// </summary>
 	bool BootConnectionToCamera(
 		int camCt, 
-		ManagedCam::PollType pt = ManagedCam::PollType::Deactivated);
+		VideoPollType pt = VideoPollType::Deactivated);
+
+	bool BootConnectionToCamera(const std::vector<cvgCamFeedSource>& sources);
 
 	/// <summary>
 	/// Get access to the shared pointer of the last polled image.
@@ -99,7 +103,7 @@ public:
 	/// </summary>
 	/// <param name="idx">The camera index to query.</param>
 	/// <param name="pty">The polling method to use.</param>
-	void SetPollType(int idx, ManagedCam::PollType pty);
+	void SetPollType(int idx, VideoPollType pty);
 
 	/// <summary>
 	/// Clear all snapshot request for a specific camera.

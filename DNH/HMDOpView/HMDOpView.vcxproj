@@ -169,11 +169,13 @@
     <ClInclude Include="States\StateIntro.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TexObj.h" />
+    <ClInclude Include="Utils\cvgCamFeedSource.h" />
     <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
     <ClInclude Include="Utils\cvgOptions.h" />
     <ClInclude Include="Utils\cvgRect.h" />
     <ClInclude Include="Utils\cvgShapes.h" />
     <ClInclude Include="Utils\multiplatform.h" />
+    <ClInclude Include="Utils\VideoPollType.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
@@ -194,11 +196,13 @@
     <ClCompile Include="States\StateInitCameras.cpp" />
     <ClCompile Include="States\StateIntro.cpp" />
     <ClCompile Include="TexObj.cpp" />
+    <ClCompile Include="Utils\cvgCamFeedSource.cpp" />
     <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
     <ClCompile Include="Utils\cvgOptions.cpp" />
     <ClCompile Include="Utils\cvgRect.cpp" />
     <ClCompile Include="Utils\cvgShapes.cpp" />
     <ClCompile Include="Utils\multiplatform.cpp" />
+    <ClCompile Include="Utils\VideoPollType.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HMDOpView.rc" />

@@ -2,10 +2,11 @@
 #include <opencv2/imgcodecs.hpp>
 #include "../Utils/multiplatform.h"
 
-ManagedCam::ManagedCam(PollType pt, int idx)
+ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedLocs& pollLocs)
 {
-	this->index = idx;
-	this->pollType = pt;
+	this->cameraId		= cameraId;
+	this->pollType		= pt;
+	this->pollLocations = pollLocs;
 }
 
 ManagedCam::~ManagedCam()
@@ -105,7 +106,7 @@ VideoRequest::SPtr ManagedCam::OpenVideo(const std::string& filename)
 	if (filename.empty())
 	{
 		this->_CloseVideo_NoMutex();
-		VideoRequest::SPtr noneRet = VideoRequest::MakeRequest(0, 0, this->index, filename);
+		VideoRequest::SPtr noneRet = VideoRequest::MakeRequest(0, 0, this->cameraId, filename);
 		noneRet->err = "Empty filename";
 		noneRet->status = VideoRequest::Status::Error;
 		return noneRet;
@@ -127,7 +128,7 @@ VideoRequest::SPtr ManagedCam::OpenVideo(const std::string& filename)
 
 	// We may have a frame immediately write, but we'll open it
 	// tenatively first.
-	this->activeVideoReq = VideoRequest::MakeRequest(0, 0, this->index, filename);
+	this->activeVideoReq = VideoRequest::MakeRequest(0, 0, this->cameraId, filename);
 	this->activeVideoReq->status = VideoRequest::Status::Requested;
 	{
 		// If we have a frame, that will set the size parameters.
@@ -242,13 +243,41 @@ void ManagedCam::ThreadFn(int camIdx)
 		//		}
 		//		post-polling shutdown
 		//	}
-		if(this->pollType == PollType::OpenCVUSB)
+
+		// Local copy in case a thread somehow changes this->pollType;
+		VideoPollType pollTy = this->pollType;
+
+		if(
+			pollTy == VideoPollType::OpenCVUSB_Idx ||
+			pollTy == VideoPollType::OpenCVUSB_Named ||
+			pollTy == VideoPollType::Web)
 		{
 			this->conState = State::Connecting;
 			this->_isStreamActive = false;
 
 			cv::VideoCapture videoCapture;
-			if(videoCapture.open(camIdx, 0) == true)
+
+			// 3 polling types are handled in this loop because their loops
+			// are similar because it's just OpenCV VideoCapture polling.
+			//
+			// Initialization of the videoCapture, branching on the polling type.
+			bool opened = false;
+			if(pollTy == VideoPollType::OpenCVUSB_Idx)
+			{ 
+				opened = videoCapture.open(this->pollLocations.camIndex, 0);
+			}
+			else if(pollTy == VideoPollType::OpenCVUSB_Named)
+			{
+				// Named device paths are probably only supported on Linux
+				opened = videoCapture.open(this->pollLocations.devicePath, cv::CAP_V4L2);
+			}
+			else if(pollTy == VideoPollType::Web)
+			{ 
+				opened = videoCapture.open(this->pollLocations.uriSource, cv::CAP_FFMPEG);
+			}
+
+			// The common polling loop
+			if(opened == true)
 			{
 				this->_isStreamActive = true;
 				videoCapture.set(cv::CAP_PROP_BUFFERSIZE, 1);
@@ -260,7 +289,7 @@ void ManagedCam::ThreadFn(int camIdx)
 				while(
 					videoCapture.isOpened() && 
 					this->_sentShutdown == false &&
-					this->pollType == PollType::OpenCVUSB)
+					pollTy == this->pollType)
 				{
 					this->conState = State::Polling;
 
@@ -275,7 +304,7 @@ void ManagedCam::ThreadFn(int camIdx)
 			}
 			this->_DeactivateStreamState();
 		}
-		if(this->pollType == PollType::Image)
+		else if(pollTy == VideoPollType::Image)
 		{
 			// Simulate the feed with a static test image. This is useful in a
 			// handful of situations:
@@ -289,16 +318,32 @@ void ManagedCam::ThreadFn(int camIdx)
 			*decoy = cv::imread("TestImg.png");
 			cv::Ptr<cv::Mat> sprtDecoy(decoy);
 
+			if(decoy != nullptr && !decoy->empty())
+			{ 
+				this->streamWidth	= decoy->cols;
+				this->streamHeight	= decoy->rows;
+			}
+			else
+			{
+				this->streamWidth	= 0;
+				this->streamHeight	= 0;
+				// Bail out of this invalid polling mode.
+				this->pollType = VideoPollType::Deactivated;
+			}
+
 			while(
 				this->_sentShutdown == false &&
-				this->pollType ==  PollType::Image)
+				pollTy == this->pollType)
 			{
 				_FinalizeHandlingPolledImage(sprtDecoy);
 				MSSleep(30);
 			}
 
 			this->_DeactivateStreamState();
-		}			
+		}
+		else if(pollTy == VideoPollType::External)
+		{
+		}
 		else
 		{
 			// If no active polling method is selected, we 
@@ -417,14 +462,14 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 {
 	if(deactivateShould)
-		this->pollType = PollType::Deactivated;
+		this->pollType = VideoPollType::Deactivated;
 
 	this->_isStreamActive		= false;
 	this->streamWidth			= -1;
 	this->streamHeight			= -1;
 }
 
-void ManagedCam::SetPoll(PollType pollTy)
+void ManagedCam::SetPoll(VideoPollType pollTy)
 {
 	this->pollType = pollTy;
 }

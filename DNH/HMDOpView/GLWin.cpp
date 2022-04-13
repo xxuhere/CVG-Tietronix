@@ -24,7 +24,8 @@ wxEND_EVENT_TABLE()
 
 GLWin::GLWin(MainWin* parent)
 	:	wxGLCanvas(parent, wxID_ANY),
-		redrawTimer(this, (int)CMDID::RedrawTimer)
+		redrawTimer(this, (int)CMDID::RedrawTimer),
+		cachedOptions(2)
 {
 	this->typedParent = parent;
 
@@ -108,8 +109,10 @@ void GLWin::LoadHMDAppOptions()
 
 void GLWin::LoadHMDAppOptions(const cvgOptions& opts)
 {
-	this->viewportX = opts.viewportX;
-	this->viewportY = opts.viewportY;
+	this->viewportX		= opts.viewportX;
+	this->viewportY		= opts.viewportY;
+	this->viewportOfsX	= opts.viewportOffsX;
+	this->viewportOfsY	= opts.viewportOffsY;
 
 	// NOTE: Viewport offsets are not implemented yet.
 }

@@ -37,6 +37,7 @@ private:
 	/// </summary>
 	boost::posix_time::ptime lastStopwatch;
 
+public:
 	/// <summary>
 	/// The application preferences. This cache should not be
 	/// used directly for anything except saving and loading.
@@ -47,7 +48,6 @@ private:
 	/// </summary>
 	cvgOptions cachedOptions;
 
-public:
 	// The viewport size will need to be set in an initial call
 	// to ApplyOptions.
 	//
@@ -81,6 +81,7 @@ public:
 	//		WX EVENT CALLBACKS
 	//
 	//////////////////////////////////////////////////
+
 	void OnResize(wxSizeEvent& evt);
 	void OnPaint(wxPaintEvent& evt);
 	void OnClose(wxCloseEvent& evt);
