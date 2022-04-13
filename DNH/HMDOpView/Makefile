@@ -103,7 +103,7 @@ all: hmdopview
 hmdopview: objs
 	@echo "COMPILING TARGET archive"
 
-	@echo "\n\n\nMaking dashboard archive"
+	@echo "\n\n\nMaking HMDOpView archive"
 	@echo "--------------------------------------------------"
 	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO)
 	
@@ -111,7 +111,7 @@ hmdopview: objs
 	@echo "--------------------------------------------------"
 	@echo "Copying a copy of dash to parent directory."
 	
-	@echo "Call 'Make dash' on parent directory to finish application build with CVG Data library."
+	@echo "Call 'Make all' on HMDOpView directory to finish application build."
 	cp hmdopview.a ../hmdopview.a
 	
 %.o: %.cpp
