@@ -3,7 +3,6 @@
 #include "../CamVideo/CamStreamMgr.h"
 #include "../Utils/cvgShapes.h"
 
-
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	: BaseState(BaseState::AppState::MainOp, app, view, core)
 {
@@ -214,10 +213,20 @@ void StateHMDOp::Initialize()
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
 {
-	if(key == WXK_NUMPAD7)
-		this->GetCoreWindow()->RequestSnap(0);
-	if(key == WXK_NUMPAD8)
-		this->GetCoreWindow()->RequestSnap(1);
+	// The numpad items will need to check for two keys, because it
+	// can vary based on if NumLock is on or not.
+	if(key == WXK_NUMPAD7		|| key == WXK_NUMPAD_HOME)
+		this->GetCoreWindow()->RequestSnap(0, "RGB");
+	else if(key == WXK_NUMPAD8	|| key == WXK_NUMPAD_UP)
+		this->GetCoreWindow()->RequestSnap(1, "NIR");
+	else if(key == WXK_NUMPAD4	|| key == WXK_NUMPAD_LEFT)
+		this->GetCoreWindow()->RecordVideo(0, "RGB");
+	else if(key == WXK_NUMPAD5	|| key == WXK_CLEAR)
+		this->GetCoreWindow()->RecordVideo(1, "NIR");
+	else if(key == WXK_NUMPAD1	|| key == WXK_NUMPAD_END)
+		this->GetCoreWindow()->StopRecording(0);
+	else if(key == WXK_NUMPAD2	|| key == WXK_NUMPAD_DOWN)
+		this->GetCoreWindow()->StopRecording(1);
 }
 
 void StateHMDOp::ClosingApp() 
