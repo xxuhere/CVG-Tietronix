@@ -11,6 +11,7 @@
 #include "Hardware/LaserSys.h"
 #include "OpSession.h"
 #include "CamVideo/SnapRequest.h"
+#include "CamVideo/VideoRequest.h"
 
 class MainWin: public wxFrame
 {
@@ -27,6 +28,11 @@ private:
     /// Snapshot filename counter.
     /// </summary>
     int snapCtr = 0;
+
+    /// <summary>
+    /// Video recording counter.
+    /// </summary>
+    int videoCtr = 0;
 
 public:
     inline BaseState* CurrState()
@@ -46,6 +52,11 @@ public:
     std::vector<SnapRequest::SPtr> waitingSnaps;
 
     /// <summary>
+    /// Handles to video recordings that are currently active.
+    /// </summary>
+    std::vector<VideoRequest::SPtr> recordingVideos;
+
+    /// <summary>
     /// Sound to be played when a snapshot request is performed.
     /// </summary>
     wxSound cameraSnap;
@@ -59,15 +70,30 @@ public:
     void ClearWaitingSnaps();
 
     /// <summary>
+    /// Do some housekeeping with request tokens and state information
+    /// that's expected to run every-so often. Right now it's invoked
+    /// from GLWin to run once a frame.
+    /// </summary>
+    void PerformMaintenenceCycle();
+
+    /// <summary>
     /// Clear all records of snapshot requests that have finished.
     /// </summary>
     void ClearFinishedSnaps();
+
+    void ClearFinishedRecordings();
 
     /// <summary>
     /// Request a snapshot and cache the request in waitingSnaps.
     /// </summary>
     /// <returns></returns>
-    SnapRequest::SPtr RequestSnap(int idx);
+    SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix);
+
+    VideoRequest::SPtr RecordVideo(int idx, const std::string& prefix);
+
+    bool IsRecording(int idx);
+
+    bool StopRecording(int idx);
 
     void ReloadAppOptions();
 

@@ -95,11 +95,14 @@ void MainWin::ClearWaitingSnaps()
 	this->waitingSnaps.clear();
 }
 
+void MainWin::PerformMaintenenceCycle()
+{
+	this->ClearFinishedSnaps();
+	this->ClearFinishedRecordings();
+}
+
 void MainWin::ClearFinishedSnaps()
 {
-	if(this->waitingSnaps.empty())
-		return;
-
 	for(int i = this->waitingSnaps.size() - 1; i >= 0; --i)
 	{
 		if(this->waitingSnaps[i]->GetStatus() != SnapRequest::Status::Requested)
@@ -107,7 +110,22 @@ void MainWin::ClearFinishedSnaps()
 	}
 }
 
-SnapRequest::SPtr MainWin::RequestSnap(int idx)
+void MainWin::ClearFinishedRecordings()
+{
+	for(int i = this->recordingVideos.size() -1; i >= 0; --i)
+	{
+		switch(this->recordingVideos[i]->GetStatus())
+		{
+		case VideoRequest::Status::Error:
+		case VideoRequest::Status::Closed:
+		case VideoRequest::Status::Unknown:
+			this->recordingVideos.erase(this->recordingVideos.begin() + i);
+			break;
+		}
+	}
+}
+
+SnapRequest::SPtr MainWin::RequestSnap(int idx, const std::string& prefix)
 {
 	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
 	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
@@ -115,7 +133,7 @@ SnapRequest::SPtr MainWin::RequestSnap(int idx)
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << "Snap_" << this->opSession.sessionName << this->snapCtr << ".png";
+	sstrmFilepath << "Snap_" << prefix << this->opSession.sessionName << this->snapCtr << ".png";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;
@@ -124,6 +142,43 @@ SnapRequest::SPtr MainWin::RequestSnap(int idx)
 	this->waitingSnaps.push_back(snreq);
 	this->cameraSnap.Play();
 	return snreq;
+}
+
+VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)
+{
+	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
+	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
+		return VideoRequest::MakeError("_badreq_");
+
+	// Build snapshot image filename
+	std::stringstream sstrmFilepath;
+	sstrmFilepath << "Video_" << prefix << this->opSession.sessionName << this->videoCtr << ".mkv";
+	std::string filepath = sstrmFilepath.str();
+
+	++this->videoCtr;
+
+	// The video recording may cancel another video recording in another
+	// file. We will handle that later by cleaning recordingVideos during the
+	// regular maintenence cycle.
+	VideoRequest::SPtr snreq = camMgr.RecordVideo(idx, filepath);
+	this->recordingVideos.push_back(snreq);
+	// A different audio should be played for video (and perhaps one when 
+	// we detect the recording has been stopped - in the maintainence cycle).
+	// But for now we'll recycle the camera snapping sound.
+	this->cameraSnap.Play();
+	return snreq;
+}
+
+bool MainWin::IsRecording(int idx)
+{
+	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
+	return camMgr.IsRecording(idx);
+}
+
+bool MainWin::StopRecording(int idx)
+{
+	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
+	return camMgr.StopRecording(idx);
 }
 
 void MainWin::ReloadAppOptions()

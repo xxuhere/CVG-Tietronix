@@ -184,7 +184,7 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 
 	// Any one individual state shouldn't be left in charge of cleaning
 	// the snaps, so its done at the outer level.
-	this->typedParent->ClearFinishedSnaps();
+	this->typedParent->PerformMaintenenceCycle();
 }
 
 // All the state delegation functions have the same boilerplate

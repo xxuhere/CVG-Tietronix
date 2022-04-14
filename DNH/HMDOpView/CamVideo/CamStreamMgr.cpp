@@ -123,6 +123,51 @@ void CamStreamMgr::ClearSnapshotRequests(int idx)
 	this->cams[idx]->ClearSnapshotRequests();
 }
 
+VideoRequest::SPtr CamStreamMgr::RecordVideo(int idx, const std::string& filename)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return VideoRequest::MakeError("__invalidstate__");
+
+	return this->cams[idx]->OpenVideo(filename);
+}
+
+bool CamStreamMgr::StopRecording(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return false;
+
+	return this->cams[idx]->CloseVideo();
+}
+
+bool CamStreamMgr::IsRecording(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return false;
+
+	return this->cams[idx]->IsRecordingVideo();
+}
+
+std::string CamStreamMgr::RecordingFilename(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return std::string();
+
+	return this->cams[idx]->VideoFilepath();
+}
+
+int CamStreamMgr::GetMSFrameTime(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return -1;
+
+	return this->cams[idx]->msInterval;
+}
+
 ManagedCam::State CamStreamMgr::GetState(int idx) 
 { 
 	std::lock_guard<std::mutex> guard(this->camAccess);

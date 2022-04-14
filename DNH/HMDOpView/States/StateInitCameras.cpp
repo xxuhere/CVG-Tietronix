@@ -119,6 +119,10 @@ void StateInitCameras::Draw(const wxSize& sz)
 					std::stringstream sstrmChan;
 					sstrmChan << "Channels: " << ConvertCVTypeToString(cur->type());
 					this->mainFont.RenderFont(sstrmChan.str().c_str(),outpX + tabIn, outpY + 40);
+
+					std::stringstream sstrmTiming;
+					sstrmTiming << "Frame MS: " << camMgrInst.GetMSFrameTime(camIt);
+					this->mainFont.RenderFont(sstrmTiming.str().c_str(), outpX + tabIn, outpY + 60);
 				}
 				showFeed = true;
 				break;

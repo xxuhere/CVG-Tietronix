@@ -158,8 +158,12 @@ public:
 
 	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
 
-
 	cvgCamFeedLocs pollLocations;
+
+	/// <summary>
+	/// The number of milliseconds between the last two frames.
+	/// </summary>
+	int msInterval = 0;
 
 private:
 
@@ -262,6 +266,10 @@ public:
 	VideoRequest::SPtr OpenVideo(const std::string& filename);
 
 	bool CloseVideo();
+
+	bool IsRecordingVideo();
+
+	std::string VideoFilepath();
 
 	/// <summary>
 	/// The thread loop to poll camera frames. This is expected to run in the 

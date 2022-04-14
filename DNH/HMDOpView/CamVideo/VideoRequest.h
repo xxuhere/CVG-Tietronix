@@ -47,7 +47,10 @@ public:
 	// Once the request is set, it can't be unset.
 	inline void RequestStop(){this->_reqStopped = true;}
 
-private:
+public:
 	typedef std::shared_ptr<VideoRequest> SPtr;
+	static SPtr MakeError( const std::string& err);
+private:
 	static SPtr MakeRequest(int width, int height, int camId, const std::string& filename);
+
 };

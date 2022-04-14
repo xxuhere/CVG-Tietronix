@@ -123,6 +123,16 @@ public:
 	/// <returns>The return value</returns>
 	SnapRequest::SPtr RequestSnapshot(int idx, const std::string& filename);
 
+	VideoRequest::SPtr RecordVideo(int idx, const std::string& filename);
+
+	bool StopRecording(int idx);
+
+	bool IsRecording(int idx);
+
+	std::string RecordingFilename(int idx);
+
+	int GetMSFrameTime(int idx);
+
 private:
 	// Only the singleton systems should be in charge of its construction.
 	CamStreamMgr();

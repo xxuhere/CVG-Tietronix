@@ -12,6 +12,13 @@ VideoRequest::VideoRequest(
 	this->filename	= filename;
 }
 
+VideoRequest::SPtr VideoRequest::MakeError(const std::string& err)
+{
+	VideoRequest* newReq = new VideoRequest(-1,-1, 0, "");
+	newReq->err = err;
+	return VideoRequest::SPtr(newReq);
+}
+
 VideoRequest::SPtr VideoRequest::MakeRequest(
 	int width, 
 	int height, 

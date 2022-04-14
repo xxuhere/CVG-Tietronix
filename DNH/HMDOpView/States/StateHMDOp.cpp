@@ -69,6 +69,15 @@ void StateHMDOp::Draw(const wxSize& sz)
 	
 
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
+
+	// Draw debug timings
+	const int camCt = 2;
+	for(int i = 0; i < camCt; ++i)
+	{
+		std::stringstream sstrm;
+		sstrm << "Cam: " << i << " - MS: " << camMgr.GetMSFrameTime(i);
+		this->fontInsTitle.RenderFont(sstrm.str().c_str(), 0, sz.y - (20 * camCt) + (20 * i));
+	}
 }
 
 void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)

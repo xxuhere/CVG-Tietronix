@@ -1,6 +1,8 @@
 #include "ManagedCam.h"
 #include <opencv2/imgcodecs.hpp>
 #include "../Utils/multiplatform.h"
+#include "../Utils/cvgStopwatch.h"
+#include "../Utils/cvgStopwatchLeft.h"
 
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedLocs& pollLocs)
 {
@@ -182,7 +184,7 @@ bool ManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 	if(!this->videoWrite.isOpened())
 	{
 		int mp4FourCC = cv::VideoWriter::fourcc('a', 'v', 'c', '1');
-		this->videoWrite.open(this->activeVideoReq->filename, mp4FourCC, 30, img.size());
+		this->videoWrite.open(this->activeVideoReq->filename, mp4FourCC, 30.0, img.size());
 		if(!this->videoWrite.isOpened())
 		{
 			this->activeVideoReq->err = "Could not open requested file.";
@@ -217,6 +219,21 @@ bool ManagedCam::CloseVideo()
 	return this->_CloseVideo_NoMutex();
 }
 
+bool ManagedCam::IsRecordingVideo()
+{
+	std::lock_guard<std::mutex> guard(this->videoAccess);
+	return this->videoWrite.isOpened();
+}
+
+std::string ManagedCam::VideoFilepath()
+{
+	std::lock_guard<std::mutex> guard(this->videoAccess);
+	if(this->activeVideoReq == nullptr)
+		return std::string();
+
+	return this->activeVideoReq->filename;
+}
+
 void ManagedCam::ThreadFn(int camIdx)
 {
 	this->_isStreamActive = false;
@@ -246,7 +263,6 @@ void ManagedCam::ThreadFn(int camIdx)
 
 		// Local copy in case a thread somehow changes this->pollType;
 		VideoPollType pollTy = this->pollType;
-
 		if(
 			pollTy == VideoPollType::OpenCVUSB_Idx ||
 			pollTy == VideoPollType::OpenCVUSB_Named ||
@@ -281,16 +297,22 @@ void ManagedCam::ThreadFn(int camIdx)
 			{
 				this->_isStreamActive = true;
 				videoCapture.set(cv::CAP_PROP_BUFFERSIZE, 1);
+				videoCapture.set(cv::CAP_PROP_FPS, 30);
+				// https://stackoverflow.com/a/69476456/2680066
+				videoCapture.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
 
 				this->streamWidth	= (int)videoCapture.get(cv::CAP_PROP_FRAME_WIDTH);
 				this->streamHeight	= (int)videoCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
+				cvgStopwatch swFPS;
+				cvgStopwatchLeft swLoopSleep;
 				// Camera frames polling loop
 				while(
 					videoCapture.isOpened() && 
 					this->_sentShutdown == false &&
 					pollTy == this->pollType)
 				{
+
 					this->conState = State::Polling;
 
 					// Poll the current frame from OpenCV.
@@ -299,7 +321,9 @@ void ManagedCam::ThreadFn(int camIdx)
 					videoCapture >> *pmat;
 
 					_FinalizeHandlingPolledImage(ptr);
-					MSSleep(30);
+					this->msInterval = swFPS.Milliseconds();
+					int msLeft = swLoopSleep.MSLeft33();
+					MSSleep(msLeft);
 				}
 			}
 			this->_DeactivateStreamState();
@@ -331,12 +355,16 @@ void ManagedCam::ThreadFn(int camIdx)
 				this->pollType = VideoPollType::Deactivated;
 			}
 
+			cvgStopwatch swFPS;
+			cvgStopwatchLeft swLoopSleep;
 			while(
 				this->_sentShutdown == false &&
 				pollTy == this->pollType)
 			{
 				_FinalizeHandlingPolledImage(sprtDecoy);
-				MSSleep(30);
+				this->msInterval = swFPS.Milliseconds();
+				int msLeft = swLoopSleep.MSLeft33();
+				MSSleep(msLeft);
 			}
 
 			this->_DeactivateStreamState();
@@ -467,6 +495,7 @@ void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 	this->_isStreamActive		= false;
 	this->streamWidth			= -1;
 	this->streamHeight			= -1;
+	this->msInterval			= 0;
 }
 
 void ManagedCam::SetPoll(VideoPollType pollTy)
