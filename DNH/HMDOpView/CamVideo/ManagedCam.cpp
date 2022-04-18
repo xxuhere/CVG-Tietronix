@@ -4,6 +4,11 @@
 #include "../Utils/cvgStopwatch.h"
 #include "../Utils/cvgStopwatchLeft.h"
 
+#include "CamImpl/CamImpl_OCV_USB.h"
+#include "CamImpl/CamImpl_OCV_Web.h"
+#include "CamImpl/CamImpl_OCV_HWPath.h"
+#include "CamImpl/CamImpl_StaticImg.h"
+
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedLocs& pollLocs)
 {
 	this->cameraId		= cameraId;
@@ -213,6 +218,94 @@ bool ManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 	return true;
 }
 
+void ManagedCam::_ClearImplementation(bool delCurrent, bool resetPollTy)
+{
+	if(this->currentImpl != nullptr)
+	{
+	}
+	if(resetPollTy)
+		this->pollType = VideoPollType::Deactivated;
+}
+
+bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent)
+{
+	//
+	//		REDUNDANCY AVOIDANCE
+	//////////////////////////////////////////////////
+	// If the same implementation, do nothing.
+	if(this->currentImpl != nullptr)
+	{
+		if(this->currentImpl->PollType() == newImplType)
+			return false;
+
+		this->_ClearImplementation();
+	}
+	else if(newImplType == VideoPollType::Deactivated)
+		return false;
+
+	//
+	//		SELECTING IMPLEMENTATION
+	//////////////////////////////////////////////////
+	// Anything created will use a default constructor, actual
+	// options and destinations are pulled later with the call
+	// to currentImpl->PullOptions() below.
+	//
+	switch(newImplType)
+	{
+	default:
+		assert(!"Unhandled implementation switch");
+	case VideoPollType::Deactivated:
+		// Does nothing, and currentImpl should be left nullptr.
+		return true;
+
+	case VideoPollType::OpenCVUSB_Idx:
+		this->currentImpl = new CamImpl_OCV_USB(0);
+		break;
+
+	case VideoPollType::OpenCVUSB_Named:
+		this->currentImpl = new CamImpl_OCV_HWPath("");
+		break;
+
+	case VideoPollType::Web:
+		this->currentImpl = new CamImpl_OCV_Web("");
+		break;
+
+	case VideoPollType::Image:
+		this->currentImpl = new CamImpl_StaticImg("");
+		break;
+	}
+
+	//
+	//		BOOT UP IMPLEMENTATION
+	//////////////////////////////////////////////////
+	// Before the implementation is usable, we need to initialize it.
+	// While Initialize(), in theory, only needs to be done once, we create
+	// these implementation on the fly instead of caching them for the entire
+	// lifetime, so these brand new implementation will need an Initialize().
+	assert(this->currentImpl != nullptr);
+	//
+	// Let the implementation library initialize any data it needs to.
+	if(!this->currentImpl->Initialize())
+	{
+		delete this->currentImpl;
+		this->currentImpl = nullptr;
+	}
+
+	this->currentImpl->PullOptions(this->pollLocations);
+
+	// Actually turn on the device for use.
+	if(!this->currentImpl->Activate())
+	{
+		this->currentImpl->Shutdown();
+		delete this->currentImpl;
+		this->currentImpl = nullptr;
+	}
+
+	this->pollType = newImplType;
+
+	return true;
+}
+
 bool ManagedCam::CloseVideo()
 {
 	std::lock_guard<std::mutex> guard(this->videoAccess);
@@ -243,136 +336,69 @@ void ManagedCam::ThreadFn(int camIdx)
 	// of the camera, which will be an inner loop.
 	while(this->_sentShutdown == false)
 	{
-		// if/else to see if we're any of the supported polling states
-		//
-		// The basic format will be
-		//
-		//	...
-		//	else if(pollType == PollType::type)
-		//	{
-		//		pre-polling initialization
-		//		while( 
-		//			poll conditions &&
-		//			pollType still equals PollType::type &&
-		//			!_sentShutdown &&)
-		//		{
-		//			Poll & process single frame.
-		//		}
-		//		post-polling shutdown
-		//	}
-
 		// Local copy in case a thread somehow changes this->pollType;
 		VideoPollType pollTy = this->pollType;
-		if(
-			pollTy == VideoPollType::OpenCVUSB_Idx ||
-			pollTy == VideoPollType::OpenCVUSB_Named ||
-			pollTy == VideoPollType::Web)
+
+		// Check if we're in here because the polling type changed
+		if(this->currentImpl != nullptr)
 		{
-			this->conState = State::Connecting;
-			this->_isStreamActive = false;
-
-			cv::VideoCapture videoCapture;
-
-			// 3 polling types are handled in this loop because their loops
-			// are similar because it's just OpenCV VideoCapture polling.
-			//
-			// Initialization of the videoCapture, branching on the polling type.
-			bool opened = false;
-			if(pollTy == VideoPollType::OpenCVUSB_Idx)
-			{ 
-				opened = videoCapture.open(this->pollLocations.camIndex, 0);
-			}
-			else if(pollTy == VideoPollType::OpenCVUSB_Named)
-			{
-				// Named device paths are probably only supported on Linux
-				opened = videoCapture.open(this->pollLocations.devicePath, cv::CAP_V4L2);
-			}
-			else if(pollTy == VideoPollType::Web)
-			{ 
-				opened = videoCapture.open(this->pollLocations.uriSource, cv::CAP_FFMPEG);
-			}
-
-			// The common polling loop
-			if(opened == true)
-			{
-				this->_isStreamActive = true;
-				videoCapture.set(cv::CAP_PROP_BUFFERSIZE, 1);
-				videoCapture.set(cv::CAP_PROP_FPS, 30);
-				// https://stackoverflow.com/a/69476456/2680066
-				videoCapture.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
-
-				this->streamWidth	= (int)videoCapture.get(cv::CAP_PROP_FRAME_WIDTH);
-				this->streamHeight	= (int)videoCapture.get(cv::CAP_PROP_FRAME_HEIGHT);
-
-				cvgStopwatch swFPS;
-				cvgStopwatchLeft swLoopSleep;
-				// Camera frames polling loop
-				while(
-					videoCapture.isOpened() && 
-					this->_sentShutdown == false &&
-					pollTy == this->pollType)
-				{
-
-					this->conState = State::Polling;
-
-					// Poll the current frame from OpenCV.
-					cv::Mat* pmat = new cv::Mat();
-					cv::Ptr<cv::Mat> ptr(pmat);
-					videoCapture >> *pmat;
-
-					_FinalizeHandlingPolledImage(ptr);
-					this->msInterval = swFPS.Milliseconds();
-					int msLeft = swLoopSleep.MSLeft33();
-					MSSleep(msLeft);
-				}
-			}
-			this->_DeactivateStreamState();
+			if(this->currentImpl->PollType() != pollTy)
+				this->_ClearImplementation();
 		}
-		else if(pollTy == VideoPollType::Image)
+
+		if(pollTy != VideoPollType::Deactivated)
+		{ 
+			this->conState = State::Connecting;
+			this->SwitchImplementation(pollTy);
+		}
+		else
+			this->conState = State::Idling;
+
+		// If we have a camera implementation, start it up.
+		if(this->currentImpl != nullptr && this->currentImpl->IsValid())
 		{
-			// Simulate the feed with a static test image. This is useful in a
-			// handful of situations:
-			// - Deterministic and stable image to diagnose
-			// - Iterating without having to wait for the webcam feed to initialize streaming.
-			// - Testing the rest of the application without needing a webcam.
-			this->_isStreamActive = true;
-			this->conState = State::Polling;
-
-			cv::Mat* decoy = new cv::Mat();
-			*decoy = cv::imread("TestImg.png");
-			cv::Ptr<cv::Mat> sprtDecoy(decoy);
-
-			if(decoy != nullptr && !decoy->empty())
-			{ 
-				this->streamWidth	= decoy->cols;
-				this->streamHeight	= decoy->rows;
-			}
-			else
-			{
-				this->streamWidth	= 0;
-				this->streamHeight	= 0;
-				// Bail out of this invalid polling mode.
-				this->pollType = VideoPollType::Deactivated;
-			}
+			this->streamWidth = -1;
+			this->streamHeight = -1;
 
 			cvgStopwatch swFPS;
 			cvgStopwatchLeft swLoopSleep;
-			while(
-				this->_sentShutdown == false &&
-				pollTy == this->pollType)
+
+			while( // Polling loop
+				this->currentImpl->PollType() == pollTy &&
+				this->currentImpl->IsValid())
 			{
-				_FinalizeHandlingPolledImage(sprtDecoy);
+				this->conState = State::Polling;
+
+				// Poll the current frame from OpenCV.
+				cv::Ptr<cv::Mat> frame = this->currentImpl->PollFrame();
+
+				if(frame != nullptr && !frame.empty())
+				{
+					// First frame we take the dimension and assume the video size is constant.
+					// We could also put in a mechanism (into ICamImpl) to give us a frame size
+					// right after activation, but that currently doesn't exist.
+					if(this->streamWidth == -1)
+					{
+						this->streamWidth = frame->cols;
+						this->streamHeight = frame->rows;
+					}
+
+					// Pass it through to the image pipeline, and then 
+					// transfer it to the last frame cache to stage it for
+					// other threads (the main GUI thread) to access.
+					_FinalizeHandlingPolledImage(frame);
+				}
+
 				this->msInterval = swFPS.Milliseconds();
 				int msLeft = swLoopSleep.MSLeft33();
 				MSSleep(msLeft);
 			}
-
+			this->currentImpl->Deactivate();
 			this->_DeactivateStreamState();
 		}
-		else if(pollTy == VideoPollType::External)
-		{
-		}
-		else
+
+		// Are we just idling?
+		if(pollTy != VideoPollType::Deactivated)
 		{
 			// If no active polling method is selected, we 
 			// wait a bit and recheck the polling method again 
@@ -386,6 +412,7 @@ void ManagedCam::ThreadFn(int camIdx)
 		}
 	}
 
+	this->_ClearImplementation();
 	this->conState = State::Shutdown;
 }
 

@@ -58,6 +58,7 @@ SUBDIR_LODEPNG = lodePNG
 SUBDIR_UTILS = Utils
 SUBDIR_HARDWARE = Hardware
 SUBDIR_CAMVIDEO = CamVideo
+SUBDIR_CAMIMPL = CamVideo/CamImpl
 
 SUBOBJ_MAIN = \
 	FontMgr GLWin HMDOpApp MainWin TexObj OpSession
@@ -76,6 +77,9 @@ SUBOBJ_HARDWARE = \
 	
 SUBOBJ_CAMVIDEO = \
 	CamStreamMgr ManagedCam SnapRequest VideoRequest
+	
+SUBOBJ_CAMIMPL = \
+	ICamImpl CamImpl_StaticImg CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))
@@ -83,6 +87,7 @@ EXPOBJS_LODEPNG = $(patsubst %,$(SUBDIR_LODEPNG)/%.o,$(SUBOBJ_LODEPNG))
 EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
 EXPOBJS_HARDWARE = $(patsubst %,$(SUBDIR_HARDWARE)/%.o,$(SUBOBJ_HARDWARE))
 EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
+EXPOBJS_CAMIMPL = $(patsubst %,$(SUBDIR_CAMIMPL)/%.o,$(SUBOBJ_CAMIMPL))
 
 ##################################################
 #
@@ -97,7 +102,7 @@ all: hmdopview
 	@echo "COMPILING TARGET All"
 	@echo "Building HmdViewOp application"
 	@echo "--------------------------------------------------"
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -Wall `wx-config --libs std,aui --gl-libs` $(OPENCVLIBS) -lftgl -lGL -o hmdopapp
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -lboost_filesystem -Wall `wx-config --libs std,aui --gl-libs` $(OPENCVLIBS) -lftgl -lGL -o hmdopapp
 	echo "Finished build command."
 	
 hmdopview: objs
@@ -105,7 +110,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking HMDOpView archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO)
+	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -117,7 +122,7 @@ hmdopview: objs
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(OPENCVLIBS) $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO)
+objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL)
 	@echo "TARGET objs"
 
 .PHONY: clean

@@ -147,6 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_USB.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_Web.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OpenCVBase.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_StaticImg.h" />
+    <ClInclude Include="CamVideo\CamImpl\ICamImpl.h" />
     <ClInclude Include="CamVideo\CamStreamMgr.h" />
     <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\SnapRequest.h" />
@@ -180,6 +186,12 @@
     <ClInclude Include="Utils\VideoPollType.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_USB.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_Web.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OpenCVBase.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_StaticImg.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\ICamImpl.cpp" />
     <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
     <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\SnapRequest.cpp" />

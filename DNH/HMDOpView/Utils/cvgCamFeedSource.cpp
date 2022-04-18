@@ -12,6 +12,7 @@ json cvgCamFeedSource::AsJSON() const
 	ret["pipe_chans"	] = this->channelCtFromPipe;
 	ret["pipe_width"	] = this->pipeWidth;
 	ret["pipe_height"	] = this->pipeHeight;
+	ret["static_img"	] = this->staticImagePath;
 
 	return ret;
 }
@@ -41,4 +42,7 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains("pipe_height") && js["pipe_height"].is_number())
 		this->pipeHeight = js["pipe_height"];
+
+	if(js.contains("static_img") && js["static_img"].is_string())
+		this->staticImagePath = js["static_img"];
 }

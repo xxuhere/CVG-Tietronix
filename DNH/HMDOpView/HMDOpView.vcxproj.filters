@@ -43,6 +43,12 @@
     <Filter Include="Source Files\CamVideo">
       <UniqueIdentifier>{870f3fcc-1cd4-419c-b95f-b3c9bfc62ea2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CamVideo\CamImpl">
+      <UniqueIdentifier>{44cd5638-5f24-4142-9a25-b86277eee5d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CamVideo\CamImpl">
+      <UniqueIdentifier>{a0c153dd-163b-4cee-a535-71c418d22ba7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -138,6 +144,24 @@
     <ClInclude Include="Utils\cvgStopwatchLeft.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\ICamImpl.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_StaticImg.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OpenCVBase.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_Web.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_USB.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h">
+      <Filter>Header Files\CamVideo\CamImpl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -220,6 +244,24 @@
     </ClCompile>
     <ClCompile Include="Utils\cvgStopwatchLeft.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\ICamImpl.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_StaticImg.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OpenCVBase.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_Web.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_USB.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp">
+      <Filter>Source Files\CamVideo\CamImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

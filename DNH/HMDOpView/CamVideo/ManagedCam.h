@@ -8,6 +8,8 @@
 #include "../Utils/VideoPollType.h"
 #include "../Utils/cvgCamFeedSource.h"
 
+#include "CamImpl/ICamImpl.h"
+
 #include <mutex>
 #include <thread>
 #include <memory>
@@ -156,14 +158,18 @@ public:
 	/// </summary>
 	State conState = State::Unknown;
 
-	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
 
-	cvgCamFeedLocs pollLocations;
 
 	/// <summary>
 	/// The number of milliseconds between the last two frames.
 	/// </summary>
 	int msInterval = 0;
+
+	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
+
+	cvgCamFeedLocs pollLocations;
+
+	ICamImpl* currentImpl = nullptr;
 
 private:
 
@@ -214,6 +220,11 @@ private:
 	/// <param name="img"></param>
 	/// <returns></returns>
 	bool _DumpImageToVideofile(const cv::Mat& img);
+
+	void _ClearImplementation(bool delCurrent = true, bool resetPollTy = true);
+
+	bool SwitchImplementation(VideoPollType newImplType, bool delCurrent = true);
+
 public:
 
 	ManagedCam(VideoPollType pt, int camId, const cvgCamFeedLocs& pollLocs);

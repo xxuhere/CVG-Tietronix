@@ -8,8 +8,9 @@ using json = nlohmann::json;
 /// <summary>
 /// A list of options of where a cam feed can come from.
 /// </summary>
-struct cvgCamFeedLocs
+class cvgCamFeedLocs
 {
+public:
 	// For serialization (in cvgCamFeedSource),
 	// these member defaults are not expected to work 
 	// "out of the box", but instead give something that
@@ -36,6 +37,12 @@ struct cvgCamFeedLocs
 	/// raw bytes from a spawned pipe.
 	/// </summary>
 	std::string externalPipeCmd = "raspiyuv";
+
+	/// <summary>
+	/// If the poll type is a static image, the path to pull the
+	/// image from.
+	/// </summary>
+	std::string staticImagePath = "testimage.png";
 
 	/// <summary>
 	/// The number of (1 byte channels) that externalPipeCmd
