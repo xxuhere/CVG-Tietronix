@@ -2,11 +2,13 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "SnapRequest.h"
 #include "VideoRequest.h"
 #include "../Utils/VideoPollType.h"
 #include "../Utils/cvgCamFeedSource.h"
+#include "../Utils/yen_threshold.h"
 
 #include "CamImpl/ICamImpl.h"
 
@@ -300,6 +302,22 @@ public:
 	/// </param>
 	/// <returns></returns>
 	bool BootupPollingThread(int camIdx);
+
+	///<summary
+	/// Preform thresholding on the target image
+	/// Should return a black and white image.
+	/// 
+	/// Note that the parameter and return value can
+	/// but dont have to be the same.
+	///  
+	/// It's expected that teh shared pointer class 
+	/// will preform all memory management needs
+	/// </summary>
+	/// <param name="src"> The image to threshold </param>
+	/// <returns></returns>
+	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src);
+
+
 
 	/// <summary>
 	/// Perform image processing on the target image.

@@ -509,9 +509,73 @@ bool ManagedCam::BootupPollingThread(int camIdx)
 	return true;
 }
 
+cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src)
+{
+
+	cv::Mat grey, cl, thresholded, blurred, edges, kernel, dialated, flooded, invert;
+
+	//Histogram constants
+	// Quantize the hue to 30 levels
+	// and the saturation to 32 levels
+	int bins = 256;
+	int histSize[] = { bins };
+	// hue varies from 0 to 179, see cvtColor
+	const float range[] = { 0, 256 };
+	const float* ranges[] = { range };
+	cv::Mat hist;
+	// we compute the histogram from the 0-th channel
+	int channels[] = { 0 };
+
+	/// Convert it to gray
+	cv::cvtColor(*src, grey, cv::COLOR_RGBA2GRAY, 0);
+
+	//equalize
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+	clahe->setClipLimit(2.7);
+	clahe->apply(grey, cl);
+
+	//make histogram
+	calcHist(&cl, 1, channels, cv::Mat(), // do not use mask
+		hist, 1, histSize, ranges,
+		true, // the histogram is uniform
+		false);
+
+	// yen_thresholding
+	int yen_threshold = Yen(hist);
+	//std::cout << "Yen threshold : " << yen_threshold << "\n";
+	cv::threshold(cl,
+		thresholded,
+		double(yen_threshold),
+		255,
+		cv::THRESH_TOZERO);
+	//Note THRESH_TO_ZERO is only one option another, possibly better option is THRESH_BINARY
+
+	//blur
+	cv::medianBlur(thresholded, blurred, 7);
+
+	//Note the next steps are expensive and possibly unnecesaary keeping them for completeness
+	//edges
+	cv::Canny(blurred, edges, 120, 120);
+
+	//dialate
+	kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
+	cv::dilate(edges, dialated, kernel);
+
+	//flood
+	flooded = dialated.clone();
+	cv::floodFill(flooded, cv::Point(0, 0), cv::Scalar(255));
+
+	//invert
+	cv::bitwise_not(flooded, invert);
+	cv::Mat* inverted = new cv::Mat(invert);
+	return inverted;//Note might be worth changing this to blurred after changing thresholding ot use THRESH_BINARY
+
+}
+
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
-	return inImg;
+	//TODO possibly make thresholding an option and do smarter compositing?
+	return ThresholdImage(inImg);
 }
 
 void ManagedCam::_DeactivateStreamState(bool deactivateShould)

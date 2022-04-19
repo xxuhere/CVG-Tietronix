@@ -70,17 +70,36 @@ GLuint cvgCamTextureRegistry::LoadTexture(int camIdx, cv::Ptr<cv::Mat> img, long
 	}
 	// Regardless of how we got here, texAlloc should be assigned and it
 	// should be binded to GL_TEXTURE_2D.
-	//
-	// NOTE: We still need to add support for other formats besides BGR,
-	// specifically 8bit 1channel greyscale.
+	int internalFormat;
+	int format;
+	switch (img->channels())
+	{
+	case 1:
+		internalFormat = GL_LUMINANCE;
+		format = GL_LUMINANCE;
+		break;
+	case 2:
+		internalFormat = GL_RG;
+		format = GL_RG;
+		break;
+	case 3:
+		internalFormat = GL_BGR;
+		format = GL_RGB;
+		break;
+	case 4:
+		internalFormat = GL_RGBA;
+		format = GL_RGBA;
+		break;
+
+	}
 	glTexImage2D(
 		GL_TEXTURE_2D, 
 		0, 
-		GL_RGB, 
+		internalFormat,
 		img->cols, 
 		img->rows, 
 		0, 
-		GL_BGR, 
+		format,
 		GL_UNSIGNED_BYTE,
 		img->ptr());
 

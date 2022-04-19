@@ -184,6 +184,7 @@
     <ClInclude Include="Utils\cvgStopwatchLeft.h" />
     <ClInclude Include="Utils\multiplatform.h" />
     <ClInclude Include="Utils\VideoPollType.h" />
+    <ClInclude Include="Utils\yen_threshold.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp" />
@@ -219,6 +220,7 @@
     <ClCompile Include="Utils\cvgStopwatchLeft.cpp" />
     <ClCompile Include="Utils\multiplatform.cpp" />
     <ClCompile Include="Utils\VideoPollType.cpp" />
+    <ClCompile Include="Utils\yen_threshold.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HMDOpView.rc" />

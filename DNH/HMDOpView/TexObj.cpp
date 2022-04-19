@@ -34,24 +34,43 @@ void TexObj::TransferFromCVMat(const cv::Mat& m)
 
 	glBindTexture(GL_TEXTURE_2D, this->texID);
 
-	int srcType = GL_BGR;
+	/*int srcType = GL_BGR;
 	if(m.dims == 1)
 		srcType = GL_RED;
 	else if(m.dims == 2)
 		srcType = GL_RG;
 	else if(m.dims == 4)
-		srcType = GL_BGRA;
+		srcType = GL_BGRA;*/
+	int internalFormat;
+	int format;
+	switch (m.channels())
+	{
+	case 1:
+		internalFormat = GL_LUMINANCE;
+		format = GL_LUMINANCE;
+		break;
+	case 2:
+		internalFormat = GL_RG;
+		format = GL_RG;
+		break;
+	case 3:
+		internalFormat = GL_BGR;
+		format = GL_RGB;
+		break;
+	case 4:
+		internalFormat = GL_RGBA;
+		format = GL_RGBA;
+		break;
 
-	// Right now this is hardcoded to BGR. We should consider supporting
-	// different formats, especially 1 channel greyscales.
+	}
 	glTexImage2D(
 		GL_TEXTURE_2D, 
 		0, 
-		GL_RGB, 
+		internalFormat, 
 		m.cols, 
 		m.rows, 
 		0, 
-		GL_BGR, 
+		format, 
 		GL_UNSIGNED_BYTE,
 		m.ptr());
 
