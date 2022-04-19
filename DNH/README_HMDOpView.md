@@ -27,11 +27,12 @@ sudo apt-get install libfreetype6-dev
 
 The Makefile in the HMDOpView will make the entire application.
 
-Note: It does not like being run headless / from an ssh terminal. It's suggested to run it from the terminal in a graphical setting like a vnc viewer.
+Note: This is a graphical application and will fail to execute if it is run headless (i.e., without a display). It is suggested to run the application with a monitor attached; but if running remotely, executing through VNC has also been observed to work.
 
 # Using the HMD Op View
 
-To use the HMD Op View, make sure the running machine has a web-camera attached, and then run the application.
+To use the HMD Op View, make sure the running machine has two web-camera attached, and then run the application.
+For the RaspberryPi, CSI (ribbon) cameras are preferred.
 
 Relevant shortcut keys during developer testing:
 

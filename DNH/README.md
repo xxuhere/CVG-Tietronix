@@ -95,7 +95,7 @@ sudo apt-get install libopencv-dev
 **OpenGL**
 
 ```cmd
-apt-get install mesa-common-dev freeglut3-dev
+sudo apt-get install mesa-common-dev freeglut3-dev
 ```
 
 
