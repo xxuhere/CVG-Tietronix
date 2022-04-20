@@ -138,9 +138,6 @@ struct RASPIVIDYUV_STATE_S
    int onTime;                         /// In timed cycle mode, the amount of time the capture is on per cycle
    int offTime;                        /// In timed cycle mode, the amount of time the capture is off per cycle
 
-   int onlyLuma;                       /// Only output the luma / Y plane of the YUV data
-   int useRGB;                         /// Output RGB data rather than YUV
-
    RASPIPREVIEW_PARAMETERS preview_parameters;   /// Preview setup parameters
    RASPICAM_CAMERA_PARAMETERS camera_parameters; /// Camera setup parameters
 
@@ -178,8 +175,6 @@ enum
    CommandSignal,
    CommandKeypress,
    CommandInitialState,
-   CommandOnlyLuma,
-   CommandUseRGB,
    CommandSavePTS,
    CommandNetListen
 };
@@ -192,8 +187,6 @@ static COMMAND_LIST cmdline_commands[] =
    { CommandSignal,        "-signal",     "s",  "Cycle between capture and pause on Signal", 0},
    { CommandKeypress,      "-keypress",   "k",  "Cycle between capture and pause on ENTER", 0},
    { CommandInitialState,  "-initial",    "i",  "Initial state. Use 'record' or 'pause'. Default 'record'", 1},
-   { CommandOnlyLuma,      "-luma",       "y",  "Only output the luma / Y of the YUV data'", 0},
-   { CommandUseRGB,        "-rgb",        "rgb","Save as RGB data rather than YUV", 0},
    { CommandSavePTS,       "-save-pts",   "pts","Save Timestamps to file", 1 },
    { CommandNetListen,     "-listen",     "l", "Listen on a TCP socket", 0},
 };
@@ -245,7 +238,6 @@ static void default_status(RASPIVIDYUV_STATE *state)
    state->onTime = 5000;
    state->offTime = 5000;
    state->bCapturing = 0;
-   state->onlyLuma = 0;
 
    // Setup preview window defaults
    raspipreview_set_defaults(&state->preview_parameters);
@@ -305,12 +297,12 @@ static void dump_status(RASPIVIDYUV_STATE *state)
  */
 static void application_help_message(char *app_name)
 {
-   fprintf(stdout, "Display camera output to display, and optionally saves an uncompressed YUV420 or RGB file \n\n");
+   fprintf(stdout, "Display camera output to display, and optionally saves an uncompressed YUV420\n\n");
    fprintf(stdout, "NOTE: High resolutions and/or frame rates may exceed the bandwidth of the system due\n");
    fprintf(stdout, "to the large amounts of data being moved to the SD card. This will result in undefined\n");
    fprintf(stdout, "results in the subsequent file.\n");
    fprintf(stdout, "The single raw file produced contains all the images. Each image in the files will be of size\n");
-   fprintf(stdout, "width*height*1.5 for YUV or width*height*3 for RGB, unless width and/or height are not divisible by 16.");
+   fprintf(stdout, "width*height*1.5 for YUV.");
    fprintf(stdout, "Use the image size displayed during the run (in verbose mode) for an accurate value\n");
 
    fprintf(stdout, "The Linux split command can be used to split up the file to individual frames\n");
@@ -444,24 +436,6 @@ static int parse_cmdline(int argc, const char **argv, RASPIVIDYUV_STATE *state)
          i++;
          break;
       }
-
-      case CommandOnlyLuma:
-         if (state->useRGB)
-         {
-            fprintf(stderr, "--luma and --rgb are mutually exclusive\n");
-            valid = 0;
-         }
-         state->onlyLuma = 1;
-         break;
-
-      case CommandUseRGB: // display lots of data during run
-         if (state->onlyLuma)
-         {
-            fprintf(stderr, "--luma and --rgb are mutually exclusive\n");
-            valid = 0;
-         }
-         state->useRGB = 1;
-         break;
 
       case CommandSavePTS:  // output filename
       {
@@ -689,8 +663,7 @@ static void camera_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buff
       int bytes_to_write = buffer->length;
       int64_t current_time = get_microseconds64()/1000000;
 
-      if (pstate->onlyLuma)
-         bytes_to_write = vcos_min(buffer->length, port->format->es->video.width * port->format->es->video.height);
+	 bytes_to_write = vcos_min(buffer->length, port->format->es->video.width * port->format->es->video.height);
 
       vcos_assert(pData->file_handle);
 
@@ -913,16 +886,8 @@ static MMAL_STATUS_T create_camera_component(RASPIVIDYUV_STATE *state)
       mmal_port_parameter_set(video_port, &fps_range.hdr);
    }
 
-   if (state->useRGB)
-   {
-      format->encoding = mmal_util_rgb_order_fixed(still_port) ? MMAL_ENCODING_RGB24 : MMAL_ENCODING_BGR24;
-      format->encoding_variant = 0;  //Irrelevant when not in opaque mode
-   }
-   else
-   {
-      format->encoding = MMAL_ENCODING_I420;
-      format->encoding_variant = MMAL_ENCODING_I420;
-   }
+  format->encoding = MMAL_ENCODING_I420;
+  format->encoding_variant = MMAL_ENCODING_I420;
 
    format->es->video.width = VCOS_ALIGN_UP(state->common_settings.width, 32);
    format->es->video.height = VCOS_ALIGN_UP(state->common_settings.height, 16);
