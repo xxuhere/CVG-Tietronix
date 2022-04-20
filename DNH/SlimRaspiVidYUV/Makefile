@@ -5,7 +5,7 @@ all :
 	@echo ""
 	@echo "Compiling test application." 
 	@printf "\n\n" 
-	$(CC) $(CFLAGS) -o SlimYUVTest RaspiVidYUV.c RaspiCommonSettings.c RaspiGPS.c libgps_loader.c RaspiCamControl.c RaspiCLI.c RaspiHelpers.c RaspiPreview.c -I/opt/vc/include/ -L/opt/vc/lib/ -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host
+	$(CC) $(CFLAGS) -o SlimYUVTest RaspiVidYUV.c RaspiCommonSettings.c RaspiCamControl.c RaspiCLI.c RaspiHelpers.c RaspiPreview.c -I/opt/vc/include/ -L/opt/vc/lib/ -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host
 	
 .PHONY: clean
 clean :

@@ -172,11 +172,9 @@ enum
    CommandAwbGains,
    CommandDRCLevel,
    CommandStatsPass,
-   CommandAnnotate,
    CommandStereoMode,
    CommandStereoDecimate,
    CommandStereoSwap,
-   CommandAnnotateExtras,
    CommandFlicker,
    CommandAnalogGain,
    CommandDigitalGain,
@@ -207,11 +205,9 @@ static COMMAND_LIST  cmdline_commands[] =
    {CommandAwbGains,    "-awbgains",  "awbg", "Set AWB gains - AWB mode must be off", 1},
    {CommandDRCLevel,    "-drc",       "drc", "Set DRC Level (see Notes)", 1},
    {CommandStatsPass,   "-stats",     "st", "Force recomputation of statistics on stills capture pass"},
-   {CommandAnnotate,    "-annotate",  "a",  "Enable/Set annotate flags or text", 1},
    {CommandStereoMode,  "-stereo",    "3d", "Select stereoscopic mode", 1},
    {CommandStereoDecimate,"-decimate","dec", "Half width/height of stereo image"},
    {CommandStereoSwap,  "-3dswap",    "3dswap", "Swap camera order for stereoscopic"},
-   {CommandAnnotateExtras,"-annotateex","ae",  "Set extra annotation parameters (text size, text colour(hex YUV), bg colour(hex YUV), justify, x, y)", 2},
    {CommandAnalogGain,  "-analoggain", "ag", "Set the analog gain (floating point)", 1},
    {CommandDigitalGain, "-digitalgain", "dg", "Set the digital gain (floating point)", 1},
    {CommandSettings,    "-settings",   "set","Retrieve camera settings and write to stdout", 0},
@@ -729,64 +725,6 @@ int raspicamcontrol_parse_cmdline(RASPICAM_CAMERA_PARAMETERS *params, const char
       break;
    }
 
-   case CommandAnnotate:
-   {
-      char dummy;
-      unsigned int bitmask;
-      // If parameter is a number, assume its a bitmask, otherwise a string
-      if (sscanf(arg2, "%u%c", &bitmask, &dummy) == 1)
-      {
-         params->enable_annotate |= bitmask;
-      }
-      else
-      {
-         params->enable_annotate |= ANNOTATE_USER_TEXT;
-         //copy string char by char and replace "\n" with newline character
-         unsigned char c;
-         char const *s = arg2;
-         char *t = &params->annotate_string[0];
-         int n=0;
-         while ((c = *s++) && n < MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3-1)
-         {
-            if (c == '\\' && *s)
-            {
-               switch (c = *s++)
-               {
-               case 'n':
-                  c = '\n';
-                  break;
-
-               default:
-                  c = '\\';
-                  s--;
-                  break;
-               }
-            }
-            *(t++) = c;
-            n++;
-         }
-         *t='\0';
-
-         //params->annotate_string[MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3-1] = '\0';
-      }
-      used=2;
-      break;
-   }
-
-   case CommandAnnotateExtras:
-   {
-      // 3 parameters - text size (6-80), text colour (Hex VVUUYY) and background colour (Hex VVUUYY)
-      sscanf(arg2, "%u,%X,%X,%u,%u,%u", &params->annotate_text_size,
-             &params->annotate_text_colour,
-             &params->annotate_bg_colour,
-             &params->annotate_justify,
-             &params->annotate_x,
-             &params->annotate_y
-            );
-      used=2;
-      break;
-   }
-
    case CommandStereoMode:
    {
       params->stereo_mode.mode = stereo_mode_from_string(arg2);
@@ -975,11 +913,6 @@ void raspicamcontrol_set_defaults(RASPICAM_CAMERA_PARAMETERS *params)
    params->awb_gains_b = 0;
    params->drc_level = MMAL_PARAMETER_DRC_STRENGTH_OFF;
    params->stats_pass = MMAL_FALSE;
-   params->enable_annotate = 0;
-   params->annotate_string[0] = '\0';
-   params->annotate_text_size = 0;	//Use firmware default
-   params->annotate_text_colour = -1;   //Use firmware default
-   params->annotate_bg_colour = -1;     //Use firmware default
    params->stereo_mode.mode = MMAL_STEREOSCOPIC_MODE_NONE;
    params->stereo_mode.decimate = MMAL_FALSE;
    params->stereo_mode.swap_eyes = MMAL_FALSE;
@@ -1048,13 +981,6 @@ int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RASPICAM_
    result += raspicamcontrol_set_shutter_speed(camera, params->shutter_speed);
    result += raspicamcontrol_set_DRC(camera, params->drc_level);
    result += raspicamcontrol_set_stats_pass(camera, params->stats_pass);
-   result += raspicamcontrol_set_annotate(camera, params->enable_annotate, params->annotate_string,
-                                          params->annotate_text_size,
-                                          params->annotate_text_colour,
-                                          params->annotate_bg_colour,
-                                          params->annotate_justify,
-                                          params->annotate_x,
-                                          params->annotate_y);
    result += raspicamcontrol_set_gains(camera, params->analog_gain, params->digital_gain);
    result += raspicamcontrol_set_focus_window(camera, params->focus_window);
 
@@ -1598,124 +1524,6 @@ int raspicamcontrol_set_focus_window(MMAL_COMPONENT_T *camera, int focus_window)
       return 1;
 
    return mmal_status_to_int(mmal_port_parameter_set_boolean(camera->control, MMAL_PARAMETER_DRAW_BOX_FACES_AND_FOCUS, focus_window));
-}
-
-/**
- * Set the annotate data
- * @param camera Pointer to camera component
- * @param Bitmask of required annotation data. 0 for off.
- * @param If set, a pointer to text string to use instead of bitmask, max length 32 characters
- *
- * @return 0 if successful, non-zero if any parameters out of range
- */
-int raspicamcontrol_set_annotate(MMAL_COMPONENT_T *camera, const int settings, const char *string,
-                                 const int text_size, const int text_colour, const int bg_colour,
-                                 const unsigned int justify, const unsigned int x, const unsigned int y)
-{
-   MMAL_PARAMETER_CAMERA_ANNOTATE_V4_T annotate =
-   {{MMAL_PARAMETER_ANNOTATE, sizeof(MMAL_PARAMETER_CAMERA_ANNOTATE_V4_T)}};
-
-   if (settings)
-   {
-      time_t t = time(NULL);
-      struct tm tm = *localtime(&t);
-      char tmp[MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V4];
-      int process_datetime = 1;
-
-      annotate.enable = 1;
-
-      if (settings & (ANNOTATE_APP_TEXT | ANNOTATE_USER_TEXT))
-      {
-         if ((settings & (ANNOTATE_TIME_TEXT | ANNOTATE_DATE_TEXT)) && strchr(string,'%') != NULL)
-         {
-            //string contains strftime parameter?
-            strftime(annotate.text, MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3, string, &tm );
-            process_datetime = 0;
-         }
-         else
-         {
-            strncpy(annotate.text, string, MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3);
-         }
-         annotate.text[MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3-1] = '\0';
-      }
-
-      if (process_datetime && (settings & ANNOTATE_TIME_TEXT))
-      {
-         if(strlen(annotate.text))
-         {
-            strftime(tmp, 32, " %X", &tm );
-         }
-         else
-         {
-            strftime(tmp, 32, "%X", &tm );
-         }
-         strncat(annotate.text, tmp, MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3 - strlen(annotate.text) - 1);
-      }
-
-      if (process_datetime && (settings & ANNOTATE_DATE_TEXT))
-      {
-         if(strlen(annotate.text))
-         {
-            strftime(tmp, 32, " %x", &tm );
-         }
-         else
-         {
-            strftime(tmp, 32, "%x", &tm );
-         }
-         strncat(annotate.text, tmp, MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3 - strlen(annotate.text) - 1);
-      }
-
-      if (settings & ANNOTATE_SHUTTER_SETTINGS)
-         annotate.show_shutter = MMAL_TRUE;
-
-      if (settings & ANNOTATE_GAIN_SETTINGS)
-         annotate.show_analog_gain = MMAL_TRUE;
-
-      if (settings & ANNOTATE_LENS_SETTINGS)
-         annotate.show_lens = MMAL_TRUE;
-
-      if (settings & ANNOTATE_CAF_SETTINGS)
-         annotate.show_caf = MMAL_TRUE;
-
-      if (settings & ANNOTATE_MOTION_SETTINGS)
-         annotate.show_motion = MMAL_TRUE;
-
-      if (settings & ANNOTATE_FRAME_NUMBER)
-         annotate.show_frame_num = MMAL_TRUE;
-
-      if (settings & ANNOTATE_BLACK_BACKGROUND)
-         annotate.enable_text_background = MMAL_TRUE;
-
-      annotate.text_size = text_size;
-
-      if (text_colour != -1)
-      {
-         annotate.custom_text_colour = MMAL_TRUE;
-         annotate.custom_text_Y = text_colour&0xff;
-         annotate.custom_text_U = (text_colour>>8)&0xff;
-         annotate.custom_text_V = (text_colour>>16)&0xff;
-      }
-      else
-         annotate.custom_text_colour = MMAL_FALSE;
-
-      if (bg_colour != -1)
-      {
-         annotate.custom_background_colour = MMAL_TRUE;
-         annotate.custom_background_Y = bg_colour&0xff;
-         annotate.custom_background_U = (bg_colour>>8)&0xff;
-         annotate.custom_background_V = (bg_colour>>16)&0xff;
-      }
-      else
-         annotate.custom_background_colour = MMAL_FALSE;
-
-      annotate.justify = justify;
-      annotate.x_offset = x;
-      annotate.y_offset = y;
-   }
-   else
-      annotate.enable = 0;
-
-   return mmal_status_to_int(mmal_port_parameter_set(camera->control, &annotate.hdr));
 }
 
 int raspicamcontrol_set_stereo_mode(MMAL_PORT_T *port, MMAL_PARAMETER_STEREOSCOPIC_MODE_T *stereo_mode)

@@ -47,8 +47,6 @@ typedef struct
    int cameraNum;                      /// Camera number
    int sensor_mode;                    /// Sensor mode. 0=auto. Check docs/forum for modes selected by other values.
    int verbose;                        /// !0 if want detailed run information
-   int gps;                            /// Add real-time gpsd output to output
-
 } RASPICOMMONSETTINGS_PARAMETERS;
 
 void raspicommonsettings_set_defaults(RASPICOMMONSETTINGS_PARAMETERS *);
