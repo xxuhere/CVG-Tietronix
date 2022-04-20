@@ -113,7 +113,6 @@ typedef struct raspicam_camera_parameters_s
    float awb_gains_b;         /// AWB blue gain
    MMAL_PARAMETER_DRC_STRENGTH_T drc_level;  // Strength of Dynamic Range compression to apply
    MMAL_BOOL_T stats_pass;    /// Stills capture statistics pass on/off
-   int focus_window;
 
    MMAL_PARAMETER_STEREOSCOPIC_MODE_T stereo_mode;
    float analog_gain;         // Analog gain
@@ -121,12 +120,6 @@ typedef struct raspicam_camera_parameters_s
 
    int settings;
 } RASPICAM_CAMERA_PARAMETERS;
-
-typedef enum
-{
-   ZOOM_IN, ZOOM_OUT, ZOOM_RESET
-} ZOOM_COMMAND_T;
-
 
 void raspicamcontrol_check_configuration(int min_gpu_mem);
 
@@ -152,13 +145,11 @@ int raspicamcontrol_set_exposure_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_EXPOS
 int raspicamcontrol_set_flicker_avoid_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_FLICKERAVOID_T mode);
 int raspicamcontrol_set_awb_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_AWBMODE_T awb_mode);
 int raspicamcontrol_set_awb_gains(MMAL_COMPONENT_T *camera, float r_gain, float b_gain);
-int raspicamcontrol_zoom_in_zoom_out(MMAL_COMPONENT_T *camera, ZOOM_COMMAND_T zoom_command, PARAM_FLOAT_RECT_T *roi);
 int raspicamcontrol_set_shutter_speed(MMAL_COMPONENT_T *camera, int speed_ms);
 int raspicamcontrol_set_DRC(MMAL_COMPONENT_T *camera, MMAL_PARAMETER_DRC_STRENGTH_T strength);
 int raspicamcontrol_set_stats_pass(MMAL_COMPONENT_T *camera, int stats_pass);
 int raspicamcontrol_set_stereo_mode(MMAL_PORT_T *port, MMAL_PARAMETER_STEREOSCOPIC_MODE_T *stereo_mode);
 int raspicamcontrol_set_gains(MMAL_COMPONENT_T *camera, float analog, float digital);
-int raspicamcontrol_set_focus_window(MMAL_COMPONENT_T *camera, int focus_window);
 
 //Individual getting functions
 int raspicamcontrol_get_saturation(MMAL_COMPONENT_T *camera);

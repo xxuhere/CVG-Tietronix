@@ -145,7 +145,6 @@ enum
    CommandAnalogGain,
    CommandDigitalGain,
    CommandSettings,
-   CommandFocusWindow
 };
 
 static COMMAND_LIST  cmdline_commands[] =
@@ -170,16 +169,12 @@ static COMMAND_LIST  cmdline_commands[] =
    {CommandAnalogGain,  "-analoggain", "ag", "Set the analog gain (floating point)", 1},
    {CommandDigitalGain, "-digitalgain", "dg", "Set the digital gain (floating point)", 1},
    {CommandSettings,    "-settings",   "set","Retrieve camera settings and write to stdout", 0},
-   {CommandFocusWindow, "-focus",      "fw","Draw a window with the focus FoM value on the image.", 0},
 };
 
 static int cmdline_commands_size = sizeof(cmdline_commands) / sizeof(cmdline_commands[0]);
 
 
 #define parameter_reset -99999
-
-#define zoom_full_16P16 ((unsigned int)(65536 * 0.15))
-#define zoom_increment_16P16 (65536UL / 10)
 
 /**
  * Update the passed in parameter according to the rest of the parameters
@@ -478,13 +473,6 @@ int raspicamcontrol_parse_cmdline(RASPICAM_CAMERA_PARAMETERS *params, const char
       break;
    }
 
-   case CommandFocusWindow:
-   {
-      params->focus_window = 1;
-      used = 1;
-      break;
-   }
-
    }
 
    return used;
@@ -592,7 +580,6 @@ int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RASPICAM_
    result += raspicamcontrol_set_DRC(camera, params->drc_level);
    result += raspicamcontrol_set_stats_pass(camera, params->stats_pass);
    result += raspicamcontrol_set_gains(camera, params->analog_gain, params->digital_gain);
-   result += raspicamcontrol_set_focus_window(camera, params->focus_window);
 
    if (params->settings)
    {
@@ -839,81 +826,6 @@ int raspicamcontrol_set_awb_gains(MMAL_COMPONENT_T *camera, float r_gain, float 
    return mmal_status_to_int(mmal_port_parameter_set(camera->control, &param.hdr));
 }
 
-/**
- * Zoom in and Zoom out by changing ROI
- * @param camera Pointer to camera component
- * @param zoom_command zoom command enum
- * @return 0 if successful, non-zero otherwise
- */
-int raspicamcontrol_zoom_in_zoom_out(MMAL_COMPONENT_T *camera, ZOOM_COMMAND_T zoom_command, PARAM_FLOAT_RECT_T *roi)
-{
-   MMAL_PARAMETER_INPUT_CROP_T crop;
-   crop.hdr.id = MMAL_PARAMETER_INPUT_CROP;
-   crop.hdr.size = sizeof(crop);
-
-   if (mmal_port_parameter_get(camera->control, &crop.hdr) != MMAL_SUCCESS)
-   {
-      vcos_log_error("mmal_port_parameter_get(camera->control, &crop.hdr) failed, skip it");
-      return 0;
-   }
-
-   if (zoom_command == ZOOM_IN)
-   {
-      if (crop.rect.width <= (zoom_full_16P16 + zoom_increment_16P16))
-      {
-         crop.rect.width = zoom_full_16P16;
-         crop.rect.height = zoom_full_16P16;
-      }
-      else
-      {
-         crop.rect.width -= zoom_increment_16P16;
-         crop.rect.height -= zoom_increment_16P16;
-      }
-   }
-   else if (zoom_command == ZOOM_OUT)
-   {
-      unsigned int increased_size = crop.rect.width + zoom_increment_16P16;
-      if (increased_size < crop.rect.width) //overflow
-      {
-         crop.rect.width = 65536;
-         crop.rect.height = 65536;
-      }
-      else
-      {
-         crop.rect.width = increased_size;
-         crop.rect.height = increased_size;
-      }
-   }
-
-   if (zoom_command == ZOOM_RESET)
-   {
-      crop.rect.x = 0;
-      crop.rect.y = 0;
-      crop.rect.width = 65536;
-      crop.rect.height = 65536;
-   }
-   else
-   {
-      unsigned int centered_top_coordinate = (65536 - crop.rect.width) / 2;
-      crop.rect.x = centered_top_coordinate;
-      crop.rect.y = centered_top_coordinate;
-   }
-
-   int ret = mmal_status_to_int(mmal_port_parameter_set(camera->control, &crop.hdr));
-
-   if (ret == 0)
-   {
-      roi->x = roi->y = (double)crop.rect.x/65536;
-      roi->w = roi->h = (double)crop.rect.width/65536;
-   }
-   else
-   {
-      vcos_log_error("Failed to set crop values, x/y: %u, w/h: %u", crop.rect.x, crop.rect.width);
-      ret = 1;
-   }
-
-   return ret;
-}
 
 /**
  * Adjust the exposure time used for images
@@ -956,14 +868,6 @@ int raspicamcontrol_set_stats_pass(MMAL_COMPONENT_T *camera, int stats_pass)
       return 1;
 
    return mmal_status_to_int(mmal_port_parameter_set_boolean(camera->control, MMAL_PARAMETER_CAPTURE_STATS_PASS, stats_pass));
-}
-
-int raspicamcontrol_set_focus_window(MMAL_COMPONENT_T *camera, int focus_window)
-{
-   if (!camera)
-      return 1;
-
-   return mmal_status_to_int(mmal_port_parameter_set_boolean(camera->control, MMAL_PARAMETER_DRAW_BOX_FACES_AND_FOCUS, focus_window));
 }
 
 int raspicamcontrol_set_stereo_mode(MMAL_PORT_T *port, MMAL_PARAMETER_STEREOSCOPIC_MODE_T *stereo_mode)
