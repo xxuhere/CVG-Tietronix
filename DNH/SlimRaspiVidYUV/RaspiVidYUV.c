@@ -133,8 +133,6 @@ struct RASPIVIDYUV_STATE_S
    RASPICOMMONSETTINGS_PARAMETERS common_settings;
    int timeout;                        /// Time taken before frame is grabbed and app then shuts down. Units are milliseconds
    int framerate;                      /// Requested frame rate (fps)
-   int demoMode;                       /// Run app in demo mode
-   int demoInterval;                   /// Interval between camera settings changes
    int waitMethod;                     /// Method for switching between pause and capture
 
    int onTime;                         /// In timed cycle mode, the amount of time the capture is on per cycle
@@ -175,7 +173,6 @@ static int initial_map_size = sizeof(initial_map) / sizeof(initial_map[0]);
 enum
 {
    CommandTimeout,
-   CommandDemoMode,
    CommandFramerate,
    CommandTimed,
    CommandSignal,
@@ -190,7 +187,6 @@ enum
 static COMMAND_LIST cmdline_commands[] =
 {
    { CommandTimeout,       "-timeout",    "t",  "Time (in ms) to capture for. If not specified, set to 5s. Zero to disable", 1 },
-   { CommandDemoMode,      "-demo",       "d",  "Run a demo mode (cycle through range of camera options, no capture)", 1},
    { CommandFramerate,     "-framerate",  "fps","Specify the frames per second to record", 1},
    { CommandTimed,         "-timed",      "td", "Cycle between capture and pause. -cycle on,off where on is record time and off is pause time in ms", 0},
    { CommandSignal,        "-signal",     "s",  "Cycle between capture and pause on Signal", 0},
@@ -245,8 +241,6 @@ static void default_status(RASPIVIDYUV_STATE *state)
    state->common_settings.width = 1920;       // Default to 1080p
    state->common_settings.height = 1080;
    state->framerate = VIDEO_FRAME_RATE_NUM;
-   state->demoMode = 0;
-   state->demoInterval = 250; // ms
    state->waitMethod = WAIT_METHOD_NONE;
    state->onTime = 5000;
    state->offTime = 5000;
@@ -275,9 +269,6 @@ static void dump_status(RASPIVIDYUV_STATE *state)
       vcos_assert(0);
       return;
    }
-
-   raspicommonsettings_dump_parameters(&state->common_settings);
-
    fprintf(stderr, "framerate %d, time delay %d\n", state->framerate, state->timeout);
 
    // Calculate the individual image size
@@ -305,7 +296,6 @@ static void dump_status(RASPIVIDYUV_STATE *state)
    fprintf(stderr, "\n");
 
    raspipreview_dump_parameters(&state->preview_parameters);
-   raspicamcontrol_dump_parameters(&state->camera_parameters);
 }
 
 /**
@@ -389,32 +379,6 @@ static int parse_cmdline(int argc, const char **argv, RASPIVIDYUV_STATE *state)
          }
          else
             valid = 0;
-         break;
-      }
-
-      case CommandDemoMode: // Run in demo mode - no capture
-      {
-         // Demo mode might have a timing parameter
-         // so check if a) we have another parameter, b) its not the start of the next option
-         if (i + 1 < argc  && argv[i+1][0] != '-')
-         {
-            if (sscanf(argv[i + 1], "%u", &state->demoInterval) == 1)
-            {
-               // TODO : What limits do we need for timeout?
-               if (state->demoInterval == 0)
-                  state->demoInterval = 250; // ms
-
-               state->demoMode = 1;
-               i++;
-            }
-            else
-               valid = 0;
-         }
-         else
-         {
-            state->demoMode = 1;
-         }
-
          break;
       }
 
@@ -1343,22 +1307,7 @@ int main(int argc, const char **argv)
 
          camera_video_port->userdata = (struct MMAL_PORT_USERDATA_T *)&state.callback_data;
 
-         if (state.demoMode)
-         {
-            // Run for the user specific time..
-            int num_iterations = state.timeout / state.demoInterval;
-            int i;
-
-            if (state.common_settings.verbose)
-               fprintf(stderr, "Running in demo mode\n");
-
-            for (i=0; state.timeout == 0 || i<num_iterations; i++)
-            {
-               raspicamcontrol_cycle_test(state.camera_component);
-               vcos_sleep(state.demoInterval);
-            }
-         }
-         else
+        
          {
             // Only save stuff if we have a filename and it opened
             // Note we use the file handle copy in the callback, as the call back MIGHT change the file handle
