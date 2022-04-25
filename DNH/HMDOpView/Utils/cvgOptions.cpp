@@ -72,6 +72,10 @@ void cvgOptions::Apply(json& data)
 	if(data.contains(szKey_VPOffsY) && data[szKey_VPOffsY].is_number())
 		this->viewportOffsY = data[szKey_VPOffsY];
 
+	const char* szKey_fullscreen = "_fullscreen";
+	if (data.contains(szKey_fullscreen) && data[szKey_fullscreen].is_boolean())
+		this->fullscreen = data[szKey_fullscreen];
+
 	const char*szkey_FeedOpts = "feed_options";
 	if(data.contains(szkey_FeedOpts) && data[szkey_FeedOpts].is_array())
 	{
@@ -107,6 +111,7 @@ json cvgOptions::RepresentAsJSON() const
 	ret["_viewport_height"	] = this->viewportY;
 	ret["_viewport_offsx"   ] = this->viewportOffsX;
 	ret["_viewport_offsy"   ] = this->viewportOffsY;
+	ret["_fullscreen"]		  = this->fullscreen;
 
 	json feedOpts = json::array();
 	for(const cvgCamFeedSource& feedSrc: this->feedOpts)

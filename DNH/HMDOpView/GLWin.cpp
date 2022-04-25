@@ -113,7 +113,7 @@ void GLWin::LoadHMDAppOptions(const cvgOptions& opts)
 	this->viewportY		= opts.viewportY;
 	this->viewportOfsX	= opts.viewportOffsX;
 	this->viewportOfsY	= opts.viewportOffsY;
-
+	this->fullscreen = opts.fullscreen;
 	// NOTE: Viewport offsets are not implemented yet.
 }
 

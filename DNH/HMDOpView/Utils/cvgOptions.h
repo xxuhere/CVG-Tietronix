@@ -57,6 +57,8 @@ public:
 	/// </summary>
 	int viewportOffsY = 0;
 
+	bool fullscreen = true;
+
 	std::vector<cvgCamFeedSource> feedOpts;
 
 public:

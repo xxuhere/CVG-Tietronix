@@ -58,6 +58,7 @@ public:
 	int viewportY = 480;
 	int viewportOfsX = 0;
 	int viewportOfsY = 0;
+	bool fullscreen = true;
 
 public:
 	GLWin(MainWin* parent);

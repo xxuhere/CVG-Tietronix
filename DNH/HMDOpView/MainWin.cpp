@@ -27,18 +27,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	this->Show();
 	
-	// The process of making the window fullscreen is different
-	// between WinOS and Linux. 
-	// - For Windows, if ShowFullscreen() is used, a white border
-	// along the outside edges may show.
-	// - For Linux, if we change the window style of 0, it behaves
-	// weird and won't fullscreen or draw correctly.
-#if _WIN32
-	this->SetWindowStyle(0);
-	this->Maximize();
-#else
-	this->ShowFullScreen(true, wxFULLSCREEN_ALL);
-#endif
+
 	//
 	//		HARDWARE INIT AND MANAGEMENT	
 	//
@@ -88,6 +77,23 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->SetAcceleratorTable(accelTable);
 
 	this->innerGLWin->SetFocus();
+
+	// The process of making the window fullscreen is different
+	// between WinOS and Linux. 
+	// - For Windows, if ShowFullscreen() is used, a white border
+	// along the outside edges may show.
+	// - For Linux, if we change the window style of 0, it behaves
+	// weird and won't fullscreen or draw correctly.
+	if (this->innerGLWin->fullscreen)
+	{
+#if _WIN32
+		this->SetWindowStyle(0);
+		this->Maximize();
+#else
+		this->ShowFullScreen(true, wxFULLSCREEN_ALL);
+#endif
+	}
+
 }
 
 void MainWin::ClearWaitingSnaps()
