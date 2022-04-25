@@ -1,9 +1,12 @@
 #pragma once
 #include "VideoPollType.h"
+#include "ProcessingType.h"
 #include "nlohmann/json.hpp"
 #include <string>
 
 using json = nlohmann::json;
+
+
 
 /// <summary>
 /// A list of options of where a cam feed can come from.
@@ -60,6 +63,8 @@ public:
 	/// The height of the image if we're streaming it from externalPipeCmd;
 	/// </summary>
 	int pipeHeight = 480;
+
+	ProcessingType processing = ProcessingType::None;
 };
 
 

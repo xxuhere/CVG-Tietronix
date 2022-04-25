@@ -9,11 +9,11 @@
 #include "CamImpl/CamImpl_OCV_HWPath.h"
 #include "CamImpl/CamImpl_StaticImg.h"
 
-ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedLocs& pollLocs)
+ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedSource& camOptions)
 {
 	this->cameraId		= cameraId;
 	this->pollType		= pt;
-	this->pollLocations = pollLocs;
+	this->camOptions = camOptions;
 }
 
 ManagedCam::~ManagedCam()
@@ -291,7 +291,7 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 		this->currentImpl = nullptr;
 	}
 
-	this->currentImpl->PullOptions(this->pollLocations);
+	this->currentImpl->PullOptions(this->camOptions);
 
 	// Actually turn on the device for use.
 	if(!this->currentImpl->Activate())
@@ -574,8 +574,17 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src)
 
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
-	//TODO possibly make thresholding an option and do smarter compositing?
-	return ThresholdImage(inImg);
+	switch (this->camOptions.processing)
+	{
+	default:
+		assert(!"Unhandled processing switch");
+
+	case ProcessingType::None:
+		return inImg;
+
+	case ProcessingType::yen_threshold:
+		return ThresholdImage(inImg);
+	}
 }
 
 void ManagedCam::_DeactivateStreamState(bool deactivateShould)

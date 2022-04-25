@@ -162,6 +162,12 @@
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h">
       <Filter>Header Files\CamVideo\CamImpl</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\yen_threshold.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ProcessingType.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -262,6 +268,12 @@
     </ClCompile>
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp">
       <Filter>Source Files\CamVideo\CamImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\yen_threshold.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\ProcessingType.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

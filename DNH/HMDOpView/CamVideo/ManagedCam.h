@@ -52,6 +52,7 @@ public:
 		/// </summary>
 		Shutdown
 	};
+	
 
 public:
 
@@ -160,8 +161,6 @@ public:
 	/// </summary>
 	State conState = State::Unknown;
 
-
-
 	/// <summary>
 	/// The number of milliseconds between the last two frames.
 	/// </summary>
@@ -169,7 +168,7 @@ public:
 
 	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
 
-	cvgCamFeedLocs pollLocations;
+	cvgCamFeedSource camOptions;
 
 	ICamImpl* currentImpl = nullptr;
 
@@ -229,7 +228,7 @@ private:
 
 public:
 
-	ManagedCam(VideoPollType pt, int camId, const cvgCamFeedLocs& pollLocs);
+	ManagedCam(VideoPollType pt, int camId, const cvgCamFeedSource& camOptions);
 	~ManagedCam();
 
 	/// <summary>

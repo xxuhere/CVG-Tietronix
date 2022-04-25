@@ -183,6 +183,7 @@
     <ClInclude Include="Utils\cvgStopwatch.h" />
     <ClInclude Include="Utils\cvgStopwatchLeft.h" />
     <ClInclude Include="Utils\multiplatform.h" />
+    <ClInclude Include="Utils\ProcessingType.h" />
     <ClInclude Include="Utils\VideoPollType.h" />
     <ClInclude Include="Utils\yen_threshold.h" />
   </ItemGroup>
@@ -219,6 +220,7 @@
     <ClCompile Include="Utils\cvgStopwatch.cpp" />
     <ClCompile Include="Utils\cvgStopwatchLeft.cpp" />
     <ClCompile Include="Utils\multiplatform.cpp" />
+    <ClCompile Include="Utils\ProcessingType.cpp" />
     <ClCompile Include="Utils\VideoPollType.cpp" />
     <ClCompile Include="Utils\yen_threshold.cpp" />
   </ItemGroup>

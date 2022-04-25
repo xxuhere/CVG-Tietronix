@@ -83,8 +83,8 @@ GLuint cvgCamTextureRegistry::LoadTexture(int camIdx, cv::Ptr<cv::Mat> img, long
 		format = GL_RG;
 		break;
 	case 3:
-		internalFormat = GL_BGR;
-		format = GL_RGB;
+		internalFormat = GL_RGB;
+		format = GL_BGR;
 		break;
 	case 4:
 		internalFormat = GL_RGBA;

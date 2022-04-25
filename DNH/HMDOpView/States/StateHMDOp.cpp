@@ -24,6 +24,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 			vrWidth, 
 			vrHeight);
 
+	//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glColor3f(1.0f, 1.0f, 1.0f);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
