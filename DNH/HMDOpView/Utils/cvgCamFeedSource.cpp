@@ -29,14 +29,14 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 	if(js.contains("uri") && js["uri"].is_string())
 		this->uriSource = js["uri"];
 
-	if(js.contains("devpath") && js["dev_path"].is_string())
-		this->uriSource = js["devpath"];
+	if(js.contains("dev_path") && js["dev_path"].is_string())
+		this->devicePath = js["dev_path"];
 
-	if(js.contains("pipecmd") && js["pipe_cmd"].is_string())
-		this->externalPipeCmd = js["pipecmd"];
+	if(js.contains("pipe_cmd") && js["pipe_cmd"].is_string())
+		this->externalPipeCmd = js["pipe_cmd"];
 
-	if(js.contains("pipechans") && js["pipe_chans"].is_string())
-		this->channelCtFromPipe = js["pipechans"];
+	if(js.contains("pipe_chans") && js["pipe_chans"].is_string())
+		this->channelCtFromPipe = js["pipe_chans"];
 
 	if(js.contains("pipe_width") && js["pipe_width"].is_number())
 		this->pipeWidth = js["pipe_width"];
