@@ -1,11 +1,21 @@
 CC=gcc
+CPP=g++
 CFLAGS=-Wall
 
-all : 
+all : slim
+	# Make both the slimvid and slim
+	@echo ""
+	@echo "Compiling All" 
+	
+slim : 
+	# Make the active ingredient test of RaspiVidYUV - this will
+	# be the most slimmed down version we can create while still getting
+	# the core functionality required, even if we have to do more than
+	# strip RaspiVidYUV as a starting template.
 	@echo ""
 	@echo "Compiling test application." 
 	@printf "\n\n" 
-	$(CC) $(CFLAGS) -o SlimYUVTest RaspiVidYUV.c RaspiCommonSettings.c RaspiCamControl.c RaspiCLI.c RaspiHelpers.c RaspiPreview.c -I/opt/vc/include/ -L/opt/vc/lib/ -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host
+	$(CPP) $(CFLAGS) -o slim Slim.cpp -I/opt/vc/include/ -L/opt/vc/lib/ -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host
 	
 .PHONY: clean
 clean :
@@ -13,6 +23,7 @@ clean :
 	@echo "COMPILING TARGET clean"
 	@echo "\n\n\nCleaning build files"
 	@echo "--------------------------------------------------"
+	rm slim
 	find . -type f -name "*.o" -delete
 	find . -type f -name "*.a" -delete
 	
