@@ -39,7 +39,7 @@ bool CamImpl_OpenCVBase::DeactivateImpl()
 
 cv::Ptr<cv::Mat> CamImpl_OpenCVBase::PollFrameImpl()
 {
-	assert(this->ocvStream != nullptr);
+	cvgAssert(this->ocvStream != nullptr, "polling with nullstream");
 
 	cv::Ptr<cv::Mat> ret = new cv::Mat();
 	*this->ocvStream >> *ret;
@@ -59,7 +59,7 @@ bool CamImpl_OpenCVBase::InitCapture(cv::VideoCapture* capture)
 
 void CamImpl_OpenCVBase::InitCapture()
 {
-	assert(this->ocvStream != nullptr);
+	cvgAssert(this->ocvStream != nullptr, "initializing capture with null stream");
 	this->InitCapture(this->ocvStream);
 }
 

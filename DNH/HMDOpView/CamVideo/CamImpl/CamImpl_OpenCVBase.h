@@ -2,6 +2,7 @@
 
 #include "ICamImpl.h"
 #include <opencv2/videoio.hpp>
+#include "../../Utils/cvgAssert.h"
 
 class CamImpl_OpenCVBase : public ICamImpl
 {
@@ -23,7 +24,7 @@ protected:
 	{ return this->ocvStream != nullptr; }
 
 	inline void AssertStreamNull()
-	{ assert(!this->IsStreamAllocated()); }
+	{ cvgAssert(!this->IsStreamAllocated(),"AssertStreamNull failed"); }
 
 public:
 	// No poll type here, that's the responsibility for 
