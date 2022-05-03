@@ -28,7 +28,7 @@ int main()
 
     std::cout << "Camera resolution: " << imgWidth << " x " << imgHeight << std::endl;
 
-    const char* szFile = "C:\\Users\\Reavenk\\Desktop\\test4.rec";
+    const char* szFile = "C:\\Users\\Reavenk\\Desktop\\testsave.rec";
     std::ifstream ifsReader;
     ifsReader.open(szFile, std::ios::binary);
 

@@ -59,9 +59,7 @@ typedef struct raspicam_camera_parameters_s
    float awb_gains_r;         /// AWB red gain
    float awb_gains_b;         /// AWB blue gain
    MMAL_PARAMETER_DRC_STRENGTH_T drc_level;  // Strength of Dynamic Range compression to apply
-   MMAL_BOOL_T stats_pass;    /// Stills capture statistics pass on/off
 
-   MMAL_PARAMETER_STEREOSCOPIC_MODE_T stereo_mode;
    float analog_gain;         // Analog gain
    float digital_gain;        // Digital gain
 
@@ -83,17 +81,11 @@ struct PORT_USERDATA
 struct RASPIVIDYUV_STATE_S
 {
    RASPICOMMONSETTINGS_PARAMETERS common_settings;
-   int framerate;                      /// Requested frame rate (fps)
-   int waitMethod;                     /// Method for switching between pause and capture
-   RASPICAM_CAMERA_PARAMETERS camera_parameters; /// Camera setup parameters
-
-   MMAL_COMPONENT_T *camera_component;    /// Pointer to the camera component
-
-   MMAL_POOL_T *camera_pool;            /// Pointer to the pool of buffers used by camera video port
-
-   PORT_USERDATA callback_data;         /// Used to move data to the camera callback
-
-   char *pts_filename;
+   int framerate;                      				/// Requested frame rate (fps)
+   RASPICAM_CAMERA_PARAMETERS camera_parameters; 	/// Camera setup parameters
+   MMAL_COMPONENT_T *camera_component;    			/// Pointer to the camera component
+   MMAL_POOL_T *camera_pool;            			/// Pointer to the pool of buffers used by camera video port
+   PORT_USERDATA callback_data;         			/// Used to move data to the camera callback
 };
 
 
@@ -167,7 +159,7 @@ void raspicamcontrol_check_configuration(int min_gpu_mem)
 
 void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& height )
 {
-   // Default to the OV5647 setup
+   // Default to the (Arducam 5MP Mini Camera) OV5647 setup
    strncpy(camera_name, "OV5647", MMAL_PARAMETER_CAMERA_INFO_MAX_STR_LEN);
 
    // Try to get the camera name and maximum supported resolution
@@ -240,7 +232,10 @@ static void camera_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buff
 		int bytes_written = 0;
 		int bytes_to_write = buffer->length;
 
-		bytes_to_write = vcos_min(buffer->length, port->format->es->video.width * port->format->es->video.height);
+		bytes_to_write = 
+			vcos_min(
+				buffer->length, 
+				port->format->es->video.width * port->format->es->video.height);
 
 		vcos_assert(pData->file_handle);
 
@@ -386,19 +381,19 @@ int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RASPICAM_
 
    if (params->settings)
    {
-      MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T change_event_request =
-      {
-         {MMAL_PARAMETER_CHANGE_EVENT_REQUEST, sizeof(MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T)},
-         MMAL_PARAMETER_CAMERA_SETTINGS, 1
-      };
+		MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T change_event_request =
+		{
+			{MMAL_PARAMETER_CHANGE_EVENT_REQUEST, sizeof(MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T)},
+			MMAL_PARAMETER_CAMERA_SETTINGS, 1
+		};
 
-      MMAL_STATUS_T status = mmal_port_parameter_set(camera->control, &change_event_request.hdr);
-      if ( status != MMAL_SUCCESS )
-      {
-         vcos_log_error("No camera settings events");
-      }
+		MMAL_STATUS_T status = mmal_port_parameter_set(camera->control, &change_event_request.hdr);
+		if ( status != MMAL_SUCCESS )
+		{
+			vcos_log_error("No camera settings events");
+		}
 
-      result += status;
+		result += status;
    }
 
    return result;
@@ -418,18 +413,18 @@ void default_camera_control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *bu
 		MMAL_EVENT_PARAMETER_CHANGED_T *param = (MMAL_EVENT_PARAMETER_CHANGED_T *)buffer->data;
 		switch (param->hdr.id)
 		{
-		case MMAL_PARAMETER_CAMERA_SETTINGS:
-		{
-			MMAL_PARAMETER_CAMERA_SETTINGS_T *settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
-			vcos_log_error("Exposure now %u, analog gain %u/%u, digital gain %u/%u",
-                        settings->exposure,
-                        settings->analog_gain.num, settings->analog_gain.den,
-                        settings->digital_gain.num, settings->digital_gain.den);
-			vcos_log_error("AWB R=%u/%u, B=%u/%u",
-                        settings->awb_red_gain.num, settings->awb_red_gain.den,
-                        settings->awb_blue_gain.num, settings->awb_blue_gain.den);
-		}
-		break;
+			case MMAL_PARAMETER_CAMERA_SETTINGS:
+			{
+				MMAL_PARAMETER_CAMERA_SETTINGS_T *settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
+				vcos_log_error("Exposure now %u, analog gain %u/%u, digital gain %u/%u",
+							settings->exposure,
+							settings->analog_gain.num, settings->analog_gain.den,
+							settings->digital_gain.num, settings->digital_gain.den);
+				vcos_log_error("AWB R=%u/%u, B=%u/%u",
+							settings->awb_red_gain.num, settings->awb_red_gain.den,
+							settings->awb_blue_gain.num, settings->awb_blue_gain.den);
+			}
+			break;
 		}
 	}
 	else if (buffer->cmd == MMAL_EVENT_ERROR)
@@ -482,9 +477,6 @@ static MMAL_STATUS_T create_camera_component(RASPIVIDYUV_STATE *state)
 		return status;
 	}
 
-	//status = raspicamcontrol_set_stereo_mode(camera->output[0], &state->camera_parameters.stereo_mode);
-	//status += raspicamcontrol_set_stereo_mode(camera->output[1], &state->camera_parameters.stereo_mode);
-	//status += raspicamcontrol_set_stereo_mode(camera->output[2], &state->camera_parameters.stereo_mode);
 	if (status != MMAL_SUCCESS)
 	{
 		vcos_log_error("Could not set stereo mode : error %d", status);
@@ -785,10 +777,7 @@ int main(int argc, const char **argv)
 	params->awb_gains_r 				= 0;	// Only have any function if AWB OFF is used.
 	params->awb_gains_b 				= 0;
 	params->drc_level 					= MMAL_PARAMETER_DRC_STRENGTH_OFF;
-	params->stats_pass 					= MMAL_FALSE;
-	params->stereo_mode.mode 			= MMAL_STEREOSCOPIC_MODE_NONE;
-	params->stereo_mode.decimate 		= MMAL_FALSE;
-	params->stereo_mode.swap_eyes 		= MMAL_FALSE;
+	
 
 	// Setup for sensor specific parameters, only set W/H settings if zero on entry
 	get_sensor_defaults(
@@ -858,12 +847,6 @@ int main(int argc, const char **argv)
 					}
 					running = false;
 				}
-			}
-			else
-			{
-				// timeout = 0 so run forever
-				while(1)
-					vcos_sleep(ABORT_INTERVAL);
 			}
 		}
 		else
