@@ -1,4 +1,7 @@
 #include "CamImpl_OCV_HWPath.h"
+#include <iostream>//for degugging
+#include <mutex>
+#include <thread>
 
 VideoPollType CamImpl_OCV_HWPath::PollType()
 {
@@ -7,7 +10,17 @@ VideoPollType CamImpl_OCV_HWPath::PollType()
 
 cv::VideoCapture * CamImpl_OCV_HWPath::CreateVideoCapture()
 {
+	///It turns out that cv::VideoCapture may not be thread-safe for V4L2 
+	/// which is what the pi uses which lead to intermittent segfaults
+	/// so we are going to make mutex guards if we are not in windows.
+	#if !_WIN32
+	static std::mutex mutexReturn;
+	std::lock_guard<std::mutex> guard(mutexReturn);
+	#endif
+
+	std::cout << "in create video capture; path is " << this->path << std::endl; 
 	this->AssertStreamNull();
+	std::cout << "sucessfully asserted stream not alocated" << std::endl;
 	return new cv::VideoCapture(this->path);
 }
 
@@ -17,7 +30,7 @@ CamImpl_OCV_HWPath::CamImpl_OCV_HWPath(const std::string& path)
 }
 
 bool CamImpl_OCV_HWPath::ChangeDeviceID(
-	const std::string& newPath, 
+	const std::string& newPath,
 	bool cannotBeRunning)
 {
 	if(cannotBeRunning == true)
