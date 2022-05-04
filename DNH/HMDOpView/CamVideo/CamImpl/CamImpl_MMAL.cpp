@@ -923,7 +923,8 @@ bool CamImpl_MMAL::ActivateImpl()
 	int num = mmal_queue_length(this->state->camera_pool->queue);
 	for (int q = 0; q < num; q++)
 	{
-		MMAL_BUFFER_HEADER_T *buffer = mmal_queue_get(this->state->camera_pool->queue);
+		MMAL_BUFFER_HEADER_T *buffer = 
+			mmal_queue_get(this->state->camera_pool->queue);
 
 		if (!buffer)
 			std::cerr << "Unable to get a required buffer " << q << " from pool queue" << std::endl;
@@ -969,8 +970,9 @@ VideoPollType CamImpl_MMAL::PollType()
 
 bool CamImpl_MMAL::IsValid()
 {
-	// TODO: There's probably more we need to do
-	return this->state != nullptr;
+	return 
+		this->state != nullptr && 
+		this->camVideoPort != nullptr;
 }
 	
 bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
