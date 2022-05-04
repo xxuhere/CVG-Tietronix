@@ -8,6 +8,9 @@
 #include "CamImpl/CamImpl_OCV_Web.h"
 #include "CamImpl/CamImpl_OCV_HWPath.h"
 #include "CamImpl/CamImpl_StaticImg.h"
+#include <iostream>
+
+#include "../Utils/cvgAssert.h"
 
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedSource& camOptions)
 {
@@ -253,24 +256,29 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 	switch(newImplType)
 	{
 	default:
-		assert(!"Unhandled implementation switch");
+		cvgAssert(false,"Unhandled implementation switch");
 	case VideoPollType::Deactivated:
 		// Does nothing, and currentImpl should be left nullptr.
+		std::cout << "Deactivated " << std::endl;
 		return true;
 
 	case VideoPollType::OpenCVUSB_Idx:
+		std::cout << "OpenCVUSB_Idx " << std::endl;
 		this->currentImpl = new CamImpl_OCV_USB(0);
 		break;
 
 	case VideoPollType::OpenCVUSB_Named:
+		std::cout << "OpenCVUSB_Named " << std::endl;
 		this->currentImpl = new CamImpl_OCV_HWPath("");
 		break;
 
 	case VideoPollType::Web:
+		std::cout << "Web " << std::endl;
 		this->currentImpl = new CamImpl_OCV_Web("");
 		break;
 
 	case VideoPollType::Image:
+		std::cout << "Image " << std::endl;
 		this->currentImpl = new CamImpl_StaticImg("");
 		break;
 	}
@@ -282,7 +290,7 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 	// While Initialize(), in theory, only needs to be done once, we create
 	// these implementation on the fly instead of caching them for the entire
 	// lifetime, so these brand new implementation will need an Initialize().
-	assert(this->currentImpl != nullptr);
+	cvgAssert(this->currentImpl != nullptr,"currentImpl is null");
 	//
 	// Let the implementation library initialize any data it needs to.
 	if(!this->currentImpl->Initialize())
@@ -577,7 +585,7 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 	switch (this->camOptions.processing)
 	{
 	default:
-		assert(!"Unhandled processing switch");
+		cvgAssert(false,"Unhandled processing switch");
 
 	case ProcessingType::None:
 		return inImg;

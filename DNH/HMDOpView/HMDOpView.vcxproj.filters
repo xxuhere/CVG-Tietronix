@@ -168,6 +168,9 @@
     <ClInclude Include="Utils\ProcessingType.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\cvgAssert.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -273,6 +276,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\ProcessingType.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgAssert.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
