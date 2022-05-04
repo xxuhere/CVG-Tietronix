@@ -21,6 +21,11 @@ enum class VideoPollType
 	OpenCVUSB_Named,
 
 	/// <summary>
+	/// Linux MMAL for ribbon cameras
+	/// </summary>
+	MMAL,
+
+	/// <summary>
 	/// Poll from OpenCV through a RTSP internet stream.
 	/// </summary>
 	Web,

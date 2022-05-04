@@ -18,6 +18,9 @@ std::string to_string(VideoPollType ty)
 
 	case VideoPollType::Image:
 		return "static";
+
+	case VideoPollType::MMAL:
+		return "mmal";
 	}
 
 	return "deactivated";
@@ -38,6 +41,9 @@ VideoPollType StringToPollType(const std::string& str)
 
 	if(str == "static")
 		return VideoPollType::Image;
+
+	if(str == "mmal")
+		return VideoPollType::MMAL;
 
 	return VideoPollType::Deactivated;
 }

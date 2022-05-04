@@ -26,7 +26,7 @@ bool cvgOptions::LoadFromFile(const std::string& filepath)
 		this->Clear();
 		this->Apply(loaded);
 	}
-	catch(std::exception& ex)
+	catch(std::exception& /*ex*/)
 	{
 		return false;
 	}
