@@ -5,6 +5,8 @@ json cvgCamFeedSource::AsJSON() const
 	json ret = json::object();
 
 	ret["default_poll"	] = to_string(this->defPoll);
+	ret["windows_poll"	] = to_string(this->windowsDefPoll);
+	ret["linux_poll"	] = to_string(this->linuxDefPoll);
 	ret["index"			] = this->camIndex;
 	ret["uri"			] = this->uriSource;
 	ret["dev_path"		] = this->devicePath;
@@ -20,8 +22,25 @@ json cvgCamFeedSource::AsJSON() const
 
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
-	if(js.contains("default_poll") && js["default_poll"].is_string())
+	//Default poll, might be replaced by other specific defaults
+	if (js.contains("default_poll") && js["default_poll"].is_string())
 		this->defPoll = StringToPollType(js["default_poll"]);
+
+	if (js.contains("linux_poll") && js["linux_poll"].is_string())
+		this->linuxDefPoll = StringToPollType(js["linux_poll"]);
+
+	if (js.contains("windows_poll") && js["windows_poll"].is_string())
+		this->windowsDefPoll = StringToPollType(js["windows_poll"]);
+//replace default depending on system running it where applicable
+#if IS_RPI
+	//running from raspberry pi
+	if (js.contains("linux_poll") && js["linux_poll"].is_string())
+		this->defPoll = linuxDefPoll;
+#elif _WIN32
+	//running from windows
+	if (js.contains("windows_poll") && js["windows_poll"].is_string())
+		this->defPoll = windowsDefPoll;
+#endif
 
 	if(js.contains("index") && js["index"].is_number())
 		this->camIndex = js["index"];
