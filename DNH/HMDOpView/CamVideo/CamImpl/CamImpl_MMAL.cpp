@@ -313,7 +313,7 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 				// The data in buffer->data is locked hardware memory so for the sake
 				// of sanity we're not going to hang onto it. This means we're going
 				// to make a copy of it.
-				memcpy(buffer->data, &matImg->data[0], bytes_to_write);
+				memcpy( &matImg->data[0], buffer->data, bytes_to_write);
 
 				std::lock_guard<std::mutex> guardPollSwap(camImpl->mutPolled);
 				{
