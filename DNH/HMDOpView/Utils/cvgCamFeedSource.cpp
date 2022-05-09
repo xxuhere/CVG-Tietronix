@@ -1,10 +1,16 @@
 #include "cvgCamFeedSource.h"
+#include <iostream>
+#include "multiplatform.h"
+
+
 
 json cvgCamFeedSource::AsJSON() const
 {
 	json ret = json::object();
 
 	ret["default_poll"	] = to_string(this->defPoll);
+	ret["windows_poll"	] = to_string(this->windowsDefPoll);
+	ret["linux_poll"	] = to_string(this->linuxDefPoll);
 	ret["index"			] = this->camIndex;
 	ret["uri"			] = this->uriSource;
 	ret["dev_path"		] = this->devicePath;
@@ -20,8 +26,33 @@ json cvgCamFeedSource::AsJSON() const
 
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
-	if(js.contains("default_poll") && js["default_poll"].is_string())
+	//Default poll, might be replaced by other specific defaults
+	if (js.contains("default_poll") && js["default_poll"].is_string())
 		this->defPoll = StringToPollType(js["default_poll"]);
+
+	if (js.contains("linux_poll") && js["linux_poll"].is_string())
+		this->linuxDefPoll = StringToPollType(js["linux_poll"]);
+
+	if (js.contains("windows_poll") && js["windows_poll"].is_string())
+		this->windowsDefPoll = StringToPollType(js["windows_poll"]);
+//replace default depending on system running it where applicable
+#ifdef IS_RPI
+	//running from raspberry pi
+	std::cout << "IS_RPI " << std::endl;
+	if (js.contains("linux_poll") && js["linux_poll"].is_string())
+	{
+		this->defPoll = linuxDefPoll;
+	}
+#elif _WIN32
+	//running from windows
+	std::cout << "_WIN32 " << std::endl;
+	if (js.contains("windows_poll") && js["windows_poll"].is_string())
+		this->defPoll = windowsDefPoll;
+#elif __arm__
+	std::cout << "not rpi but yes __arm__ " << std::endl;
+#else
+	std::cout << "not rpi or win32 " << std::endl;
+#endif
 
 	if(js.contains("index") && js["index"].is_number())
 		this->camIndex = js["index"];

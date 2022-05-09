@@ -76,8 +76,14 @@ struct cvgCamFeedSource : public cvgCamFeedLocs
 {
 public:
 	// The default source to us. This may not be used if the 
-	// application chooses not the repect the default.
+	// application chooses not the repect the default or one of the other options overrides it.
 	VideoPollType defPoll = VideoPollType::OpenCVUSB_Idx;
+	// The default source for Windows. This may not be used if the 
+	// application chooses not the repect the default.
+	VideoPollType windowsDefPoll = VideoPollType::OpenCVUSB_Idx;
+	// The default source to us. This may not be used if the 
+	// application chooses not the repect the default.
+	VideoPollType linuxDefPoll = VideoPollType::OpenCVUSB_Named;
 
 	json AsJSON() const;
 	void ApplyJSON(const json& js);
