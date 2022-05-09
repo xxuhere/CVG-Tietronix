@@ -446,14 +446,17 @@ void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 		{
 			case MMAL_PARAMETER_CAMERA_SETTINGS:
 			{
-				MMAL_PARAMETER_CAMERA_SETTINGS_T *settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
+				// If not commented out, this will show the lighting values every
+				// time the camera auto-balance is changed.
 
-				std::cerr << "Exposure now "	<< settings->exposure << 
-							 ", analog gain "	<< settings->analog_gain.num	<< settings->analog_gain.den << 
-							 ", digital gain "	<< settings->digital_gain.num	<< settings->digital_gain.den << std::endl;
+				// MMAL_PARAMETER_CAMERA_SETTINGS_T *settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
 
-				std::cerr << "AWB R=" << settings->awb_red_gain.num  << settings->awb_red_gain.den << 
-							 ", B= "  << settings->awb_blue_gain.num << settings->awb_blue_gain.den << std::endl;
+				//std::cerr << "Exposure now "	<< settings->exposure << 
+				//			 ", analog gain "	<< settings->analog_gain.num	<< settings->analog_gain.den << 
+				//			 ", digital gain "	<< settings->digital_gain.num	<< settings->digital_gain.den << std::endl;
+				//
+				//std::cerr << "AWB R=" << settings->awb_red_gain.num  << settings->awb_red_gain.den << 
+				//			 ", B= "  << settings->awb_blue_gain.num << settings->awb_blue_gain.den << std::endl;
 			}
 			break;
 		}
