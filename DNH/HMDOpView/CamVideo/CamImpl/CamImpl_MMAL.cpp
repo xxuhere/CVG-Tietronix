@@ -850,6 +850,7 @@ bool CamImpl_MMAL::DeactivateImpl()
 		delete this->state;
 		this->state = nullptr;
 	}
+	return true;
 }
 
 cv::Ptr<cv::Mat> CamImpl_MMAL::PollFrameImpl()
