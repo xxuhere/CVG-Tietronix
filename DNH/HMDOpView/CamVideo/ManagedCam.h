@@ -316,8 +316,6 @@ public:
 	/// <returns></returns>
 	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src);
 
-
-
 	/// <summary>
 	/// Perform image processing on the target image.
 	/// 

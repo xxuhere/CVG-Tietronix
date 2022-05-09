@@ -102,7 +102,7 @@ all: hmdopview
 	@echo "COMPILING TARGET All"
 	@echo "Building HmdViewOp application"
 	@echo "--------------------------------------------------"
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl -L/usr/local/aarch64-linux-gnu -lssl -lcrypto -lboost_system -lboost_filesystem -Wall `wx-config --libs std,aui --gl-libs` $(OPENCVLIBS) -lftgl -lGL -o hmdopapp
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl `wx-config --libs std,aui --gl-libs` -L/lib -lssl -lcrypto -lboost_system -lboost_filesystem -Wall $(OPENCVLIBS) -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host -lftgl -lpthread -ldl -o hmdopapp
 	echo "Finished build command."
 	
 hmdopview: objs
@@ -119,8 +119,16 @@ hmdopview: objs
 	@echo "Call 'Make all' on HMDOpView directory to finish application build."
 	cp hmdopview.a ../hmdopview.a
 	
+moves:
+	cp /opt/vc/lib/libmmal_core.so /lib/libmmal_core.so
+	cp /opt/vc/lib/libmmal_components.so /lib/libmmal_components.so
+	cp /opt/vc/lib/libmmal.so /lib/libmmal.so
+	cp /opt/vc/lib/libmmal_util.so /lib/libmmal_util.so
+	cp /opt/vc/lib/libvcos.so /lib/libvcos.so
+	cp /opt/vc/lib/libbcm_host.so /lib/libbcm_host.so
+	
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I/opt/vc/include/ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(OPENCVLIBS) $(VEND_ALLINCLUDES)
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I/opt/vc/include/ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(VEND_ALLINCLUDES)
 
 objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL)
 	@echo "TARGET objs"

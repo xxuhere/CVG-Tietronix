@@ -70,7 +70,7 @@ Note that *.prop files are in the .gitignore. the *_props file is a template, an
 
 ## Building on Linux
 
-The build for Linux is centered around the RaspberryPi, specifically Ubuntu 20 for the RaspberryPi.
+The build for Linux is centered around the RaspberryPi, specifically Raspbian Buster for the RaspberryPi.
 
 **Boost 1.67**
 To build, make sure to get Boost 1.67. More recent versions are ideal, but may not be available in the package manager for supported Linux systems.
@@ -98,7 +98,16 @@ sudo apt-get install libopencv-dev
 sudo apt-get install mesa-common-dev freeglut3-dev
 ```
 
+**Userland**
 
+For access to MMAL libraries, the userland repo must be built.
+
+1. Download the userland repo to the RaspberryPi.
+2. On the RaspberryPi, `./buildme` as specified in the userland repo instructions.
+   https://github.com/raspberrypi/userland
+3. Then execute the `moves`  target in the DNH/HMDOpView makefile
+   `make moves`
+   This will move the built userland shared objects to a location the build process can access.
 
 ### Compiling
 

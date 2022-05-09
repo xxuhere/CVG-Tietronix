@@ -82,7 +82,6 @@ protected:
 	cv::Ptr<cv::Mat> PollFrameImpl() override;
 
 	bool _ShutdownGlobal();
-	bool _ShutdownGlobal(MMAL_STATUS_T status);
 public:
 
 	CamImpl_MMAL(const std::string& devPath);

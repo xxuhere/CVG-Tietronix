@@ -82,55 +82,6 @@ const int minVideoOutputBuffers = 3;
 #define VIDEO_FRAME_RATE_DEN 1
 
 /// <summary>
-/// Coppied from the RaspiVidYUV program. Left in, in case we want
-/// to reuse and recycle some of the brightness adjustment logic.
-/// </summary>
-class RaspicamParams
-{
-public:
-	// Right now these are set in SetDefaults(), but we may just
-	// want to make members be member-initialized and get rid of
-	// SetDefaults().
-	//
-	int sharpness;						/// -100 to 100
-	int contrast;						/// -100 to 100
-	int brightness;						///  0 to 100
-	int ISO;							///  TODO : what range?
-	int videoStabilisation;				/// 0 or 1 (false or true)
-	int exposureCompensation;			/// -10 to +10 ?
-	MMAL_PARAM_EXPOSUREMODE_T 			exposureMode;
-	MMAL_PARAM_EXPOSUREMETERINGMODE_T 	exposureMeterMode;
-	MMAL_PARAM_FLICKERAVOID_T 			flickerAvoidMode;
-	int shutter_speed;					/// 0 = auto, otherwise the shutter speed in ms
-	float awb_gains_r;					/// AWB red gain
-	float awb_gains_b;					/// AWB blue gain
-	MMAL_PARAMETER_DRC_STRENGTH_T drc_level;  // Strength of Dynamic Range compression to apply
-	
-	float analog_gain;					// Analog gain
-	float digital_gain;					// Digital gain
-	
-	int settings;
-   
-public:
-	void SetDefaults()
-	{
-		this->sharpness 				= 0;
-		this->contrast 					= 0;
-		this->brightness 				= 50;
-		this->ISO 						= 0;   	// 0 = auto
-		this->videoStabilisation 		= 0;
-		this->exposureCompensation 		= 0;
-		this->exposureMode 				= MMAL_PARAM_EXPOSUREMODE_AUTO;
-		this->flickerAvoidMode 			= MMAL_PARAM_FLICKERAVOID_OFF;
-		this->exposureMeterMode 		= MMAL_PARAM_EXPOSUREMETERINGMODE_AVERAGE;
-		this->shutter_speed 			= 0;    // 0 = auto
-		this->awb_gains_r 				= 0;	// Only have any function if AWB OFF is used.
-		this->awb_gains_b 				= 0;
-		this->drc_level 				= MMAL_PARAMETER_DRC_STRENGTH_OFF;
-	}
-};
-
-/// <summary>
 /// Transfered from RaspiVidYUV with some member containers spilled out
 /// and the naming convention changed a bit for C++ and code convention
 /// confort.
@@ -157,9 +108,6 @@ public:
    /// Requested frame rate (fps)
    int framerate;
 
-   /// Camera setup parameters
-   RaspicamParams camParams;
-
    /// Pointer to the camera component
    MMAL_COMPONENT_T* camera_component;
 
@@ -177,8 +125,6 @@ public:
 	   this->width 			= TARGET_CAMRES_WIDTH;		// Default to 1080p
 	   this->height 		= TARGET_CAMRES_HEIGHT;
 	   this->framerate 		= VIDEO_FRAME_RATE_NUM;
-
-	   this->camParams.SetDefaults();
    }
 
    void DisableCameraComponent()
@@ -345,6 +291,10 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 
 	if (camImpl)
 	{
+		// The size is expected to be 2088960, which is from the
+		// resolution
+		// 1920 x (1080 + 8)
+		//
 		int bytes_to_write = 
 			vcos_min(
 				buffer->length, 
@@ -364,6 +314,14 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 				// of sanity we're not going to hang onto it. This means we're going
 				// to make a copy of it.
 				memcpy(buffer->data, &matImg->data[0], bytes_to_write);
+
+				std::lock_guard<std::mutex> guardPollSwap(camImpl->mutPolled);
+				{
+					// Only keep the lock as long as needed. It's only needed
+					// for as long as the swap lasts; but we need to commit to
+					// not touching matImg afterwards since camImpl now owns it.
+					camImpl->lastPolled = matImg;
+				}
 			}
 			mmal_buffer_header_mem_unlock(buffer);
 		}
@@ -473,33 +431,6 @@ void default_signal_handler(int signal_number)
 
 }
 
-/**
- * Set the specified camera to all the specified settings
- * @param camera Pointer to camera component
- * @param params Pointer to parameter block containing parameters
- * @return 0 if successful, none-zero if unsuccessful.
- */
-int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RaspicamParams* params)
-{
-   int result;
-
-   if (params->settings)
-   {
-		MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T change_event_request =
-		{
-			{MMAL_PARAMETER_CHANGE_EVENT_REQUEST, sizeof(MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T)},
-			MMAL_PARAMETER_CAMERA_SETTINGS, 1
-		};
-
-		MMAL_STATUS_T status = mmal_port_parameter_set(camera->control, &change_event_request.hdr);
-		if ( status != MMAL_SUCCESS )
-			std::cerr << "No camera settings events" << std::endl;
-
-		result += status;
-   }
-
-   return result;
-}
 
 /** Default camera callback function
  * Handles the --settings
@@ -508,8 +439,6 @@ int raspicamcontrol_set_all_parameters(MMAL_COMPONENT_T *camera, const RaspicamP
  */
 void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
-	fprintf(stderr, "Camera control callback  cmd=0x%08x", buffer->cmd);
-
 	if (buffer->cmd == MMAL_EVENT_PARAMETER_CHANGED)
 	{
 		MMAL_EVENT_PARAMETER_CHANGED_T *param = (MMAL_EVENT_PARAMETER_CHANGED_T *)buffer->data;
@@ -541,17 +470,12 @@ void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 	mmal_buffer_header_release(buffer);
 }
 
-bool CamImpl_MMAL::_ShutdownGlobal()
-{
-	return this->_ShutdownGlobal(MMAL_SUCCESS);
-}
-
-bool CamImpl_MMAL::_ShutdownGlobal(MMAL_STATUS_T status)
+bool ShutdownGlobal(MMAL_STATUS_T status, RPiYUVState* state, MMAL_PORT_T* camPort)
 {
 	HandleMMALStatus(status);
 
 	// Disable all our ports that are not handled by connections
-	check_disable_port(this->camVideoPort);
+	check_disable_port(camPort);
 
 	state->DisableCameraComponent();
 
@@ -564,6 +488,11 @@ bool CamImpl_MMAL::_ShutdownGlobal(MMAL_STATUS_T status)
 	return true;
 }
 
+bool CamImpl_MMAL::_ShutdownGlobal()
+{
+	return ShutdownGlobal(MMAL_SUCCESS, this->state, this->camVideoPort);
+}
+
 static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 {
 	// Create the component
@@ -573,12 +502,7 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 	if (status != MMAL_SUCCESS)
 	{
 		std::cerr << "Failed to create camera component" << std::endl;
-		return status;
-	}
-
-	if (status != MMAL_SUCCESS)
-	{
-		std::cerr << "Could not set stereo mode : error " << status << std::endl;
+		exit(1);
 		return status;
 	}
 
@@ -661,36 +585,6 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 
 	MMAL_ES_FORMAT_T* format = preview_port->format;
 
-	if(state->camParams.shutter_speed > 6000000)
-	{
-		MMAL_PARAMETER_FPS_RANGE_T fps_range = 
-		{
-			{MMAL_PARAMETER_FPS_RANGE, sizeof(fps_range)},
-			{ 5, 	1000 }, 
-			{ 166, 	1000 }
-		};
-		mmal_port_parameter_set(preview_port, &fps_range.hdr);
-	}
-	else if(state->camParams.shutter_speed > 1000000)
-	{
-		MMAL_PARAMETER_FPS_RANGE_T fps_range = 
-		{
-			{MMAL_PARAMETER_FPS_RANGE, sizeof(fps_range)},
-			{ 166, 1000 }, 
-			{ 999, 1000 }
-		};
-		mmal_port_parameter_set(preview_port, &fps_range.hdr);
-	}
-
-	//enable dynamic framerate if necessary
-	if (state->camParams.shutter_speed)
-	{
-		if (state->framerate > 1000000./state->camParams.shutter_speed)
-		{
-			state->framerate=0;
-		}
-	}
-
 	format->encoding 					= MMAL_ENCODING_OPAQUE;
 	format->es->video.width 			= VCOS_ALIGN_UP(state->width, 32);
 	format->es->video.height 			= VCOS_ALIGN_UP(state->height, 16);
@@ -717,27 +611,6 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 	//////////////////////////////////////////////////
 	
 	format = video_port->format;
-
-	if(state->camParams.shutter_speed > 6000000) // TODO: DRY violation with logic?
-	{
-		MMAL_PARAMETER_FPS_RANGE_T fps_range = 
-		{
-			{MMAL_PARAMETER_FPS_RANGE, sizeof(fps_range)},
-			{ 5, 	1000 }, 
-			{ 166, 	1000 }
-		};
-		mmal_port_parameter_set(video_port, &fps_range.hdr);
-	}
-	else if(state->camParams.shutter_speed > 1000000)
-	{
-		MMAL_PARAMETER_FPS_RANGE_T fps_range = 
-		{
-			{MMAL_PARAMETER_FPS_RANGE, sizeof(fps_range)},
-			{ 167, 	1000 }, 
-			{ 999, 	1000 }
-		};
-		mmal_port_parameter_set(video_port, &fps_range.hdr);
-	}
 
 	format->encoding					= MMAL_ENCODING_I420;
 	format->encoding_variant			= MMAL_ENCODING_I420;
@@ -815,7 +688,18 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 		return status;
 	}
 
-	raspicamcontrol_set_all_parameters(camera, &state->camParams);
+	MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T change_event_request =
+	{
+		{MMAL_PARAMETER_CHANGE_EVENT_REQUEST, sizeof(MMAL_PARAMETER_CHANGE_EVENT_REQUEST_T)},
+		MMAL_PARAMETER_CAMERA_SETTINGS, 1
+	};
+
+	status = mmal_port_parameter_set(camera->control, &change_event_request.hdr);
+	if ( status != MMAL_SUCCESS )
+	{ 
+		std::cerr << "No camera settings events" << std::endl;
+		return status;
+	}
 
 	// Create pool of buffer headers for the output port to consume
 	MMAL_POOL_T* pool = 
@@ -881,6 +765,9 @@ bool CamImpl_MMAL::ActivateImpl()
 	check_camera_stack(this->devPath);
 
 	InitPrereqs();
+
+	// TODO: Assert non-null
+	this->state = new RPiYUVState();
 	this->state->SetDefaults();
 
 	// Setup for sensor specific parameters, only set W/H settings if zero on entry
@@ -889,8 +776,16 @@ bool CamImpl_MMAL::ActivateImpl()
 		this->state->camera_name,
 		this->state->width, 
 		this->state->height);
-					   
+
+	std::cout << 
+		"Get sensor defaults - camera num: "	<< this->state->cameraNum << std::endl <<
+		"Get sensor defaults - camera name: "	<< this->state->camera_name << std::endl << 
+		"Get sensor defaults - camera num: "	<< this->state->width << std::endl <<
+		"Get sensor defaults - camera num: "	<< this->state->height << std::endl;
+
 	MMAL_STATUS_T status = create_camera_component(state);
+
+
 	if(status != MMAL_SUCCESS)
 	{
 		std::cerr << __func__ << ": Failed to create camera component" << std::endl;
@@ -916,7 +811,8 @@ bool CamImpl_MMAL::ActivateImpl()
 	if (status != MMAL_SUCCESS)
 	{
 		std::cerr << "Failed to setup camera output" << std::endl;
-		return this->_ShutdownGlobal(status);
+		exit(1);
+		return ShutdownGlobal(status, this->state, this->camVideoPort);
 	}
 
 	// Send all the buffers to the camera video port
@@ -932,6 +828,14 @@ bool CamImpl_MMAL::ActivateImpl()
 		if (mmal_port_send_buffer(this->camVideoPort, buffer)!= MMAL_SUCCESS)
 			std::cerr << "Unable to send a buffer to camera video port (" << q << ")" << std::endl;
 	}	
+
+	// Turn on streaming to the callback
+	mmal_port_parameter_set_boolean(
+		this->camVideoPort, 
+		MMAL_PARAMETER_CAPTURE, 
+		true);
+
+	return true;
 }
 
 bool CamImpl_MMAL::DeactivateImpl()

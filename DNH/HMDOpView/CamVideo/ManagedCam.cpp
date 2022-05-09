@@ -8,6 +8,9 @@
 #include "CamImpl/CamImpl_OCV_Web.h"
 #include "CamImpl/CamImpl_OCV_HWPath.h"
 #include "CamImpl/CamImpl_StaticImg.h"
+#if !_WIN32
+	#include "CamImpl/CamImpl_MMAL.h"
+#endif
 
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedSource& camOptions)
 {
@@ -273,6 +276,12 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 	case VideoPollType::Image:
 		this->currentImpl = new CamImpl_StaticImg("");
 		break;
+
+#if !_WIN32
+	case VideoPollType::MMAL:
+		this->currentImpl = new CamImpl_MMAL("");
+		break;
+#endif
 	}
 
 	//
