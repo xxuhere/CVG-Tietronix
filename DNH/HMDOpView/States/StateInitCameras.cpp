@@ -121,7 +121,7 @@ void StateInitCameras::Draw(const wxSize& sz)
 					this->mainFont.RenderFont(sstrmChan.str().c_str(),outpX + tabIn, outpY + 40);
 
 					std::stringstream sstrmTiming;
-					sstrmTiming << "Frame MS: " << camMgrInst.GetMSFrameTime(camIt);
+					sstrmTiming << "Frame MS: " << camMgrInst.GetMSFrameTime(camIt) << " - frame " << camMgrInst.GetStreamFrameCt(camIt);
 					this->mainFont.RenderFont(sstrmTiming.str().c_str(), outpX + tabIn, outpY + 60);
 				}
 				showFeed = true;

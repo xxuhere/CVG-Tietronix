@@ -1,5 +1,6 @@
 #include "cvgCamTextureRegistry.h"
 #include "../glext.h"
+#include <iostream>
 
 GLuint cvgCamTextureRegistry::GetID(int camIdx)
 {
@@ -72,6 +73,7 @@ GLuint cvgCamTextureRegistry::LoadTexture(int camIdx, cv::Ptr<cv::Mat> img, long
 	// should be binded to GL_TEXTURE_2D.
 	int internalFormat;
 	int format;
+
 	switch (img->channels())
 	{
 	case 1:
@@ -92,6 +94,7 @@ GLuint cvgCamTextureRegistry::LoadTexture(int camIdx, cv::Ptr<cv::Mat> img, long
 		break;
 
 	}
+
 	glTexImage2D(
 		GL_TEXTURE_2D, 
 		0, 

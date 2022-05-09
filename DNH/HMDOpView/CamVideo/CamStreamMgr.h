@@ -131,7 +131,17 @@ public:
 
 	std::string RecordingFilename(int idx);
 
+	/// <summary>
+	/// Query the last frame's processing time, in milliseconds.
+	/// </summary>
+	/// <param name="idx">The camera index to query.</param>
 	int GetMSFrameTime(int idx);
+
+	/// <summary>
+	/// Query the number of frames processed in the current camera stream.
+	/// </summary>
+	/// <param name="idx">The camera index to query.</param>
+	int GetStreamFrameCt(int idx);
 
 private:
 	// Only the singleton systems should be in charge of its construction.

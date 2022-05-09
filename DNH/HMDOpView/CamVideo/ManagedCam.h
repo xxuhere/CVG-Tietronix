@@ -166,6 +166,12 @@ public:
 	/// </summary>
 	int msInterval = 0;
 
+	/// <summary>
+	/// The number of frames processed in the stream. Only used
+	/// for diagnostic purposes.
+	/// </summary>
+	int streamFrameCt = 0;
+
 	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
 
 	cvgCamFeedSource camOptions;

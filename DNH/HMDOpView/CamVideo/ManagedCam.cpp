@@ -382,6 +382,8 @@ void ManagedCam::ThreadFn(int camIdx)
 			cvgStopwatch swFPS;
 			cvgStopwatchLeft swLoopSleep;
 
+			this->streamFrameCt = 0;
+
 			while( // Polling loop
 				this->currentImpl->PollType() == pollTy &&
 				this->currentImpl->IsValid())
@@ -406,11 +408,19 @@ void ManagedCam::ThreadFn(int camIdx)
 					// transfer it to the last frame cache to stage it for
 					// other threads (the main GUI thread) to access.
 					_FinalizeHandlingPolledImage(frame);
-				}
 
-				this->msInterval = swFPS.Milliseconds();
-				int msLeft = swLoopSleep.MSLeft33();
-				MSSleep(msLeft);
+					++this->streamFrameCt;
+					this->msInterval = swFPS.Milliseconds();
+					int msLeft = swLoopSleep.MSLeft33();
+					MSSleep(msLeft);
+				}
+				else
+				{
+					// Some implementations block, others don't. For the non-blocking stream
+					// we have to make sure not to count them - and we'll give them some breathing
+					// room before we poll for a frame again.
+					MSSleep(10);
+				}
 			}
 			this->currentImpl->Deactivate();
 			this->_DeactivateStreamState();

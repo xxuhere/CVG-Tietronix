@@ -168,6 +168,15 @@ int CamStreamMgr::GetMSFrameTime(int idx)
 	return this->cams[idx]->msInterval;
 }
 
+int CamStreamMgr::GetStreamFrameCt(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return -1;
+
+	return this->cams[idx]->streamFrameCt;
+}
+
 ManagedCam::State CamStreamMgr::GetState(int idx) 
 { 
 	std::lock_guard<std::mutex> guard(this->camAccess);
