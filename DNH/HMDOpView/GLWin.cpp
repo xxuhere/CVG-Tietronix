@@ -174,7 +174,7 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 	// which some Update() functions may need for animations
 	// and other realtime things.
 	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::time_duration diff = this->lastStopwatch - now;
+	boost::posix_time::time_duration diff = now - this->lastStopwatch;
 	double deltaTimeSecs = (double)diff.total_microseconds() / 1000000.0;
 	this->lastStopwatch = now;
 
