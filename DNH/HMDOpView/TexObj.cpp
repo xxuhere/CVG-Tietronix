@@ -3,6 +3,7 @@
 #include "lodePNG/lodepng.h"
 #include <vector>
 #include <iostream>
+#include <GL/glu.h>
 
 TexObj::TexObj()
 {
@@ -118,7 +119,7 @@ bool TexObj::LODEFromImage(const std::string& imgFilepath)
 		glGenTextures(1, &this->texID);
 		glBindTexture(GL_TEXTURE_2D, this->texID);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -127,15 +128,24 @@ bool TexObj::LODEFromImage(const std::string& imgFilepath)
 
 	glBindTexture(GL_TEXTURE_2D, this->texID);
 
-	glTexImage2D(
+	//glTexImage2D(
+	//	GL_TEXTURE_2D, 
+	//	0, 
+	//	GL_RGBA8, 
+	//	width, 
+	//	height, 
+	//	0, 
+	//	GL_RGBA, 
+	//	GL_UNSIGNED_BYTE,
+	//	&image[0]);
+
+	gluBuild2DMipmaps(
 		GL_TEXTURE_2D, 
-		0, 
-		GL_RGBA8, 
+		4, 
 		width, 
 		height, 
-		0, 
 		GL_RGBA, 
-		GL_UNSIGNED_BYTE,
+		GL_UNSIGNED_BYTE, 
 		&image[0]);
 
 	this->width = width;
