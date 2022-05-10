@@ -1,10 +1,20 @@
 #include "cvgCamFeedSource.h"
+#include <iostream>
+#include "multiplatform.h"
+
+
 
 json cvgCamFeedSource::AsJSON() const
 {
 	json ret = json::object();
 
 	ret["default_poll"	] = to_string(this->defPoll);
+
+	if(this->windowsOverRidePoll.has_value())
+		ret["windows_poll"	] = to_string(this->windowsOverRidePoll.value());
+	if(this->linuxOverRidePoll.has_value())
+		ret["linux_poll"] = to_string(this->linuxOverRidePoll.value());
+
 	ret["index"			] = this->camIndex;
 	ret["uri"			] = this->uriSource;
 	ret["dev_path"		] = this->devicePath;
@@ -20,8 +30,16 @@ json cvgCamFeedSource::AsJSON() const
 
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
-	if(js.contains("default_poll") && js["default_poll"].is_string())
+	//Default poll, might be replaced by other specific defaults
+	std::cout << " ABOUT DEF!!!!!!!";
+	if (js.contains("default_poll") && js["default_poll"].is_string())
 		this->defPoll = StringToPollType(js["default_poll"]);
+
+	if (js.contains("linux_poll") && js["linux_poll"].is_string())
+		this->linuxOverRidePoll = StringToPollType(js["linux_poll"]);
+
+	if (js.contains("windows_poll") && js["windows_poll"].is_string())
+		this->windowsOverRidePoll = StringToPollType(js["windows_poll"]);
 
 	if(js.contains("index") && js["index"].is_number())
 		this->camIndex = js["index"];
@@ -50,4 +68,19 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 	if (js.contains("processing") && js["processing"].is_string())
 		this->processing = StringToProcessingType(js["processing"]);
 		
+}
+
+VideoPollType cvgCamFeedSource::GetUsedPoll() const
+{
+	VideoPollType ret = this->defPoll;
+
+#if IS_RPI
+	if(this->linuxOverRidePoll.has_value())
+		ret = this->linuxOverRidePoll.value();
+#elif _WIN32
+	if(this->windowsOverRidePoll.has_value())
+		ret = this->windowsOverRidePoll.value();
+#endif
+
+	return ret;
 }

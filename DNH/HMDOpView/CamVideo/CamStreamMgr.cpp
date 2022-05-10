@@ -65,7 +65,11 @@ bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& s
 
 	for(int i = 0; i < sources.size(); ++i)
 	{
-		ManagedCam* newMc = new ManagedCam(sources[i].defPoll, i, sources[i]);
+		VideoPollType usedPollTy = sources[i].GetUsedPoll();
+		std::cout << "Creating poll of type " << to_string(usedPollTy) << std::endl;
+		ManagedCam* newMc = new ManagedCam(usedPollTy, i, sources[i]);
+
+
 		this->cams.push_back(newMc);
 		newMc->BootupPollingThread(i);
 	}

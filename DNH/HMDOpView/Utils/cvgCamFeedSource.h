@@ -3,6 +3,7 @@
 #include "ProcessingType.h"
 #include "nlohmann/json.hpp"
 #include <string>
+#include <optional>
 
 using json = nlohmann::json;
 
@@ -75,9 +76,35 @@ public:
 struct cvgCamFeedSource : public cvgCamFeedLocs
 {
 public:
-	// The default source to us. This may not be used if the 
-	// application chooses not the repect the default.
+	// We maintain poll types for other platforms so that if the 
+	// application is runing concurrently on multiple platforms, we
+	// don't destroy option information for the other platforms.
+
+	/// <summary>
+	/// The default source to us. This may not be used if the application 
+	/// chooses not the respect the default or one of the other options 
+	/// overrides it.
+	/// </summary>
 	VideoPollType defPoll = VideoPollType::OpenCVUSB_Idx;
+
+	
+	/// <summary>
+	/// The default source for Windows, if specified.
+	/// </summary>
+	std::optional<VideoPollType> windowsOverRidePoll;
+
+	/// <summary>
+	/// The default source for linux, if specified.
+	/// </summary>
+	std::optional<VideoPollType> linuxOverRidePoll;
+
+	/// <summary>
+	/// Get the polling method to use for the application. Takes into 
+	/// account platform overrides and the current platform.
+	/// </summary>
+	/// <returns></returns>
+	VideoPollType GetUsedPoll() const;
+
 
 	json AsJSON() const;
 	void ApplyJSON(const json& js);
