@@ -65,16 +65,7 @@ bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& s
 
 	for(int i = 0; i < sources.size(); ++i)
 	{
-	#if __arm__
-		// we are in an arm system, likely the raspberry pi
-		ManagedCam* newMc = new ManagedCam(sources[i].linuxDefPoll, i, sources[i]);
-	#elif _WIN32
-		//we are in windows
-		ManagedCam* newMc = new ManagedCam(sources[i].windowsDefPoll, i, sources[i]);
-	#else
-		//who knows where we are, lets use the default default
 		ManagedCam* newMc = new ManagedCam(sources[i].defPoll, i, sources[i]);
-	#endif
 		this->cams.push_back(newMc);
 		newMc->BootupPollingThread(i);
 	}

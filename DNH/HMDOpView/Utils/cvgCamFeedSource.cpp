@@ -36,7 +36,7 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 	if (js.contains("windows_poll") && js["windows_poll"].is_string())
 		this->windowsDefPoll = StringToPollType(js["windows_poll"]);
 //replace default depending on system running it where applicable
-#ifdef IS_RPI
+#if IS_RPI == 1
 	//running from raspberry pi
 	std::cout << "IS_RPI " << std::endl;
 	if (js.contains("linux_poll") && js["linux_poll"].is_string())
