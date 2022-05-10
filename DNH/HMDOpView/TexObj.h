@@ -13,8 +13,30 @@ class TexObj
 public:
 
 	GLuint texID = (GLuint)-1;
+
 	int width = -1;
 	int height = -1;
+
+	/// <summary>
+	/// Return values for LODEIfEmpty()
+	/// </summary>
+	enum ELoadRet
+	{
+		/// <summary>
+		/// Cannot load image, requested path is invalid.
+		/// </summary>
+		Invalid,
+
+		/// <summary>
+		/// Will not load image, TextObj already has image content.
+		/// </summary>
+		AlreadyLoaded,
+
+		/// <summary>
+		/// Requested image successfully loaded.
+		/// </summary>
+		Success
+	};
 
 public:
 	TexObj();
@@ -25,8 +47,9 @@ public:
 
 	bool LoadFromImage(const std::string& imgFilepath);
 	bool LODEFromImage(const std::string& imgFilepath);
+	ELoadRet LODEIfEmpty(const std::string& imgFilepath);
 
-	inline void GLBind()
+	inline void GLBind() const
 	{ glBindTexture(GL_TEXTURE_2D, this->texID); }
 
 	inline float VAspect()

@@ -110,8 +110,6 @@ bool TexObj::LODEFromImage(const std::string& imgFilepath)
 		return false;
 	}
 
-	std::cout << "Loaded via lodePNG " << imgFilepath << " with width " << width << " and height " << height << std::endl;
-
 	if(this->IsValid())
 		this->Destroy();
 
@@ -126,6 +124,7 @@ bool TexObj::LODEFromImage(const std::string& imgFilepath)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	}
 
+
 	glBindTexture(GL_TEXTURE_2D, this->texID);
 
 	glTexImage2D(
@@ -139,7 +138,22 @@ bool TexObj::LODEFromImage(const std::string& imgFilepath)
 		GL_UNSIGNED_BYTE,
 		&image[0]);
 
+	this->width = width;
+	this->height = height;
 	return true;
+}
+
+TexObj::ELoadRet TexObj::LODEIfEmpty(const std::string& imgFilepath)
+{
+	if(this->IsValid())
+		return TexObj::ELoadRet::AlreadyLoaded;
+
+	bool ret = this->LODEFromImage(imgFilepath);
+
+	return 
+		ret ? 
+			TexObj::ELoadRet::Success : 
+			TexObj::ELoadRet::Invalid; 
 }
 
 void TexObj::Destroy()

@@ -3,9 +3,97 @@
 #include "../CamVideo/CamStreamMgr.h"
 #include "../Utils/cvgShapes.h"
 
+void StateHMDOp::MouseDownState::Reset()
+{
+	this->sinceClick = 0.0f;
+	this->isDown = false;
+}
+
+void StateHMDOp::MouseDownState::Decay(double dt)
+{
+	if(this->isDown)
+		return;
+
+	this->sinceClick = (float)std::max(0.0, this->sinceClick	- dt * clickDecayRate);
+}
+
+void StateHMDOp::MouseDownState::FlagUp()
+{
+	this->isDown = false;
+}
+
+void StateHMDOp::MouseDownState::FlagDown()
+{
+	this->isDown = true;
+	this->sinceClick = 1.0f;
+}
+
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	: BaseState(BaseState::AppState::MainOp, app, view, core)
 {
+}
+
+void DrawOffsetVertices(
+	float x, 
+	float y, 
+	float w, 
+	float h, 
+	float px, 
+	float py, 
+	float scale)
+{
+	float toLeft	= -px *			w * scale;
+	float toRight	= (1.0f - px) * w * scale;
+	float toTop		= -py *			h * scale;
+	float toBot		= (1.0 - py) *	h * scale;
+
+	glBegin(GL_QUADS);
+	{
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(x + toLeft, y + toTop);
+		//
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(x + toRight, y + toTop);
+		//
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(x + toRight, y + toBot);
+		//
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(x + toLeft, y + toBot);
+	}
+	glEnd();
+}
+
+void DrawOffsetVertices(float x, float y, TexObj& to, float px, float py, float scale)
+{
+	to.GLBind();
+	DrawOffsetVertices(x, y, to.width, to.height, px, py, scale);
+}
+
+void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown)
+{
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	// For all the quads we're about to lay down, we're starting at
+	// the top left and moving clockwise.
+	this->ico_MousePadCrevice.GLBind();
+	float invLeftCl		= 1.0f - this->mdsLeft.sinceClick;
+	float invRightCl	= 1.0f - this->mdsRight.sinceClick;
+	float invMiddle		= 1.0f - this->mdsMiddle.sinceClick;
+	//
+	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
+	//
+	glColor3f(invMiddle, 1.0f, invMiddle);
+	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
+	//
+	glColor3f(invLeftCl, 1.0f, invLeftCl);
+	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
+	//
+	glColor3f(invRightCl, 1.0f, invRightCl);
+	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
 }
 
 void StateHMDOp::Draw(const wxSize& sz)
@@ -69,6 +157,14 @@ void StateHMDOp::Draw(const wxSize& sz)
 	
 
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
+
+	this->DrawMousePad(
+		sz.x /2, 
+		sz.y / 2 + 300, 
+		0.5f, 
+		false, 
+		false, 
+		false);
 
 	// Draw debug timings
 	const int camCt = 2;
@@ -182,6 +278,10 @@ void StateHMDOp::Update(double dt)
 	if(this->inspectorShow == true)
 	{
 	}
+
+	this->mdsLeft.Decay(dt);
+	this->mdsMiddle.Decay(dt);
+	this->mdsRight.Decay(dt);
 }
 
 void StateHMDOp::EnteredActive()
@@ -192,15 +292,20 @@ void StateHMDOp::EnteredActive()
 	//
 	// most likely because the OpenGL context doesn't get initialized
 	// as fast as on Windows.
-	if(!this->ico_MenuAlign.IsValid())
-		this->ico_MenuAlign.LODEFromImage("Menu_Icon_Align.png");
-	if(!this->ico_MenuSliders.IsValid())
-		this->ico_MenuSliders.LODEFromImage("Menu_Icon_Sliders.png");
-	if(!this->ico_MenuLaser.IsValid())
-		this->ico_MenuLaser.LODEFromImage("Menu_Icon_Laser.png");
-	if(!this->ico_MenuReturn.IsValid())
-		this->ico_MenuReturn.LODEFromImage("Menu_Icon_Return.png");
-}
+	this->ico_MenuAlign.LODEIfEmpty("Menu_Icon_Align.png");
+	this->ico_MenuSliders.LODEIfEmpty("Menu_Icon_Sliders.png");
+	this->ico_MenuLaser.LODEIfEmpty("Menu_Icon_Laser.png");
+	this->ico_MenuReturn.LODEIfEmpty("Menu_Icon_Return.png");
+
+	this->ico_MousePadLeft.LODEIfEmpty("Mousepad_Left.png");
+	this->ico_MousePadRight.LODEIfEmpty("Mousepad_Right.png");
+	this->ico_MousePadCrevice.LODEIfEmpty("Mousepad_Crevice.png");
+	this->ico_MousePadBall.LODEIfEmpty("Mousepad_MiddleBall.png");
+
+	this->mdsLeft.Reset();
+	this->mdsMiddle.Reset();
+	this->mdsRight.Reset();
+} 
 
 void StateHMDOp::ExitedActive() 
 {
@@ -234,6 +339,26 @@ void StateHMDOp::OnKeydown(wxKeyCode key)
 		this->GetCoreWindow()->StopRecording(0);
 	else if(key == WXK_NUMPAD2	|| key == WXK_NUMPAD_DOWN)
 		this->GetCoreWindow()->StopRecording(1);
+}
+
+void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
+{
+	if(button == 0)
+		this->mdsLeft.FlagDown();
+	else if(button == 1)
+		this->mdsMiddle.FlagDown();
+	else if(button == 2)
+		this->mdsRight.FlagDown();
+}
+
+void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
+{
+	if(button == 0)
+		this->mdsLeft.FlagUp();
+	else if(button == 1)
+		this->mdsMiddle.FlagUp();
+	else if(button == 2)
+		this->mdsRight.FlagUp();
 }
 
 void StateHMDOp::ClosingApp() 
