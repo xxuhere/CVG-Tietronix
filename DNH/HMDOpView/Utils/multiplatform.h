@@ -5,6 +5,5 @@
 // pplatform-specific implementations.
 
 void MSSleep(int ms);
-#if  __arm__ 
-	#define IS_RPI 1
-#endif
+
+#define IS_RPI __arm__ 

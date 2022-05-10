@@ -58,4 +58,4 @@ Run the program, and in the top left of the application, enter the hostname and 
 
 ## Coding
 
-The DNH codebase uses C++14. The general rule being applied is that the C++ standard being used should be the most recent one that's at least 5 years  old. While this is somewhat arbitrary, this is done to make sure the project uses a version of C++ that available on all supported platforms, as well as helping to make sure the C++ compilers have a certain level of maturity.
+The DNH codebase uses C++17. The general rule being applied is that the C++ standard being used should be the most recent one that's at least 5 years  old. While this is somewhat arbitrary, this is done to make sure the project uses a version of C++ that available on all supported platforms, as well as helping to make sure the C++ compilers have a certain level of maturity.

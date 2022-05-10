@@ -90,6 +90,7 @@ void GLWin::InitializeOptions()
 {
 	const char* szConfigLocation = "AppOptions.json";
 
+	std::cout << "Initializing from options file ..." << std::endl;
 	if(!this->cachedOptions.LoadFromFile(szConfigLocation))
 	{
 		// If there's no configuration file, make one. Chances

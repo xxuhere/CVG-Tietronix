@@ -278,9 +278,6 @@
     <ClCompile Include="Utils\ProcessingType.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\cvgAssert.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HMDOpView.rc">

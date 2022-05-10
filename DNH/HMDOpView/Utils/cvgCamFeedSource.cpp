@@ -9,8 +9,12 @@ json cvgCamFeedSource::AsJSON() const
 	json ret = json::object();
 
 	ret["default_poll"	] = to_string(this->defPoll);
-	ret["windows_poll"	] = to_string(this->windowsDefPoll);
-	ret["linux_poll"	] = to_string(this->linuxDefPoll);
+
+	if(this->windowsOverRidePoll.has_value())
+		ret["windows_poll"	] = to_string(this->windowsOverRidePoll.value());
+	if(this->linuxOverRidePoll.has_value())
+		ret["linux_poll"] = to_string(this->linuxOverRidePoll.value());
+
 	ret["index"			] = this->camIndex;
 	ret["uri"			] = this->uriSource;
 	ret["dev_path"		] = this->devicePath;
@@ -27,32 +31,15 @@ json cvgCamFeedSource::AsJSON() const
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
 	//Default poll, might be replaced by other specific defaults
+	std::cout << " ABOUT DEF!!!!!!!";
 	if (js.contains("default_poll") && js["default_poll"].is_string())
 		this->defPoll = StringToPollType(js["default_poll"]);
 
 	if (js.contains("linux_poll") && js["linux_poll"].is_string())
-		this->linuxDefPoll = StringToPollType(js["linux_poll"]);
+		this->linuxOverRidePoll = StringToPollType(js["linux_poll"]);
 
 	if (js.contains("windows_poll") && js["windows_poll"].is_string())
-		this->windowsDefPoll = StringToPollType(js["windows_poll"]);
-//replace default depending on system running it where applicable
-#if IS_RPI == 1
-	//running from raspberry pi
-	std::cout << "IS_RPI " << std::endl;
-	if (js.contains("linux_poll") && js["linux_poll"].is_string())
-	{
-		this->defPoll = linuxDefPoll;
-	}
-#elif _WIN32
-	//running from windows
-	std::cout << "_WIN32 " << std::endl;
-	if (js.contains("windows_poll") && js["windows_poll"].is_string())
-		this->defPoll = windowsDefPoll;
-#elif __arm__
-	std::cout << "not rpi but yes __arm__ " << std::endl;
-#else
-	std::cout << "not rpi or win32 " << std::endl;
-#endif
+		this->windowsOverRidePoll = StringToPollType(js["windows_poll"]);
 
 	if(js.contains("index") && js["index"].is_number())
 		this->camIndex = js["index"];
@@ -81,4 +68,19 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 	if (js.contains("processing") && js["processing"].is_string())
 		this->processing = StringToProcessingType(js["processing"]);
 		
+}
+
+VideoPollType cvgCamFeedSource::GetUsedPoll() const
+{
+	VideoPollType ret = this->defPoll;
+
+#if IS_RPI
+	if(this->linuxOverRidePoll.has_value())
+		ret = this->linuxOverRidePoll.value();
+#elif _WIN32
+	if(this->windowsOverRidePoll.has_value())
+		ret = this->windowsOverRidePoll.value();
+#endif
+
+	return ret;
 }
