@@ -320,7 +320,7 @@ public:
 	/// </summary>
 	/// <param name="src"> The image to threshold </param>
 	/// <returns></returns>
-	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src);
+	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed);
 
 	/// <summary>
 	/// Perform image processing on the target image.

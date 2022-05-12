@@ -15,6 +15,11 @@ enum class ProcessingType {
 	yen_threshold,
 
 	/// <summary>
+	/// apply yen thresholding in a compressed fashion, no dialation, no floodfill
+	/// </summary>
+	yen_threshold_compressed,
+
+	/// <summary>
 	/// not implemented
 	/// </summary>
 	
