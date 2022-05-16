@@ -104,6 +104,10 @@ EXPOBJS_UISYS = $(patsubst %,$(SUBDIR_UISYS)/%.o,$(SUBOBJ_UISYS))
 # Set to empty, or comment out, for building release version
 DEBUGFLAGS = -g -ggdb
 
+.PHONY: all multi
+multi:
+	$(MAKE) -j8 all
+	
 all: hmdopview
 	@echo "COMPILING TARGET All"
 	@echo "Building HmdViewOp application"
