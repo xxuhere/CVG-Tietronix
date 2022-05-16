@@ -49,6 +49,12 @@
     <Filter Include="Source Files\CamVideo\CamImpl">
       <UniqueIdentifier>{a0c153dd-163b-4cee-a535-71c418d22ba7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\UISys">
+      <UniqueIdentifier>{e862d4a7-3089-4e3a-89b1-d103dbfe4a2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UISys">
+      <UniqueIdentifier>{28eb28a5-2cf3-4b9e-9b87-37cfc814cd7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -171,6 +177,33 @@
     <ClInclude Include="Utils\cvgAssert.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="UISys\UISys.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIVec2.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIBase.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIButton.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIRect.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIPlate.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UISink.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIColor4.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadAnim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -277,6 +310,33 @@
     </ClCompile>
     <ClCompile Include="Utils\ProcessingType.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIBase.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIButton.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UISys.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIVec2.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIRect.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIPlate.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UISink.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIColor4.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadAnim.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

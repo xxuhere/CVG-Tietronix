@@ -1,5 +1,6 @@
 #include "StateIntro.h"
 #include "StateIncludes.h"
+#include "../LoadAnim.h"
 
 #include <FTGL/ftgl.h>
 
@@ -26,6 +27,13 @@ void StateIntro::Draw(const wxSize& sz)
 	
 	this->mainFont.RenderFont("Example intro screen.",		500, 100);
 	this->mainFont.RenderFont("Press any key to continue",	500, 200);
+
+	// TODO: Remove, Not the final location, just a test scratchpad
+	float loadAnimPhase = loadScreenTimer.Milliseconds(false) / 1000.0f;
+	LoadAnim::DrawAt(
+		UIVec2(sz.x / 2, sz.y / 2), 
+		2.0f, 
+		loadAnimPhase);
 }
 
 void StateIntro::Update(double dt)
@@ -40,6 +48,8 @@ void StateIntro::Update(double dt)
 void StateIntro::EnteredActive()
 {
 	this->ResetInteraction();
+
+	this->loadScreenTimer.Restart();
 }
 
 void StateIntro::ExitedActive() 

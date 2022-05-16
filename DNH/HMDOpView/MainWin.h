@@ -13,6 +13,7 @@
 #include "CamVideo/SnapRequest.h"
 #include "CamVideo/VideoRequest.h"
 
+// TODO: class docstring
 class MainWin: public wxFrame
 {
 private:
@@ -96,6 +97,16 @@ public:
     bool StopRecording(int idx);
 
     void ReloadAppOptions();
+
+    /// <summary>
+    /// Populates and initializes the state machine. This will be called
+    /// by GLWin the first time it draw.
+    /// 
+    /// Originally this was done in the MainWin constructor, but because
+    /// of OpenGL management issues on Linux, it's currently easier to
+    /// defer this initialization to GLWin.
+    /// </summary>
+    void InitializeAppStateMachine();
 
     void PopulateStates();
     void States_Initialize();

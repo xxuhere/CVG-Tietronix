@@ -10,6 +10,7 @@
 class MainWin;
 class BaseState;
 
+// TODO: class docstring
 class GLWin : public wxGLCanvas
 {
 public:
@@ -59,6 +60,10 @@ public:
 	int viewportOfsX = 0;
 	int viewportOfsY = 0;
 	bool fullscreen = true;
+	bool initStaticResources = false;
+
+protected:
+	void _SetupGLDimensions();
 
 public:
 	GLWin(MainWin* parent);
@@ -76,6 +81,20 @@ public:
 	void InitializeOptions();
 	void LoadHMDAppOptions();
 	void LoadHMDAppOptions(const cvgOptions& opts);
+
+	/// <summary>
+	/// Called by MainWin when the GLWin is initialized with a valid
+	/// graphics context, and one-time OpenGL 
+	/// </summary>
+	void InitStaticGraphicResources();
+
+	/// <summary>
+	/// This should be called once, at the end of application's life.
+	/// For any resources allocated from InitStaticGraphicResources(),
+	/// they should be released from here - before the OpenGL context
+	/// and the application are destroyed.
+	/// </summary>
+	void ReleaseStaticGraphicResources();
 
 public:
 

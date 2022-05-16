@@ -25,9 +25,6 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->opSession.SetName("William", "McGillicuddy", "Leu");
 	this->opSession.SetSession("__TEST_SESSION__");
 
-	this->Show();
-	
-
 	//
 	//		HARDWARE INIT AND MANAGEMENT	
 	//
@@ -53,15 +50,9 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->SetSizer(szrMain);
 	this->Layout();
 	this->innerGLWin->SetGLCurrent();
-
-	//
-	//		APP STATE MACHINES
-	//
-	//////////////////////////////////////////////////
-	this->PopulateStates();
-	this->ReloadAppOptions();
-	this->States_Initialize();
-	this->ChangeState(BaseState::AppState::Intro);
+	// From here, we deffer a lot of initialization until
+	// the first draw frame in GLWin::OnPaint().
+	
 
 	//
 	//		KEYBOARD SHORTCUTS AND INIT FINALIZATIONS
@@ -94,6 +85,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 #endif
 	}
 
+	this->Show();
 }
 
 void MainWin::ClearWaitingSnaps()
@@ -192,6 +184,14 @@ void MainWin::ReloadAppOptions()
 	this->innerGLWin->InitializeOptions();
 }
 
+void MainWin::InitializeAppStateMachine()
+{
+	this->PopulateStates();
+	this->ReloadAppOptions();
+	this->States_Initialize();
+	this->ChangeState(BaseState::AppState::Intro);
+}
+
 void MainWin::PopulateStates()
 {
 	HMDOpApp& app = wxGetApp();
@@ -284,6 +284,7 @@ void MainWin::OnResize(wxSizeEvent& evt)
 
 void MainWin::OnExit(wxCommandEvent& event)
 {
+	this->innerGLWin->ReleaseStaticGraphicResources();
 	this->States_AppShutdown();
 	this->Close( true );
 }

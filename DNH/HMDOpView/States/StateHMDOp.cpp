@@ -2,6 +2,9 @@
 #include "StateIncludes.h"
 #include "../CamVideo/CamStreamMgr.h"
 #include "../Utils/cvgShapes.h"
+#include "../UISys/UIPlate.h"
+#include "../UISys/UIButton.h"
+#include <cmath>
 
 void StateHMDOp::MouseDownState::Reset()
 {
@@ -28,9 +31,27 @@ void StateHMDOp::MouseDownState::FlagDown()
 	this->sinceClick = 1.0f;
 }
 
+const float icoDim = 80.0f;
+
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
-	: BaseState(BaseState::AppState::MainOp, app, view, core)
+	:	BaseState(BaseState::AppState::MainOp, app, view, core),
+		uiSys(-1, UIRect(0, 0, 1920, 1080))
 {
+	this->vertMenuPlate = new UIPlate( -1, UIRect(960, 540, 50.0f, 100.0f));
+
+	UIButton* btnLaser		= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Align.png"	);
+	btnLaser->SetPivot(0.0f, 1.0f/5.0f);
+	UIButton* btnSettings	= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Sliders.png");
+	btnSettings->SetPivot(0.0f, 2.0f/5.0f);
+	UIButton* btnAlign		= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Laser.png"	);
+	btnAlign->SetPivot(0.0f, 3.0f/5.0f);
+	UIButton* btnCamSets	= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Return.png"	);
+	btnCamSets->SetPivot(0.0f, 4.0f/5.0f);
+	this->vertMenuPlate->AddChild(btnLaser);
+	this->vertMenuPlate->AddChild(btnSettings);
+	this->vertMenuPlate->AddChild(btnAlign);
+	this->vertMenuPlate->AddChild(btnCamSets);
+	this->uiSys.AddChild(this->vertMenuPlate);
 }
 
 void DrawOffsetVertices(
@@ -174,6 +195,12 @@ void StateHMDOp::Draw(const wxSize& sz)
 		sstrm << "Cam: " << i << " - MS: " << camMgr.GetMSFrameTime(i);
 		this->fontInsTitle.RenderFont(sstrm.str().c_str(), 0, sz.y - (20 * camCt) + (20 * i));
 	}
+
+	this->vertMenuPlate->SetLocPos(cameraWindowRgn.EndX() + 10.0f, cameraWindowRgn.y + 25.0f);
+	this->vertMenuPlate->SetDim(curVertWidth, cameraWindowRgn.h - 50.0f);
+
+	this->uiSys.Align();
+	this->uiSys.Render(UIRect(0.0f, 0.0f, sz.x, sz.y));
 }
 
 void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
@@ -277,11 +304,17 @@ void StateHMDOp::Update(double dt)
 {
 	if(this->inspectorShow == true)
 	{
+		// TODO: Slide in/out inspector
 	}
 
 	this->mdsLeft.Decay(dt);
 	this->mdsMiddle.Decay(dt);
 	this->mdsRight.Decay(dt);
+
+	if(showVertMenu)
+		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
+	else
+		curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
 }
 
 void StateHMDOp::EnteredActive()

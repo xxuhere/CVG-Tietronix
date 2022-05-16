@@ -5,6 +5,8 @@
 #include "../TexObj.h"
 #include "../Utils/cvgRect.h"
 #include "../Utils/cvgCamTextureRegistry.h"
+#include "../UISys/UISys.h"
+#include "../UISys/UIPlate.h"
 
 /// <summary>
 /// The application state for the main operator loop.
@@ -30,10 +32,22 @@ public:
 	bool inspectorShow = false;
 	float maxInspectorWidth = 200.0f;
 
+	UISys uiSys;
+
+	const float maxVertWidth = 120.0f;
+	const float minVertWidth = 40.0f;
+	const float vertTransSpeed = 4.0f;
+	float curVertWidth = minVertWidth;
+
+	bool showVertMenu = false;
+
+
 	TexObj ico_MenuAlign ;
 	TexObj ico_MenuSliders;
 	TexObj ico_MenuLaser;
 	TexObj ico_MenuReturn;
+
+	UIPlate* vertMenuPlate = nullptr;
 
 	TexObj ico_MousePadLeft;
 	TexObj ico_MousePadRight;

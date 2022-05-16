@@ -33,7 +33,7 @@ public:
 public:
 	StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core);
 
-	bool FlagTransitionNextState();
+	bool FlagTransitionNextState(bool force = false);
 
 	void ClearVideoTextures();
 

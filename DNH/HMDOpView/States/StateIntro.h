@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseState.h"
 #include "../FontMgr.h"
+#include "../Utils/cvgStopwatch.h"
 
 /// <summary>
 /// The first application state. The application is hard-coded
@@ -17,6 +18,8 @@ public:
 	bool interacted = false;
 
 	FontWU mainFont;
+
+	cvgStopwatch loadScreenTimer;
 
 public:
 	StateIntro(HMDOpApp* app, GLWin* view, MainWin* core);

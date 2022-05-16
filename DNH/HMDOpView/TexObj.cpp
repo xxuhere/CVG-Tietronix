@@ -4,6 +4,17 @@
 #include <vector>
 #include <iostream>
 #include <GL/glu.h>
+#include <filesystem>
+
+bool CheckTextureSourceExists(const std::string& filepath)
+{
+	if(!std::filesystem::exists(filepath))
+	{
+		std::cerr << "Missing expected image file " << filepath << ". If on Linux, make sure the filename case is correct." << std::endl;
+		return false;
+	}
+	return true;
+}
 
 TexObj::TexObj()
 {
@@ -89,6 +100,9 @@ void TexObj::TransferFromCVMat(const cv::Ptr<cv::Mat>& ptr)
 
 bool TexObj::LoadFromImage(const std::string& imgFilepath)
 {
+	if(!CheckTextureSourceExists(imgFilepath))
+		return false;
+
 	cv::Mat mat = cv::imread(imgFilepath);
 	if(mat.empty())
 		return false;
@@ -99,6 +113,9 @@ bool TexObj::LoadFromImage(const std::string& imgFilepath)
 
 bool TexObj::LODEFromImage(const std::string& imgFilepath)
 {
+	if(!CheckTextureSourceExists(imgFilepath))
+		return false;
+
 	std::vector<unsigned char> image;
 	unsigned width, height;
 
@@ -173,4 +190,26 @@ void TexObj::Destroy()
 
 	glDeleteTextures(1, &this->texID);
 	this->texID = (GLuint)-1;
+}
+
+TexObj::SPtr TexObj::MakeSharedLoad(const std::string& imgFilepath)
+{
+	TexObj* ret = new TexObj();
+	if(!ret->LoadFromImage(imgFilepath))
+	{
+		delete ret;
+		return nullptr;
+	}
+	return TexObj::SPtr(ret);
+}
+
+TexObj::SPtr TexObj::MakeSharedLODE(const std::string& imgFilepath)
+{
+	TexObj* ret = new TexObj();
+	if(!ret->LODEFromImage(imgFilepath))
+	{
+		delete ret;
+		return nullptr;
+	}
+	return TexObj::SPtr(ret);
 }

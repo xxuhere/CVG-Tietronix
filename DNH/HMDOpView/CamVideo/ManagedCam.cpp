@@ -386,7 +386,8 @@ void ManagedCam::ThreadFn(int camIdx)
 
 			while( // Polling loop
 				this->currentImpl->PollType() == pollTy &&
-				this->currentImpl->IsValid())
+				this->currentImpl->IsValid() && 
+				this->_sentShutdown == false)
 			{
 				this->conState = State::Polling;
 

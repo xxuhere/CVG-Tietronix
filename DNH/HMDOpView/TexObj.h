@@ -3,6 +3,7 @@
 #include <opencv2/core.hpp>
 #include <cmath>
 #include <opencv2/imgcodecs.hpp>
+#include <memory>
 
 /// <summary>
 /// Utility class to manage OpenGL textures as objects, as
@@ -64,5 +65,10 @@ public:
 	{ return this->texID != (GLuint)-1; }
 
 	void Destroy();
+
+	typedef std::shared_ptr<TexObj> SPtr;
+
+	static SPtr MakeSharedLoad(const std::string& imgFilepath);
+	static SPtr MakeSharedLODE(const std::string& imgFilepath);
 };
 

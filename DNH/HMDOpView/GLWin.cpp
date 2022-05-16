@@ -3,6 +3,8 @@
 #include <iostream>
 #include "CamVideo/CamStreamMgr.h"
 
+#include "LoadAnim.h"
+
 wxBEGIN_EVENT_TABLE(GLWin, wxGLCanvas)
 	EVT_SIZE		(GLWin::OnResize)
 	EVT_PAINT		(GLWin::OnPaint)
@@ -48,6 +50,23 @@ GLWin::~GLWin()
 {
 	delete ctx;
 	this->ctx = nullptr;
+}
+
+void GLWin::_SetupGLDimensions()
+{
+	this->SetCurrent(*this->ctx);
+
+	wxSize size = this->GetClientSize();
+
+	glViewport(0, 0, size.x, size.y);
+	std::cout << "Changing GL viewport to " << size.x << ", " << size.y << std::endl;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0, size.x, size.y, 0.0, 0.0f, 1.0f);
+	std::cout << "Changing Ortho view to " << size.x << ", " << size.y << std::endl;
+
+	glMatrixMode(GL_MODELVIEW);
 }
 
 BaseState* GLWin::CurrState()
@@ -120,23 +139,10 @@ void GLWin::LoadHMDAppOptions(const cvgOptions& opts)
 
 void GLWin::OnResize(wxSizeEvent& evt)
 {
-	if(this->ctx == nullptr)
+	if(this->ctx == nullptr || !this->initStaticResources)
 		return;
 
-	this->SetCurrent(*this->ctx);
-
-	wxSize size = evt.GetSize();
-
-	glViewport(0, 0, size.x, size.y);
-	std::cout << "Changing GL viewport to " << size.x << ", " << size.y << std::endl;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, size.x, size.y, 0.0, 0.0f, 1.0f);
-	std::cout << "Changing Ortho view to " << size.x << ", " << size.y << std::endl;
-
-	glMatrixMode(GL_MODELVIEW);
-
+	this->_SetupGLDimensions();
 	this->Refresh(false);
 }
 
@@ -147,6 +153,16 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 	wxPaintDC dc(this);
 
 	this->SetCurrent(*this->ctx);
+
+	if(!this->initStaticResources)
+	{ 
+		this->InitStaticGraphicResources();
+
+		// If we've just initialized, then we've never successfully 
+		// handled a resize and updated the viewport state yet.
+		this->_SetupGLDimensions();
+		this->typedParent->InitializeAppStateMachine();
+	}
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -186,6 +202,31 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 	// Any one individual state shouldn't be left in charge of cleaning
 	// the snaps, so its done at the outer level.
 	this->typedParent->PerformMaintenenceCycle();
+}
+
+void GLWin::InitStaticGraphicResources()
+{
+	std::cout << "Entering InitStaticGraphicResources" << std::endl;
+
+	if(this->initStaticResources)
+		return;
+
+	this->initStaticResources = true;
+
+	LoadAnim::LoadRet loadAnimSuc = LoadAnim::EnsureInit();
+	if(loadAnimSuc == LoadAnim::LoadRet::Error)
+	{
+		wxMessageBox(
+			"Could not load assets.", 
+			"Could not load assets for load screen. Make sure Load_*.png files are where expected.");
+	}
+
+	std::cout << "Exiting InitStaticGraphicResources" << std::endl;
+}
+
+void GLWin::ReleaseStaticGraphicResources()
+{
+	LoadAnim::Uninit();
 }
 
 // All the state delegation functions have the same boilerplate

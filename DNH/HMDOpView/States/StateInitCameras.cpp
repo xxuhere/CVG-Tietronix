@@ -43,10 +43,10 @@ StateInitCameras::StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->nextState = false;
 }
 
-bool StateInitCameras::FlagTransitionNextState()
+bool StateInitCameras::FlagTransitionNextState(bool force)
 {
 	// !TODO: Handle multiple cameras
-	if(!this->allCamsReady)
+	if(!force && !this->allCamsReady)
 		return false;
 
 	this->nextState = true;
@@ -211,7 +211,8 @@ void StateInitCameras::ClosingApp()
 void StateInitCameras::OnKeydown(wxKeyCode key)
 {
 
-	this->FlagTransitionNextState();
+	bool forceTransition = (key == WXK_HOME);
+	this->FlagTransitionNextState(forceTransition);
 }
 
 void StateInitCameras::OnMouseDown(int button, const wxPoint& pt)
