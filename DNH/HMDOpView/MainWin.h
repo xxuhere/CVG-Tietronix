@@ -13,16 +13,25 @@
 #include "CamVideo/SnapRequest.h"
 #include "CamVideo/VideoRequest.h"
 
-// TODO: class docstring
+/// <summary>
+/// The main application top-level window.
+/// </summary>
 class MainWin: public wxFrame
 {
 private:
 
+    /// <summary>
+    /// interior OpenGL rendering viewport.
+    /// </summary>
     GLWin* innerGLWin = nullptr;
 
     // We may want to consider putting these state machine
     // elements in a specialized class.
     BaseState* curState = nullptr;
+
+    /// <summary>
+    /// A mapping of all state available to an AppState id.
+    /// </summary>
     std::map<BaseState::AppState, BaseState*> states;
 
     /// <summary>

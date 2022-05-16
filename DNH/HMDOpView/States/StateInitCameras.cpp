@@ -46,7 +46,6 @@ StateInitCameras::StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core)
 
 bool StateInitCameras::FlagTransitionNextState(bool force)
 {
-	// !TODO: Handle multiple cameras
 	if(!force && !this->allCamsReady)
 		return false;
 

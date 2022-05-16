@@ -237,16 +237,7 @@ void GLWin::ReleaseStaticGraphicResources()
 
 void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
-	if(evt.GetKeyCode() == WXK_PAUSE)
-	{
-		// !TODO: Replace
-		//CamStreamMgr::GetInstance().ToggleTesting();
-
-#if _WIN32
-		MessageBeep(MB_OK);
-#endif
-	}
-	else if(evt.GetKeyCode() == WXK_HOME)
+	if(evt.GetKeyCode() == WXK_HOME)
 	{
 		// Reload options during runtime.
 		this->InitializeOptions();

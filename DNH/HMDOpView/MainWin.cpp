@@ -4,6 +4,7 @@
 #include "HMDOpApp.h"
 #include <vector>
 #include <sstream>
+#include "Utils/cvgAssert.h"
 
 #include "States/StateIntro.h"
 #include "States/StateInitCameras.h"
@@ -214,7 +215,10 @@ void MainWin::PopulateStates()
 
 	for(BaseState* bs : statesToAdd)
 	{
-		// TODO: Insert error handling? May not be necessary.
+		cvgAssert(
+			this->states.find(bs->GetState()) == this->states.end(),
+			"Attemping to add multiple states mapped to the same id");
+
 		this->states[bs->GetState()] = bs;
 	}
 }

@@ -10,7 +10,9 @@
 class MainWin;
 class BaseState;
 
-// TODO: class docstring
+/// <summary>
+/// The main OpenGL viewport where all content is rendered.
+/// </summary>
 class GLWin : public wxGLCanvas
 {
 public:
