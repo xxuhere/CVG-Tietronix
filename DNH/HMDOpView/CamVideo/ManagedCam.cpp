@@ -614,11 +614,9 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
+	// When modifying this function, make sure to sync with IsThresholded().
 	switch (this->camOptions.processing)
 	{
-	default:
-		cvgAssert(false,"Unhandled processing switch");
-
 	case ProcessingType::None:
 		return inImg;
 
@@ -628,6 +626,26 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 	case ProcessingType::yen_threshold_compressed:
 		return ThresholdImage(inImg, true);
 	}
+
+	cvgAssert(false,"Unhandled processing switch");
+}
+
+bool ManagedCam::IsThresholded()
+{
+	// When modifying this function, make sure to sync with ProcessImage().
+	switch (this->camOptions.processing)
+	{
+	case ProcessingType::None:
+		return false;
+
+	case ProcessingType::yen_threshold:
+		return true;
+
+	case ProcessingType::yen_threshold_compressed:
+		return true;
+	}
+
+	return false;
 }
 
 void ManagedCam::_DeactivateStreamState(bool deactivateShould)

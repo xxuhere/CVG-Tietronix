@@ -129,6 +129,8 @@ public:
 
 	bool IsRecording(int idx);
 
+	bool IsThresholded(int idx);
+
 	std::string RecordingFilename(int idx);
 
 	/// <summary>

@@ -334,6 +334,12 @@ public:
 	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg);
 
 	/// <summary>
+	/// Query if the camera settings are set for the image feed to go through
+	/// thresholding image processing.
+	/// </summary>
+	bool IsThresholded();
+
+	/// <summary>
 	/// Adjust the streaming state to disable streaming.
 	/// </summary>
 	/// <param name="deactivateShould">

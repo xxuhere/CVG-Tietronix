@@ -154,6 +154,15 @@ bool CamStreamMgr::IsRecording(int idx)
 	return this->cams[idx]->IsRecordingVideo();
 }
 
+bool CamStreamMgr::IsThresholded(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return false;
+
+	return this->cams[idx]->IsThresholded();
+}
+
 std::string CamStreamMgr::RecordingFilename(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);

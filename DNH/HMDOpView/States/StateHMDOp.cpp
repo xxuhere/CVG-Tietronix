@@ -168,7 +168,12 @@ void StateHMDOp::Draw(const wxSize& sz)
 		viewRegion.y = cy - viewRegion.h * 0.5f;
 
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+		if(camMgr.IsThresholded(camIt))
+			glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+		else
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 		glBegin(GL_QUADS);
 			viewRegion.GLVerts_Textured();
 		glEnd();
