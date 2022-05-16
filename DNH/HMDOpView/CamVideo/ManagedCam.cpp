@@ -539,7 +539,7 @@ bool ManagedCam::BootupPollingThread(int camIdx)
 	return true;
 }
 
-cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src)
+cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed)
 {
 
 	cv::Mat grey, cl, thresholded, blurred, edges, kernel, dialated, flooded, invert;
@@ -573,15 +573,25 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src)
 	// yen_thresholding
 	int yen_threshold = Yen(hist);
 	//std::cout << "Yen threshold : " << yen_threshold << "\n";
-	cv::threshold(cl,
-		thresholded,
-		double(yen_threshold),
-		255,
-		cv::THRESH_TOZERO);
+	if(compressed)
+		cv::threshold(cl,
+			thresholded,
+			double(yen_threshold),
+			255,
+			cv::THRESH_BINARY);
+	else
+		cv::threshold(cl,
+			thresholded,
+			double(yen_threshold),
+			255,
+			cv::THRESH_TOZERO);
 	//Note THRESH_TO_ZERO is only one option another, possibly better option is THRESH_BINARY
 
 	//blur
 	cv::medianBlur(thresholded, blurred, 7);
+
+	if (compressed)
+		return new cv::Mat(blurred);
 
 	//Note the next steps are expensive and possibly unnecesaary keeping them for completeness
 	//edges
@@ -613,7 +623,10 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 		return inImg;
 
 	case ProcessingType::yen_threshold:
-		return ThresholdImage(inImg);
+		return ThresholdImage(inImg, false);
+
+	case ProcessingType::yen_threshold_compressed:
+		return ThresholdImage(inImg, true);
 	}
 }
 
