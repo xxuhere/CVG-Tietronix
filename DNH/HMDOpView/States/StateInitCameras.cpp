@@ -1,6 +1,7 @@
 #include "StateInitCameras.h"
 #include "StateIncludes.h"
 #include "../CamVideo/CamStreamMgr.h"
+#include "../LoadAnim.h"
 
 
 std::string ConvertCVTypeToString(int ty)
@@ -62,12 +63,21 @@ void StateInitCameras::Draw(const wxSize& sz)
 {
 	// If any camera is not ready, this gets
 	// switched to false.
-	this->allCamsReady = true;
+	
 
-	this->mainFont.RenderFont(
-		"Waiting for camera to connect",
-		500, 
-		100);
+	const char* sztitle = 
+		this->allCamsReady ? 
+			"All cameras ready!" :
+			"Waiting for camera to connect";
+
+	float titleAdv = this->titleFont.GetAdvance(sztitle);
+	this->titleFont.RenderFontCenter(sztitle, sz.x / 2, 150);
+
+	if(this->allCamsReady)
+	{
+		glColor3f(1.0f, 1.0f, 1.0f);
+		this->mainFont.RenderFontCenter("Press any key to continue!",sz.x / 2, 250);
+	}
 
 	CamStreamMgr& camMgrInst = CamStreamMgr::GetInstance(); 
 
@@ -77,6 +87,11 @@ void StateInitCameras::Draw(const wxSize& sz)
 	int midScrX = sz.x / 2;
 	int midScrY = sz.y / 2;
 
+	// Timer for the load animation
+	float loadAnimPhase = this->loadAnimTimer.Milliseconds(false) / 1000.0f;
+
+	this->allCamsReady = true;
+
 	for(int camIt = 0; camIt < 2; ++camIt)
 	{
 		cv::Ptr<cv::Mat> cur = 
@@ -85,14 +100,17 @@ void StateInitCameras::Draw(const wxSize& sz)
 		ManagedCam::State camPollState = 
 			CamStreamMgr::GetInstance().GetState(camIt);
 
+		const int verticalOffsetBetweenCamPreviews = 350;
 		int outpX = midScrX + 10;
-		int outpY = 300 + camIt * 100;
+		int outpY = 450 + camIt * verticalOffsetBetweenCamPreviews;
+
+		static const float titleOffsetX = 30.0f;
 
 		bool showFeed = false;
 		switch(camPollState)
 		{
 			case ManagedCam::State::Unknown:
-				this->mainFont.RenderFont("Booting",outpX, outpY);
+				this->mainFont.RenderFont("Booting",outpX + titleOffsetX, outpY);
 				this->allCamsReady = false;
 				break;
 			case ManagedCam::State::Idling:
@@ -100,17 +118,17 @@ void StateInitCameras::Draw(const wxSize& sz)
 				this->allCamsReady = false;
 				break;
 			case ManagedCam::State::Connecting:
-				this->mainFont.RenderFont("Connecting",outpX, outpY);
+				this->mainFont.RenderFont("Connecting",outpX + titleOffsetX, outpY);
 				this->allCamsReady = false;
 				break;
 			case ManagedCam::State::Polling:
-				this->mainFont.RenderFont("Connected!",outpX, outpY);
+				this->mainFont.RenderFont("Connected!",outpX + titleOffsetX, outpY);
 
 				// Even when polling, there can be a state where a first frame hasn't
 				// be polled yet.
 				if(cur != nullptr)
 				{
-					const float tabIn = 10.0f;
+					const float tabIn = 50.0f;
 
 					std::stringstream sstrmRes;
 					sstrmRes << "Res: " << cur->cols << " x " << cur->rows;
@@ -132,9 +150,14 @@ void StateInitCameras::Draw(const wxSize& sz)
 				break;
 		}
 
+		static const float prevViewWidth = 300.0f;
+		static const float prevViewRadHeight = 100.0f; 
 		// Only continue if there's a frame to update and draw.
 		if(showFeed == false)
+		{ 
+			LoadAnim::DrawAt(UIVec2(outpX - prevViewWidth/2.0f, outpY), 1.0f, loadAnimPhase);
 			continue;	
+		}
 		
 		// Check if we need to update the image in OpenGL
 		long long feedCtr = camMgrInst.GetCameraFeedChanges(camIt);
@@ -153,25 +176,18 @@ void StateInitCameras::Draw(const wxSize& sz)
 			
 			glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, 0.0f);
-				glVertex2f(outpX - 300.0f,	outpY - 100.0f);
+				glVertex2f(outpX - prevViewWidth,	outpY - prevViewRadHeight);
 				//
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex2f(outpX,			outpY - 100.0f);
+				glVertex2f(outpX,					outpY - prevViewRadHeight);
 				//
 				glTexCoord2f(1.0f, 1.0f);
-				glVertex2f(outpX,			outpY + 100.0f);
+				glVertex2f(outpX,					outpY + prevViewRadHeight);
 				//
 				glTexCoord2f(0.0f, 1.0f);
-				glVertex2f(outpX - 300.0f,	outpY + 100.0f);
+				glVertex2f(outpX - prevViewWidth,	outpY + prevViewRadHeight);
 			glEnd();
 		}
-	}
-		
-
-	if(this->allCamsReady)
-	{
-		glColor3f(1.0f, 1.0f, 1.0f);
-		this->mainFont.RenderFont("Press and key to continue!",300, 700);
 	}
 }
 
@@ -191,6 +207,8 @@ void StateInitCameras::EnteredActive()
 	this->nextState = false;
 	CamStreamMgr::GetInstance().BootConnectionToCamera(
 		this->GetView()->cachedOptions.feedOpts);
+
+	this->loadAnimTimer.Restart();
 }
 
 void StateInitCameras::ExitedActive() 
@@ -201,6 +219,7 @@ void StateInitCameras::ExitedActive()
 void StateInitCameras::Initialize() 
 {
 	this->mainFont = FontMgr::GetInstance().GetFont(24);
+	this->titleFont = FontMgr::GetInstance().GetFont(40);
 }
 
 void StateInitCameras::ClosingApp() 

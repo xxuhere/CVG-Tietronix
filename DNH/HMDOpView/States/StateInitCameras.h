@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseState.h"
 #include "StateIncludes.h"
+#include "../Utils/cvgStopwatch.h"
 #include "../FontMgr.h"
 #include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
@@ -25,10 +26,12 @@ public:
 	};
 
 	FontWU mainFont;
+	FontWU titleFont;
 	bool nextState = false;
 	bool allCamsReady = false;
 
 	cvgCamTextureRegistry camTextureRegistry;
+	cvgStopwatch loadAnimTimer;
 
 public:
 	StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core);
