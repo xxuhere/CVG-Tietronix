@@ -170,7 +170,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
 
 		if(camMgr.IsThresholded(camIt))
-			glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+			glColor4f(0.5f, 0.0f, 0.0f, 1.0f);
 		else
 			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -185,9 +185,9 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
 
 	this->DrawMousePad(
-		sz.x /2, 
-		sz.y / 2 + 300, 
-		0.5f, 
+		sz.x /2,		// Horizontally at the center
+		sz.y / 2 + 500, // Near the bottom
+		0.4f, 
 		false, 
 		false, 
 		false);
