@@ -31,7 +31,6 @@ json cvgCamFeedSource::AsJSON() const
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
 	//Default poll, might be replaced by other specific defaults
-	std::cout << " ABOUT DEF!!!!!!!";
 	if (js.contains("default_poll") && js["default_poll"].is_string())
 		this->defPoll = StringToPollType(js["default_poll"]);
 

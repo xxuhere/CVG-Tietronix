@@ -13,14 +13,12 @@ cv::VideoCapture * CamImpl_OCV_HWPath::CreateVideoCapture()
 	///It turns out that cv::VideoCapture may not be thread-safe for V4L2 
 	/// which is what the pi uses which lead to intermittent segfaults
 	/// so we are going to make mutex guards if we are not in windows.
-	#if !_WIN32
+#if !_WIN32
 	static std::mutex mutexReturn;
 	std::lock_guard<std::mutex> guard(mutexReturn);
-	#endif
+#endif
 
-	std::cout << "in create video capture; path is " << this->path << std::endl; 
 	this->AssertStreamNull();
-	std::cout << "sucessfully asserted stream not alocated" << std::endl;
 	return new cv::VideoCapture(this->path);
 }
 

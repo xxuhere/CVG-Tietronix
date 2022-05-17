@@ -52,13 +52,11 @@ LoadAnim::LoadRet LoadAnim::EnsureInit()
 		}
 
 		std::string lodePath = lt.srcFilepath;
-		std::cout << "About to LODE " << lt.dst << ' ' << lodePath <<  std::endl;
 		TexObj* to = lt.dst;
 		if(to->LODEIfEmpty(lodePath) == TexObj::ELoadRet::Success)
 		{
 			++initted;
 		}
-		std::cout << "done to LODE" << std::endl;
 	}
 
 	// The number of LoadAnim::tex* variables we 
