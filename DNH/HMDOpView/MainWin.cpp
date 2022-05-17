@@ -27,20 +27,6 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->opSession.SetSession("__TEST_SESSION__");
 
 	//
-	//		HARDWARE INIT AND MANAGEMENT	
-	//
-	//////////////////////////////////////////////////
-	// Add all known hardware that's going to be used.
-	// We keep references to we have typed access, but also we 
-	// can now leave cleanup and management to the manager.
-	this->hwLaser = new LaserSys();
-	this->hmgr.Add(this->hwLaser);
-	// When we actually initialize and validate, and how errors
-	// are presented is something still TBD.
-	this->hmgr.Initialize(std::cerr);
-	this->hmgr.Validate(std::cerr);
-
-	//
 	//		GRAPHICS RENDERING RESOURCES
 	//
 	//////////////////////////////////////////////////
@@ -53,7 +39,24 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->innerGLWin->SetGLCurrent();
 	// From here, we deffer a lot of initialization until
 	// the first draw frame in GLWin::OnPaint().
-	
+
+	//////////////////////////////////////////////////
+
+	this->ReloadAppOptions();
+
+	//
+	//		HARDWARE INIT AND MANAGEMENT	
+	//
+	//////////////////////////////////////////////////
+	// Add all known hardware that's going to be used.
+	// We keep references to we have typed access, but also we 
+	// can now leave cleanup and management to the manager.
+	this->hwLaser = new LaserSys();
+	this->hmgr.Add(this->hwLaser);
+	// When we actually initialize and validate, and how errors
+	// are presented is something still TBD.
+	this->hmgr.Initialize(std::cerr);
+	this->hmgr.Validate(std::cerr);
 
 	//
 	//		KEYBOARD SHORTCUTS AND INIT FINALIZATIONS
@@ -188,7 +191,6 @@ void MainWin::ReloadAppOptions()
 void MainWin::InitializeAppStateMachine()
 {
 	this->PopulateStates();
-	this->ReloadAppOptions();
 	this->States_Initialize();
 	this->ChangeState(BaseState::AppState::Intro);
 }
