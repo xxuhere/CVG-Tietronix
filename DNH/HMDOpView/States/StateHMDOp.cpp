@@ -125,11 +125,13 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 	float vrWidth = (float)this->GetView()->viewportX;
 	float vrHeight = (float)this->GetView()->viewportY;
+	float vrOffsX = (float)this->GetView()->viewportOfsX;
+	float vrOffsY = (float)this->GetView()->viewportOfsY;
 
 	cvgRect cameraWindowRgn = 
 		cvgRect(
-			cx - vrWidth * 0.5f, 
-			cy - vrHeight * 0.5f, 
+			vrOffsX + cx - vrWidth * 0.5f, 
+			vrOffsY + cy - vrHeight * 0.5f, 
 			vrWidth, 
 			vrHeight);
 
@@ -164,8 +166,8 @@ void StateHMDOp::Draw(const wxSize& sz)
 			vaspect = (float)texInfo.cachedHeight / (float)texInfo.cachedWidth;
 
 		cvgRect viewRegion = cvgRect::MakeWidthAspect(cameraWindowRgn.w, vaspect);
-		viewRegion.x = cx - viewRegion.w * 0.5f;
-		viewRegion.y = cy - viewRegion.h * 0.5f;
+		viewRegion.x = vrOffsX + cx - viewRegion.w * 0.5f;
+		viewRegion.y = vrOffsY + cy - viewRegion.h * 0.5f;
 
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
 
