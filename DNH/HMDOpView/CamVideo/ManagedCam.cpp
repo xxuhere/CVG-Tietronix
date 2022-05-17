@@ -541,9 +541,6 @@ bool ManagedCam::BootupPollingThread(int camIdx)
 
 cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed)
 {
-
-	cv::Mat grey, cl, thresholded, blurred, edges, kernel, dialated, flooded, invert;
-
 	//Histogram constants
 	// Quantize the hue to 30 levels
 	// and the saturation to 32 levels
@@ -556,13 +553,21 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 	// we compute the histogram from the 0-th channel
 	int channels[] = { 0 };
 
-	/// Convert it to gray
-	cv::cvtColor(*src, grey, cv::COLOR_RGBA2GRAY, 0);
+	/// Convert it to gray (if it's not already).
+	cv::Ptr<cv::Mat> grey;
+	if(src->elemSize() != 1)
+	{
+		grey = new cv::Mat();
+		cv::cvtColor(*src, *grey, cv::COLOR_RGBA2GRAY, 0);
+	}
+	else
+		grey = src;
 
 	//equalize
 	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
 	clahe->setClipLimit(2.7);
-	clahe->apply(grey, cl);
+	cv::Mat cl;
+	clahe->apply(*grey, cl);
 
 	//make histogram
 	calcHist(&cl, 1, channels, cv::Mat(), // do not use mask
@@ -572,6 +577,7 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 
 	// yen_thresholding
 	int yen_threshold = Yen(hist);
+	cv::Mat thresholded; 
 	//std::cout << "Yen threshold : " << yen_threshold << "\n";
 	if(compressed)
 		cv::threshold(cl,
@@ -588,6 +594,7 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 	//Note THRESH_TO_ZERO is only one option another, possibly better option is THRESH_BINARY
 
 	//blur
+	cv::Mat blurred; 
 	cv::medianBlur(thresholded, blurred, 7);
 
 	if (compressed)
@@ -595,17 +602,20 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 
 	//Note the next steps are expensive and possibly unnecesaary keeping them for completeness
 	//edges
+	cv::Mat edges;
 	cv::Canny(blurred, edges, 120, 120);
 
 	//dialate
-	kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
+	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3), cv::Point(1, 1));
+	cv::Mat dialated;
 	cv::dilate(edges, dialated, kernel);
 
 	//flood
-	flooded = dialated.clone();
+	cv::Mat flooded = dialated.clone();
 	cv::floodFill(flooded, cv::Point(0, 0), cv::Scalar(255));
 
 	//invert
+	cv::Mat invert;
 	cv::bitwise_not(flooded, invert);
 	cv::Mat* inverted = new cv::Mat(invert);
 	return inverted;//Note might be worth changing this to blurred after changing thresholding ot use THRESH_BINARY
