@@ -580,25 +580,29 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 	cv::Mat thresholded; 
 	//std::cout << "Yen threshold : " << yen_threshold << "\n";
 	if(compressed)
+	{ 
 		cv::threshold(cl,
 			thresholded,
 			double(yen_threshold),
 			255,
 			cv::THRESH_BINARY);
+	}
 	else
+	{ 
 		cv::threshold(cl,
 			thresholded,
 			double(yen_threshold),
 			255,
 			cv::THRESH_TOZERO);
+	}
 	//Note THRESH_TO_ZERO is only one option another, possibly better option is THRESH_BINARY
+	 
+	if (compressed)
+		return new cv::Mat(thresholded);
 
 	//blur
 	cv::Mat blurred; 
 	cv::medianBlur(thresholded, blurred, 7);
-
-	if (compressed)
-		return new cv::Mat(blurred);
 
 	//Note the next steps are expensive and possibly unnecesaary keeping them for completeness
 	//edges
