@@ -11,16 +11,19 @@ wxBEGIN_EVENT_TABLE(GLWin, wxGLCanvas)
 	EVT_CLOSE		(GLWin::OnClose)
 	EVT_TIMER		((int)CMDID::RedrawTimer, GLWin::OnRedrawTimer)
 
-	EVT_KEY_DOWN	( GLWin::OnKeyDown		)
-	EVT_KEY_UP		( GLWin::OnKeyUp		)
-	EVT_LEFT_DOWN	( GLWin::OnLMouseDown	)
-	EVT_LEFT_UP		( GLWin::OnLMouseUp		)
-	EVT_MIDDLE_DOWN	( GLWin::OnMMouseDown	)
-	EVT_MIDDLE_UP	( GLWin::OnMMouseUp		)
-	EVT_RIGHT_DOWN	( GLWin::OnRMouseDown	)
-	EVT_RIGHT_UP	( GLWin::OnRMouseUp		)
-	EVT_MOTION		( GLWin::OnMouseMotion	)
-	EVT_MOUSEWHEEL	( GLWin::OnMouseWheel	)
+	EVT_KEY_DOWN		( GLWin::OnKeyDown		)
+	EVT_KEY_UP			( GLWin::OnKeyUp		)
+	EVT_LEFT_DOWN		( GLWin::OnLMouseDown	)
+	EVT_LEFT_DCLICK		( GLWin::OnLMouseDown	)
+	EVT_LEFT_UP			( GLWin::OnLMouseUp		)
+	EVT_MIDDLE_DOWN		( GLWin::OnMMouseDown	)
+	EVT_MIDDLE_DCLICK	( GLWin::OnMMouseDown	)
+	EVT_MIDDLE_UP		( GLWin::OnMMouseUp		)
+	EVT_RIGHT_DOWN		( GLWin::OnRMouseDown	)
+	EVT_RIGHT_DCLICK	( GLWin::OnRMouseDown	)
+	EVT_RIGHT_UP		( GLWin::OnRMouseUp		)
+	EVT_MOTION			( GLWin::OnMouseMotion	)
+	EVT_MOUSEWHEEL		( GLWin::OnMouseWheel	)
 wxEND_EVENT_TABLE()
 
 
@@ -259,6 +262,14 @@ void GLWin::OnLMouseDown(wxMouseEvent& evt)
 	cur->OnMouseDown(0, evt.GetPosition());
 }
 
+void GLWin::OnLMouseDoubleDown(wxMouseEvent& evt)
+{
+	GET_CURR_STATE_OR_RETURN(cur);
+	// States currently don't have a double click, but it still needs
+	// to be handled, so we consider it a normal click.
+	cur->OnMouseDown(0, evt.GetPosition());
+}
+
 void GLWin::OnLMouseUp(wxMouseEvent& evt)
 {
 	GET_CURR_STATE_OR_RETURN(cur);
@@ -271,6 +282,12 @@ void GLWin::OnMMouseDown(wxMouseEvent& evt)
 	cur->OnMouseDown(1, evt.GetPosition());
 }
 
+void GLWin::OnMMouseDoubleDown(wxMouseEvent& evt)
+{
+	GET_CURR_STATE_OR_RETURN(cur);
+	cur->OnMouseDown(1, evt.GetPosition());
+}
+
 void GLWin::OnMMouseUp(wxMouseEvent& evt)
 {
 	GET_CURR_STATE_OR_RETURN(cur);
@@ -278,6 +295,12 @@ void GLWin::OnMMouseUp(wxMouseEvent& evt)
 }
 
 void GLWin::OnRMouseDown(wxMouseEvent& evt)
+{
+	GET_CURR_STATE_OR_RETURN(cur);
+	cur->OnMouseDown(2, evt.GetPosition());
+}
+
+void GLWin::OnRMouseDoubleDown(wxMouseEvent& evt)
 {
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(2, evt.GetPosition());

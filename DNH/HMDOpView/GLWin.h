@@ -115,10 +115,13 @@ public:
 	void OnKeyDown(wxKeyEvent& evt);
 	void OnKeyUp(wxKeyEvent& evt);
 	void OnLMouseDown(wxMouseEvent& evt);
+	void OnLMouseDoubleDown(wxMouseEvent& evt);
 	void OnLMouseUp(wxMouseEvent& evt);
 	void OnMMouseDown(wxMouseEvent& evt);
+	void OnMMouseDoubleDown(wxMouseEvent& evt);
 	void OnMMouseUp(wxMouseEvent& evt);
 	void OnRMouseDown(wxMouseEvent& evt);
+	void OnRMouseDoubleDown(wxMouseEvent& evt);
 	void OnRMouseUp(wxMouseEvent& evt);
 	void OnMouseMotion(wxMouseEvent& evt);
 	void OnMouseWheel(wxMouseEvent& evt);
