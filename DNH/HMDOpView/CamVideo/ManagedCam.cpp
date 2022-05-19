@@ -642,6 +642,7 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 	}
 
 	cvgAssert(false,"Unhandled processing switch");
+	return inImg;
 }
 
 bool ManagedCam::IsThresholded()
