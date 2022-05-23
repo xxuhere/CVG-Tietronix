@@ -52,10 +52,12 @@ void LaserSys::SetLight(Light l, float intensity)
 	{
 	case Light::NIR:
 		// TODO: Implement
+		this->intensityNIR = intensity;
 		break;
 
 	case Light::White:
 		// TODO: Implement
+		this->intensityWhite = intensity;
 		break;
 	}
 }

@@ -55,10 +55,10 @@ public:
 	void SetLight(Light l, float intensity);
 
 	inline void SetWhiteIntensity(float intensity)
-	{ this->ShowLight(Light::White, intensity); }
+	{ this->SetLight(Light::White, intensity); }
 
 	inline void SetNIRIntensity(float intensity)
-	{ this->ShowLight(Light::NIR, intensity); }
+	{ this->SetLight(Light::NIR, intensity); }
 
 	inline void HideLight(Light l)
 	{ this->ShowLight(l, false); }
