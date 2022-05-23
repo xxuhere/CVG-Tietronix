@@ -4,7 +4,28 @@
 #include "../Utils/cvgShapes.h"
 #include "../UISys/UIPlate.h"
 #include "../UISys/UIButton.h"
+#include "../UISys/UIVBulkSlider.h"
 #include <cmath>
+
+// The standard colors for buttons
+ColorSetInteractable colSetButton(
+	UIColor4(1.0f, 1.0f, 1.0f),	// White
+	UIColor4(0.5f, 1.0f, 0.5f),	// Green
+	UIColor4(0.7f, 1.0f, 0.7f));// Bright green
+
+// The standard colors for buttons that are toggled on
+ColorSetInteractable colSetButtonTog(
+	UIColor4(1.0f, 0.2f, 0.2f),	// Red
+	UIColor4(1.0f, 0.5f, 0.5f),	// Pink
+	UIColor4(1.0f, 0.7f, 0.7f));// Bright pink
+
+void SetButtonStdCols(UIBase* uib, bool toggled = false)
+{
+	if(!toggled)
+		uib->uiCols = colSetButton;
+	else
+		uib->uiCols = colSetButtonTog;
+}
 
 void StateHMDOp::MouseDownState::Reset()
 {
@@ -35,23 +56,153 @@ const float icoDim = 80.0f;
 
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
-		uiSys(-1, UIRect(0, 0, 1920, 1080))
+		uiSys(-1, UIRect(0, 0, 1920, 1080), this)
 {
-	this->vertMenuPlate = new UIPlate( -1, UIRect(960, 540, 50.0f, 100.0f));
+	const int btnTextSz = 14.0f;
 
-	UIButton* btnLaser		= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Align.png"	);
-	btnLaser->SetPivot(0.0f, 1.0f/5.0f);
-	UIButton* btnSettings	= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Sliders.png");
-	btnSettings->SetPivot(0.0f, 2.0f/5.0f);
-	UIButton* btnAlign		= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Laser.png"	);
-	btnAlign->SetPivot(0.0f, 3.0f/5.0f);
-	UIButton* btnCamSets	= new UIButton(-1, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim), "Menu_Icon_Return.png"	);
-	btnCamSets->SetPivot(0.0f, 4.0f/5.0f);
-	this->vertMenuPlate->AddChild(btnLaser);
-	this->vertMenuPlate->AddChild(btnSettings);
-	this->vertMenuPlate->AddChild(btnAlign);
-	this->vertMenuPlate->AddChild(btnCamSets);
-	this->uiSys.AddChild(this->vertMenuPlate);
+	// Build elements for the right menu bar
+	//
+	this->vertMenuPlate = new UIPlate( &this->uiSys, UIID::PullMenu, UIRect(960, 540, 50.0f, 100.0f));
+	this->vertMenuPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	//
+	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Laser.png"	);
+	this->btnLaser->SetPivot(0.0f, 1.0f/5.0f);
+	SetButtonStdCols(this->btnLaser);
+	this->btnSettings	= new UIButton(this->vertMenuPlate, UIID::MBtnLaserSet, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Sliders.png");
+	this->btnSettings->SetPivot(0.0f, 2.0f/5.0f);
+	SetButtonStdCols(this->btnSettings);
+	this->btnAlign		= new UIButton(this->vertMenuPlate, UIID::MBtnAlign,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Align.png"	);
+	this->btnAlign->SetPivot(0.0f, 3.0f/5.0f);
+	SetButtonStdCols(this->btnAlign);
+	this->btnCamSets	= new UIButton(this->vertMenuPlate, UIID::MBtnSource,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Return.png"	);
+	this->btnCamSets->SetPivot(0.0f, 4.0f/5.0f);
+	SetButtonStdCols(this->btnCamSets);
+
+	UIRect defInspPlateDim(800, 200, 400, 600);
+	// Build elements for the inspector
+	//
+	this->inspSettingsPlate = new UIPlate( &this->uiSys, -1, defInspPlateDim);
+	this->inspSettingsPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspSettingsPlate->Show(false);
+	this->inspSetFrame = new UIPlate(this->inspSettingsPlate, -1, defInspPlateDim.DilateAtOrigin(-20.0f).SS_Height(250.0f));
+	this->inspSetFrame->filled = false;
+	this->inspSetFrame->uiCols.norm.Set(0.0f, 0.0f, 0.0f);
+	UIText* textLaseWatts = new UIText(this->inspSetFrame, -1, "LASE WATTS", 20, UIRect(0.0f, 40.0f, 380, 20.0f));
+	textLaseWatts->uiCols.norm.SetColor_Black();
+	this->btnLaseW_1 = new UIButton(this->inspSetFrame, UIID::LaseWat_1, UIRect(20, 50, 50, 30),	"L1", btnTextSz);
+	SetButtonStdCols(this->btnLaseW_1, true);
+	this->btnLaseW_2 = new UIButton(this->inspSetFrame, UIID::LaseWat_2, UIRect(80, 50, 50, 30),	"L2", btnTextSz);
+	SetButtonStdCols(this->btnLaseW_2, false);
+	this->btnLaseW_3 = new UIButton(this->inspSetFrame, UIID::LaseWat_3, UIRect(140, 50, 50, 30),	"L3", btnTextSz);
+	SetButtonStdCols(this->btnLaseW_3, false);
+	UIText* textLaseExp = new UIText(this->inspSetFrame, -1, "EXPOSURE", 20, UIRect(0.0f, 140.0f, 380, 20.0f));
+	textLaseExp->uiCols.norm.SetColor_Black();
+	this->btnExp_1	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_1, UIRect(20, 150, 50, 30), "E1", btnTextSz);
+	SetButtonStdCols(this->btnExp_1, true);
+	this->btnExp_2	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_2, UIRect(80, 150, 50, 30), "E2", btnTextSz);
+	SetButtonStdCols(this->btnExp_2, false);
+	this->btnExp_3	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_3, UIRect(20, 200, 50, 30), "E3", btnTextSz);
+	SetButtonStdCols(this->btnExp_3, false);
+	this->btnExp_4	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_4, UIRect(80, 200, 50, 30), "E4", btnTextSz);
+	SetButtonStdCols(this->btnExp_4, false);
+	this->btnThreshTy = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdType, UIRect(20, 300, 100, 30), "THRESH:", btnTextSz);
+	SetButtonStdCols(this->btnThreshTy, false);
+	// TODO: Initialize threshold based on starting value.
+	this->btnThreshTog = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdToggle, UIRect(120, 300, 100, 30), "ON", btnTextSz);
+	
+	//
+	const float titleHeight = 40.0f;
+	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim);
+	this->inspAlignPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspAlignPlate->Show(true);
+	UIText* alignTitle = new UIText(this->inspAlignPlate, -1, "Cam. Settings", 20, UIRect());
+	alignTitle->debugName = "alignTitle";
+	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
+	{
+		this->alignButtonGrid = new UIPlate(this->inspAlignPlate, -1, UIRect());
+		this->alignButtonGrid->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignButtonGrid->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
+		this->alignButtonGrid->Show(true);
+
+		const float BtnHPad = 10.0f;
+		const float BtnVPad = 10.0f;
+		const float BtnH = 40.0f;
+		const float BtnStride = BtnH + BtnVPad;
+		int btnIt = BtnVPad;
+		UIButton* btnSetExpo = new UIButton(this->alignButtonGrid, UIID::CamSet_Exposure, UIRect(), "EXPOSURE", btnTextSz);
+		btnSetExpo->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetExpo);
+		btnIt += BtnStride;
+		UIButton* btnSetDisp = new UIButton(this->alignButtonGrid, UIID::CamSet_Disparity, UIRect(), "DISPARITY", btnTextSz);
+		btnSetDisp->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetDisp);
+		btnIt += BtnStride;
+		UIButton* btnSetOpa = new UIButton(this->alignButtonGrid, UIID::CamSet_Opacity, UIRect(), "OPACITY", btnTextSz);
+		btnSetOpa->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetOpa);
+		btnIt += BtnStride;
+		UIButton* btnSetReg = new UIButton(this->alignButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
+		btnSetReg->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetReg);
+		btnIt += BtnStride;
+		UIButton* btnSetCal = new UIButton(this->alignButtonGrid, UIID::CamSet_Calibrate, UIRect(), "Calibrate Focus", btnTextSz);
+		btnSetCal->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetCal);
+		btnIt += BtnStride;
+		UIButton* btnSetThr = new UIButton(this->alignButtonGrid, UIID::CamSet_Threshold, UIRect(), "Threshold Settings", btnTextSz);
+		btnSetThr->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(btnSetThr);
+		//btnIt += BtnStride;
+	}
+	{
+		this->alignSubOpacity = new UIPlate(this->inspAlignPlate, -1, UIRect());
+		this->alignSubOpacity->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignSubOpacity->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
+		this->alignSubOpacity->Show(false);
+
+		UIPlate* titlePlate = new UIPlate(this->alignSubOpacity, -1, UIRect());
+		titlePlate->UseDyn()->AnchorsTop().SetOffsets(10.0f, 0.0f, -10.0f, 40);
+		titlePlate->uiCols.norm.SetColor_Black();
+		UIText* titleText = new UIText(titlePlate, -1, "OPACITY", btnTextSz, UIRect());
+		titleText->uiCols.norm.SetColor_White();
+		titleText->UseDyn()->AnchorsAll().ZeroOffsets();
+
+		this->sliderOpacity = new UIVBulkSlider(this->alignSubOpacity, UIID::CamSet_Opacity_Meter, 0.0f, 1.0f, 0.5f, UIRect());
+		this->sliderOpacity->UseDyn()->AnchorsAll().SetOffsets(50.0f, 50.0f, -10.0f, -60.0f);
+
+		UIButton* backBtn = new UIButton(this->alignSubOpacity, UIID::CamSet_Opacity_Back, UIRect(), "Back", btnTextSz);
+		backBtn->textColor.SetColor_Black();
+		backBtn->UseDyn()->AnchorsBot().SetOffsets(50.0f, -50.0f, -50.0f, -10.0f);
+		SetButtonStdCols(backBtn);
+	}
+	{
+		this->alignThreshold = new UIPlate(this->inspAlignPlate, -1, UIRect());
+		this->alignThreshold->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignThreshold->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
+		this->alignThreshold->Show(false);
+
+		UIPlate* titlePlate = new UIPlate(this->alignThreshold, -1, UIRect());
+		titlePlate->UseDyn()->AnchorsTop().SetOffsets(10.0f, 0.0f, -10.0f, 40);
+		titlePlate->uiCols.norm.SetColor_Black();
+		UIText* titleText = new UIText(titlePlate, -1, "THRESHOLD", btnTextSz, UIRect());
+		titleText->uiCols.norm.SetColor_White();
+		titleText->UseDyn()->AnchorsAll().ZeroOffsets();
+
+		this->sliderThresh = new UIVBulkSlider(this->alignThreshold, UIID::CamSet_Threshold_SlideThresh, 0.0f, 1.0f, 0.5f, UIRect());
+		this->sliderThresh->UseDyn()->SetAnchors(0.0f, 0.0f, 0.5f, 1.0f).SetOffsets(10.0f, 50.0f, -10.0f, -60.0f);
+
+		this->sliderDispup = new UIVBulkSlider(this->alignThreshold, UIID::CamSet_Threshold_DispUp, 0.0f, 1.0f, 0.5f, UIRect());
+		this->sliderDispup->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 1.0f).SetOffsets(10.0f, 50.0f, -10.0f, -60.0f);
+
+		UIButton* backBtn = new UIButton(this->alignThreshold, UIID::CamSet_Threshold_Back, UIRect(), "Back", btnTextSz);
+		backBtn->textColor.SetColor_Black();
+		backBtn->UseDyn()->AnchorsBot().SetOffsets(50.0f, -50.0f, -50.0f, -10.0f);
+		SetButtonStdCols(backBtn);
+	}
+	//
+	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim);
+	this->inspCamSetsPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspCamSetsPlate->Show(false);
 }
 
 void DrawOffsetVertices(
@@ -183,7 +334,6 @@ void StateHMDOp::Draw(const wxSize& sz)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_BLEND);
 	
-
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
 
 	this->DrawMousePad(
@@ -204,12 +354,14 @@ void StateHMDOp::Draw(const wxSize& sz)
 	}
 
 	this->vertMenuPlate->SetLocPos(cameraWindowRgn.EndX() + 10.0f, cameraWindowRgn.y + 25.0f);
-	this->vertMenuPlate->SetDim(curVertWidth, cameraWindowRgn.h - 50.0f);
+	this->vertMenuPlate->SetDim(this->curVertWidth, cameraWindowRgn.h - 50.0f);
 
 	this->uiSys.Align();
-	this->uiSys.Render(UIRect(0.0f, 0.0f, sz.x, sz.y));
+	this->uiSys.Render();
 }
 
+// NOTE: This function has been greatly reduce from its original purpose.
+// It may be the case we remove this function, or change its name.
 void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 {
 	cvgRect cvgrOutl = rectDrawAround;
@@ -217,94 +369,32 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 	glDisable(GL_TEXTURE_2D);
 	glColor3f(0.5f, 0.5f, 0.5f);
 	glBegin(GL_LINE_LOOP);
-	cvgrOutl.GLVerts();
+		cvgrOutl.GLVerts();
 	glEnd();
 
-	//////////////////////////////////////////////////
-	//
-	//		DRAW MAIN MENU
-	//
-	//////////////////////////////////////////////////
-
-	std::vector<TexObj*> mmIcos = 
-	{
-		&this->ico_MenuLaser,
-		&this->ico_MenuSliders, 
-		&this->ico_MenuAlign, 
-		&this->ico_MenuReturn
-	};
-
-	const int iconSz = 50;
-	const int iconSep = 20;
-	const int iconPad = 30;
-	const int iconCt = mmIcos.size();
-	const int mmTotWidth = iconSz + iconPad + iconPad;
-	const int mmTotHeight = iconCt * iconSz + (iconCt - 1) * iconSep + 2 * iconPad;
-
-	cvgRect cvgMMenu(
-		cvgrOutl.EndX(), 
-		cvgrOutl.y + cvgrOutl.h * 0.5f - mmTotHeight * 0.5f, 
-		mmTotWidth, 
-		mmTotHeight);
-
-	glColor3f(0.25f, 0.25f, 0.25f);
-	glBegin(GL_TRIANGLE_FAN);
-		cvgShapes::DrawBoxRoundedRight(cvgMMenu, 20.0f);
-	glEnd();
-
-	// Draw the main menu icons
-	glEnable(GL_TEXTURE_2D);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-	glEnable(GL_BLEND);
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	cvgRect menuIconRect(
-		cvgMMenu.x + iconPad, 
-		cvgMMenu.y + iconPad, 
-		iconSz, 
-		iconSz);
-
-	for(size_t i = 0; i < mmIcos.size(); ++i)
-	{
-		mmIcos[i]->GLBind();
-		glBegin(GL_QUADS);
-			menuIconRect.GLVerts_Textured();
-		glEnd();
-
-		menuIconRect.y += iconSz + iconSep;
-	}
-
-	//////////////////////////////////////////////////
-	//
-	//		DRAW INSPECTOR REGION
-	//
-	//////////////////////////////////////////////////
-
-	glDisable(GL_TEXTURE_2D);
-	glColor3f(0.25f, 0.25f, 0.25f);
-	float insWidth = 250.0f;
-	cvgRect cvgMIns(
-		cvgrOutl.EndX() - insWidth, 
+	// Because of some weird history involving the code, we have two
+	// different representation of rectangle bounds...
+	UIRect r(
+		cvgrOutl.x, 
 		cvgrOutl.y, 
-		insWidth, 
+		cvgrOutl.w, 
 		cvgrOutl.h);
 
-	glBegin(GL_TRIANGLE_FAN);
-		cvgShapes::DrawBoxRoundedLeft(cvgMIns, 20.0f);
-	glEnd();
+	if(this->lastViewportRect != r)
+	{
+		this->lastViewportRect = r;
 
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE);
-	glColor3f(1.0f, 1.0f, 1.0f);
-	this->fontInsTitle.RenderFontCenter(
-		"Title", 
-		cvgMIns.x + cvgMIns.w * 0.5f, 
-		cvgMIns.y + 25);
+		// There's some +- 1.0s and 2.0s to make sure we don't
+		// draw over lines
+		UIRect inspLoc(
+			r.Right() - r.dim.x * 0.2f - 2.0f,
+			r.pos.y + 1.0f,
+			r.dim.x * 0.2f,
+			r.dim.y - 2.0f);
 
-	glColor3f(1.0f, 1.0f, 1.0f);
-	glBegin(GL_LINE_LOOP);
-		cvgShapes::DrawBoxRoundedLeft(cvgMIns, 20.0f);
-	glEnd();
+		this->inspSettingsPlate->SetRect(inspLoc);
+		this->inspAlignPlate->SetRect(inspLoc);
+	}
 }
 
 void StateHMDOp::Update(double dt)
@@ -318,10 +408,19 @@ void StateHMDOp::Update(double dt)
 	this->mdsMiddle.Decay(dt);
 	this->mdsRight.Decay(dt);
 
+	bool showRButtons = false;
 	if(showVertMenu)
+	{ 
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
+		showRButtons = (curVertWidth == maxVertWidth);
+	}
 	else
 		curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
+
+	this->btnLaser->Show(showRButtons);
+	this->btnSettings->Show(showRButtons);
+	this->btnAlign->Show(showRButtons);
+	this->btnCamSets->Show(showRButtons);
 }
 
 void StateHMDOp::EnteredActive()
@@ -332,11 +431,6 @@ void StateHMDOp::EnteredActive()
 	//
 	// most likely because the OpenGL context doesn't get initialized
 	// as fast as on Windows.
-	this->ico_MenuAlign.LODEIfEmpty("Menu_Icon_Align.png");
-	this->ico_MenuSliders.LODEIfEmpty("Menu_Icon_Sliders.png");
-	this->ico_MenuLaser.LODEIfEmpty("Menu_Icon_Laser.png");
-	this->ico_MenuReturn.LODEIfEmpty("Menu_Icon_Return.png");
-
 	this->ico_MousePadLeft.LODEIfEmpty("Mousepad_Left.png");
 	this->ico_MousePadRight.LODEIfEmpty("Mousepad_Right.png");
 	this->ico_MousePadCrevice.LODEIfEmpty("Mousepad_Crevice.png");
@@ -350,6 +444,7 @@ void StateHMDOp::EnteredActive()
 void StateHMDOp::ExitedActive() 
 {
 	this->camTextureRegistry.ClearTextures();
+	this->uiSys.DelegateReset();
 }
 
 void StateHMDOp::Initialize() 
@@ -379,6 +474,22 @@ void StateHMDOp::OnKeydown(wxKeyCode key)
 		this->GetCoreWindow()->StopRecording(0);
 	else if(key == WXK_NUMPAD2	|| key == WXK_NUMPAD_DOWN)
 		this->GetCoreWindow()->StopRecording(1);
+
+	// Keyboard shortcut for the pull-out menu
+	else if(key == WXK_NUMPAD_ENTER)
+		this->showVertMenu = !this->showVertMenu;
+	else
+	{
+		// If not handled by an element outside the UI system,
+		// delegate to the UI system and see if anything is interested
+		// in handling this.
+		this->uiSys.DelegateKeydown(key);
+	}
+}
+
+void StateHMDOp::OnKeyup(wxKeyCode key)
+{
+	this->uiSys.DelegateKeyup(key);
 }
 
 void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
@@ -389,6 +500,8 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 		this->mdsMiddle.FlagDown();
 	else if(button == 2)
 		this->mdsRight.FlagDown();
+
+	this->uiSys.DelegateMouseDown(button, UIVec2(pt.x, pt.y));
 }
 
 void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
@@ -396,9 +509,45 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 	if(button == 0)
 		this->mdsLeft.FlagUp();
 	else if(button == 1)
+	{
+		this->showVertMenu = false;
 		this->mdsMiddle.FlagUp();
+	}
 	else if(button == 2)
 		this->mdsRight.FlagUp();
+
+	this->uiSys.DelegateMouseUp(button, UIVec2(pt.x, pt.y));
+}
+
+/// <summary>
+/// Query if a widget ID used in the StateHMDOp is in the main
+/// right menu bar.
+/// </summary>
+/// <param name="id">The ID of the UI item.</param>
+/// <returns>True if a part of the menu bar.</returns>
+bool IsRightMenuItem(int id)
+{
+	switch(id)
+	{
+	case StateHMDOp::PullMenu:
+	case StateHMDOp::MBtnLaserTog:
+	case StateHMDOp::MBtnLaserSet:
+	case StateHMDOp::MBtnAlign:
+	case StateHMDOp::MBtnSource:
+		return true;
+	}
+	return false;
+}
+
+void StateHMDOp::OnMouseMove(const wxPoint& pt)
+{
+	DelMouseRet m = this->uiSys.DelegateMouseMove(UIVec2(pt.x, pt.y));
+
+	if(m.evt == DelMouseRet::Event::Hovered)
+	{
+		if(IsRightMenuItem(m.idx))
+			this->showVertMenu = true;
+	}	
 }
 
 void StateHMDOp::ClosingApp() 
@@ -407,4 +556,184 @@ void StateHMDOp::ClosingApp()
 
 StateHMDOp::~StateHMDOp()
 {
+}
+
+void StateHMDOp::SetShownMenuBarUIPanel(int idx)
+{
+	// Step 1, hide all relevant inspector views.
+	this->inspSettingsPlate->Hide();
+	this->inspAlignPlate->Hide();
+
+	UpdateGroupColorSet( 
+		idx,
+		{this->btnSettings, this->btnAlign, this->btnCamSets},
+		colSetButtonTog,
+		colSetButton);
+
+	switch(idx)
+	{
+	case UIID::MBtnLaserSet:
+		this->inspSettingsPlate->Show();
+		break;
+
+	case UIID::MBtnAlign:
+		this->inspAlignPlate->Show();
+		break;
+
+	case UIID::MBtnSource:
+		break;
+	}
+}
+
+void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)
+{
+	// Only right click is supported
+	if(mouseBtn != (int)MouseBtn::Right)
+		return;
+
+	switch(uib->Idx())
+	{
+	case UIID::MBtnLaserTog:
+		{
+			if(this->GetCoreWindow()->hwLaser->intensityNIR == 0.0f)
+			{ 
+				this->GetCoreWindow()->hwLaser->SetNIRIntensity(1.0f);
+				SetButtonStdCols(this->btnLaser, true);
+			}
+			else
+			{ 
+				this->GetCoreWindow()->hwLaser->SetNIRIntensity(0.0f);
+				SetButtonStdCols(this->btnLaser, false);
+			}
+		}
+		break;
+
+	case UIID::MBtnLaserSet:
+		this->SetShownMenuBarUIPanel(uib->Idx());
+		break;
+
+	case UIID::MBtnAlign:
+		this->SetShownMenuBarUIPanel(uib->Idx());
+		break;
+
+	case UIID::MBtnSource:
+		this->SetShownMenuBarUIPanel(uib->Idx());
+		break;
+
+	case UIID::LaseWat_1:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnLaseW_1, this->btnLaseW_2, this->btnLaseW_3}, 
+			colSetButtonTog,
+			colSetButton);
+
+		// TODO: Placeholder
+		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(0.3f);
+		break;
+
+	case UIID::LaseWat_2:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnLaseW_1, this->btnLaseW_2, this->btnLaseW_3}, 
+			colSetButtonTog,
+			colSetButton);
+
+		// TODO: Placeholder
+		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(0.6f);
+		break;
+
+	case UIID::LaseWat_3:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnLaseW_1, this->btnLaseW_2, this->btnLaseW_3}, 
+			colSetButtonTog,
+			colSetButton);
+
+		// TODO: Placeholder
+		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(1.0f);
+		break;
+
+	case UIID::Lase_Exposure_1:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
+			colSetButtonTog,
+			colSetButton);
+		break;
+
+	case UIID::Lase_Exposure_2:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
+			colSetButtonTog,
+			colSetButton);
+		break;
+
+	case UIID::Lase_Exposure_3:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
+			colSetButtonTog,
+			colSetButton);
+		break;
+
+	case UIID::Lase_Exposure_4:
+		UpdateGroupColorSet(
+			uib->Idx(), 
+			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
+			colSetButtonTog,
+			colSetButton);
+		break;
+
+	case UIID::Lase_ThresholdType:
+		break;
+
+	case UIID::Lase_ThresholdToggle:
+		break;
+
+	case UIID::CamSet_Exposure:
+		break;
+
+	case UIID::CamSet_Disparity:
+		break;
+
+	case UIID::CamSet_Opacity:
+		this->alignButtonGrid->Hide();
+		this->alignSubOpacity->Show();
+		break;
+
+	case UIID::CamSet_Register:
+		break;
+
+	case UIID::CamSet_Calibrate:
+		break;
+
+	case UIID::CamSet_Threshold:
+		this->alignButtonGrid->Hide();
+		this->alignThreshold->Show();
+		break;
+
+	case UIID::CamSet_Threshold_SlideThresh:
+		break;
+
+	case UIID::CamSet_Threshold_DispUp:
+		break;
+
+	case UIID::CamSet_Threshold_Back:
+		this->alignThreshold->Hide();
+		this->alignButtonGrid->Show();
+		break;
+
+	case UIID::CamSet_Opacity_Meter:
+		break;
+
+	case UIID::CamSet_Opacity_Back:
+		this->alignSubOpacity->Hide();
+		this->alignButtonGrid->Show();
+		break;
+
+	case UIID::CamSet_Calibrate_Slider:
+		break;
+
+	}
 }

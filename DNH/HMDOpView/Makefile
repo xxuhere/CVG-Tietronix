@@ -83,7 +83,7 @@ SUBOBJ_CAMIMPL = \
 	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
 	
 SUBOBJ_UISYS = \
-	UIBase UIButton UIColor4 UIPlate UIRect UISink UISys UIVec2
+	CacheRecordUtils DynSize UIBase UIButton UIColor4 UIHSlider UIPlate UIRect UISink UISys UIText UIVBulkSlider UIVec2
 	
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))

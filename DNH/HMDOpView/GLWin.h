@@ -4,6 +4,7 @@
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
 #include "Utils/cvgOptions.h"
+#include "FontMgr.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -39,6 +40,9 @@ private:
 	/// has already taken.
 	/// </summary>
 	boost::posix_time::ptime lastStopwatch;
+
+	FontWU fontMousePos;
+	wxPoint lastDownDbgMouse;
 
 public:
 	/// <summary>

@@ -1,4 +1,5 @@
 #include "UIVec2.h"
+#include "UIRect.h"
 
 UIVec2::UIVec2()
 {}
@@ -71,6 +72,34 @@ UIVec2& UIVec2::operator /= (float s)
 	return *this;
 }
 
+UIVec2 UIVec2::operator * (const UIVec2& o) const
+{
+	return UIVec2(
+		this->x * o.x,
+		this->y * o.y);
+}
+
+UIVec2& UIVec2::operator *= (const UIVec2& o)
+{
+	this->x *= o.x;
+	this->y *= o.y;
+	return *this;
+}
+
+UIVec2 UIVec2::operator / (const UIVec2& o) const
+{
+	return UIVec2(
+		this->x / o.x,
+		this->y / o.y);
+}
+
+UIVec2& UIVec2::operator /= (const UIVec2& o)
+{
+	this->x /= o.x;
+	this->y /= o.y;
+	return *this;
+}
+
 bool UIVec2::operator == (const UIVec2& v2) const
 {
 	return 
@@ -83,4 +112,18 @@ bool UIVec2::operator != (const UIVec2& v2) const
 	return
 		this->x != v2.x ||
 		this->y != v2.y;
+}
+
+bool UIVec2::InRectBounds(const UIVec2& pt, const UIVec2& topLeft, const UIVec2& dim)
+{
+	return 
+		pt.x >= topLeft.x && 
+		pt.y >= topLeft.y &&
+		pt.x <= topLeft.x + dim.x &&
+		pt.y <= topLeft.y + dim.y;
+}
+
+bool UIVec2::InRectBounds(const UIVec2& pt, const UIRect& r)
+{
+	return InRectBounds(pt, r.pos, r.dim);
 }

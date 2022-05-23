@@ -204,6 +204,21 @@
     <ClInclude Include="LoadAnim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UISys\UIText.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\CacheRecordUtils.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\DynSize.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIHSlider.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIVBulkSlider.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -337,6 +352,21 @@
     </ClCompile>
     <ClCompile Include="LoadAnim.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIText.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\CacheRecordUtils.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\DynSize.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIVBulkSlider.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIHSlider.cpp">
+      <Filter>Source Files\UISys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

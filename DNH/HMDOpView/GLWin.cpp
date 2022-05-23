@@ -2,6 +2,7 @@
 #include "MainWin.h"
 #include <iostream>
 #include "CamVideo/CamStreamMgr.h"
+#include "UISys/UISys.h"
 
 #include "LoadAnim.h"
 
@@ -159,7 +160,9 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 
 	if(!this->initStaticResources)
 	{ 
+
 		this->InitStaticGraphicResources();
+		this->fontMousePos = FontMgr::GetInstance().GetFont(10);
 
 		// If we've just initialized, then we've never successfully 
 		// handled a resize and updated the viewport state yet.
@@ -167,10 +170,20 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 		this->typedParent->InitializeAppStateMachine();
 	}
 
+	glColor3f(1.0f, 1.0f, 1.0f);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	wxSize sz = this->GetSize();
 	this->DrawGraphics(sz);
+
+	if(this->fontMousePos.IsValid())
+	{
+		glColor3f(1.0f, 0.0f, 1.0f);
+		std::stringstream sstrmDbg;
+		sstrmDbg << "x: " << this->lastDownDbgMouse.x << " - y: " << this->lastDownDbgMouse.y;
+		this->fontMousePos.RenderFont(sstrmDbg.str().c_str(), sz.x - 200, sz.y - 50);
+	}
 
 	this->SwapBuffers();
 }
@@ -245,6 +258,10 @@ void GLWin::OnKeyDown(wxKeyEvent& evt)
 		// Reload options during runtime.
 		this->InitializeOptions();
 	}
+	else if(evt.GetKeyCode() == WXK_PAUSE)
+	{
+		UISys::ToggleDebugView();
+	}
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnKeydown((wxKeyCode)evt.GetKeyCode());
@@ -258,12 +275,16 @@ void GLWin::OnKeyUp(wxKeyEvent& evt)
 
 void GLWin::OnLMouseDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(0, evt.GetPosition());
 }
 
 void GLWin::OnLMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	// States currently don't have a double click, but it still needs
 	// to be handled, so we consider it a normal click.
@@ -272,48 +293,64 @@ void GLWin::OnLMouseDoubleDown(wxMouseEvent& evt)
 
 void GLWin::OnLMouseUp(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(0, evt.GetPosition());
 }
 
 void GLWin::OnMMouseDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(1, evt.GetPosition());
 }
 
 void GLWin::OnMMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(1, evt.GetPosition());
 }
 
 void GLWin::OnMMouseUp(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(1, evt.GetPosition());
 }
 
 void GLWin::OnRMouseDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(2, evt.GetPosition());
 }
 
 void GLWin::OnRMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(2, evt.GetPosition());
 }
 
 void GLWin::OnRMouseUp(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(2, evt.GetPosition());
 }
 
 void GLWin::OnMouseMotion(wxMouseEvent& evt)
 {
+	this->lastDownDbgMouse = evt.GetPosition();
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseMove(evt.GetPosition());
 }

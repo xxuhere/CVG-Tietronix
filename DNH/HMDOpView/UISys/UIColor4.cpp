@@ -53,3 +53,46 @@ void UIColor4::GLColor4()
 {
 	glColor4fv(this->ar);
 }
+
+bool UIColor4::operator== (const UIColor4& o) const
+{
+	return 
+		this->r == o.r && 
+		this->g == o.g && 
+		this->b == o.b && 
+		this->a == o.a;
+}
+
+ColorSetInteractable::ColorSetInteractable()
+{}
+
+ColorSetInteractable::ColorSetInteractable(
+	const UIColor4& norm, 
+	const UIColor4& hover, 
+	const UIColor4& pressed)
+{
+	this->norm		= norm;
+	this->hover		= hover;
+	this->pressed	= pressed;
+}
+
+void ColorSetInteractable::Set(
+	const UIColor4& norm, 
+	const UIColor4& hover, 
+	const UIColor4& pressed)
+{
+	this->norm		= norm;
+	this->hover		= hover;
+	this->pressed	= pressed;
+}
+
+UIColor4& ColorSetInteractable::GetContexedColor(int pressedCt, bool isHovering)
+{
+	if(pressedCt != 0)
+		return this->pressed;
+
+	if(isHovering)
+		return this->hover;
+	
+	return this->norm;
+}

@@ -1,6 +1,5 @@
 #pragma once
 #include "UIBase.h"
-#include "UIColor4.h"
 
 class UIPlate : public UIBase
 {
@@ -22,13 +21,12 @@ public:
 	float pxTop = 10;
 	float pxBot = 10;
 
-	UIColor4 colNormal;
-	UIColor4 colHover;
+	bool filled = true;
 
 	UIVec2 lastDim;
 
 public:
-	UIPlate(int idx, const UIRect& r);
+	UIPlate(UIBase* parent, int idx, const UIRect& r);
 
-	void Render() override;
+	bool Render() override;
 };

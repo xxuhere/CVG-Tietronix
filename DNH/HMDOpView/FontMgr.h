@@ -3,6 +3,7 @@
 #include <FTGL/ftgl.h>
 #include <map>
 #include <string>
+#include "UISys/UIVec2.h"
 
 class FontMgr;
 
@@ -60,9 +61,14 @@ public:
 	/// The y position, in screen coordinates, to render the text.
 	/// </param>
 	void RenderFont(const char * sz, float x, float y);
-	void RenderFontCenter(const char * sz, float x, float y);
+	void RenderFontCenter(const char * sz, float x, float y, bool vertCenter = false);
+
+	inline void RenderFontCenter(const char * sz, const UIVec2& pos, bool vertCenter = false)
+	{ return this->RenderFontCenter(sz, pos.x, pos.y, vertCenter); }
 
 	float GetAdvance(const char* sz);
+	float LineHeight() const;
+	float TypeSize() const;
 };
 
 /// <summary>

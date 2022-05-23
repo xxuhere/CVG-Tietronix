@@ -62,7 +62,6 @@ void StateInitCameras::Draw(const wxSize& sz)
 {
 	// If any camera is not ready, this gets
 	// switched to false.
-	
 
 	const char* sztitle = 
 		this->allCamsReady ? 

@@ -29,9 +29,13 @@ void FontWU::RenderFont(const char * sz, float x, float y)
 	glPopMatrix();
 }
 
-void FontWU::RenderFontCenter(const char * sz, float x, float y)
+void FontWU::RenderFontCenter(const char * sz, float x, float y, bool vertCenter)
 {
 	float adv = this->GetAdvance(sz);
+
+	if(vertCenter)
+		y += this->TypeSize() / 2.0f;
+
 	this->RenderFont(sz, x - adv * 0.5f, y);
 }
 
@@ -41,6 +45,22 @@ float FontWU::GetAdvance(const char* sz)
 		return 0.0f;
 
 	return this->font->Advance(sz);
+}
+
+float FontWU::LineHeight() const
+{
+	if(!this->valid)
+		return 0.0f;
+
+	return this->font->LineHeight();
+}
+
+float FontWU::TypeSize() const
+{
+	if(!this->valid)
+		return 0.0f;
+
+	return this->font->FaceSize();
 }
 
 FontMgr FontMgr::_inst;
