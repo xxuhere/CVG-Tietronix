@@ -219,6 +219,15 @@
     <ClInclude Include="UISys\UIVBulkSlider.h">
       <Filter>Header Files\UISys</Filter>
     </ClInclude>
+    <ClInclude Include="UISys\NinePatcher.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIDefines.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
+    <ClInclude Include="UISys\UIGraphic.h">
+      <Filter>Header Files\UISys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -366,6 +375,12 @@
       <Filter>Source Files\UISys</Filter>
     </ClCompile>
     <ClCompile Include="UISys\UIHSlider.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\NinePatcher.cpp">
+      <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="UISys\UIGraphic.cpp">
       <Filter>Source Files\UISys</Filter>
     </ClCompile>
   </ItemGroup>

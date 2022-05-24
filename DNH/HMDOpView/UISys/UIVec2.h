@@ -43,4 +43,7 @@ public:
 		const UIVec2& pt,
 		const UIRect& r);
 
+	void SetOne();
+	void SetZero();
+
 };

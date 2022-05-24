@@ -1,32 +1,16 @@
 #pragma once
-#include "UIBase.h"
-
-class UIPlate : public UIBase
+#include "UIGraphic.h"
+#include "UIDefines.h"
+#include "UIColor4.h"
+/// <summary>
+/// Pretty much a usable version of UIGraphic. UIGraphic should not be used
+/// directly because it's purpose is not to be used in the UI as a plate, but
+/// rather store variables and logic common to a family of UIBase subclasses.
+/// </summary>
+class UIPlate : public UIGraphic
 {
-public:
-	enum Mode
-	{
-		Fill,
-		Slice
-	};
-
-public:
-	float ULeft = 0.3f;
-	float URight = 0.7f;
-	float VTop = 0.3f;
-	float VBot = 0.7f;
-
-	float pxLeft = 10;
-	float pxRight = 10;
-	float pxTop = 10;
-	float pxBot = 10;
-
-	bool filled = true;
-
-	UIVec2 lastDim;
 
 public:
 	UIPlate(UIBase* parent, int idx, const UIRect& r);
-
-	bool Render() override;
+	UIPlate(UIBase* parent, int idx, const UIRect& r, const UIColor4& staticCol);
 };

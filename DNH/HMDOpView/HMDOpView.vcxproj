@@ -179,9 +179,12 @@
     <ClInclude Include="TexObj.h" />
     <ClInclude Include="UISys\CacheRecordUtils.h" />
     <ClInclude Include="UISys\DynSize.h" />
+    <ClInclude Include="UISys\NinePatcher.h" />
     <ClInclude Include="UISys\UIBase.h" />
     <ClInclude Include="UISys\UIButton.h" />
     <ClInclude Include="UISys\UIColor4.h" />
+    <ClInclude Include="UISys\UIDefines.h" />
+    <ClInclude Include="UISys\UIGraphic.h" />
     <ClInclude Include="UISys\UIHSlider.h" />
     <ClInclude Include="UISys\UIPlate.h" />
     <ClInclude Include="UISys\UIRect.h" />
@@ -231,9 +234,11 @@
     <ClCompile Include="TexObj.cpp" />
     <ClCompile Include="UISys\CacheRecordUtils.cpp" />
     <ClCompile Include="UISys\DynSize.cpp" />
+    <ClCompile Include="UISys\NinePatcher.cpp" />
     <ClCompile Include="UISys\UIBase.cpp" />
     <ClCompile Include="UISys\UIButton.cpp" />
     <ClCompile Include="UISys\UIColor4.cpp" />
+    <ClCompile Include="UISys\UIGraphic.cpp" />
     <ClCompile Include="UISys\UIPlate.cpp" />
     <ClCompile Include="UISys\UIRect.cpp" />
     <ClCompile Include="UISys\UISink.cpp" />

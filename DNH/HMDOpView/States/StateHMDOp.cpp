@@ -58,12 +58,21 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this)
 {
+	this->patch_circle		= TexObj::MakeSharedLODE("8mmCircle.png"		);
+	this->patch_roundLeft	= TexObj::MakeSharedLODE("8mmRoundedLeft.png"	);
+	this->patch_roundRight	= TexObj::MakeSharedLODE("8mmRoundedRight.png"	);
+	this->ninePatchCircle	= NinePatcher::MakeFromPixelsMiddle(this->patch_circle);
+
+	this->patch_smallCircle	= TexObj::MakeSharedLODE("3mmCircle.png");
+	this->ninePatchSmallCircle = NinePatcher::MakeFromPixelsMiddle(this->patch_smallCircle);
+
+	const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
 	const int btnTextSz = 14.0f;
 
 	// Build elements for the right menu bar
 	//
-	this->vertMenuPlate = new UIPlate( &this->uiSys, UIID::PullMenu, UIRect(960, 540, 50.0f, 100.0f));
-	this->vertMenuPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->vertMenuPlate = new UIPlate( &this->uiSys, UIID::PullMenu, UIRect(960, 540, 50.0f, 100.0f), plateGray);
+	this->vertMenuPlate->SetMode_Patch(this->patch_roundRight, this->ninePatchCircle);
 	//
 	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Laser.png"	);
 	this->btnLaser->SetPivot(0.0f, 1.0f/5.0f);
@@ -81,46 +90,56 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	UIRect defInspPlateDim(800, 200, 400, 600);
 	// Build elements for the inspector
 	//
-	this->inspSettingsPlate = new UIPlate( &this->uiSys, -1, defInspPlateDim);
-	this->inspSettingsPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspSettingsPlate = new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
+	inspSettingsPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspSettingsPlate->Show(false);
 	this->inspSetFrame = new UIPlate(this->inspSettingsPlate, -1, defInspPlateDim.DilateAtOrigin(-20.0f).SS_Height(250.0f));
-	this->inspSetFrame->filled = false;
-	this->inspSetFrame->uiCols.norm.Set(0.0f, 0.0f, 0.0f);
+	// TODO:
+	// this->inspSetFrame->filled = false;
+	this->inspSetFrame->SetAllColors(plateGray);
 	UIText* textLaseWatts = new UIText(this->inspSetFrame, -1, "LASE WATTS", 20, UIRect(0.0f, 40.0f, 380, 20.0f));
 	textLaseWatts->uiCols.norm.SetColor_Black();
 	this->btnLaseW_1 = new UIButton(this->inspSetFrame, UIID::LaseWat_1, UIRect(20, 50, 50, 30),	"L1", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnLaseW_1);
 	SetButtonStdCols(this->btnLaseW_1, true);
 	this->btnLaseW_2 = new UIButton(this->inspSetFrame, UIID::LaseWat_2, UIRect(80, 50, 50, 30),	"L2", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnLaseW_2);
 	SetButtonStdCols(this->btnLaseW_2, false);
 	this->btnLaseW_3 = new UIButton(this->inspSetFrame, UIID::LaseWat_3, UIRect(140, 50, 50, 30),	"L3", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnLaseW_3);
 	SetButtonStdCols(this->btnLaseW_3, false);
 	UIText* textLaseExp = new UIText(this->inspSetFrame, -1, "EXPOSURE", 20, UIRect(0.0f, 140.0f, 380, 20.0f));
 	textLaseExp->uiCols.norm.SetColor_Black();
 	this->btnExp_1	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_1, UIRect(20, 150, 50, 30), "E1", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnExp_1);
 	SetButtonStdCols(this->btnExp_1, true);
 	this->btnExp_2	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_2, UIRect(80, 150, 50, 30), "E2", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnExp_2);
 	SetButtonStdCols(this->btnExp_2, false);
 	this->btnExp_3	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_3, UIRect(20, 200, 50, 30), "E3", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnExp_3);
 	SetButtonStdCols(this->btnExp_3, false);
 	this->btnExp_4	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_4, UIRect(80, 200, 50, 30), "E4", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnExp_4);
 	SetButtonStdCols(this->btnExp_4, false);
 	this->btnThreshTy = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdType, UIRect(20, 300, 100, 30), "THRESH:", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnThreshTy);
 	SetButtonStdCols(this->btnThreshTy, false);
 	// TODO: Initialize threshold based on starting value.
 	this->btnThreshTog = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdToggle, UIRect(120, 300, 100, 30), "ON", btnTextSz);
+	this->ApplyFormButtonStyle(this->btnThreshTog);
 	
 	//
 	const float titleHeight = 40.0f;
-	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim);
-	this->inspAlignPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
+	this->inspAlignPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspAlignPlate->Show(true);
 	UIText* alignTitle = new UIText(this->inspAlignPlate, -1, "Cam. Settings", 20, UIRect());
 	alignTitle->debugName = "alignTitle";
 	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
 	{
-		this->alignButtonGrid = new UIPlate(this->inspAlignPlate, -1, UIRect());
-		this->alignButtonGrid->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignButtonGrid = new UIPlate(this->inspAlignPlate, -1, UIRect(), plateGray);
+		this->alignButtonGrid->SetMode_Invisible();
 		this->alignButtonGrid->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
 		this->alignButtonGrid->Show(true);
 
@@ -130,33 +149,38 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		const float BtnStride = BtnH + BtnVPad;
 		int btnIt = BtnVPad;
 		UIButton* btnSetExpo = new UIButton(this->alignButtonGrid, UIID::CamSet_Exposure, UIRect(), "EXPOSURE", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetExpo);
 		btnSetExpo->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetExpo);
 		btnIt += BtnStride;
 		UIButton* btnSetDisp = new UIButton(this->alignButtonGrid, UIID::CamSet_Disparity, UIRect(), "DISPARITY", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetDisp);
 		btnSetDisp->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetDisp);
 		btnIt += BtnStride;
 		UIButton* btnSetOpa = new UIButton(this->alignButtonGrid, UIID::CamSet_Opacity, UIRect(), "OPACITY", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetOpa);
 		btnSetOpa->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetOpa);
 		btnIt += BtnStride;
 		UIButton* btnSetReg = new UIButton(this->alignButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetReg);
 		btnSetReg->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetReg);
 		btnIt += BtnStride;
 		UIButton* btnSetCal = new UIButton(this->alignButtonGrid, UIID::CamSet_Calibrate, UIRect(), "Calibrate Focus", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetCal);
 		btnSetCal->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetCal);
 		btnIt += BtnStride;
 		UIButton* btnSetThr = new UIButton(this->alignButtonGrid, UIID::CamSet_Threshold, UIRect(), "Threshold Settings", btnTextSz);
+		this->ApplyFormButtonStyle(btnSetThr);
 		btnSetThr->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(btnSetThr);
 		//btnIt += BtnStride;
 	}
 	{
-		this->alignSubOpacity = new UIPlate(this->inspAlignPlate, -1, UIRect());
-		this->alignSubOpacity->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignSubOpacity = new UIPlate(this->inspAlignPlate, -1, UIRect(), plateGray);
 		this->alignSubOpacity->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
 		this->alignSubOpacity->Show(false);
 
@@ -171,13 +195,13 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->sliderOpacity->UseDyn()->AnchorsAll().SetOffsets(50.0f, 50.0f, -10.0f, -60.0f);
 
 		UIButton* backBtn = new UIButton(this->alignSubOpacity, UIID::CamSet_Opacity_Back, UIRect(), "Back", btnTextSz);
+		this->ApplyFormButtonStyle(backBtn);
 		backBtn->textColor.SetColor_Black();
 		backBtn->UseDyn()->AnchorsBot().SetOffsets(50.0f, -50.0f, -50.0f, -10.0f);
 		SetButtonStdCols(backBtn);
 	}
 	{
-		this->alignThreshold = new UIPlate(this->inspAlignPlate, -1, UIRect());
-		this->alignThreshold->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+		this->alignThreshold = new UIPlate(this->inspAlignPlate, -1, UIRect(), plateGray);
 		this->alignThreshold->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
 		this->alignThreshold->Show(false);
 
@@ -195,13 +219,13 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->sliderDispup->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 1.0f).SetOffsets(10.0f, 50.0f, -10.0f, -60.0f);
 
 		UIButton* backBtn = new UIButton(this->alignThreshold, UIID::CamSet_Threshold_Back, UIRect(), "Back", btnTextSz);
+		this->ApplyFormButtonStyle(backBtn);
 		backBtn->textColor.SetColor_Black();
 		backBtn->UseDyn()->AnchorsBot().SetOffsets(50.0f, -50.0f, -50.0f, -10.0f);
 		SetButtonStdCols(backBtn);
 	}
 	//
-	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim);
-	this->inspCamSetsPlate->uiCols.norm.Set(0.5f, 0.5f, 0.5f);
+	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspCamSetsPlate->Show(false);
 }
 
@@ -356,7 +380,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->vertMenuPlate->SetLocPos(cameraWindowRgn.EndX() + 10.0f, cameraWindowRgn.y + 25.0f);
 	this->vertMenuPlate->SetDim(this->curVertWidth, cameraWindowRgn.h - 50.0f);
 
-	this->uiSys.Align();
+	this->uiSys.AlignSystem();
 	this->uiSys.Render();
 }
 
@@ -583,6 +607,13 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 	case UIID::MBtnSource:
 		break;
 	}
+}
+
+void StateHMDOp::ApplyFormButtonStyle(UIGraphic* uib)
+{
+	uib->SetMode_Patch(
+		this->patch_smallCircle, 
+		this->ninePatchSmallCircle);
 }
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)

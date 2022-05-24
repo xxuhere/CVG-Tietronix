@@ -127,3 +127,15 @@ bool UIVec2::InRectBounds(const UIVec2& pt, const UIRect& r)
 {
 	return InRectBounds(pt, r.pos, r.dim);
 }
+
+void UIVec2::SetOne()
+{
+	this->x = 1.0f;
+	this->y = 1.0f;
+}
+
+void UIVec2::SetZero()
+{
+	this->x = 0.0f;
+	this->y = 0.0f;
+}

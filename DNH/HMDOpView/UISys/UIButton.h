@@ -1,19 +1,19 @@
 #pragma once
 #include "UIBase.h"
 #include <string>
-#include "../TexObj.h"
-#include "../FontMgr.h"
+#include "UIGraphic.h"
 #include <initializer_list>
+#include <vector>
 
-class UIButton : public UIBase
+class UIButton : public UIGraphic
 {
 public:
-	TexObj::SPtr image;
-
 	std::string text;
 	FontWU font;
 
 	UIColor4 textColor;
+
+	
 
 private:
 	void _InitializeColors();

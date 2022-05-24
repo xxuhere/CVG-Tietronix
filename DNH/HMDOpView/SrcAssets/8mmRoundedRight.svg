@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="10mm"
+   height="10mm"
+   viewBox="0 0 10 10"
+   version="1.1"
+   id="svg3419"
+   inkscape:version="1.2-beta (1b65182ce9, 2022-04-05)"
+   sodipodi:docname="8mmRoundedRight.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview3421"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="8.3452885"
+     inkscape:cx="-39.183786"
+     inkscape:cy="33.851436"
+     inkscape:window-width="2560"
+     inkscape:window-height="1017"
+     inkscape:window-x="2552"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="true">
+    <sodipodi:guide
+       position="0.52916668,5.0000466"
+       orientation="0,1"
+       id="guide408" />
+    <sodipodi:guide
+       position="0.52916668,5.0000466"
+       orientation="1,0"
+       id="guide410" />
+  </sodipodi:namedview>
+  <defs
+     id="defs3416" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path4465"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.1;stop-color:#000000;stroke-opacity:1"
+       d="M 0.52916667 0.52916667 L 0.52916667 5.0002116 L 0.52916667 9.4707397 L 5.0002116 9.4707397 A 4.4707866 4.4707866 0 0 0 9.4707397 5.0002116 A 4.4707866 4.4707866 0 0 0 5.0002116 0.52916667 L 0.52916667 0.52916667 z "
+       inkscape:export-filename="8mmRoundedRight.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+  </g>
+</svg>

@@ -14,6 +14,7 @@ public:
 		};
 		float ar[4];
 	};
+
 public:
 	UIColor4();
 	UIColor4(float r, float g, float b);
@@ -51,10 +52,14 @@ public:
 		const UIColor4& hover, 
 		const UIColor4& pressed);
 
+	ColorSetInteractable(const UIColor4& all);
+
 	void Set(
 		const UIColor4& norm, 
 		const UIColor4& hover, 
 		const UIColor4& pressed);
+
+	void SetAll(const UIColor4& all);
 
 	UIColor4& GetContexedColor(int pressedCt, bool isHovering);
 };

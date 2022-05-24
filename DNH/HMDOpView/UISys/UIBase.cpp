@@ -20,6 +20,10 @@ UIBase::UIBase(UIBase* parent, int idx, const UIRect& r)
 
 	if(parent != nullptr)
 		parent->AddChild(this);
+
+	this->dirtyHierarchy	= true;
+	this->dirtyTransform	= true;
+	this->dirtyContents		= true;
 }
 
 void UIBase::_RecacheSelfSys()
@@ -87,12 +91,36 @@ UIBase* UIBase::CheckMouseOver(const UIVec2& pos, bool testSelf)
 	return testSelf ? this : nullptr;
 }
 
-void UIBase::FlagDirty()
+void UIBase::FlagTransformDirty(bool flagHierarchy)
 {
-	this->dirty = true;
+	// Set self transform as dirty
+	this->dirtyTransform = true;
 
-	if(this->parent)
-		this->parent->FlagDirty();
+	if(flagHierarchy)
+		this->FlagHierarchyDirty();
+	
+}
+
+void UIBase::FlagHierarchyDirty()
+{
+	// Set the rest of the parent hierarchy 
+	// as having a dirty child. 
+	//
+	// This should recurse all the way up to the UISys.
+	//
+	// It's not 100% known but it might be possible
+	// to stop if we encounter a dirtyHierarchy parent - because
+	// in theory the rest of the parents could be assumed to
+	// be flagged as dirtyHierarchy.
+	// (wleu 05/23/2022)
+
+	for(
+		UIBase* it = this; 
+		it != nullptr;
+		it = it->parent)
+	{
+		it->dirtyHierarchy = true;
+	}
 }
 
 void UIBase::Destroy()
@@ -117,10 +145,8 @@ bool UIBase::Render()
 	return true;
 }
 
-void UIBase::Align(bool recurse, bool force)
+void UIBase::Align(bool scanRebuild, bool forceRebuild)
 {
-	if(!force && !this->dirty)
-		return;
 
 	// If not visible, there's no point to aligning it right now. It will still
 	// need to be Aligned later when made visible, but Show()ing it later should
@@ -131,56 +157,74 @@ void UIBase::Align(bool recurse, bool force)
 
 	UIRect oldR = this->rect;
 
-	if(!this->parent)
-	{
-		this->rect.pos = this->transOffs;
+	if(forceRebuild || this->dirtyTransform)
+	{ 
+		if(!this->parent)
+		{
+			this->rect.pos = this->transOffs;
+		}
+		else if(this->dyn && this->dyn->active)
+		{
+			UIVec2 tl = this->parent->rect.pos + this->parent->rect.dim * this->dyn->anchMin;
+			UIVec2 br = this->parent->rect.pos + this->parent->rect.dim * this->dyn->anchMax;
+			tl += this->dyn->offsMin;
+			br += this->dyn->offsMax;
+
+			this->rect.pos = tl;
+			this->rect.dim = br - tl;
+		}
+		else
+		{
+			UIVec2 oldPos = this->rect.pos;
+
+			float fx = 
+				this->parent->rect.pos.x + 
+				this->transPivot.x * this->parent->rect.dim.x +
+				this->transOffs.x;
+
+			float fy =
+				this->parent->rect.pos.y +
+				this->transPivot.y * this->parent->rect.dim.y +
+				this->transOffs.y;
+
+			this->rect.pos.Set(fx, fy);
+		}
+
+		if(!forceRebuild && (this->rect != oldR))
+			forceRebuild = true;
 	}
-	else if(this->dyn && this->dyn->active)
-	{
-		UIVec2 tl = this->parent->rect.pos + this->parent->rect.dim * this->dyn->anchMin;
-		UIVec2 br = this->parent->rect.pos + this->parent->rect.dim * this->dyn->anchMax;
-		tl += this->dyn->offsMin;
-		br += this->dyn->offsMax;
 
-		this->rect.pos = tl;
-		this->rect.dim = br - tl;
-	}
-	else
-	{
-		UIVec2 oldPos = this->rect.pos;
+	this->dirtyTransform = false;
 
-		float fx = 
-			this->parent->rect.pos.x + 
-			this->transPivot.x * this->parent->rect.dim.x +
-			this->transOffs.x;
-
-		float fy =
-			this->parent->rect.pos.y +
-			this->transPivot.y * this->parent->rect.dim.y +
-			this->transOffs.y;
-
-		this->rect.pos.Set(fx, fy);
-	}
-
-	this->dirty = false;
-
-	bool modified = (this->rect != oldR);
-	if(modified || recurse)
+	if(forceRebuild || scanRebuild)
 	{
 		for(UIBase* uib : this->children)
 		{
-			if(!uib->IsDirty() && !force)
-				continue;
-
-			uib->Align(true);
+			// Same body for both, just easier to see why it 
+			// was entered during step-through.
+			if(forceRebuild)
+			{
+				uib->Align(scanRebuild, forceRebuild);
+			}
+			else if(scanRebuild && uib->IsHierarchyDirty())
+			{ 
+				uib->Align(scanRebuild, forceRebuild);
+			}
 		}
 	}
+
+	// This isn't quite true yet, but should be after 
+	// the recursive maintenence.
+	this->dirtyHierarchy = false;
+
+	this->OnAligned();
+
 }
 
 void UIBase::SetLocPos(const UIVec2& v)
 {
 	this->transOffs = v;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetLocPos(float x, float y)
@@ -189,7 +233,7 @@ void UIBase::SetLocPos(float x, float y)
 		return;
 
 	this->transOffs.Set(x, y);
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetLocXPos(float x)
@@ -198,7 +242,7 @@ void UIBase::SetLocXPos(float x)
 		return;
 
 	this->transOffs.x = x;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetLocYPos(float y)
@@ -207,7 +251,7 @@ void UIBase::SetLocYPos(float y)
 		return;
 
 	this->transOffs.y = y;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetPivot(const UIVec2& v)
@@ -216,7 +260,7 @@ void UIBase::SetPivot(const UIVec2& v)
 		return;
 
 	this->transPivot = v;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetPivot(float x, float y)
@@ -225,7 +269,7 @@ void UIBase::SetPivot(float x, float y)
 		return;
 
 	this->transPivot.Set(x, y);
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 
@@ -235,7 +279,7 @@ void UIBase::SetDim(const UIVec2& v)
 		return;
 
 	this->rect.dim = v;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetDim(float x, float y)
@@ -244,7 +288,7 @@ void UIBase::SetDim(float x, float y)
 		return;
 
 	this->rect.dim.Set(x, y);
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetRect(const UIRect& r)
@@ -254,7 +298,7 @@ void UIBase::SetRect(const UIRect& r)
 
 	this->transOffs = r.pos;
 	this->rect.dim = r.dim;
-	this->FlagDirty();
+	this->FlagTransformDirty();
 }
 
 void UIBase::SetRect(float x, float y, float w, float h)
@@ -277,7 +321,7 @@ bool UIBase::AddChild(UIBase* child)
 	this->children.push_back(child);
 	child->parent = this;
 
-	child->FlagDirty();
+	child->FlagTransformDirty();
 
 	this->_RecacheSelfSys();
 	return true;
@@ -291,7 +335,7 @@ bool UIBase::RemoveChild(UIBase* child)
 		{
 			this->children.erase(this->children.begin() + i);
 			child->parent = nullptr;
-			child->FlagDirty();
+			child->FlagTransformDirty();
 			return true;
 		}
 	}
@@ -309,7 +353,7 @@ void UIBase::SubmitValue(float value, int vid)
 
 DynSize* UIBase::UseDyn()
 {
-	this->FlagDirty();
+	this->FlagTransformDirty();
 
 	if(this->dyn == nullptr)
 		this->dyn = new DynSize();
@@ -320,7 +364,7 @@ DynSize* UIBase::UseDyn()
 
 void UIBase::DisableDyn()
 {
-	this->FlagDirty();
+	this->FlagHierarchyDirty();
 
 	if(this->dyn != nullptr)
 		this->dyn->active = false;
@@ -351,7 +395,7 @@ void UIBase::_InternalShow(bool show)
 
 	if(wasChanged)
 	{
-		this->FlagDirty();
+		this->FlagHierarchyDirty();
 
 		if(show)
 		{ 
@@ -374,12 +418,22 @@ void UIBase::Show(bool show)
 	_InternalShow(show);
 }
 
+void UIBase::SetAllColors(const UIColor4& col)
+{
+	this->uiCols.SetAll(col);
+}
+
 
 void UIBase::OnEnabled()
 {}
 
 void UIBase::OnDisabled()
 {}
+
+void UIBase::OnAligned()
+{
+	this->dirtyContents = true;
+}
 
 // Mouse handling functions will typically be iterated in reverse
 // order. This is because when we draw things, things at the top

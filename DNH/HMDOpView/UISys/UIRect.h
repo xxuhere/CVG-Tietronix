@@ -1,5 +1,6 @@
 #pragma once
 #include "UIVec2.h"
+#include <vector>
 
 class UIRect
 {
@@ -42,7 +43,10 @@ public:
 	inline UIRect& SS_Y(float y)		{ this->pos.y = y; return *this; }
 
 	void GLQuad();
+	void GLQuad(std::vector<UIVec2>& outPts);
+
 	void GLQuadTex();
+	void GLQuadTex(std::vector<UIVec2>& outUVs, std::vector<UIVec2>& outPts);
 
 	bool operator== (const UIRect& o) const;
 	bool operator!= (const UIRect& o) const;

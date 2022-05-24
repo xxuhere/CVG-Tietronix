@@ -1,23 +1,22 @@
 #include "UIButton.h"
 
 UIButton::UIButton(UIBase* parent, int idx, const UIRect& r, const std::string& filePath)
-	: UIBase(parent, idx, r)
+	: UIGraphic(parent, idx, r, filePath)
 {
-	this->image = TexObj::MakeSharedLODE(filePath);
-
 	this->_InitializeColors();
 }
 
 UIButton::UIButton(UIBase* parent, int idx, const UIRect& r, TexObj::SPtr img)
-	:	UIBase(parent, idx, r),
-		image(img)
+	:	UIGraphic(parent, idx, r, img)
 {
 	this->_InitializeColors();
 }
 
 UIButton::UIButton(UIBase* parent, int idx, const UIRect& r, const std::string& text, int size, const std::string& fontType)
-	: UIBase(parent, idx, r)
+	: UIGraphic(parent, idx, r, TexObj::SPtr())
 {
+	this->SetMode_RawRect();
+
 	this->text = text;
 
 	if(fontType.empty())
@@ -46,22 +45,7 @@ bool UIButton::Render()
 	if(!this->selfVisible)
 		return false;
 
-	UIColor4& col = 
-		this->uiCols.GetContexedColor(
-			this->pressedCt, 
-			this->isHovered);
-	
-	col.GLColor4();
-
-	if(this->image.get() != nullptr)
-	{ 
-		glEnable(GL_TEXTURE_2D);
-		this->image->GLBind();
-	}
-	else
-		glDisable(GL_TEXTURE_2D);
-
-	this->rect.GLQuadTex();
+	this->_RenderGraphic();
 
 	if(this->font.IsValid() && !this->text.empty())
 	{ 
@@ -73,7 +57,8 @@ bool UIButton::Render()
 			true);
 	}
 
-	return UIBase::Render();
+	this->UIBase::Render();
+	return true;
 }
 
 int UpdateGroupColorSet( 

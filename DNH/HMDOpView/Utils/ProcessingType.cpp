@@ -15,7 +15,8 @@ std::string to_string(ProcessingType ty)
 		return "yen_threshold_compressed";
 	}
 
-	return "other";//This should never happen, maybe this is a failed assert?
+	//This should never happen, maybe this needs an illegal location assert?
+	return "None";
 }
 
 ProcessingType StringToProcessingType(const std::string& str)
@@ -26,9 +27,6 @@ ProcessingType StringToProcessingType(const std::string& str)
 	if (str == "yen_threshold_compressed")
 		return ProcessingType::yen_threshold_compressed;
 
-	if (str == "None")
-		return ProcessingType::None;
-
-	/// default, TODO fix this one
-	return ProcessingType::None;;
+	//if (str == "None")
+	return ProcessingType::None;
 }

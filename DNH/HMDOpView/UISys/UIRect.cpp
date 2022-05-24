@@ -89,6 +89,17 @@ void UIRect::GLQuad()
 	glEnd();
 }
 
+void UIRect::GLQuad(std::vector<UIVec2>& outPts)
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	outPts.push_back(UIVec2(this->pos.x,	this->pos.y));
+	outPts.push_back(UIVec2(right,			this->pos.y));
+	outPts.push_back(UIVec2(right,			bottom));
+	outPts.push_back(UIVec2(this->pos.x,	bottom));
+}
+
 void UIRect::GLQuadTex()
 {
 	float right = this->pos.x + this->dim.x;
@@ -107,6 +118,26 @@ void UIRect::GLQuadTex()
 		glTexCoord2f(0.0f, 1.0f);
 		glVertex2f(this->pos.x,		bottom);
 	glEnd();
+}
+
+void UIRect::GLQuadTex(
+	std::vector<UIVec2>& outUVs, 
+	std::vector<UIVec2>& outPts)
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	outUVs.push_back(UIVec2(0.0f, 0.0f));
+	outPts.push_back(UIVec2(this->pos.x,	this->pos.y));
+	//
+	outUVs.push_back(UIVec2(1.0f, 0.0f));
+	outPts.push_back(UIVec2(right,			this->pos.y));
+	//
+	outUVs.push_back(UIVec2(1.0f, 1.0f));
+	outPts.push_back(UIVec2(right,			bottom));
+	//
+	outUVs.push_back(UIVec2(0.0f, 1.0f));
+	outPts.push_back(UIVec2(this->pos.x,	bottom));
 }
 
 bool UIRect::operator== (const UIRect& o) const

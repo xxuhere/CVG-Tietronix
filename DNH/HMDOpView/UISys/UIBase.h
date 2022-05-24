@@ -180,6 +180,30 @@ protected:
 	/// </summary>
 	int idx = -1;
 
+private:
+	/// <summary>
+	/// Bitflag for if a child in its transform is dirty. Note that if an
+	/// operation leave the hierarchy ambiguous, the dirty flag should be
+	/// overly-conservative on setting it to dirty - i.e., better to err on
+	/// "over-processing nothing, rather than ignoring something".
+	/// </summary>
+	bool dirtyHierarchy : 1;
+
+	/// <summary>
+	/// Bitflag for if the transform of the UI base is dirty.
+	/// </summary>
+	bool dirtyTransform : 1;
+
+protected:
+	/// <summary>
+	/// Bitflag for if the contents of the actual UIBase is dirty, which
+	/// is orthogonal to if the transform is dirty.
+	/// 
+	/// What "contents" actually means, will depend on the subclass
+	/// implementation.
+	/// </summary>
+	bool dirtyContents	: 1;
+
 protected:
 
 	//////////////////////////////////////////////////
@@ -244,6 +268,15 @@ protected:
 	virtual void OnDisabled();
 
 	/// <summary>
+	/// Called whenever the transform is readjusted from an Align.
+	/// 
+	/// It is suggested that the implementation flag handling the
+	/// state change for later instead of immediately handling the
+	/// state change, in case multiple aligns are called.
+	/// </summary>
+	virtual void OnAligned();
+
+	/// <summary>
 	/// Callback for when the mouse is moved over the widget (when it previously
 	/// wasn't).
 	/// </summary>
@@ -305,6 +338,7 @@ protected:
 	/// <param name="keycode">The key being released.</param>
 	/// <returns>If handled, return true.</returns>
 	virtual bool HandleKeyUp(int keycode);
+
 public:
 	/// <summary>
 	/// Constructor.
@@ -337,8 +371,15 @@ public:
 
 	inline int Idx() const {return this->idx;};
 
-	void FlagDirty();
-	bool IsDirty(){return this->dirty;}
+	void FlagTransformDirty(bool flagHierarchy = true);
+	void FlagHierarchyDirty();
+	inline void FlagContentsDirty() { this->dirtyContents = true; }
+
+	bool IsHierarchyDirty() const { return this->dirtyHierarchy; }
+	bool IsTransformDirty() const { return this->dirtyTransform; }
+	bool IsContentsDirty() const { return this->dirtyContents; }
+
+	void SetAllColors(const UIColor4& col);
 
 	/// <summary>
 	/// Show the widget.
@@ -368,15 +409,17 @@ public:
 	void ClearChildren();
 
 	/// <summary>
-	/// Perform alignment to update dirty UI elements.
+	/// Realign the nodes
 	/// </summary>
-	/// <param name="recurse">
-	/// If true, recurse dirty children.
+	/// <param name="scanRebuild">
+	/// Recurse and look for nodes that may have
 	/// </param>
-	/// <param name="force">
-	/// If true, process, even if not flagged as dirty.
+	/// <param name="forceRebuild">
+	/// Force rebuilding the node and the entire child hierarchy.
+	/// This will be set to true if we know a parent node's transform
+	/// was previously modified.
 	/// </param>
-	void Align(bool recurse = true, bool force = false);
+	void Align(bool scanRebuild, bool forceRebuild);
 
 	void SetLocPos(const UIVec2& v);
 	void SetLocPos(float x, float y);

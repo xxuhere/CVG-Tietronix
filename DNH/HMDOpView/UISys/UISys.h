@@ -68,5 +68,7 @@ public:
 
 	static void ToggleDebugView();
 
+	void AlignSystem();
+
 };
 

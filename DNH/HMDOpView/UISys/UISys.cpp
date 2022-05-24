@@ -265,3 +265,13 @@ void UISys::ToggleDebugView()
 {
 	showDebug = !showDebug;
 }
+
+void UISys::AlignSystem()
+{
+	if(this->IsHierarchyDirty() || this->IsTransformDirty())
+	{
+		this->Align(
+			true, 
+			this->IsTransformDirty());
+	}
+}

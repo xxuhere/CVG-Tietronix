@@ -61,7 +61,7 @@ public:
 		return (float)this->height / (float)this->width;
 	}
 
-	inline bool IsValid() 
+	inline bool IsValid() const 
 	{ return this->texID != (GLuint)-1; }
 
 	void Destroy();

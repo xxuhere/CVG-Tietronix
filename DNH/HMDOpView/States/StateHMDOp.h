@@ -90,6 +90,25 @@ public:
 
 	//////////////////////////////////////////////////
 	//
+	//		UI Assets
+	//
+	//////////////////////////////////////////////////
+
+	// These are for standard graphical elements. If there are
+	// other states that need this, this needs to be moved out
+	// of the class and somewhere more accessible to all states,
+	// such as the GLWin.
+
+	TexObj::SPtr patch_circle;
+	TexObj::SPtr patch_roundLeft;
+	TexObj::SPtr patch_roundRight;
+	NinePatcher ninePatchCircle;
+
+	TexObj::SPtr patch_smallCircle;
+	NinePatcher ninePatchSmallCircle;
+
+	//////////////////////////////////////////////////
+	//
 	//		MOUSE PAD GRAPHIC VARIABLES
 	//
 	//////////////////////////////////////////////////
@@ -187,6 +206,8 @@ public:
 protected:
 	void SetShownMenuBarUIPanel(int idx);
 
+	void ApplyFormButtonStyle(UIGraphic* uib);
 public:
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
+
 };
