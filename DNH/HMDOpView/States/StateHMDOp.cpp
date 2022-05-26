@@ -56,6 +56,8 @@ const float icoDim = 60.0f;					// (Square) Size of main menu icons/buttons in p
 const float menuYPiv = 1.05f / 7.0f;		// Separation of main menu icons, in terms of percentage of the main menu bar.
 
 const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
+const UIColor4 menuTitleCol(0.0f, 0.0f, 0.0f, 1.0f);
+const float titleHeight = 40.0f;
 
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
@@ -105,9 +107,14 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->inspSettingsPlate = new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	inspSettingsPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspSettingsPlate->Show(false);
+	//
+	UIText* settingsTitle = new UIText(this->inspSettingsPlate, -1, "View Settings", 20, UIRect());
+	settingsTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
+	settingsTitle->uiCols.SetAll(menuTitleCol);
+	//
 	this->inspSetFrame = new UIPlate(this->inspSettingsPlate, -1, UIRect());
 	this->inspSetFrame->SetMode_Outline();
-	this->inspSetFrame->UseDyn()->AnchorsTop().SetOffsets(10.0f, 20.0f, -10.0f, 250.0f);
+	this->inspSetFrame->UseDyn()->AnchorsTop().SetOffsets(10.0f, titleHeight, -10.0f, 250.0f);
 	// TODO:
 	// this->inspSetFrame->filled = false;
 	this->inspSetFrame->SetAllColors(UIColor4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -158,16 +165,19 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspAlignPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspAlignPlate->Show(false);
+	//
+	UIText* alignTitle = new UIText(this->inspAlignPlate, -1, "Reregister", 20, UIRect());
+	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
+	alignTitle->uiCols.SetAll(menuTitleCol);
+
 
 	//
-	const float titleHeight = 40.0f;
 	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspCamSetsPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspCamSetsPlate->Show(false);
-	UIText* alignTitle = new UIText(this->inspCamSetsPlate, -1, "Cam. Settings", 20, UIRect());
-	alignTitle->debugName = "alignTitle";
-	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
-	alignTitle->uiCols.SetAll(UIColor4(0.0f, 0.0f, 0.0f, 1.0f));
+	UIText* camSetsTitle = new UIText(this->inspCamSetsPlate, -1, "Cam. Settings", 20, UIRect());
+	camSetsTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
+	camSetsTitle->uiCols.SetAll(menuTitleCol);
 	{
 		this->camButtonGrid = new UIPlate(this->inspCamSetsPlate, -1, UIRect(), plateGray);
 		this->camButtonGrid->SetMode_Invisible();
