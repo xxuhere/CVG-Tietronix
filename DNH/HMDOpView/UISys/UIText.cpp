@@ -8,6 +8,37 @@ UIText::UIText(UIBase* parent, int idx, const std::string& text, int size, const
 	this->SetText(text);
 }
 
+void UIText::SetHAlignment(HTextAlign halign)
+{
+	this->halign = halign;
+	//this->FlagContentsDirty();
+}
+
+void UIText::SetVAlignment(VTextAlign valign)
+{
+	this->valign = valign;
+	//this->FlagContentsDirty();
+}
+
+void UIText::SetTextAlignment(HTextAlign halign, VTextAlign valign)
+{
+	this->halign = halign;
+	this->valign = valign;
+	//this->FlagContentsDirty();
+}
+
+UIText& UIText::operator << (HTextAlign halign)
+{
+	this->SetHAlignment(halign);
+	return *this;
+}
+
+UIText& UIText::operator << (VTextAlign valign)
+{
+	this->SetVAlignment(valign);
+	return *this;
+}
+
 void UIText::SetText(const std::string& text)
 {
 	this->text = text;

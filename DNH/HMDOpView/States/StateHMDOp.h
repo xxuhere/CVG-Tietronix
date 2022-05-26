@@ -90,6 +90,9 @@ public:
 
 	UIRect lastViewportRect;
 
+	TexObj::SPtr texSliderSysPos;
+	TexObj::SPtr texSliderSysNeg;
+
 	//////////////////////////////////////////////////
 	//
 	//		UI Assets
@@ -156,34 +159,39 @@ public:
 	UIButton* btnThreshTy		= nullptr;
 	UIButton* btnThreshTog		= nullptr;
 
-	UIPlate* plCalibrate		= nullptr;
-	UIHSlider* sliderCalibrate	= nullptr;
+	UIPlate* plateSliderCalibrate	= nullptr;
 
 	//////////////////////////////////////////////////
 	//
 	//		ALIGNMENT SETTINGS MENU
 	//
 	//////////////////////////////////////////////////
-	UIPlate* inspAlignPlate	= nullptr;
+	UIPlate* inspAlignPlate			= nullptr;
 
 	//////////////////////////////////////////////////
 	//
 	//		CAMERA SETTINGS MENU
 	//
 	//////////////////////////////////////////////////
-	UIPlate* inspCamSetsPlate	= nullptr;
-	UIPlate* camButtonGrid		= nullptr;
-	UIPlate* camSubOpacity		= nullptr;
-	UIPlate* camThreshold		= nullptr;
+	UIPlate* inspCamSetsPlate		= nullptr;
+	UIPlate* camButtonGrid			= nullptr;
 
-	UIButton* camBtnCalibrate	= nullptr;
+	UIButton* camBtnExposure		= nullptr;
+	UIButton* camBtnDisparity		= nullptr;
+	UIButton* camBtnOpacity			= nullptr;
+	UIButton* camBtnCalibrate		= nullptr;
+	UIButton* camBtnRegisterXY		= nullptr;
+	UIButton* camBtnThresh			= nullptr;
 
-	UIVBulkSlider* sliderOpacity= nullptr;
-	UIVBulkSlider* sliderThresh = nullptr;
-	UIVBulkSlider* sliderDispup = nullptr;
+	UIPlate* plateSliderOpacity		= nullptr;
+	UIPlate* plateSliderThresh		= nullptr;
+	UIPlate* plateSliderDispup		= nullptr;
 
 	int lastCamButtonSel = -1;
-	
+
+	//////////////////////////////////////////////////
+
+	std::vector<UIBase*> horizontalFloatingUISys;
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
@@ -212,6 +220,14 @@ public:
 
 	bool AnyUIUp();
 
+	UIPlate* CreateSliderSystem(
+		UIBase* parent, 
+		int id,
+		const std::string& labelText,
+		float minVal,
+		float maxVal,
+		float startingVal,
+		const UIRect& r);
 
 	~StateHMDOp();
 

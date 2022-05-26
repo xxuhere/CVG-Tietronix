@@ -55,10 +55,16 @@ void StateHMDOp::MouseDownState::FlagDown()
 const float icoDim = 60.0f;					// (Square) Size of main menu icons/buttons in pixels
 const float menuYPiv = 1.05f / 7.0f;		// Separation of main menu icons, in terms of percentage of the main menu bar.
 
+const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
+
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this)
 {
+
+	this->texSliderSysPos = TexObj::MakeSharedLODE("Circle_Pos.png");
+	this->texSliderSysNeg = TexObj::MakeSharedLODE("Circle_Neg.png");
+
 	this->uiSys.SetSelectingButtons(true, true, true);
 
 	this->patch_circle		= TexObj::MakeSharedLODE("8mmCircle.png"		);
@@ -69,7 +75,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->patch_smallCircle	= TexObj::MakeSharedLODE("3mmCircle.png");
 	this->ninePatchSmallCircle = NinePatcher::MakeFromPixelsMiddle(this->patch_smallCircle);
 
-	const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
+	
 	const int btnTextSz = 14.0f;
 
 	// Build elements for the right menu bar
@@ -173,91 +179,51 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		const float BtnH = 40.0f;
 		const float BtnStride = BtnH + BtnVPad;
 		int btnIt = BtnVPad;
-		UIButton* btnSetExpo = new UIButton(this->camButtonGrid, UIID::CamSet_Exposure, UIRect(), "EXPOSURE", btnTextSz);
-		this->ApplyFormButtonStyle(btnSetExpo);
-		btnSetExpo->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
-		SetButtonStdCols(btnSetExpo);
+		this->camBtnExposure = new UIButton(this->camButtonGrid, UIID::CamSet_Exposure, UIRect(), "EXPOSURE", btnTextSz);
+		this->ApplyFormButtonStyle(this->camBtnExposure);
+		this->camBtnExposure->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(this->camBtnExposure);
 		btnIt += BtnStride;
-		UIButton* btnSetDisp = new UIButton(this->camButtonGrid, UIID::CamSet_Disparity, UIRect(), "DISPARITY", btnTextSz);
-		this->ApplyFormButtonStyle(btnSetDisp);
-		btnSetDisp->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
-		SetButtonStdCols(btnSetDisp);
+		this->camBtnDisparity = new UIButton(this->camButtonGrid, UIID::CamSet_Disparity, UIRect(), "DISPARITY", btnTextSz);
+		this->ApplyFormButtonStyle(this->camBtnDisparity);
+		this->camBtnDisparity->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(this->camBtnDisparity);
 		btnIt += BtnStride;
-		UIButton* btnSetOpa = new UIButton(this->camButtonGrid, UIID::CamSet_Opacity, UIRect(), "OPACITY", btnTextSz);
-		this->ApplyFormButtonStyle(btnSetOpa);
-		btnSetOpa->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
-		SetButtonStdCols(btnSetOpa);
+		this->camBtnOpacity = new UIButton(this->camButtonGrid, UIID::CamSet_Opacity, UIRect(), "OPACITY", btnTextSz);
+		this->ApplyFormButtonStyle(this->camBtnOpacity);
+		this->camBtnOpacity->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(this->camBtnOpacity);
 		btnIt += BtnStride;
-		UIButton* btnSetReg = new UIButton(this->camButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
-		this->ApplyFormButtonStyle(btnSetReg);
-		btnSetReg->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
-		SetButtonStdCols(btnSetReg);
+		this->camBtnRegisterXY = new UIButton(this->camButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
+		this->ApplyFormButtonStyle(this->camBtnRegisterXY);
+		this->camBtnRegisterXY->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(this->camBtnRegisterXY);
 		btnIt += BtnStride;
 		this->camBtnCalibrate = new UIButton(this->camButtonGrid, UIID::CamSet_Calibrate, UIRect(), "Calibrate Focus", btnTextSz);
 		this->ApplyFormButtonStyle(this->camBtnCalibrate);
 		this->camBtnCalibrate->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(this->camBtnCalibrate);
 		btnIt += BtnStride;
-		UIButton* btnSetThr = new UIButton(this->camButtonGrid, UIID::CamSet_Threshold, UIRect(), "Threshold Settings", btnTextSz);
-		this->ApplyFormButtonStyle(btnSetThr);
-		btnSetThr->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
-		SetButtonStdCols(btnSetThr);
+		this->camBtnThresh = new UIButton(this->camButtonGrid, UIID::CamSet_Threshold, UIRect(), "Threshold Settings", btnTextSz);
+		this->ApplyFormButtonStyle(this->camBtnThresh);
+		this->camBtnThresh->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(this->camBtnThresh);
 		//btnIt += BtnStride;
 
-		this->plCalibrate = new UIPlate(&this->uiSys, -1, UIRect(50.0f, 900.0f, 500.0f, 40.0f), plateGray);
-		this->sliderCalibrate = new UIHSlider(this->plCalibrate, UIID::CamSet_Calibrate_Slider, 0.0f, 1.0f, 0.25f, UIRect(), this->patch_circle);
-		this->sliderCalibrate->UseDyn()->AnchorsAll().SetOffsets( 5.0f, 5.0f, -5.0f, -5.0f);
-		SetButtonStdCols(sliderCalibrate);
-		this->plCalibrate->Hide();
+		this->plateSliderCalibrate = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Calibrate_Slider,	"Calibrate", 0.0f, 1.0f, 0.25f, UIRect());
+		this->horizontalFloatingUISys.push_back(this->plateSliderCalibrate);
 	}
 	{
-		this->camSubOpacity = new UIPlate(this->inspCamSetsPlate, -1, UIRect(), plateGray);
-		this->camSubOpacity->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
-		this->camSubOpacity->Show(false);
-
-		UIPlate* titlePlate = new UIPlate(this->camSubOpacity, -1, UIRect());
-		titlePlate->UseDyn()->AnchorsTop().SetOffsets(10.0f, 0.0f, -10.0f, 40);
-		titlePlate->uiCols.norm.SetColor_Black();
-		UIText* titleText = new UIText(titlePlate, -1, "OPACITY", btnTextSz, UIRect());
-		titleText->uiCols.norm.SetColor_White();
-		titleText->UseDyn()->AnchorsAll().ZeroOffsets();
-
-		this->sliderOpacity = new UIVBulkSlider(this->camSubOpacity, UIID::CamSet_Opacity_Meter, 0.0f, 1.0f, 0.25f, UIRect());
-		SetButtonStdCols(this->sliderOpacity);
-		this->sliderOpacity->UseDyn()->AnchorsAll().SetOffsets(50.0f, 50.0f, -10.0f, -60.0f);
-
-		UIButton* backBtn = new UIButton(this->camSubOpacity, UIID::CamSet_Opacity_Back, UIRect(), "Back", btnTextSz);
-		this->ApplyFormButtonStyle(backBtn);
-		backBtn->textColor.SetColor_Black();
-		backBtn->UseDyn()->AnchorsBot().SetOffsets(25.0f, -50.0f, -25.0f, -10.0f);
-		SetButtonStdCols(backBtn);
+		this->plateSliderOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, 0.25f, UIRect());
+		this->horizontalFloatingUISys.push_back(this->plateSliderOpacity);
 	}
-	{
-		this->camThreshold = new UIPlate(this->inspCamSetsPlate, -1, UIRect(), plateGray);
-		this->camThreshold->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
-		this->camThreshold->Show(false);
-
-		UIPlate* titlePlate = new UIPlate(this->camThreshold, -1, UIRect());
-		titlePlate->UseDyn()->AnchorsTop().SetOffsets(10.0f, 0.0f, -10.0f, 40);
-		titlePlate->uiCols.norm.SetColor_Black();
-		UIText* titleText = new UIText(titlePlate, -1, "THRESHOLD", btnTextSz, UIRect());
-		titleText->uiCols.norm.SetColor_White();
-		titleText->UseDyn()->AnchorsAll().ZeroOffsets();
-
-		this->sliderThresh = new UIVBulkSlider(this->camThreshold, UIID::CamSet_Threshold_SlideThresh, 0.0f, 1.0f, 0.25f, UIRect());
-		SetButtonStdCols(this->sliderThresh);
-		this->sliderThresh->UseDyn()->SetAnchors(0.0f, 0.0f, 0.5f, 1.0f).SetOffsets(10.0f, 50.0f, -10.0f, -60.0f);
-
-		this->sliderDispup = new UIVBulkSlider(this->camThreshold, UIID::CamSet_Threshold_DispUp, 0.0f, 1.0f, 0.25f, UIRect());
-		SetButtonStdCols(this->sliderDispup);
-		this->sliderDispup->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 1.0f).SetOffsets(10.0f, 50.0f, -10.0f, -60.0f);
-
-		UIButton* backBtn = new UIButton(this->camThreshold, UIID::CamSet_Threshold_Back, UIRect(), "Back", btnTextSz);
-		this->ApplyFormButtonStyle(backBtn);
-		backBtn->textColor.SetColor_Black();
-		backBtn->UseDyn()->AnchorsBot().SetOffsets(25.0f, -50.0f, -25.0f, -10.0f);
-		SetButtonStdCols(backBtn);
+	{	
+		this->plateSliderThresh = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_SlideThresh,	"Thresh", 0.0f, 1.0f, 0.25f, UIRect());
+		this->horizontalFloatingUISys.push_back(this->plateSliderThresh);
+		this->plateSliderDispup = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_DispUp,		"DispUp", 0.0f, 1.0f, 0.25f, UIRect());
+		this->horizontalFloatingUISys.push_back(this->plateSliderDispup);
 	}
+	this->ManageCamButtonPressed(-1, false);
 	
 }
 
@@ -452,11 +418,17 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 		this->inspAlignPlate->SetRect(inspLoc);
 		this->inspCamSetsPlate->SetRect(inspLoc);
 
-		this->plCalibrate->SetRect(
-			r.LerpHoriz(0.33f), 
-			r.Bottom() - 20.0f,
-			r.LerpWidth(0.33f),
-			40.0f);
+		const float lerpLeft = 0.1f;
+		const float lerpWidth = 0.6f;
+		const float rowHeight = 40.0f;
+		const float rowOffs = 50.0f;
+
+		this->plateSliderCalibrate->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
+		//
+		this->plateSliderOpacity->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
+		//
+		this->plateSliderThresh->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
+		this->plateSliderDispup->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f + rowOffs, r.LerpWidth(lerpWidth), rowHeight);
 	}
 }
 
@@ -689,15 +661,52 @@ void StateHMDOp::ManageCamButtonPressed(int buttonID, bool record)
 	if(record)
 		this->lastCamButtonSel = buttonID;
 
-	if(buttonID == UIID::CamSet_Calibrate)
-	{ 
-		this->plCalibrate->Show();
-		SetButtonStdCols(this->camBtnCalibrate, true);
+	// Hide everything that could be shown as a horizontal bar.
+	// If we need to see it again, it will be turned on again before
+	// the function exits...
+	for(UIBase* uib : this->horizontalFloatingUISys)
+		uib->Hide();
+
+	// The same goes for these toggle buttons
+	std::vector<UIButton*> camSettingsCtxSet = 
+	{
+		this->camBtnExposure,
+		this->camBtnDisparity,
+		this->camBtnOpacity,
+		this->camBtnCalibrate,
+		this->camBtnRegisterXY,
+		this->camBtnThresh
+	};
+	//
+	for(UIButton* btn : camSettingsCtxSet)
+	{
+		SetButtonStdCols(btn, false);
 	}
-	else
-	{ 
-		this->plCalibrate->Hide();
-		SetButtonStdCols(this->camBtnCalibrate, false);
+
+	switch(buttonID)
+	{
+		case CamSet_Exposure:
+			SetButtonStdCols(this->camBtnExposure, true);
+			break;
+		case CamSet_Disparity:
+			SetButtonStdCols(this->camBtnDisparity, true);
+			break;
+		case CamSet_Opacity:
+			this->plateSliderOpacity->Show();
+			SetButtonStdCols(this->camBtnOpacity, true);
+			break;
+		case CamSet_Register:
+			SetButtonStdCols(this->camBtnRegisterXY, true);
+			break;
+		case CamSet_Calibrate:
+			this->plateSliderCalibrate->Show();
+			SetButtonStdCols(this->camBtnCalibrate, true);
+			break;
+		case CamSet_Threshold:
+			this->plateSliderThresh->Show();
+			this->plateSliderDispup->Show();
+			SetButtonStdCols(this->camBtnThresh, true);
+			break;
 	}
 }
 
@@ -705,6 +714,61 @@ bool StateHMDOp::AnyUIUp()
 {
 	// TODO: Used to check if mouse buttons perform captures
 	return false;
+}
+
+UIPlate* StateHMDOp::CreateSliderSystem(
+	UIBase* parent, 
+	int id,
+	const std::string& labelText,
+	float minVal,
+	float maxVal,
+	float startingVal,
+	const UIRect& r)
+{
+	struct $_
+	{
+		static void UpdateText(UIHSlider * slider, UIText* text)
+		{
+			std::stringstream sstrm;
+			sstrm << std::fixed << std::setprecision(3) << slider->GetValue(UIHSlider::VID::Value);
+			text->SetText(sstrm.str());
+		}
+	};
+
+	UIPlate* retPlate = new UIPlate(parent, -1, r);
+	retPlate->SetAllColors(plateGray);
+
+	UIText* label = new UIText(retPlate, -1, labelText, 14, UIRect());
+	label->UseDyn()->SetAnchors(0.0f, 0.0f, 0.25f, 1.0f).ZeroOffsets();
+	label->SetAllColors(UIColor4(1.0f, 1.0f, 1.0f, 1.0f));
+	*label << HTextAlign::Right << VTextAlign::Center;
+
+	UIText* valText = new UIText(retPlate, -1, "---", 14, UIRect());
+	valText->UseDyn()->SetAnchors(0.75f, 0.0f, 1.0f, 1.0f).ZeroOffsets();
+	*valText << HTextAlign::Left << VTextAlign::Center;
+	valText->SetAllColors(UIColor4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	UIHSlider* slider = new UIHSlider(retPlate, id, minVal, maxVal, startingVal, UIRect(), this->patch_circle);
+	slider->UseDyn()->SetAnchors(0.25f, 0.0f, 0.75f, 1.0f).SetOffsets(5.0f, 5.0f, -5.0f, -5.0f);
+	slider->onSlide = [slider, valText](float){$_::UpdateText(slider, valText);};
+	SetButtonStdCols(slider, false);
+
+	const float decorDim = 20.0f;
+
+	UIPlate* decorNeg = new UIPlate(retPlate, -1, UIRect());
+	decorNeg->UseDyn()->SetAnchors(0.25f, 0.0f, 0.25f, 0.0f).SetOffsets(0.0f, 0.0f, decorDim, decorDim);
+	decorNeg->SetAllColors(UIColor4(1.0f, 1.0f, 1.0f, 1.0f));
+	decorNeg->SetMode_TexRect(this->texSliderSysNeg);
+
+	UIPlate* decorPos = new UIPlate(retPlate, -1, UIRect());
+	decorPos->UseDyn()->SetAnchors(0.75f, 0.0f, 0.75f, 0.0f).SetOffsets(-decorDim, 0.0f, 0.0f, decorDim);
+	decorPos->SetAllColors(UIColor4(1.0f, 1.0f, 1.0f, 1.0f));
+	decorPos->SetMode_TexRect(this->texSliderSysPos);
+
+
+	$_::UpdateText(slider, valText);
+
+	return retPlate;
 }
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)
@@ -828,8 +892,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 
 	case UIID::CamSet_Opacity:
 		this->ManageCamButtonPressed(uiId, true);
-		this->camButtonGrid->Hide();
-		this->camSubOpacity->Show();
 		break;
 
 	case UIID::CamSet_Register:
@@ -842,8 +904,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 
 	case UIID::CamSet_Threshold:
 		this->ManageCamButtonPressed(uiId, true);
-		this->camButtonGrid->Hide();
-		this->camThreshold->Show();
 		break;
 
 	case UIID::CamSet_Threshold_SlideThresh:
@@ -853,7 +913,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	case UIID::CamSet_Threshold_Back:
-		this->camThreshold->Hide();
 		this->camButtonGrid->Show();
 		break;
 
@@ -861,8 +920,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	case UIID::CamSet_Opacity_Back:
-		this->camSubOpacity->Hide();
-		this->camButtonGrid->Show();
 		break;
 
 	case UIID::CamSet_Calibrate_Slider:
