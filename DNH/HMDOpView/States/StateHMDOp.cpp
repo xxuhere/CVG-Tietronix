@@ -619,10 +619,51 @@ StateHMDOp::~StateHMDOp()
 
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 {
-	// Step 1, hide all relevant inspector views.
+	bool toggleOff = false;
+	// Check if the thing is already on, if so, it's a complete toggle off...
+
+	switch(idx)
+	{
+	case UIID::MBtnLaserSet:
+		if(this->inspSettingsPlate->IsSelfVisible())
+			toggleOff = true;
+		break;
+
+	case UIID::MBtnAlign:
+		if(this->inspAlignPlate->IsSelfVisible())
+			toggleOff = true;
+		break;
+
+	case UIID::MBtnSource:
+		if(this->inspCamSetsPlate->IsSelfVisible())
+			toggleOff = true;
+		break;
+	}
+
+	// TODO: when turning off, we eventually need to handle a slide-in 
+	// animation for the current active plate being disabled.
+
+	// Regardless of toggling everything off, or toggling everything off
+	// except the new context, we're going to turn it all off.
 	this->inspSettingsPlate->Hide();
 	this->inspCamSetsPlate->Hide();
 	this->inspAlignPlate->Hide();
+
+	if(toggleOff)
+	{
+		this->ManageCamButtonPressed(-1, false);
+
+		UpdateGroupColorSet( 
+			-1,
+			{this->btnSettings, this->btnAlign, this->btnCamSets},
+			colSetButtonTog,
+			colSetButton);
+
+		return;
+	}
+
+	// ... Else, it's a toggle on, so we turn off everything except for the one
+	// thing we've switched our UI context to.
 
 	UpdateGroupColorSet( 
 		idx,

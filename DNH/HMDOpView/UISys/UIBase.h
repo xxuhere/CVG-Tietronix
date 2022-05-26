@@ -381,6 +381,9 @@ public:
 
 	void SetAllColors(const UIColor4& col);
 
+	inline bool IsSelfVisible() const
+	{ return this->selfVisible; }
+
 	/// <summary>
 	/// Check if the UIBase is registered to a UISys, and if it
 	/// has a specific mouse button down.
