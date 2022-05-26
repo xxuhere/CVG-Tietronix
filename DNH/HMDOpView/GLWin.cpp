@@ -3,6 +3,7 @@
 #include <iostream>
 #include "CamVideo/CamStreamMgr.h"
 #include "UISys/UISys.h"
+#include "HMDOpApp.h"
 
 #include "LoadAnim.h"
 
@@ -111,7 +112,7 @@ void GLWin::DrawGraphics(const wxSize& sz)
 
 void GLWin::InitializeOptions()
 {
-	const char* szConfigLocation = "AppOptions.json";
+	const char* szConfigLocation = wxGetApp().appOptionsLoc.c_str();
 
 	std::cout << "Initializing from options file ..." << std::endl;
 	if(!this->cachedOptions.LoadFromFile(szConfigLocation))
