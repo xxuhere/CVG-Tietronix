@@ -40,6 +40,12 @@ void UIButton::ResetColorsToDefault()
 	this->uiCols.pressed.Set(0.75f, 1.0f, 0.75f);
 }
 
+void UIButton::HandleClick(int button)
+{
+	if(this->onClick)
+		this->onClick(button);
+}
+
 bool UIButton::Render()
 {
 	if(!this->selfVisible)

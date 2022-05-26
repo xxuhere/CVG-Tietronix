@@ -20,6 +20,7 @@ UISys::UISys(int idx, const UIRect& r, UISink* sink)
 void UISys::PlotDebugBoundsQuad() const
 {
 	glDisable(GL_TEXTURE);
+	glDisable(GL_BLEND);
 	glColor3f(1.0f, 0.0f, 1.0f);
 	this->_PlotDebugBoundsQuad();
 }
@@ -66,7 +67,7 @@ void UISys::_NotifyDeletedChild(UIBase* widget)
 		return;
 
 	if(widget == this->sel)
-		this->sel = nullptr;
+		this->ResetSelection();
 
 	if(widget == this->lastOver)
 		this->lastOver = nullptr;
@@ -97,10 +98,12 @@ bool UISys::DelegateKeyup(wxKeyCode key)
 	// This may need to change in the future.
 	if(this->sel != nullptr)
 	{ 
-		return this->sel->HandleKeyUp(key);
+		int ret = this->sel->HandleKeyUp(key);
 
 		if(this->sink != nullptr)
 			this->sink->OnUISink_Keydown(this->sel, key);
+
+		return ret;
 	}
 
 	return false;
@@ -108,7 +111,7 @@ bool UISys::DelegateKeyup(wxKeyCode key)
 
 DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 {
-	UIBase* mouseOver = this->CheckMouseOver(pt);
+	UIBase* mouseOver = this->CheckMouseOver(pt, false);
 
 	if(this->onDown[mouseButton] != nullptr)
 		this->onDown[mouseButton]->_RecordMouseRelease();
@@ -121,8 +124,16 @@ DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 	if(mouseOver != nullptr)
 	{
 		// Left clicking selects
-		if(mouseButton == 0) 
+		if(this->IsSelectingButton(mouseButton)) 
+		{
+			if(mouseOver->IsSelectable())
+			{
+				this->ResetSelection();
+				this->sel = mouseOver;
+				this->sel->HandleSelect();
+			}
 			this->sel = mouseOver;
+		}
 
 		mouseOver->HandleMouseDown(pt, mouseButton);
 		if(this->sink != nullptr)
@@ -142,6 +153,58 @@ DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 		-1);
 }
 
+bool UISys::IsSysRegisteredMouseDown(int idx, const UIBase* uib) const
+{
+	if(uib == nullptr)
+		return false;
+
+	return this->onDown[idx] == uib;
+}
+
+bool UISys::IsSysRegisteredMouseDown(const UIBase* uib) const
+{
+	if(uib == nullptr)
+		return false;
+
+	// NOTE: We may just want to unroll the checks out of the loop.
+	for(int i = 0; i < 3; ++i)
+	{
+		if(this->onDown[i] == uib)
+			return true;
+	}
+	return false;
+}
+
+bool UISys::IsSysRegisteredSelected(const UIBase* uib) const
+{
+	if(uib == nullptr)
+		return false;
+
+	return this->sel == uib;
+}
+
+void UISys::SetSelectingButtons(bool left, bool middle, bool right)
+{
+	this->mouseBtnSelFlags = 0;
+
+	if(left)
+		this->mouseBtnSelFlags |= 1 << 0;
+
+	if(middle)
+		this->mouseBtnSelFlags |= 1 << 1;
+
+	if(right)
+		this->mouseBtnSelFlags |= 1 << 2;
+}
+
+bool UISys::IsSelectingButton(int mouseBtn)
+{
+	int andVal = 
+		this->mouseBtnSelFlags & (1 << mouseBtn);
+
+	return andVal != 0;
+}
+
 DelMouseRet UISys::DelegateMouseUp(int mouseButton, const UIVec2& pt)
 {
 
@@ -157,11 +220,13 @@ DelMouseRet UISys::DelegateMouseUp(int mouseButton, const UIVec2& pt)
 		this->onDown[mouseButton] = nullptr;
 	}
 
-	UIBase* mouseOver = this->CheckMouseOver(pt);
+	UIBase* mouseOver = this->CheckMouseOver(pt, false);
 	if(mouseOver != nullptr && prevDown == mouseOver)
 	{ 
 		if(this->sink != nullptr)
 			this->sink->OnUISink_Clicked(mouseOver, mouseButton, pt);
+
+		mouseOver->HandleClick(mouseButton);
 
 		return DelMouseRet(
 			DelMouseRet::Event::MouseUp,
@@ -236,7 +301,7 @@ DelMouseRet UISys::DelegateMouseMove( const UIVec2& pt)
 
 void UISys::DelegateReset()
 {
-	this->sel = nullptr;
+	this->ResetSelection();
 
 	for(int i = 0; i < 3; ++i)
 	{
@@ -256,15 +321,37 @@ void UISys::DelegateReset()
 	}
 }
 
+void UISys::ResetSelection()
+{
+	if(this->sel != nullptr)
+	{
+		UIBase* oldSel = this->sel;
+		this->sel = nullptr;
+		oldSel->HandleUnselect();
+	}
+}
+
 UISys* UISys::_GetSelfSys()
 {
 	return this;
 }
 
+bool UISys::IsDebugView()
+{
+	return showDebug;
+}
+
+void UISys::ToggleDebugView(bool debug)
+{
+	showDebug = debug;
+}
+
 void UISys::ToggleDebugView()
 {
-	showDebug = !showDebug;
+	ToggleDebugView(!IsDebugView());
 }
+
+
 
 void UISys::AlignSystem()
 {

@@ -18,52 +18,46 @@ UIGraphic::UIGraphic(UIBase* parent, int idx, const UIRect& r, TexObj::SPtr img)
 		this->SetMode_TexRect(img);
 }
 
-bool UIGraphic::Render()
+void UIGraphic::_RebuildVerts()
 {
-	if(!this->selfVisible)
-		return false;
-
-	this->_RenderGraphic();
-
-	return UIBase::Render();
+	this->_RebuildVerts(this->rect);
 }
 
-void UIGraphic::_RenderGraphic()
+void UIGraphic::_RebuildVerts(const UIRect& r)
 {
-	// Regenerate the vert data if dirty
-	if(this->IsContentsDirty())
+	this->uvs.clear();
+	this->verts.clear();
+
+	switch(this->plateDraw)
 	{
-		this->uvs.clear();
-		this->verts.clear();
+	case PlateDraw::Invisible:
+		break;
 
-		switch(this->plateDraw)
-		{
-		case PlateDraw::Invisible:
-			break;
+	case PlateDraw::Outline:
+		r.GLQuad(this->verts);
+		break;
 
-		case PlateDraw::Outline:
-			this->rect.GLQuad(this->verts);
-			break;
+	case PlateDraw::RawRect:
+		r.GLQuad(this->verts);
+		break;
 
-		case PlateDraw::RawRect:
-			this->rect.GLQuad(this->verts);
-			break;
+	case PlateDraw::TexRect:
+		r.GLQuadTex(this->uvs, this->verts);
+		break;
 
-		case PlateDraw::TexRect:
-			this->rect.GLQuadTex(this->uvs, this->verts);
-			break;
-
-		case PlateDraw::Patch:
-			this->ninePatch.GeneratePatchGeometryQuads(
-				this->rect.pos,
-				this->rect.dim,
-				this->uvs,
-				this->verts);
-			break;
-		}
-		this->dirtyContents = false;
+	case PlateDraw::Patch:
+		this->ninePatch.GeneratePatchGeometryQuads(
+			r.pos,
+			r.dim,
+			this->uvs,
+			this->verts);
+		break;
 	}
+	this->dirtyContents = false;
+}
 
+void UIGraphic::_DrawVerts()
+{
 	// Draw the vert with the correct render state
 	if(this->plateDraw != PlateDraw::Invisible)
 	{
@@ -79,70 +73,89 @@ void UIGraphic::_RenderGraphic()
 			break;
 
 		case PlateDraw::Outline:
-			{
-				cvgAssert(this->verts.size() >= 4, "Missing cached outline verts.");
+		{
+			cvgAssert(this->verts.size() >= 4, "Missing cached outline verts.");
 
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_TEXTURE_2D);
-				glColor3fv(col.ar);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDisable(GL_TEXTURE_2D);
+			glColor3fv(col.ar);
 
-				glBegin(GL_QUADS);
-					FlushGLVerts(this->verts);
-				glEnd();
+			glBegin(GL_QUADS);
+			FlushGLVerts(this->verts);
+			glEnd();
 
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
-			break;
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+		break;
 
 		case PlateDraw::RawRect:
-			{
-				cvgAssert(this->verts.size() >= 4, "Missing cached RawRect verts.");
+		{
+			cvgAssert(this->verts.size() >= 4, "Missing cached RawRect verts.");
 
-				glDisable(GL_TEXTURE_2D);
-				glColor3fv(col.ar);
+			glDisable(GL_TEXTURE_2D);
+			glColor3fv(col.ar);
 
-				glBegin(GL_QUADS);
-					FlushGLVerts(this->verts);
-				glEnd();
-			}
-			break;
+			glBegin(GL_QUADS);
+			FlushGLVerts(this->verts);
+			glEnd();
+		}
+		break;
 
 		case PlateDraw::TexRect:
-			{
-				cvgAssert(this->verts.size()	>= 4, "Missing cached TextRect verts.");
-				cvgAssert(this->uvs.size()		>= 4, "Missing cached TextRect UVs");
+		{
+			cvgAssert(this->verts.size()	>= 4, "Missing cached TextRect verts.");
+			cvgAssert(this->uvs.size()		>= 4, "Missing cached TextRect UVs");
 
-				glEnable(GL_TEXTURE_2D);
-				glColor3fv(col.ar);
+			glEnable(GL_TEXTURE_2D);
+			glColor3fv(col.ar);
 
-				if(this->plateImg)
-					this->plateImg->GLBind();
+			if(this->plateImg)
+				this->plateImg->GLBind();
 
-				glBegin(GL_QUADS);
-					FlushGLVerts(this->uvs, this->verts);
-				glEnd();
-			}
-			break;
+			glBegin(GL_QUADS);
+			FlushGLVerts(this->uvs, this->verts);
+			glEnd();
+		}
+		break;
 
 		case PlateDraw::Patch:
-			{
-				// 4 verts a quad, for a 3x3 grid of quads.
-				cvgAssert(this->verts.size()	>= 4 * 9, "Missing cached Patch verts.");
-				cvgAssert(this->uvs.size()		>= 4 * 9, "Missing cached Patch UVs.");
+		{
+			// 4 verts a quad, for a 3x3 grid of quads.
+			cvgAssert(this->verts.size()	>= 4 * 9, "Missing cached Patch verts.");
+			cvgAssert(this->uvs.size()		>= 4 * 9, "Missing cached Patch UVs.");
 
-				glEnable(GL_TEXTURE_2D);
-				glColor3fv(col.ar);
+			glEnable(GL_TEXTURE_2D);
+			glColor3fv(col.ar);
 
-				if(this->plateImg)
-					this->plateImg->GLBind();
+			if(this->plateImg)
+				this->plateImg->GLBind();
 
-				glBegin(GL_QUADS);
-					FlushGLVerts(this->uvs, this->verts);
-				glEnd();
-			}
-			break;
+			glBegin(GL_QUADS);
+			FlushGLVerts(this->uvs, this->verts);
+			glEnd();
+		}
+		break;
 		}
 	}
+}
+
+bool UIGraphic::Render()
+{
+	if(!this->selfVisible)
+		return false;
+
+	this->_RenderGraphic();
+
+	return UIBase::Render();
+}
+
+void UIGraphic::_RenderGraphic()
+{
+	// Regenerate the vert data if dirty
+	if(this->IsContentsDirty())
+		this->_RebuildVerts();
+
+	this->_DrawVerts();
 }
 
 void UIGraphic::SetImage(TexObj::SPtr img)

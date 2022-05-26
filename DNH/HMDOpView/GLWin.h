@@ -61,12 +61,15 @@ public:
 	// Depending on where/how we actually use these values, these
 	// variables may be moved into a more relevant location, such
 	// as a state.
-	int viewportX = 640;
-	int viewportY = 480;
-	int viewportOfsX = 0;
-	int viewportOfsY = 0;
-	bool fullscreen = true;
-	bool initStaticResources = false;
+	int viewportX				= 640;
+	int viewportY				= 480;
+	int viewportOfsX			= 0;
+	int viewportOfsY			= 0;
+	int mousepadOffsX			= 0;
+	int mousepadOffsY			= 500.0f;
+	float mousepadScale			= 0.4f;
+	bool fullscreen				= true;
+	bool initStaticResources	= false;
 
 protected:
 	void _SetupGLDimensions();

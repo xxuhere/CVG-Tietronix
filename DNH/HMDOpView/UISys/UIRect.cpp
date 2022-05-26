@@ -76,7 +76,7 @@ UIRect UIRect::DilateAtOrigin(float v)
 		this->dim.y + v * 2.0f);
 }
 
-void UIRect::GLQuad()
+void UIRect::GLQuad() const
 {
 	float right = this->pos.x + this->dim.x;
 	float bottom = this->pos.y + this->dim.y;
@@ -89,7 +89,7 @@ void UIRect::GLQuad()
 	glEnd();
 }
 
-void UIRect::GLQuad(std::vector<UIVec2>& outPts)
+void UIRect::GLQuad(std::vector<UIVec2>& outPts) const
 {
 	float right = this->pos.x + this->dim.x;
 	float bottom = this->pos.y + this->dim.y;
@@ -100,7 +100,20 @@ void UIRect::GLQuad(std::vector<UIVec2>& outPts)
 	outPts.push_back(UIVec2(this->pos.x,	bottom));
 }
 
-void UIRect::GLQuadTex()
+void UIRect::GLLineLoop() const
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	glBegin(GL_LINE_LOOP);
+		glVertex2f(this->pos.x,		this->pos.y);
+		glVertex2f(right,			this->pos.y);
+		glVertex2f(right,			bottom );
+		glVertex2f(this->pos.x,		bottom );
+	glEnd();
+}
+
+void UIRect::GLQuadTex() const
 {
 	float right = this->pos.x + this->dim.x;
 	float bottom = this->pos.y + this->dim.y;
@@ -122,7 +135,7 @@ void UIRect::GLQuadTex()
 
 void UIRect::GLQuadTex(
 	std::vector<UIVec2>& outUVs, 
-	std::vector<UIVec2>& outPts)
+	std::vector<UIVec2>& outPts) const
 {
 	float right = this->pos.x + this->dim.x;
 	float bottom = this->pos.y + this->dim.y;
@@ -152,6 +165,15 @@ bool UIRect::operator== (const UIRect& o) const
 		this->pos.y == o.pos.y && 
 		this->dim.x == o.dim.x && 
 		this->dim.y == o.dim.y;
+}
+
+bool UIRect::Contains(const UIVec2& v) const
+{
+	return 
+		v.x >= this->pos.x && 
+		v.y >= this->pos.y &&
+		v.x <= this->pos.x + this->dim.x &&
+		v.y <= this->pos.y + this->dim.y;
 }
 
 bool UIRect::operator!= (const UIRect& o) const

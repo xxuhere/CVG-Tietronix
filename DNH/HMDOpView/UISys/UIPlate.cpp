@@ -17,3 +17,8 @@ UIPlate::UIPlate(
 {
 	this->uiCols.SetAll(staticCol);
 }
+
+bool UIPlate::IsSelectable()
+{
+	return false;
+}

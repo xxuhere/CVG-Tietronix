@@ -9,6 +9,7 @@
 #include "../UISys/UIPlate.h"
 #include "../UISys/UIText.h"
 #include "../UISys/UIVBulkSlider.h"
+#include "../UISys/UIHSlider.h"
 
 class UIButton;
 
@@ -43,6 +44,7 @@ public:
 		MBtnLaserSet,
 		MBtnAlign,
 		MBtnSource,
+		MBtnBack,
 		// Laser Menu
 		LaseWat_1,
 		LaseWat_2,
@@ -74,8 +76,8 @@ public:
 
 	UISys uiSys;
 
-	const float maxVertWidth = 120.0f;
-	const float minVertWidth = 40.0f;
+	const float maxVertWidth = 100.0f;
+	const float minVertWidth = 30.0f;
 	const float vertTransSpeed = 400.0f;
 	float curVertWidth = minVertWidth;
 
@@ -135,6 +137,7 @@ public:
 	UIButton* btnSettings		= nullptr;
 	UIButton* btnAlign			= nullptr;
 	UIButton* btnCamSets		= nullptr;
+	UIButton* btnBack			= nullptr;
 
 	//////////////////////////////////////////////////
 	//
@@ -153,22 +156,15 @@ public:
 	UIButton* btnThreshTy		= nullptr;
 	UIButton* btnThreshTog		= nullptr;
 
-	UIPlate* plCamThreshold		= nullptr;
-	UIPlate* plCamCalibrate		= nullptr;
+	UIPlate* plCalibrate		= nullptr;
+	UIHSlider* sliderCalibrate	= nullptr;
 
 	//////////////////////////////////////////////////
 	//
 	//		ALIGNMENT SETTINGS MENU
 	//
 	//////////////////////////////////////////////////
-	UIPlate* inspAlignPlate		= nullptr;
-	UIPlate* alignButtonGrid	= nullptr;
-	UIPlate* alignSubOpacity	= nullptr;
-	UIPlate* alignThreshold		= nullptr;
-
-	UIVBulkSlider* sliderOpacity= nullptr;
-	UIVBulkSlider* sliderThresh = nullptr;
-	UIVBulkSlider* sliderDispup = nullptr;
+	UIPlate* inspAlignPlate	= nullptr;
 
 	//////////////////////////////////////////////////
 	//
@@ -176,6 +172,18 @@ public:
 	//
 	//////////////////////////////////////////////////
 	UIPlate* inspCamSetsPlate	= nullptr;
+	UIPlate* camButtonGrid		= nullptr;
+	UIPlate* camSubOpacity		= nullptr;
+	UIPlate* camThreshold		= nullptr;
+
+	UIButton* camBtnCalibrate	= nullptr;
+
+	UIVBulkSlider* sliderOpacity= nullptr;
+	UIVBulkSlider* sliderThresh = nullptr;
+	UIVBulkSlider* sliderDispup = nullptr;
+
+	int lastCamButtonSel = -1;
+	
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
@@ -199,6 +207,10 @@ public:
 	//
 	void Initialize() override;
 	void ClosingApp() override;
+
+	void ManageCamButtonPressed(int buttonID, bool record);
+
+	bool AnyUIUp();
 
 
 	~StateHMDOp();

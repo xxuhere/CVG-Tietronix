@@ -19,6 +19,9 @@ private:
 	void _InitializeColors();
 
 public:
+	std::function<void(int)> onClick;
+
+public:
 	UIButton(UIBase* parent, int idx, const UIRect& r, const std::string& filePath);
 	UIButton(UIBase* parent, int idx, const UIRect& r, TexObj::SPtr img);
 	UIButton(
@@ -30,6 +33,8 @@ public:
 		const std::string& fontType = "");
 
 	void ResetColorsToDefault();
+
+	void HandleClick(int button) override;
 
 	bool Render() override;
 };

@@ -42,6 +42,8 @@ public:
 	// to allow for click drag.
 	UIBase* onDown[3] = {nullptr, nullptr, nullptr};
 
+	int mouseBtnSelFlags = 0;
+
 public:
 	UISys(int idx, const UIRect& r, UISink* sink);
 
@@ -65,7 +67,17 @@ public:
 	DelMouseRet DelegateMouseUp(int mouseButton, const UIVec2& pt);
 	DelMouseRet DelegateMouseMove(const UIVec2& pt);
 	void DelegateReset();
+	void ResetSelection();
 
+	bool IsSysRegisteredMouseDown(int idx, const UIBase* uib) const;
+	bool IsSysRegisteredMouseDown(const UIBase* uib) const;
+	bool IsSysRegisteredSelected(const UIBase* uib) const;
+
+	void SetSelectingButtons(bool left, bool middle, bool right);
+	bool IsSelectingButton(int mouseBtn);
+
+	static bool IsDebugView();
+	static void ToggleDebugView(bool debug);
 	static void ToggleDebugView();
 
 	void AlignSystem();

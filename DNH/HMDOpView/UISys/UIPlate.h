@@ -13,4 +13,5 @@ class UIPlate : public UIGraphic
 public:
 	UIPlate(UIBase* parent, int idx, const UIRect& r);
 	UIPlate(UIBase* parent, int idx, const UIRect& r, const UIColor4& staticCol);
+	bool IsSelectable() override;
 };

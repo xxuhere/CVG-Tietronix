@@ -59,6 +59,23 @@ public:
 
 	bool fullscreen = true;
 
+	/// <summary>
+	/// The X pixel offset of the mousepad from the center.
+	/// </summary>
+	int mousepadX = 0;
+
+	/// <summary>
+	/// The Y pixel offset of the mousepad from the center.
+	/// </summary>
+	int mousepadY = 500;
+
+	/// <summary>
+	/// The scale of the mousepad.
+	/// </summary>
+	float mousepadScale = 0.4f;
+
+	bool drawUIDebug = false;
+
 	std::vector<cvgCamFeedSource> feedOpts;
 
 public:

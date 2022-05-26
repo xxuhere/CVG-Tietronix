@@ -28,7 +28,7 @@ UIBase::UIBase(UIBase* parent, int idx, const UIRect& r)
 
 void UIBase::_RecacheSelfSys()
 {
-	this->system = this->_GetSelfSys();
+	this->system = this->GetRootSys();
 }
 
 void UIBase::_RecordMouseDown()
@@ -323,7 +323,7 @@ bool UIBase::AddChild(UIBase* child)
 
 	child->FlagTransformDirty();
 
-	this->_RecacheSelfSys();
+	child->_RecacheSelfSys();
 	return true;
 }
 
@@ -423,12 +423,39 @@ void UIBase::SetAllColors(const UIColor4& col)
 	this->uiCols.SetAll(col);
 }
 
+bool UIBase::IsRegisteredMouseDown(int idx) const
+{
+	if(this->system == nullptr)
+		return false;
+
+	return this->system->IsSysRegisteredMouseDown(idx, this);
+}
+
+bool UIBase::IsRegisteredMouseDown() const
+{
+	if(this->system == nullptr)
+		return false;
+
+	return this->system->IsSysRegisteredMouseDown(this);
+}
+
+bool UIBase::IsRegisteredSelected() const
+{
+	if(this->system == nullptr)
+		return false;
+
+	return this->system->IsSysRegisteredSelected(this);
+}
 
 void UIBase::OnEnabled()
-{}
+{
+	// Do-nothing placeholder of virtual function.
+}
 
 void UIBase::OnDisabled()
-{}
+{
+	// Do-nothing placeholder of virtual function.
+}
 
 void UIBase::OnAligned()
 {
@@ -460,6 +487,9 @@ void UIBase::HandleMouseDrag(const UIVec2& pos, int button)
 void UIBase::HandleMouseUp(const UIVec2& pos, int button)
 {}
 
+void UIBase::HandleClick(int button)
+{}
+
 void UIBase::HandleMouseMove(const UIVec2& pos)
 {}
 
@@ -473,6 +503,26 @@ bool UIBase::HandleKeyUp(int keycode)
 	return false;
 }
 
+bool UIBase::IsSelectable()
+{
+	return true;
+}
+
+void UIBase::HandleSelect()
+{
+}
+
+void UIBase::HandleUnselect()
+{
+}
+
+float UIBase::GetValue(int vid)
+{
+	// It's arguable what the default/error
+	// value should be. Perhaps NaN?
+	return -1.0f;
+}
+
 UISys* UIBase::GetRootSys()
 {
 	// Get root element
@@ -482,7 +532,7 @@ UISys* UIBase::GetRootSys()
 
 	// It should be a UISys, but use the built-in casting
 	// to be safe.
-	return this->_GetSelfSys();
+	return it->_GetSelfSys();
 }
 
 UIBase::~UIBase()

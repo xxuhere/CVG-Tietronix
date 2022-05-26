@@ -92,16 +92,6 @@ public:
 	std::string debugName;
 
 protected:
-	/// <summary>
-	/// If true, the transform data has been modified by has not yet
-	/// been reprocessed yet.
-	/// </summary>
-	// NOTE: This also represents if children in the hierarchy are dirty -
-	// because flagging a widget as dirty will also flag all parents. This
-	// probably needs to be split into 2 flags: 
-	// 1) One for if the widget itself is dirty,
-	// 2) One for if there is a dirty child in the hierarchy.
-	bool dirty = true;
 
 	/// <summary>
 	/// The explicit value of if the widget should be shown
@@ -304,6 +294,8 @@ protected:
 	/// <param name="button">The button the was released.</param>
 	virtual void HandleMouseUp(const UIVec2& pos, int button);
 
+	virtual void HandleClick(int button);
+
 	/// <summary>
 	/// Callback for when the mouse is moved over the widget. These
 	/// callbacks will be received between a HandleMouseEnter() and
@@ -338,6 +330,14 @@ protected:
 	/// <param name="keycode">The key being released.</param>
 	/// <returns>If handled, return true.</returns>
 	virtual bool HandleKeyUp(int keycode);
+
+	virtual bool IsSelectable();
+
+	virtual void HandleSelect();
+
+	virtual void HandleUnselect();
+
+	virtual float GetValue(int vid);
 
 public:
 	/// <summary>
@@ -380,6 +380,34 @@ public:
 	bool IsContentsDirty() const { return this->dirtyContents; }
 
 	void SetAllColors(const UIColor4& col);
+
+	/// <summary>
+	/// Check if the UIBase is registered to a UISys, and if it
+	/// has a specific mouse button down.
+	/// </summary>
+	/// <param name="idx">The mouse button to check for.</param>
+	/// <returns>
+	/// If true, the root UISys recognizes that the specific mouse button
+	/// is down for the invoking object.
+	/// </returns>
+	bool IsRegisteredMouseDown(int idx) const;
+
+	/// <summary>
+	/// Check if the UIBase is registered to a UISys, and if it
+	/// has any mouse buttons down.
+	/// </summary>
+	/// <returns>
+	/// If true, the root UISys recognizes that a mouse button is down
+	/// for the invoking object.
+	/// </returns>
+	bool IsRegisteredMouseDown() const;
+
+	/// <summary>
+	/// Check if the UIBase is registered to a UISys, and if it
+	/// is the UISys's currently selected UIBase.
+	/// </summary>
+	/// <returns></returns>
+	bool IsRegisteredSelected() const;
 
 	/// <summary>
 	/// Show the widget.

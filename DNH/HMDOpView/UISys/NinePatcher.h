@@ -67,8 +67,8 @@ public:
 
 
 	void GeneratePatchGeometryQuads(
-		UIVec2& posOffs,
-		UIVec2& rgnDim,
+		const UIVec2& posOffs,
+		const UIVec2& rgnDim,
 		std::vector<UIVec2>& outUVs,
 		std::vector<UIVec2>& outVerts);
 };

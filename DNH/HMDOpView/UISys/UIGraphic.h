@@ -50,6 +50,10 @@ public:
 	UIGraphic(UIBase* parent, int idx, const UIRect& r, const std::string& filepath);
 	UIGraphic(UIBase* parent, int idx, const UIRect& r, TexObj::SPtr img);
 
+	void _RebuildVerts();
+	void _RebuildVerts(const UIRect& r);
+	void _DrawVerts();
+
 	bool Render() override;
 	void _RenderGraphic();
 
@@ -68,8 +72,6 @@ public:
 	void SetMode_Patch(TexObj::SPtr img, const UIVec2& pmin, const UIVec2& pmax);
 	void SetMode_Patch(const NinePatcher& patch);
 	void SetMode_Patch(TexObj::SPtr img, const NinePatcher& patch);
-
-	void HandleDirty();
 
 	static void FlushGLVerts(std::vector<UIVec2>& verts);
 	static void FlushGLVerts(
