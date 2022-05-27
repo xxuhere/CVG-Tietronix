@@ -2,6 +2,9 @@
 
 class UIRect;
 
+/// <summary>
+/// 2D vector.
+/// </summary>
 class UIVec2
 {
 public:
@@ -34,16 +37,36 @@ public:
 	bool operator != (const UIVec2& v2) const;
 
 public:
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="pt"></param>
+	/// <param name="topLeft"></param>
+	/// <param name="dim"></param>
+	/// <returns></returns>
 	static bool InRectBounds(
 		const UIVec2& pt, 
 		const UIVec2& topLeft, 
 		const UIVec2& dim);
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="pt"></param>
+	/// <param name="r"></param>
+	/// <returns></returns>
 	static bool InRectBounds(
 		const UIVec2& pt,
 		const UIRect& r);
 
+	/// <summary>
+	/// Set both the x and y component to 1.0f.
+	/// </summary>
 	void SetOne();
+
+	/// <summary>
+	/// Set both the x and y component to 0.0f.
+	/// </summary>
 	void SetZero();
 
 };

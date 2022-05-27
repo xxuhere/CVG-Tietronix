@@ -6,8 +6,8 @@ bool ICamImpl::Initialize()
 	if(this->hasInitialized)
 		return false;
 
-	this->initStatus = this->InitializeImpl();
-	return this->initStatus;
+	this->hasInitialized = this->InitializeImpl();
+	return this->hasInitialized;
 }
 
 bool ICamImpl::Shutdown()

@@ -57,6 +57,11 @@ public:
 	/// </summary>
 	int viewportOffsY = 0;
 
+	/// <summary>
+	/// If true, the application should be fullscreen. Else, it will
+	/// be windowed. The resolution of the window is not currently 
+	/// definable - although the window should be resizeable.
+	/// </summary>
 	bool fullscreen = true;
 
 	/// <summary>
@@ -74,25 +79,35 @@ public:
 	/// </summary>
 	float mousepadScale = 0.4f;
 
+	/// <summary>
+	/// If true, UISys should have debug drag enabled.
+	/// </summary>
 	bool drawUIDebug = false;
 
+	/// <summary>
+	/// Camera options. While it's represented as a generic vector,
+	/// this is expected to always be of size 2.
+	/// </summary>
 	std::vector<cvgCamFeedSource> feedOpts;
 
 public:
 	cvgOptions(int defSources);
 
 	/// <summary>
-	/// 
+	/// Load an options JSON file into the object.
 	/// </summary>
-	/// <param name="filepath"></param>
-	/// <returns></returns>
+	/// <param name="filepath">The filepath of the JSON file to load.</param>
+	/// <returns>
+	/// True if successful; else, the specified filepath could not be
+	/// processed.
+	/// </returns>
 	bool LoadFromFile(const std::string& filepath);
 
 	/// <summary>
-	/// 
+	/// Save the object as a JSON file.
 	/// </summary>
-	/// <param name="filepath"></param>
-	/// <returns></returns>
+	/// <param name="filepath">The filepath to save to.</param>
+	/// <returns>True if successfully saved.</returns>
 	bool SaveToFile(const std::string& filepath) const;
 
 	// Apply can work with limited data -
@@ -101,13 +116,12 @@ public:
 	void Apply(json& data);
 
 	/// <summary>
-	/// 
+	/// Get the object's data as a JSON object.
 	/// </summary>
-	/// <returns></returns>
 	json RepresentAsJSON() const;
 
 	/// <summary>
-	/// 
+	/// Reset object to defaults.
 	/// </summary>
 	void Clear();
 };

@@ -19,6 +19,10 @@ public:
 
 	FontWU mainFont;
 
+	/// <summary>
+	/// Timer for how long the state has been shown. This is used
+	/// the drive procedural animations.
+	/// </summary>
 	cvgStopwatch loadScreenTimer;
 
 public:

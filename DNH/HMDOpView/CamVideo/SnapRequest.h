@@ -5,8 +5,7 @@
 class CamStreamMgr;
 
 /// <summary>
-/// The representation of a camera picture request
-/// for CamStreamMgr.
+/// The representation of a camera picture request for CamStreamMgr.
 /// </summary>
 class SnapRequest
 {
@@ -82,5 +81,11 @@ public:
 	std::string err;
 
 	typedef std::shared_ptr<SnapRequest> SPtr;
+
+	/// <summary>
+	/// Utility function to create a shared pointer to a SnapRequest.
+	/// </summary>
+	/// <param name="filename">The request's filename.</param>
+	/// <returns>The created request.</returns>
 	static SPtr MakeRequest(const std::string& filename);
 };

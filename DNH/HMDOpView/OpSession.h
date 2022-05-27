@@ -1,11 +1,23 @@
 #pragma once
 #include <string>
 
+/// <summary>
+/// Operation session data.
+/// 
+/// NOTE: currently UNUSED.
+/// </summary>
 struct OpSession
 {
+	// Patient's first name
 	std::string patNameFirst;
+
+	// Patient's middle name
 	std::string patNameMid;
+
+	// Patient's last name
 	std::string patNameLast;
+
+	// Session name metadata
 	std::string sessionName;
 
 	void SetName(

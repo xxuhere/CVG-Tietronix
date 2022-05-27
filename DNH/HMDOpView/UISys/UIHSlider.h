@@ -1,19 +1,47 @@
 #pragma once
+
 #include "UIGraphic.h"
 #include <functional>
 
+/// <summary>
+/// UI implementation of a slider.
+/// </summary>
 class UIHSlider : public UIGraphic
 {
 public:
+	/// <summary>
+	/// Value IDs that can be used for this subclass'
+	/// implementation of GetValue().
+	/// </summary>
 	enum VID
 	{
+		/// <summary>
+		/// The value of the slider.
+		/// </summary>
 		Value,
+
+		/// <summary>
+		/// The percentage of the slider value between the
+		/// min and max value.
+		/// </summary>
 		Percent
 	};
 
 protected:
-	const float vPad = 5.0f;
+
+	/// <summary>
+	/// The height of the crevice - i.e., the cut in the surface the
+	/// slider slides along as a guide.
+	/// </summary>
 	const float creviceHeight = 10.0f;
+
+	/// <summary>
+	/// The maximum thumb width. The thumb width, by default, will be 
+	/// the same size as the UI widget's rect's height to ensure it's 
+	/// circular, but at a certain pixel limit it's clamped to avoid 
+	/// the slider thumb being awkwardly wide.
+	/// </summary>
+	// NOTE: Consider renaming to maxThumbWidthPx.
 	const float maxBarWidthPx = 50.0f;
 
 	/// <summary>
@@ -56,6 +84,11 @@ public:
 	std::function<void(float)> onSlide;
 
 protected:
+
+	/// <summary>
+	/// Calculate the size of the thumb width. It's based off the height
+	/// of the widget, but also clamped to maxBarWidthPx.
+	/// </summary>
 	float ThumbWidth() const;
 
 public:
@@ -67,9 +100,20 @@ public:
 	void HandleMouseUp(const UIVec2& pos, int button) override;
 
 	bool Render() override;
-
-	void SetCurValue(float value);
 	float GetValue(int vid) override;
 
+	/// <summary>
+	/// Set the value of curVal.
+	/// 
+	/// Even when inside of this class, prefer calling this function over
+	/// modifying curVal directly, as the function manages other state
+	/// management functionality.
+	/// </summary>
+	/// <param name="value">The new value.</param>
+	void SetCurValue(float value);
+
+	/// <summary>
+	/// Recalculate cached rectangles.
+	/// </summary>
 	void _RecacheDirtyDimensioning();
 };

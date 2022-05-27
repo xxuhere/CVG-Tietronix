@@ -1,5 +1,8 @@
 #pragma once
 
+/// <summary>
+/// 4 component color representation.
+/// </summary>
 class UIColor4
 {
 public:
@@ -7,10 +10,10 @@ public:
 	{
 		struct
 		{
-			float r;
-			float g;
-			float b;
-			float a;
+			float r;	// Red
+			float g;	// Green
+			float b;	// Blue
+			float a;	// Alpha (opacity)
 		};
 		float ar[4];
 	};
@@ -23,9 +26,17 @@ public:
 	void Set(float r, float g, float b);
 	void Set(float r, float g, float b, float a);
 
+	/// <summary>
+	/// Call glColor3f on the color data.
+	/// </summary>
 	void GLColor3();
+
+	/// <summary>
+	/// Call glColor4f on the color data.
+	/// </summary>
 	void GLColor4();
 
+	// Preset color setting utilities.
 	inline void SetColor_Black()	{ this->Set(0.0f, 0.0f, 0.0f); }
 	inline void SetColor_White()	{ this->Set(1.0f, 1.0f, 1.0f); }
 	inline void SetColor_FRed()		{ this->Set(1.0f, 0.0f, 0.0f); }
@@ -37,11 +48,26 @@ public:
 	bool operator== (const UIColor4& o) const;
 };
 
+/// <summary>
+/// A combination of colors used to represent a widget
+/// under different interaction states.
+/// </summary>
 struct ColorSetInteractable
 {
 public:
+	/// <summary>
+	/// The normal color when not in hover or pressed mode.
+	/// </summary>
 	UIColor4 norm;
+
+	/// <summary>
+	/// The color when the mouse is hovered over the widget.
+	/// </summary>
 	UIColor4 hover;
+
+	/// <summary>
+	/// The color when the mouse is pressed down on the widget.
+	/// </summary>
 	UIColor4 pressed;
 
 public:
@@ -52,6 +78,10 @@ public:
 		const UIColor4& hover, 
 		const UIColor4& pressed);
 
+	/// <summary>
+	/// Set all colors in the object to the same color.
+	/// </summary>
+	/// <param name="all">The color to set everything to.</param>
 	ColorSetInteractable(const UIColor4& all);
 
 	void Set(
@@ -59,7 +89,25 @@ public:
 		const UIColor4& hover, 
 		const UIColor4& pressed);
 
+	/// <summary>
+	/// Set all colors to the same color value.
+	/// </summary>
+	/// <param name="all">The color to set everything to.</param>
 	void SetAll(const UIColor4& all);
 
+	/// <summary>
+	/// Given UI context data, select the relevant color member that
+	/// the widget should use.
+	/// </summary>
+	/// <param name="pressedCt">
+	/// The number of mouse buttons currently pressed on the widget.
+	/// </param>
+	/// <param name="isHovering">
+	/// True if the mouse is hovering over the widget; else, false.
+	/// </param>
+	/// <returns>
+	/// The color that should be used to represent the widgets given
+	/// the specified context.
+	/// </returns>
 	UIColor4& GetContexedColor(int pressedCt, bool isHovering);
 };

@@ -29,7 +29,36 @@ public:
 
 	cvgStopwatchLeft();
 
+	/// <summary>
+	/// Check how many more milliseconds need to pass (be slept for)
+	/// for the time that's passed so far, plus the return value, to
+	/// cause the specified (msToPass) number of milliseconds to be
+	/// ellapsed.
+	/// 
+	/// Note that calling this function will reset the timer.
+	/// </summary>
+	/// <param name="msToPass">
+	/// The number of millisecond to attempt to ellapse.
+	/// </param>
+	/// <returns>
+	/// The number of milliseconds that need to pass for the combined
+	/// time of how long since the last time MSLeft was called plus the
+	/// return value for msToPass milliseconds to occur. 
+	/// 
+	/// Note that if time underruns, 0 will be passed as there would be 
+	/// nothing we could do with negative time.
+	/// </returns>
 	int MSLeft(int msToPass);
 
+	/// <summary>
+	/// Equivalent to MSLeft(33).
+	/// This is a number that will often be checked for, as a common
+	/// target for realtime updates will be 30 frames a second, and
+	/// the 1000 ms in a second needs to be ~33 to hit as close to
+	/// 30FPS with millisecond resolution.
+	/// </summary>
+	/// <returns>
+	/// The equivalent of what MSLeft(33) would return.
+	/// </returns>
 	int MSLeft33();
 };

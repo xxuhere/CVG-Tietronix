@@ -49,10 +49,23 @@ cv::Ptr<cv::Mat> CamImpl_OpenCVBase::PollFrameImpl()
 
 bool CamImpl_OpenCVBase::InitCapture(cv::VideoCapture* capture)
 {
+	// Keep the buffer as small as possible so while the video
+	// will not be expected to be silky smooth, the latency
+	// will be as low as possible.
 	capture->set(cv::CAP_PROP_BUFFERSIZE, 1);
+
+	// Standardize the FPS rate.
 	capture->set(cv::CAP_PROP_FPS, 30);
 
 	// https://stackoverflow.com/a/69476456/2680066
+	// On some webcams, changing the exposure behaviour will
+	// allow it to run faster. Note that this may be naive
+	// in that the settings we use for one webcam may not apply
+	// to all other webcams.
+	//
+	// Also note that this is being set on a VideoCapture made
+	// in the base CamImpl_OpenCVBase class, but only really applies
+	// to specific subclasses, mainly ther OCV_USB and OCV_HWPath.
 	capture->set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
 	return true;
 }

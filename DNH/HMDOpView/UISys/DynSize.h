@@ -2,15 +2,56 @@
 #include "UIVec2.h"
 #include "UIRect.h"
 
+/// <summary>
+/// A container holding variables for a dynamic UI resizing system.
+/// The variables will reference landmarks on the parent UIBase or
+/// offsets.
+/// </summary>
 class DynSize
 {
 public:
+	/// <summary>
+	/// Can be set to false to allow ignoring using the DynSize.
+	/// </summary>
 	bool active = true;
 
+	//////////////////////////////////////////////////
+	//
+	//		ANCHORS
+	//
+	//////////////////////////////////////////////////
+	// Anchors are location in the parents rect, represented by a 
+	// horizontal and vertical value that go between [0.0, 1.0].
+
+	/// <summary>
+	/// The top left anchor.
+	/// </summary>
 	UIVec2 anchMin;
+
+	/// <summary>
+	/// The bottom right anchor.
+	/// </summary>
 	UIVec2 anchMax;
+
+	//////////////////////////////////////////////////
+	//
+	//		OFFSETS
+	//
+	//////////////////////////////////////////////////
+	// Offsets are vectors that are added to anchors to specify a final
+	// corner of the rect. These will be in pixel values.
+
+	/// <summary>
+	/// The offset to anchMin.
+	/// </summary>
 	UIVec2 offsMin;
+
+	/// <summary>
+	/// The offset to anchMax.
+	/// </summary>
 	UIVec2 offsMax;
+
+	//////////////////////////////////////////////////
 
 public:
 	DynSize();

@@ -3,12 +3,29 @@
 #include "../FontMgr.h"
 #include <functional>
 
+/// <summary>
+/// Eccentric, graduated cylinder style, vertical slider.
+/// 
+/// Follows CVG HMDOpView design document but may be deprecated/obsolete.
+/// </summary>
 class UIVBulkSlider : public UIBase
 {
 public:
+	/// <summary>
+	/// Value IDs that can be used for this subclass'
+	/// implementation of GetValue().
+	/// </summary>
 	enum VID
 	{
+		/// <summary>
+		/// The value of the slider.
+		/// </summary>
 		Value,
+
+		/// <summary>
+		/// The percentage of the slider value between the
+		/// min and max value.
+		/// </summary>
 		Percent
 	};
 

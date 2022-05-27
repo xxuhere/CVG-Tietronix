@@ -17,9 +17,25 @@
 #include <memory>
 #include <vector>
 
+/// <summary>
+/// A video streaming (usually from a camera/webcam) class. This system
+/// will poll a video stream (See ICamImpl for more details) in a thread
+/// as well as provide other services involved with polling the video
+/// stream:
+/// - Handling snapshot requests (See SnapRequest)
+/// - Handling video saving requests (See VideoRequest)
+/// - Staging polled image frames to other systems, such as rendering
+/// systems.
+/// - Performing the pipeline for image processing.
+/// 
+/// Note this class should not be used directly by outside calling 
+/// code. Instead, access should be limited by using the public member
+/// functions provided by the public functions of CamStreamMgr.
+/// </summary>
 class ManagedCam
 {
 	friend class CamStreamMgr;
+
 public:
 	/// <summary>
 	/// The various running states of the manager.
@@ -172,10 +188,23 @@ public:
 	/// </summary>
 	int streamFrameCt = 0;
 
+	/// <summary>
+	/// The polling implementation to use. Depending on what this is
+	/// set to, will determine what subclass is instanciated for
+	/// this->currentImpl.
+	/// </summary>
 	VideoPollType pollType = VideoPollType::OpenCVUSB_Idx;
 
+	/// <summary>
+	/// A cache of the camera options to define the ManagedCam's stream
+	/// locations and behaviours.
+	/// </summary>
 	cvgCamFeedSource camOptions;
 
+	/// <summary>
+	/// The polling implementation. See this->pollType, as well as 
+	/// the various subclasses of ICamImpl for more details.
+	/// </summary>
 	ICamImpl* currentImpl = nullptr;
 
 private:
@@ -216,6 +245,8 @@ private:
 	bool _FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr);
 
 	/// <summary>
+	/// Add another frame to the video being saved.
+	/// 
 	/// THREAD WARNING: When the function is called
 	/// - it assumes the image is threadsafe.
 	/// - it assumes the videoAccess mutex is locked.
@@ -224,12 +255,32 @@ private:
 	/// Function will automatically shut down the video stream and
 	/// recording process if it detects any request errors or state errors.
 	/// </summary>
-	/// <param name="img"></param>
-	/// <returns></returns>
+	/// <param name="img">The OpenCV image to add to the video.</param>
+	/// <returns>
+	/// True if the frame was added to the video file successfully, else
+	/// false.
+	/// </returns>
 	bool _DumpImageToVideofile(const cv::Mat& img);
 
+	/// <summary>
+	/// Null the camera implementation.
+	/// </summary>
+	/// <param name="delCurrent">
+	/// If true, delete the current implementation.
+	/// </param>
+	/// <param name="resetPollTy">
+	/// If true, reset the poll type to VideoPollType::Deactivated.
+	/// </param>
 	void _ClearImplementation(bool delCurrent = true, bool resetPollTy = true);
 
+	/// <summary>
+	/// Switch the camera polling implementation method.
+	/// </summary>
+	/// <param name="newImplType">The new polling type.</param>
+	/// <param name="delCurrent">
+	/// If true, delete the old camera type.
+	/// </param>
+	/// <returns>True if successful, else false.</returns>
 	bool SwitchImplementation(VideoPollType newImplType, bool delCurrent = true);
 
 public:
@@ -279,14 +330,30 @@ public:
 	/// <summary>
 	/// Request saving the stream to a video.
 	/// </summary>
-	/// <param name="filename"></param>
-	/// <returns>The VideoRequest.</returns>
+	/// <param name="filename">The filename to save the video to.</param>
+	/// <returns>The VideoRequest representing the request.</returns>
 	VideoRequest::SPtr OpenVideo(const std::string& filename);
 
+	/// <summary>
+	/// Close the video that's currently being recorded.
+	/// Obviously only useful if a video is currently being recorded. Note
+	/// that this will also update the state of the VideoRequest to be 
+	/// Status::Closed.
+	/// </summary>
+	/// <returns>
+	/// True if a recording session was successfully closed.
+	/// </returns>
 	bool CloseVideo();
 
+	/// <summary>
+	/// Query if the ManagedCam is currently saving polled frames to a video.
+	/// </summary>
 	bool IsRecordingVideo();
 
+	/// <summary>
+	/// If the ManagedCam is currently saving polled frames to a video, query
+	/// the video filename.
+	/// </summary>
 	std::string VideoFilepath();
 
 	/// <summary>
@@ -318,7 +385,7 @@ public:
 	/// It's expected that teh shared pointer class 
 	/// will preform all memory management needs
 	/// </summary>
-	/// <param name="src"> The image to threshold </param>
+	/// <param name="src"> The image to threshold</param>
 	/// <returns></returns>
 	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed);
 
@@ -348,5 +415,9 @@ public:
 	/// the application still wants to stream.</param>
 	void _DeactivateStreamState(bool deactivateShould = false);
 
+	/// <summary>
+	/// Set the polling type of the camera.
+	/// </summary>
+	/// <param name="pollTy">The polling type.</param>
 	void SetPoll(VideoPollType pollTy);
 };

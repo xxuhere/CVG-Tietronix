@@ -58,24 +58,6 @@ UIRect UIRect::Dilate(float v)
 		this->dim.y + v * 2.0f);
 }
 
-UIRect UIRect::DilateAtOrigin(float x, float y)
-{
-	return UIRect(
-		-x,
-		-y,
-		this->dim.x + x * 2.0f,
-		this->dim.y + y * 2.0f);
-}
-
-UIRect UIRect::DilateAtOrigin(float v)
-{
-	return UIRect(
-		-v,
-		-v,
-		this->dim.x + v * 2.0f,
-		this->dim.y + v * 2.0f);
-}
-
 void UIRect::GLQuad() const
 {
 	float right = this->pos.x + this->dim.x;

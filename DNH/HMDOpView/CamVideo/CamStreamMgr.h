@@ -4,9 +4,20 @@
 #include "../Utils/VideoPollType.h"
 #include "../Utils/cvgCamFeedSource.h"
 
+// NOTE: The terms camera stream and video streams are used 
+// somewhat synonamously for the comments and elements in this
+// system. The streams are really video streams - but often times
+// they will be specificly video streams from a camera.
+//
+// If this becomes a problem, a refactor to canonicalize these
+// terms may be necessary.
+
 /// <summary>
-/// Manages camera streaming. Note that this is expected to
-/// happen in its own thread.
+/// A system that manages multiple cameras and streaming video systems.
+///
+/// Outside code should not touch those camera (ManagedCam) and video
+/// systems. The whole point of this system is that it's an intermediary
+/// delegating authority.
 /// 
 /// CamStreamMgr::GetInstance().BootConnectionToCamera() should
 /// be called once in the app to initialize the main processing 
@@ -59,6 +70,11 @@ public:
 		int camCt, 
 		VideoPollType pt = VideoPollType::Deactivated);
 
+	/// <summary>
+	/// Initialize all the cameras.
+	/// </summary>
+	/// <param name="sources">The properties of the cameras to initialize.</param>
+	/// <returns>True, if successful.</returns>
 	bool BootConnectionToCamera(const std::vector<cvgCamFeedSource>& sources);
 
 	/// <summary>
@@ -112,25 +128,59 @@ public:
 	void ClearSnapshotRequests(int idx);
 
 	/// <summary>
-	/// Clear all snapshot requests of all cameras.
+	/// Clear all snapshot requests of all videos.
 	/// </summary>
 	void ClearAllSnapshotRequests();
 
 	/// <summary>
 	/// Queue a snapshot request for the new camera frame.
 	/// </summary>
-	/// <param name="idx">The camera index to queue.</param>
+	/// <param name="idx">The video index to queue.</param>
 	/// <returns>The return value</returns>
 	SnapRequest::SPtr RequestSnapshot(int idx, const std::string& filename);
 
+	/// <summary>
+	/// Requests a video stream to be recorded to a video file.
+	/// </summary>
+	/// <param name="idx">The id of the video to request the recording for.</param>
+	/// <param name="filename">The video filename to record the video to.</param>
+	/// <returns> The VideoRequest object related to the request.</returns>
 	VideoRequest::SPtr RecordVideo(int idx, const std::string& filename);
 
+	/// <summary>
+	/// Stop recording a video stream.
+	/// </summary>
+	/// <param name="idx">The id of video stream to stop recording.</param>
+	/// <returns>True, if the request to stop the recording was successful.</returns>
 	bool StopRecording(int idx);
 
+	/// <summary>
+	/// Query if a video stream is currenly saving to a file.
+	/// </summary>
+	/// <param name="idx">The id of the video stream to query.</param>
+	/// <returns>
+	/// True, if the specified camera is recording. Else, false.
+	/// </returns>
 	bool IsRecording(int idx);
 
+	/// <summary>
+	/// Query if a video stream is set to be image processed.
+	/// </summary>
+	/// <param name="idx">The id of the video stream to query.</param>
+	/// <returns>
+	/// True, if the video stream is set to be thresholded. Else, false.
+	/// </returns>
 	bool IsThresholded(int idx);
 
+	/// <summary>
+	/// Check if a camera is recording a video feed. and if so, check 
+	/// the filename being recorded to.
+	/// </summary>
+	/// <param name="idx">The </param>
+	/// <returns>
+	/// The video filename the specified camera is being recorded to,
+	/// or an empty string.
+	/// </returns>
 	std::string RecordingFilename(int idx);
 
 	/// <summary>

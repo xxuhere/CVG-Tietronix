@@ -3,9 +3,19 @@
 #include "ICamImpl.h"
 #include <vector>
 
+// NOTE: This class has implementation logic, but has not been
+// tested!
+
+/// <summary>
+/// A ICamImpl that mimics a video feed by sending a
+/// preloaded image.
+/// </summary>
 class CamImpl_StaticImg : public ICamImpl
 {
 private:
+	/// <summary>
+	/// The image to load image data from.
+	/// </summary>
 	std::string imgPath;
 
 protected:

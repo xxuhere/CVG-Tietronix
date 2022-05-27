@@ -74,10 +74,11 @@ public:
 public:
     MainWin(const wxString& title, const wxPoint& pos, const wxSize& size);
 
-    /// <summary>
-    /// Clear all records of snapshot requests
-    /// </summary>
-    void ClearWaitingSnaps();
+    //////////////////////////////////////////////////
+    //
+    //      MISC
+    //
+    //////////////////////////////////////////////////
 
     /// <summary>
     /// Do some housekeeping with request tokens and state information
@@ -86,26 +87,83 @@ public:
     /// </summary>
     void PerformMaintenenceCycle();
 
+    //////////////////////////////////////////////////
+    //
+    //      MEDIA CAPTURE UTILITIES
+    //
+    //////////////////////////////////////////////////
+    // A lot of what's in this category is delegating media capturing 
+    // functionality of CamStreamMgr to the CamStreamMgr singleton. At the
+    // application level, these functions should be used instead as they will
+    // notify the application to manage some extra events and state changes -
+    // such as: 
+    //  - letting the application know when to update graphical representations
+    //      of if video is being recorded or a snapshot being taken.
+    //  - playing feedback audio when a picture is taken.
+    //  - etc.
+
+    /// <summary>
+    /// Clear all records of snapshot requests
+    /// </summary>
+    void ClearWaitingSnaps();
+
     /// <summary>
     /// Clear all records of snapshot requests that have finished.
     /// </summary>
     void ClearFinishedSnaps();
 
+    /// <summary>
+    /// Clear all records of video requests that aren't pending or active.
+    /// </summary>
     void ClearFinishedRecordings();
 
     /// <summary>
     /// Request a snapshot and cache the request in waitingSnaps.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The SnapRequest from CamStreamMgr.</returns>
     SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix);
 
+    /// <summary>
+    /// Set a camera to start saving to a video file.
+    /// </summary>
+    /// <param name="idx">The index of the video to record</param>
+    /// <param name="prefix">The prefix to apply to the video.</param>
+    /// <returns>The video request from CamStreamMgr.</returns>
     VideoRequest::SPtr RecordVideo(int idx, const std::string& prefix);
 
+    /// <summary>
+    /// Query if a video is recording.
+    /// 
+    /// Accessibility function that delegates to CamStreamMgr.
+    /// </summary>
+    /// <param name="idx">The id of the camera to record.</param>
+    /// <returns>True if the camera successfully started recording to file.</returns>
     bool IsRecording(int idx);
 
+    /// <summary>
+    /// Stop recording video from a camera.
+    /// </summary>
+    /// <param name="idx">Id of the camera to stop recording from.</param>
+    /// <returns>True if the request was successful.</returns>
     bool StopRecording(int idx);
 
+    //////////////////////////////////////////////////
+    //
+    //      OPTIONS UTILITIES
+    //
+    //////////////////////////////////////////////////
+
+    /// <summary>
+    /// Reload app options and integrate them into the application. Certain
+    /// options will be immediately 
+    /// </summary>
     void ReloadAppOptions();
+
+    //////////////////////////////////////////////////
+    //
+    //      APPLICATION STATE MACHINE STUFF
+    //
+    //////////////////////////////////////////////////
 
     /// <summary>
     /// Populates and initializes the state machine. This will be called
@@ -117,12 +175,37 @@ public:
     /// </summary>
     void InitializeAppStateMachine();
 
+    /// <summary>
+    /// Create the applications states and store them into this->states.
+    /// </summary>
     void PopulateStates();
+
+    /// <summary>
+    /// Call Initialize() for all states in the state machine system.
+    /// </summary>
     void States_Initialize();
+
+    /// <summary>
+    /// Call ClosingApp() for all states in the state machine system.
+    /// </summary>
     void States_AppShutdown();
+
+    /// <summary>
+    /// Switch the active state.
+    /// </summary>
+    /// <param name="newState">The id of the state to change to.</param>
+    /// <returns>
+    /// Returns true if the state was found and successfully switched to.
+    /// </returns>
     bool ChangeState(BaseState::AppState newState);
 
-    void OnFocus(wxFocusEvent& evt);
+    //////////////////////////////////////////////////
+    //
+    //      WXWIDGETS MESSAGE HANDLERS
+    //
+    //////////////////////////////////////////////////
+
+    void OnFocus(wxFocusEvent& evt);        // Keyboard focus change
     void OnResize(wxSizeEvent& evt);
     void OnExit(wxCommandEvent& evt);
 

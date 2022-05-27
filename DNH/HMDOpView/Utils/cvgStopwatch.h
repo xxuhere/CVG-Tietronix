@@ -51,5 +51,8 @@ public:
 	/// </returns>
 	long long Nanoseconds(bool restart = true);
 
+	/// <summary>
+	/// Restart the stopwatch timer.
+	/// </summary>
 	void Restart();
 };

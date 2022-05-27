@@ -7,7 +7,9 @@
 
 class UISys;
 
-// Enumerated names for different mouse values.
+/// <summary>
+/// Enumerated names for different mouse values.
+/// </summary>
 enum class MouseBtn
 {
 	// There's really no need to explicitly number these items
@@ -150,6 +152,9 @@ protected:
 	/// </summary>
 	std::vector<UIBase*> children;
 
+	/// <summary>
+	/// 
+	/// </summary>
 	UIVec2 transPivot;
 
 	/// <summary>
@@ -242,6 +247,7 @@ protected:
 	void _InternalShow(bool show);
 
 protected:
+
 	// Only UISys implementation will return non-nullpr
 	virtual UISys* _GetSelfSys();
 
@@ -294,6 +300,12 @@ protected:
 	/// <param name="button">The button the was released.</param>
 	virtual void HandleMouseUp(const UIVec2& pos, int button);
 
+	/// <summary>
+	/// Callback for when the UI widget is clicked. For a click to occur, the
+	/// mouse needs to first receive a MouseDown, and then later receive a
+	/// MouseUp while on top of the original widget.
+	/// </summary>
+	/// <param name="button">The mouse button used to click the widget.</param>
 	virtual void HandleClick(int button);
 
 	/// <summary>
@@ -331,12 +343,31 @@ protected:
 	/// <returns>If handled, return true.</returns>
 	virtual bool HandleKeyUp(int keycode);
 
+	/// <summary>
+	/// Query if the UI widget can be selected when interacted with the mouse.
+	/// 
+	/// NOTE: This may also be relevant if there's a tab navigation feature - which 
+	/// currently doesn't exist.
+	/// </summary>
+	/// <returns></returns>
 	virtual bool IsSelectable();
 
+	/// <summary>
+	/// Callback for when the UI widget is selected.
+	/// </summary>
 	virtual void HandleSelect();
 
+	/// <summary>
+	/// Callback for when the UI widget, when previously selected, is unselected.
+	/// </summary>
 	virtual void HandleUnselect();
 
+	/// <summary>
+	/// Get a float value from the widget. The types of values supports, their ids, 
+	/// and the format of the value will depend on the subclass.
+	/// </summary>
+	/// <param name="vid"></param>
+	/// <returns>The value of the id.</returns>
 	virtual float GetValue(int vid);
 
 public:
@@ -379,6 +410,10 @@ public:
 	bool IsTransformDirty() const { return this->dirtyTransform; }
 	bool IsContentsDirty() const { return this->dirtyContents; }
 
+	/// <summary>
+	/// Set all colors in the color settings to the same color.
+	/// </summary>
+	/// <param name="col">The color to set the UI widget.</param>
 	void SetAllColors(const UIColor4& col);
 
 	inline bool IsSelfVisible() const
@@ -409,7 +444,8 @@ public:
 	/// Check if the UIBase is registered to a UISys, and if it
 	/// is the UISys's currently selected UIBase.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>If true, the root UISys recognizes that the 
+	/// invoking object is the selected object.</returns>
 	bool IsRegisteredSelected() const;
 
 	/// <summary>
@@ -452,6 +488,9 @@ public:
 	/// </param>
 	void Align(bool scanRebuild, bool forceRebuild);
 
+	// Transform modification functions. Used to set the position
+	// of the UI elements, as well as flag the transform as dirty.
+	//
 	void SetLocPos(const UIVec2& v);
 	void SetLocPos(float x, float y);
 	void SetLocXPos(float x);
@@ -489,8 +528,8 @@ public:
 	void SubmitValue(float value, int vid);
 
 	/// <summary>
-	/// Enable using dynamic sizing data and get access
-	/// to the allocated dynamic sizing data.
+	/// Enable using dynamic sizing data and get access to the 
+	/// allocated dynamic sizing data.
 	/// </summary>
 	DynSize* UseDyn();
 

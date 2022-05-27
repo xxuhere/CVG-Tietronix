@@ -3,6 +3,11 @@
 #include <wx/glcanvas.h>
 #include "cvgShapes.h"
 
+// Old implementation of a rectangle. It's questionable if
+// we should just remove this and replace it with the newer
+// UIRect.
+// (wleu 05/26/2022)
+
 struct cvgRect
 {
 	float x;	// X position (leftest)

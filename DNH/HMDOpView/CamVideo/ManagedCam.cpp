@@ -230,6 +230,15 @@ void ManagedCam::_ClearImplementation(bool delCurrent, bool resetPollTy)
 {
 	if(this->currentImpl != nullptr)
 	{
+		this->currentImpl->Deactivate();
+
+		if(delCurrent)
+		{
+			this->currentImpl->Shutdown();
+			delete this->currentImpl;
+		}
+
+		this->currentImpl = nullptr;
 	}
 	if(resetPollTy)
 		this->pollType = VideoPollType::Deactivated;

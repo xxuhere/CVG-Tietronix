@@ -7,8 +7,6 @@
 
 using json = nlohmann::json;
 
-
-
 /// <summary>
 /// A list of options of where a cam feed can come from.
 /// </summary>
@@ -65,6 +63,9 @@ public:
 	/// </summary>
 	int pipeHeight = 480;
 
+	/// <summary>
+	/// The type of image processing to apply to the video frames.
+	/// </summary>
 	ProcessingType processing = ProcessingType::None;
 };
 
@@ -87,7 +88,6 @@ public:
 	/// </summary>
 	VideoPollType defPoll = VideoPollType::OpenCVUSB_Idx;
 
-	
 	/// <summary>
 	/// The default source for Windows, if specified.
 	/// </summary>
@@ -105,7 +105,15 @@ public:
 	/// <returns></returns>
 	VideoPollType GetUsedPoll() const;
 
-
+	/// <summary>
+	/// Get a JSON representation of the object.
+	/// </summary>
+	/// <returns></returns>
 	json AsJSON() const;
+
+	/// <summary>
+	/// Load a JSON representation of the object.
+	/// </summary>
+	/// <param name="js"></param>
 	void ApplyJSON(const json& js);
 };
