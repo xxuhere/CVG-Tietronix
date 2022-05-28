@@ -17,7 +17,17 @@ enum class ProcessingType {
 	/// <summary>
 	/// apply yen thresholding in a compressed fashion, no dialation, no floodfill
 	/// </summary>
-	yen_threshold_compressed
+	yen_threshold_compressed,
+
+	/// <summary>
+	/// This threshold is a static number defined by the user.
+	/// </summary>
+	static_threshold,
+
+	/// <summary>
+	/// apply a simple threshold 2 standard deviations away from the mean
+	/// </summary>
+	two_stdev_from_mean,
 };
 
 /// <summary>

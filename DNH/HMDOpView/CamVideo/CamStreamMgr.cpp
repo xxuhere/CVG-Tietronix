@@ -190,6 +190,24 @@ int CamStreamMgr::GetStreamFrameCt(int idx)
 	return this->cams[idx]->streamFrameCt;
 }
 
+ProcessingType CamStreamMgr::GetProcessingType(int idx)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return ProcessingType::None;
+
+	return this->cams[idx]->GetProcessingType();
+}
+
+bool CamStreamMgr::SetProcessingType(int idx, ProcessingType pt)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return false;
+
+	return this->cams[idx]->SetProcessingType(pt);
+}
+
 ManagedCam::State CamStreamMgr::GetState(int idx) 
 { 
 	std::lock_guard<std::mutex> guard(this->camAccess);

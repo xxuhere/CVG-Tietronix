@@ -13,6 +13,12 @@ std::string to_string(ProcessingType ty)
 
 	case ProcessingType::yen_threshold_compressed:
 		return "yen_threshold_compressed";
+
+	case ProcessingType::static_threshold:
+		return "static_threshold";
+
+	case ProcessingType::two_stdev_from_mean:
+		return "two_stdev_from_mean";
 	}
 
 	//This should never happen, maybe this needs an illegal location assert?
@@ -26,6 +32,12 @@ ProcessingType StringToProcessingType(const std::string& str)
 
 	if (str == "yen_threshold_compressed")
 		return ProcessingType::yen_threshold_compressed;
+
+	if (str == "static_threshold")
+		return ProcessingType::static_threshold;
+
+	if (str == "two_stdev_from_mean")
+		return ProcessingType::two_stdev_from_mean;
 
 	//if (str == "None")
 	return ProcessingType::None;

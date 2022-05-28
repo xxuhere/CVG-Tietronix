@@ -60,6 +60,8 @@ private:
 	/// </summary>
 	std::mutex camAccess;
 
+	int activeIndex = -1;
+
 public:
 	~CamStreamMgr();
 
@@ -194,6 +196,19 @@ public:
 	/// </summary>
 	/// <param name="idx">The camera index to query.</param>
 	int GetStreamFrameCt(int idx);
+
+	/// <summary>
+	/// Query the processing type of a camera stream.
+	/// </summary>
+	/// <param name="idx">The camera index to query.</param>
+	ProcessingType GetProcessingType(int idx);
+
+	/// <summary>
+	/// Set the processing type of a camera stream.
+	/// </summary>
+	/// <param name="idx">The camera stream to set.</param>
+	/// <param name="pt">The camera's new processing type.</param>
+	bool SetProcessingType(int idx, ProcessingType pt);
 
 private:
 	// Only the singleton systems should be in charge of its construction.

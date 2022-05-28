@@ -64,6 +64,11 @@ public:
 	int pipeHeight = 480;
 
 	/// <summary>
+	/// For algorithms that specify an explict threshold value (from 0-255)
+	/// </summary>
+	int thresholdExplicit = 128;
+
+	/// <summary>
 	/// The type of image processing to apply to the video frames.
 	/// </summary>
 	ProcessingType processing = ProcessingType::None;

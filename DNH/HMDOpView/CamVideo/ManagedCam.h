@@ -283,6 +283,17 @@ private:
 	/// <returns>True if successful, else false.</returns>
 	bool SwitchImplementation(VideoPollType newImplType, bool delCurrent = true);
 
+	/// <summary>
+	/// Perform image processing on the target image.
+	/// 
+	/// Note that the parameter and return value can be the same, but 
+	/// they don't have to be. And it's expected that the shared pointer
+	/// class will perform all the memory management needs.
+	/// </summary>
+	/// <param name="inImg">The image to process.</param>
+	/// <returns>The process image.</returns>
+	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg);
+
 public:
 
 	ManagedCam(VideoPollType pt, int camId, const cvgCamFeedSource& camOptions);
@@ -375,31 +386,6 @@ public:
 	/// <returns></returns>
 	bool BootupPollingThread(int camIdx);
 
-	///<summary
-	/// Preform thresholding on the target image
-	/// Should return a black and white image.
-	/// 
-	/// Note that the parameter and return value can
-	/// but dont have to be the same.
-	///  
-	/// It's expected that teh shared pointer class 
-	/// will preform all memory management needs
-	/// </summary>
-	/// <param name="src"> The image to threshold</param>
-	/// <returns></returns>
-	cv::Ptr<cv::Mat> ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed);
-
-	/// <summary>
-	/// Perform image processing on the target image.
-	/// 
-	/// Note that the parameter and return value can be the same, but 
-	/// they don't have to be. And it's expected that the shared pointer
-	/// class will perform all the memory management needs.
-	/// </summary>
-	/// <param name="inImg">The image to process.</param>
-	/// <returns>The process image.</returns>
-	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg);
-
 	/// <summary>
 	/// Query if the camera settings are set for the image feed to go through
 	/// thresholding image processing.
@@ -420,4 +406,46 @@ public:
 	/// </summary>
 	/// <param name="pollTy">The polling type.</param>
 	void SetPoll(VideoPollType pollTy);
+
+	/// <summary>
+	/// Get the image processing algorithm.
+	/// </summary>
+	ProcessingType GetProcessingType() const;
+
+	/// <summary>
+	/// Set the image processing algorithm.
+	/// </summary>
+	/// <return>
+	/// True, if successful. Currently always returns true, but added in anticipation
+	/// of image processing modes that may have regulations on when switching is 
+	/// successful/valid.
+	/// </return>
+	bool SetProcessingType(ProcessingType pt);
+	
+
+	//////////////////////////////////////////////////
+	//
+	//		IMAGE PROCESSING METHODS
+	//
+	//////////////////////////////////////////////////
+
+	cv::Ptr<cv::Mat> ImgProc_Simple(cv::Ptr<cv::Mat> src, int threshold);
+
+	///<summary
+	/// Preform thresholding on the target image
+	/// Should return a black and white image.
+	/// 
+	/// Note that the parameter and return value can
+	/// but dont have to be the same.
+	///  
+	/// It's expected that teh shared pointer class 
+	/// will preform all memory management needs
+	/// </summary>
+	/// <param name="src"> The image to threshold</param>
+	/// <returns></returns>
+	cv::Ptr<cv::Mat> ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed);
+
+	cv::Ptr<cv::Mat> ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src);
+
+	
 };

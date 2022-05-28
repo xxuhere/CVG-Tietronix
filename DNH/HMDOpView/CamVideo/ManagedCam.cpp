@@ -548,7 +548,22 @@ bool ManagedCam::BootupPollingThread(int camIdx)
 	return true;
 }
 
-cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compressed)
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, int threshold)
+{
+	cv::Mat thresholding;
+	cv::threshold(
+		*src,
+		thresholding,
+		double(threshold),
+		255,
+		cv::THRESH_BINARY);
+
+	cv::Mat* thresholded = new cv::Mat(thresholding);
+	return thresholded;
+}
+
+
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed)
 {
 	//Histogram constants
 	// Quantize the hue to 30 levels
@@ -635,6 +650,26 @@ cv::Ptr<cv::Mat> ManagedCam::ThresholdImage(cv::Ptr<cv::Mat> src, bool compresse
 
 }
 
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
+{
+	// make sure greyscale first
+	cv::Ptr<cv::Mat> grey;
+	if (src->elemSize() != 1)
+	{
+		grey = new cv::Mat();
+		cv::cvtColor(*src, *grey, cv::COLOR_RGBA2GRAY, 0);
+	}
+	else 
+		grey = src;
+
+	cv::Mat mean, stddev;
+	cv::meanStdDev(*grey, mean, stddev);
+	float final_mean = mean.at<double>(0, 0);
+	float final_stddev = stddev.at<double>(0, 0);
+
+	return ImgProc_Simple(grey, final_mean + 2 * final_stddev);
+}
+
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
 	// When modifying this function, make sure to sync with IsThresholded().
@@ -644,10 +679,16 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 		return inImg;
 
 	case ProcessingType::yen_threshold:
-		return ThresholdImage(inImg, false);
+		return ImgProc_YenThreshold(inImg, false);
 
 	case ProcessingType::yen_threshold_compressed:
-		return ThresholdImage(inImg, true);
+		return ImgProc_YenThreshold(inImg, true);
+
+	case ProcessingType::two_stdev_from_mean:
+		return ImgProc_TwoStDevFromMean(inImg);
+
+	case ProcessingType::static_threshold:
+		return ImgProc_Simple(inImg, this->camOptions.thresholdExplicit);
 	}
 
 	cvgAssert(false,"Unhandled processing switch");
@@ -656,20 +697,7 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 
 bool ManagedCam::IsThresholded()
 {
-	// When modifying this function, make sure to sync with ProcessImage().
-	switch (this->camOptions.processing)
-	{
-	case ProcessingType::None:
-		return false;
-
-	case ProcessingType::yen_threshold:
-		return true;
-
-	case ProcessingType::yen_threshold_compressed:
-		return true;
-	}
-
-	return false;
+	return this->camOptions.processing != ProcessingType::None;
 }
 
 void ManagedCam::_DeactivateStreamState(bool deactivateShould)
@@ -686,4 +714,15 @@ void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 void ManagedCam::SetPoll(VideoPollType pollTy)
 {
 	this->pollType = pollTy;
+}
+
+ProcessingType ManagedCam::GetProcessingType() const
+{
+	return this->camOptions.processing;
+}
+
+bool ManagedCam::SetProcessingType(ProcessingType pt)
+{
+	this->camOptions.processing = pt;
+	return true;
 }
