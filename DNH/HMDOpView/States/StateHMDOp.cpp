@@ -68,17 +68,17 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//		LOAD COMMON ASSETS
 	//
 	//////////////////////////////////////////////////
-	this->texSliderSysPos = TexObj::MakeSharedLODE("Circle_Pos.png");
-	this->texSliderSysNeg = TexObj::MakeSharedLODE("Circle_Neg.png");
+	this->texSliderSysPos = TexObj::MakeSharedLODE("Assets/Circle_Pos.png");
+	this->texSliderSysNeg = TexObj::MakeSharedLODE("Assets/Circle_Neg.png");
 
 	this->uiSys.SetSelectingButtons(true, true, true);
 
-	this->patch_circle		= TexObj::MakeSharedLODE("8mmCircle.png"		);
-	this->patch_roundLeft	= TexObj::MakeSharedLODE("8mmRoundedLeft.png"	);
-	this->patch_roundRight	= TexObj::MakeSharedLODE("8mmRoundedRight.png"	);
+	this->patch_circle		= TexObj::MakeSharedLODE("Assets/UIPlates/8mmCircle.png"		);
+	this->patch_roundLeft	= TexObj::MakeSharedLODE("Assets/UIPlates/8mmRoundedLeft.png"	);
+	this->patch_roundRight	= TexObj::MakeSharedLODE("Assets/UIPlates/8mmRoundedRight.png"	);
 	this->ninePatchCircle	= NinePatcher::MakeFromPixelsMiddle(this->patch_circle);
 
-	this->patch_smallCircle	= TexObj::MakeSharedLODE("3mmCircle.png");
+	this->patch_smallCircle	= TexObj::MakeSharedLODE("Assets/UIPlates/3mmCircle.png");
 	this->ninePatchSmallCircle = NinePatcher::MakeFromPixelsMiddle(this->patch_smallCircle);
 
 	
@@ -95,19 +95,19 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->vertMenuPlate = new UIPlate( &this->uiSys, UIID::PullMenu, UIRect(960, 540, 50.0f, 100.0f), plateGray);
 	this->vertMenuPlate->SetMode_Patch(this->patch_roundRight, this->ninePatchCircle);
 	//
-	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Laser.png"	);
+	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Laser.png"	);
 	this->btnLaser->SetPivot(0.0f, 0.5f - menuYPiv * 2.0f);
 	SetButtonStdCols(this->btnLaser);
-	this->btnSettings	= new UIButton(this->vertMenuPlate, UIID::MBtnLaserSet, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Sliders.png");
+	this->btnSettings	= new UIButton(this->vertMenuPlate, UIID::MBtnLaserSet, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Sliders.png");
 	this->btnSettings->SetPivot(0.0f, 0.5f - menuYPiv * 0.5f);
 	SetButtonStdCols(this->btnSettings);
-	this->btnAlign		= new UIButton(this->vertMenuPlate, UIID::MBtnAlign,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Align.png"	);
+	this->btnAlign		= new UIButton(this->vertMenuPlate, UIID::MBtnAlign,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Align.png"	);
 	this->btnAlign->SetPivot(0.0f, 0.5f + menuYPiv * 0.5f);
 	SetButtonStdCols(this->btnAlign);
-	this->btnCamSets	= new UIButton(this->vertMenuPlate, UIID::MBtnSource,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),	"Menu_Icon_Return.png"	);
+	this->btnCamSets	= new UIButton(this->vertMenuPlate, UIID::MBtnSource,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Return.png"	);
 	this->btnCamSets->SetPivot(0.0f, 0.5f + menuYPiv * 1.5f);
 	SetButtonStdCols(this->btnCamSets);
-	this->btnBack		= new UIButton(this->vertMenuPlate, UIID::MBtnBack,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Menu_Back.png"	)	;
+	this->btnBack		= new UIButton(this->vertMenuPlate, UIID::MBtnBack,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Assets/MenubarIcos/Menu_Back.png"	)	;
 	this->btnBack->SetPivot(0.0f, 0.5f + menuYPiv * 3.15f);
 	SetButtonStdCols(this->btnBack);
 
@@ -492,10 +492,10 @@ void StateHMDOp::EnteredActive()
 	//
 	// most likely because the OpenGL context doesn't get initialized
 	// as fast as on Windows.
-	this->ico_MousePadLeft.LODEIfEmpty("Mousepad_Left.png");
-	this->ico_MousePadRight.LODEIfEmpty("Mousepad_Right.png");
-	this->ico_MousePadCrevice.LODEIfEmpty("Mousepad_Crevice.png");
-	this->ico_MousePadBall.LODEIfEmpty("Mousepad_MiddleBall.png");
+	this->ico_MousePadLeft.LODEIfEmpty(		"Assets/Mousepad/Mousepad_Left.png");
+	this->ico_MousePadRight.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Right.png");
+	this->ico_MousePadCrevice.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Crevice.png");
+	this->ico_MousePadBall.LODEIfEmpty(		"Assets/Mousepad/Mousepad_MiddleBall.png");
 
 	this->mdsLeft.Reset();
 	this->mdsMiddle.Reset();

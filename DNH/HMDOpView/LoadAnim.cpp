@@ -19,11 +19,11 @@ std::vector<LoadAnim::LoadTarg> LoadAnim::GetLoadTargs()
 {
 	std::vector<LoadAnim::LoadTarg> ret = 
 	{
-		{&texChevron,	"Load_Chevron.png"	},
-		{&texInner,		"Load_Inner.png"	},
-		{&texClip,		"Load_InnerClip.png"},
-		{&texHalo,		"Load_Halo.png"		},
-		{&texCog,		"Load_Cog.png"		}
+		{&texChevron,	"Assets/Loading/Load_Chevron.png"	},
+		{&texInner,		"Assets/Loading/Load_Inner.png"		},
+		{&texClip,		"Assets/Loading/Load_InnerClip.png"	},
+		{&texHalo,		"Assets/Loading/Load_Halo.png"		},
+		{&texCog,		"Assets/Loading/Load_Cog.png"		}
 	};
 
 	return ret;

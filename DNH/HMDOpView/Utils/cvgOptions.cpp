@@ -45,9 +45,9 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		// Note that this does mean these sample files, even if we never intend
 		// for them to be used during operation, MUST ALWAYS EXIST in case the
 		// default carousel items are used.
-		this->carouselEntries.push_back(CarouselData( "E1", "CarIco_Sample1.png", "SAM1", "Sample 1"));
-		this->carouselEntries.push_back(CarouselData( "E2", "CarIco_Sample2.png", "SAM2", "Sample 2"));
-		this->carouselEntries.push_back(CarouselData( "E3", "CarIco_Sample3.png", "SAM3", "Sample 3"));
+		this->carouselEntries.push_back(CarouselData( "E1", "Assets/CarIcons/CarIco_Sample1.png", "SAM1", "Sample 1"));
+		this->carouselEntries.push_back(CarouselData( "E2", "Assets/CarIcons/CarIco_Sample2.png", "SAM2", "Sample 2"));
+		this->carouselEntries.push_back(CarouselData( "E3", "Assets/CarIcons/CarIco_Sample3.png", "SAM3", "Sample 3"));
 	}
 }
 
