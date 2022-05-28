@@ -19,7 +19,7 @@ static const char* szKey_VPWidth			= "_viewport_width";
 static const char* szKey_VPHeight			= "_viewport_height";
 static const char* szKey_VPOffsX			= "_viewport_offsx";
 static const char* szKey_VPOffsY			= "_viewport_offsy";
-static const char* szKey_fullscreen			= "_fullscreen";
+static const char* szKey_fullscreen			= "_fullscreen";		// TODO: Fix variable casing.
 static const char* szKey_mousepad_x			= "_mousepad_x";
 static const char* szKey_mousepad_y			= "_mousepad_y";
 static const char* szKey_mousepad_scale		= "_mousepad_scale";
@@ -146,8 +146,17 @@ void cvgOptions::Apply(json& data)
 			this->carouselEntries.push_back(cdData);
 		}
 	}
+}
 
+int cvgOptions::FindMenuTargetIndex() const
+{
+	for(int i = 0; i < this->feedOpts.size(); ++i)
+	{
+		if(this->feedOpts[i].menuTarg)
+			return i;
+	}
 
+	return -1;
 }
 
 json cvgOptions::RepresentAsJSON() const

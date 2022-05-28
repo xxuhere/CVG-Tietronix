@@ -162,14 +162,32 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnExp_4->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 190.0f, 0.0f, 220.0f);
 	this->ApplyFormButtonStyle(this->btnExp_4);
 	SetButtonStdCols(this->btnExp_4, false);
-	this->btnThreshTy = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdType, UIRect(20, 300, 100, 30), "THRESH:", btnTextSz);
-	this->btnThreshTy->UseDyn()->SetAnchors(0.0f, 0.0f, 0.5f, 0.0f).SetOffsets(0.0f, 300.0f, 0.0f, 330.0f);
-	this->ApplyFormButtonStyle(this->btnThreshTy);
-	SetButtonStdCols(this->btnThreshTy, false);
-	// TODO: Initialize threshold based on starting value.
-	this->btnThreshTog = new UIButton(inspSettingsPlate, UIID::Lase_ThresholdToggle, UIRect(120, 300, 100, 30), "ON", btnTextSz);
-	this->btnThreshTog->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 300.0f, 0.0f, 330.0f);
-	this->ApplyFormButtonStyle(this->btnThreshTog);
+	
+	UIText* threshTxt = new UIText(inspSettingsPlate, -1, "THRESHOLDING", 14, UIRect());
+	threshTxt->SetAllColors(UIColor4(0.0f, 0.0f, 0.0f, 1.0f));
+	threshTxt->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 300.0f, 0.0f, 330.0f);
+
+	this->btnThreshSel_None = new UIButton(inspSettingsPlate, Lase_Threshold_None, UIRect(), "None", 14);
+	this->btnThreshSel_None->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 330.0f, 0.0f, 360.0f);
+	this->ApplyFormButtonStyle(this->btnThreshSel_None);
+	SetButtonStdCols(this->btnThreshSel_None, false);
+	this->btnThreshTog_Simple = new UIButton(inspSettingsPlate, Lase_Threshold_Simple, UIRect(), "Simple", 14 );
+	this->btnThreshTog_Simple->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 360.0f, 0.0f, 390.0f);
+	this->ApplyFormButtonStyle(this->btnThreshTog_Simple);
+	SetButtonStdCols(this->btnThreshTog_Simple, false);
+	this->btnThreshTog_Mean2 = new UIButton(inspSettingsPlate, Lase_Threshold_Mean2, UIRect(), "Mean2", 14);
+	this->btnThreshTog_Mean2->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 390.0f, 0.0f, 420.0f);
+	this->ApplyFormButtonStyle(this->btnThreshTog_Mean2);
+	SetButtonStdCols(this->btnThreshTog_Mean2, false);
+	this->btnThreshTog_Yen = new UIButton(inspSettingsPlate, Lase_Threshold_Yen, UIRect(), "Yen", 14);
+	this->btnThreshTog_Yen->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 420.0f, 0.0f, 450.0f);
+	this->ApplyFormButtonStyle(this->btnThreshTog_Yen);
+	SetButtonStdCols(this->btnThreshTog_Yen, false);
+	this->btnThreshTog_YenSimple = new UIButton(inspSettingsPlate, Lase_Threshold_YenSimple, UIRect(), "Yen Simple", 14);
+	this->btnThreshTog_YenSimple->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 450.0f, 0.0f, 480.0f);
+	this->ApplyFormButtonStyle(this->btnThreshTog_YenSimple);
+	SetButtonStdCols(this->btnThreshTog_YenSimple, false);
+	
 	
 	//
 	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
@@ -238,7 +256,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->horizontalFloatingUISys.push_back(this->plateSliderOpacity);
 	}
 	{	
-		this->plateSliderThresh = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_SlideThresh,	"Thresh", 0.0f, 1.0f, 0.25f, UIRect());
+		this->plateSliderThresh = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_SlideThresh,	"Thresh", 0.0f, 255.0f, 127.0f, UIRect(), &this->sliderThresh);
 		this->horizontalFloatingUISys.push_back(this->plateSliderThresh);
 		this->plateSliderDispup = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_DispUp,		"DispUp", 0.0f, 1.0f, 0.25f, UIRect());
 		this->horizontalFloatingUISys.push_back(this->plateSliderDispup);
@@ -500,7 +518,55 @@ void StateHMDOp::EnteredActive()
 	this->mdsLeft.Reset();
 	this->mdsMiddle.Reset();
 	this->mdsRight.Reset();
+
+	this->_SyncImageProcessingSetUI();
+	this->_SyncThresholdSlider();
 } 
+
+void StateHMDOp::_SyncImageProcessingSetUI()
+{
+	// Initialize the buttons states for the thresholding options
+	// to match the app's current state.
+	int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+	if(targIdx == -1)
+		return;
+
+	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+	ProcessingType pt = cmgr.GetProcessingType(targIdx);
+	switch(pt)
+	{
+	case ProcessingType::None:
+		this->DoThresholdButton(UIID::Lase_Threshold_None, ProcessingType::None, true);
+		break;
+
+	case ProcessingType::static_threshold:
+		this->DoThresholdButton(UIID::Lase_Threshold_Simple, ProcessingType::static_threshold, true);
+		break;
+
+	case ProcessingType::two_stdev_from_mean:
+		this->DoThresholdButton(UIID::Lase_Threshold_Mean2, ProcessingType::two_stdev_from_mean, true);
+		break;
+
+	case ProcessingType::yen_threshold:
+		this->DoThresholdButton(UIID::Lase_Threshold_Yen, ProcessingType::yen_threshold, true);
+		break;
+
+	case ProcessingType::yen_threshold_compressed:
+		this->DoThresholdButton(UIID::Lase_Threshold_YenSimple, ProcessingType::yen_threshold_compressed, true);
+		break;
+	}
+}
+
+void StateHMDOp::_SyncThresholdSlider()
+{
+	// NOTE: We may change this to a function that syncronizes everything
+	int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+	if(targIdx == -1)
+		return;
+
+	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+	this->sliderThresh->SetCurValue(cmgr.GetFloat(targIdx, StreamParams::StaticThreshold));
+}
 
 void StateHMDOp::ExitedActive() 
 {
@@ -798,7 +864,8 @@ UIPlate* StateHMDOp::CreateSliderSystem(
 	float minVal,
 	float maxVal,
 	float startingVal,
-	const UIRect& r)
+	const UIRect& r,
+	UIHSlider** outSlider)
 {
 	struct $_
 	{
@@ -843,7 +910,33 @@ UIPlate* StateHMDOp::CreateSliderSystem(
 
 	$_::UpdateText(slider, valText);
 
+	if(outSlider != nullptr)
+		*outSlider = slider;
+
 	return retPlate;
+}
+
+void StateHMDOp::DoThresholdButton(int idxButton, ProcessingType type, bool skipSet)
+{
+	int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+	if(skipSet || targIdx != -1)
+	{
+		CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+		if(skipSet || cmgr.SetProcessingType(targIdx, type))
+		{
+			UpdateGroupColorSet(
+				idxButton, 
+				{
+					this->btnThreshSel_None, 
+					this->btnThreshTog_Simple, 
+					this->btnThreshTog_Mean2, 
+					this->btnThreshTog_Yen,
+					this->btnThreshTog_YenSimple
+				}, 
+				colSetButtonTog,
+				colSetButton);
+		}
+	}
 }
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)
@@ -951,10 +1044,24 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			colSetButton);
 		break;
 
-	case UIID::Lase_ThresholdType:
+	case UIID::Lase_Threshold_None:
+		this->DoThresholdButton(UIID::Lase_Threshold_None, ProcessingType::None);
 		break;
 
-	case UIID::Lase_ThresholdToggle:
+	case UIID::Lase_Threshold_Simple:
+		this->DoThresholdButton(UIID::Lase_Threshold_Simple, ProcessingType::static_threshold);
+		break;
+
+	case UIID::Lase_Threshold_Mean2:
+		this->DoThresholdButton(UIID::Lase_Threshold_Mean2, ProcessingType::two_stdev_from_mean);
+		break;
+
+	case UIID::Lase_Threshold_Yen:
+		this->DoThresholdButton(UIID::Lase_Threshold_Yen, ProcessingType::yen_threshold);
+		break;
+
+	case UIID::Lase_Threshold_YenSimple:
+		this->DoThresholdButton(UIID::Lase_Threshold_YenSimple, ProcessingType::yen_threshold_compressed);
 		break;
 
 	case UIID::CamSet_Exposure:
@@ -1000,5 +1107,23 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 	case UIID::CamSet_Calibrate_Slider:
 		break;
 
+	}
+}
+
+void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
+{
+	int uiId = uib->Idx();
+	switch(uiId)
+	{
+	case UIID::CamSet_Threshold_SlideThresh:
+		{
+			int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+			if(targIdx == -1)
+				return;
+
+			CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+			cmgr.SetFloat(targIdx, StreamParams::StaticThreshold, value);
+		}
+		break;
 	}
 }

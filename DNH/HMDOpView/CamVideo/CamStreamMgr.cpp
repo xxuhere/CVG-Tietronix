@@ -242,3 +242,22 @@ bool CamStreamMgr::Shutdown()
 	this->cams.clear();
 	 return true;
 }
+
+
+float CamStreamMgr::GetFloat(int id, StreamParams paramid)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return -1.0f;
+
+	return this->cams[id]->GetFloat(paramid);
+}
+
+bool CamStreamMgr::SetFloat(int id, StreamParams paramid, float value)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return false;
+
+	return this->cams[id]->SetFloat(paramid, value);
+}

@@ -166,7 +166,7 @@ void UIVBulkSlider::SetCurValue(float value)
 		return;
 
 	this->curVal = value;
-	this->SubmitValue(VID::Value, this->curVal);
+	this->SubmitValue(this->curVal, VID::Value);
 	this->FlagContentsDirty();
 
 	if(this->onSlide)

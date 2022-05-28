@@ -23,6 +23,7 @@ json cvgCamFeedSource::AsJSON() const
 	ret["pipe_width"	] = this->pipeWidth;
 	ret["pipe_height"	] = this->pipeHeight;
 	ret["static_img"	] = this->staticImagePath;
+	ret["menu_targ"		] = this->menuTarg;
 
 	if(this->processing == ProcessingType::static_threshold)
 		ret["processing"] = this->thresholdExplicit;
@@ -67,6 +68,9 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains("static_img") && js["static_img"].is_string())
 		this->staticImagePath = js["static_img"];
+
+	if(js.contains("menu_targ") && js["menu_targ"].is_boolean())
+		this->menuTarg = js["menu_targ"];
 
 	if (js.contains("processing"))
 	{

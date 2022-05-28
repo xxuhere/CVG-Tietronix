@@ -210,6 +210,10 @@ public:
 	/// <param name="pt">The camera's new processing type.</param>
 	bool SetProcessingType(int idx, ProcessingType pt);
 
+	float GetFloat(int id, StreamParams paramid);
+
+	bool SetFloat(int id, StreamParams paramid, float value);
+
 private:
 	// Only the singleton systems should be in charge of its construction.
 	CamStreamMgr();

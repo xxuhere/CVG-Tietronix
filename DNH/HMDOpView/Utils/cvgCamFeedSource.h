@@ -104,6 +104,12 @@ public:
 	std::optional<VideoPollType> linuxOverRidePoll;
 
 	/// <summary>
+	/// If true, then the camera will be the target of what the
+	/// threshold menu controls.
+	/// </summary>
+	bool menuTarg = false;
+
+	/// <summary>
 	/// Get the polling method to use for the application. Takes into 
 	/// account platform overrides and the current platform.
 	/// </summary>

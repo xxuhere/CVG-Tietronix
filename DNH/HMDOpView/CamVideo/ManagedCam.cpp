@@ -728,6 +728,29 @@ ProcessingType ManagedCam::GetProcessingType() const
 	return this->camOptions.processing;
 }
 
+float ManagedCam::GetFloat( StreamParams paramid)
+{
+	switch(paramid)
+	{
+	case StreamParams::StaticThreshold:
+		return this->camOptions.thresholdExplicit;
+		break;
+	}
+
+	return -1.0f;
+}
+
+bool ManagedCam::SetFloat( StreamParams paramid, float value)
+{
+	switch(paramid)
+	{
+	case StreamParams::StaticThreshold:
+		this->camOptions.thresholdExplicit = (int)std::clamp(value, 0.0f, 255.0f);
+		return true;
+	}
+	return false;
+}
+
 bool ManagedCam::SetProcessingType(ProcessingType pt)
 {
 	this->camOptions.processing = pt;

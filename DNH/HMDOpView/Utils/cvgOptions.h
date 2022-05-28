@@ -118,6 +118,15 @@ public:
 	void Apply(json& data);
 
 	/// <summary>
+	/// Check what camera index is designated the menu target. This
+	/// will be the first entry found to have menuTarg set to true.
+	/// </summary>
+	/// <returns>
+	/// The index found to be the menu target, or -1 if none was found.
+	/// </returns>
+	int FindMenuTargetIndex() const;
+
+	/// <summary>
 	/// Get the object's data as a JSON object.
 	/// </summary>
 	json RepresentAsJSON() const;

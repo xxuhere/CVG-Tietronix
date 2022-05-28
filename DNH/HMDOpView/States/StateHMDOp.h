@@ -67,8 +67,11 @@ public:
 		Lase_Exposure_2,
 		Lase_Exposure_3,
 		Lase_Exposure_4,
-		Lase_ThresholdType,
-		Lase_ThresholdToggle,
+		Lase_Threshold_None,
+		Lase_Threshold_Simple,
+		Lase_Threshold_Mean2,
+		Lase_Threshold_Yen,
+		Lase_Threshold_YenSimple,
 		// Camera Settings
 		CamSet_Exposure,
 		CamSet_Disparity,
@@ -238,8 +241,12 @@ public:
 	UIButton* btnExp_2			= nullptr;
 	UIButton* btnExp_3			= nullptr;
 	UIButton* btnExp_4			= nullptr;
-	UIButton* btnThreshTy		= nullptr;
-	UIButton* btnThreshTog		= nullptr;
+
+	UIButton* btnThreshSel_None			= nullptr;
+	UIButton* btnThreshTog_Simple		= nullptr;
+	UIButton* btnThreshTog_Mean2		= nullptr;
+	UIButton* btnThreshTog_Yen			= nullptr;
+	UIButton* btnThreshTog_YenSimple	= nullptr;
 
 	UIPlate* plateSliderCalibrate	= nullptr;
 
@@ -267,6 +274,7 @@ public:
 
 	UIPlate* plateSliderOpacity		= nullptr;
 	UIPlate* plateSliderThresh		= nullptr;
+	UIHSlider* sliderThresh			= nullptr;
 	UIPlate* plateSliderDispup		= nullptr;
 
 	/// <summary>
@@ -295,6 +303,10 @@ public:
 	/// </summary>
 	/// <param name="rectDrawAround"></param>
 	void DrawMenuSystemAroundRect(const cvgRect& rectDrawAround);
+
+protected:
+	void _SyncImageProcessingSetUI();
+	void _SyncThresholdSlider();
 
 public:
 	/// <summary>
@@ -381,6 +393,9 @@ public:
 	/// <param name="r">
 	/// The local pos/size of the UI system.
 	/// </param>
+	/// <param name="outSlider">
+	/// Options output parameter to get access to the created slider
+	/// </param>
 	/// <returns>The root plate of the UI system.</returns>
 	UIPlate* CreateSliderSystem(
 		UIBase* parent, 
@@ -389,7 +404,8 @@ public:
 		float minVal,
 		float maxVal,
 		float startingVal,
-		const UIRect& r);
+		const UIRect& r,
+		UIHSlider** outSlider = nullptr);
 
 	~StateHMDOp();
 
@@ -410,11 +426,14 @@ protected:
 	/// <param name="uib">The UI widget to set the style for.</param>
 	void ApplyFormButtonStyle(UIGraphic* uib);
 
+	void DoThresholdButton(int idxButton, ProcessingType type, bool skipSet = false);
+
 public:
 
 	//		UISink overrides
 	//
 	//////////////////////////////////////////////////
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
+	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
 
 };

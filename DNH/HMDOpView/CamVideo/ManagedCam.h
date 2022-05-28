@@ -17,6 +17,11 @@
 #include <memory>
 #include <vector>
 
+enum StreamParams
+{
+	StaticThreshold
+};
+
 /// <summary>
 /// A video streaming (usually from a camera/webcam) class. This system
 /// will poll a video stream (See ICamImpl for more details) in a thread
@@ -421,6 +426,10 @@ public:
 	/// successful/valid.
 	/// </return>
 	bool SetProcessingType(ProcessingType pt);
+
+	float GetFloat( StreamParams paramid);
+
+	bool SetFloat( StreamParams paramid, float value);
 	
 
 	//////////////////////////////////////////////////
