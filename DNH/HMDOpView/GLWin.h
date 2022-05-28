@@ -71,6 +71,13 @@ public:
 	bool fullscreen				= true;
 	bool initStaticResources	= false;
 
+	/// <summary>
+	/// This is a cache of what was last loaded from the AppOptions.
+	/// This will not be the actual data used during runtime. That will
+	/// be the Carousel used in StateHMDOp.
+	/// </summary>
+	std::vector<CarouselData> lastLoadedCarousel;
+
 protected:
 	void _SetupGLDimensions();
 
@@ -90,6 +97,8 @@ public:
 	void InitializeOptions();
 	void LoadHMDAppOptions();
 	void LoadHMDAppOptions(const cvgOptions& opts);
+	void SaveOptions();
+	void SaveOptions(const std::string& saveFilepath) const;
 
 	/// <summary>
 	/// Called by MainWin when the GLWin is initialized with a valid

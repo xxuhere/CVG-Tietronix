@@ -2,6 +2,13 @@
 
 class UIRect;
 
+// NOTE: The codebase is currently at c++2017. As of writing this comment,
+// std::lerp is too new to use because it's a C++2020 function.
+inline float Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
 /// <summary>
 /// 2D vector.
 /// </summary>
@@ -68,5 +75,12 @@ public:
 	/// Set both the x and y component to 0.0f.
 	/// </summary>
 	void SetZero();
+
+	inline static UIVec2 Lerp(const UIVec2& a, const UIVec2& b, float t)
+	{
+		return UIVec2(
+			::Lerp(a.x, b.x, t),
+			::Lerp(a.y, b.y, t));
+	}
 
 };

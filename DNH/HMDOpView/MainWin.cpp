@@ -12,6 +12,7 @@
 
 wxBEGIN_EVENT_TABLE(MainWin, wxFrame)
 	EVT_MENU		(wxID_EXIT,  MainWin::OnExit)
+	EVT_MENU		(wxID_SAVE,  MainWin::OnAccelerator_SaveCurOptions)
 	EVT_SET_FOCUS	(MainWin::OnFocus			)
 	EVT_SIZE		(MainWin::OnResize			)	
 wxEND_EVENT_TABLE()
@@ -64,6 +65,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//////////////////////////////////////////////////
 	std::vector<wxAcceleratorEntry> entries;
 	entries.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_F4, wxID_EXIT));
+	entries.push_back(wxAcceleratorEntry(wxACCEL_CTRL, 'S', wxID_SAVE));
 
 	// Setup Alt+F4 to exit the app (we lost that when we stripped the app
 	// to be bare-bone since that keyboard accelerator was originally handled
@@ -293,4 +295,10 @@ void MainWin::OnExit(wxCommandEvent& event)
 	this->innerGLWin->ReleaseStaticGraphicResources();
 	this->States_AppShutdown();
 	this->Close( true );
+}
+
+void MainWin::OnAccelerator_SaveCurOptions(wxCommandEvent& evt)
+{
+	std::cout << "Pressed shortcut key to overwrite AppOptions." << std::endl;
+	this->innerGLWin->SaveOptions();
 }

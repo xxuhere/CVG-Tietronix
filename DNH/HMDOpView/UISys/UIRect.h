@@ -85,6 +85,8 @@ public:
 	/// </summary>
 	void GLQuad() const;
 
+	void GLQuad(const UIVec2& offs) const;
+
 	/// <summary>
 	/// Function name is a misnomer, does not use OpenGL - 
 	/// this function is somewhat the equivalent of GLQuad(), but 
@@ -99,10 +101,14 @@ public:
 	/// </summary>
 	void GLLineLoop() const;
 
+	void GLLineLoop(const UIVec2& offs) const;
+
 	/// <summary>
 	/// Draw the object as a textured quad using OpenGL And GL_QUADS.
 	/// </summary>
 	void GLQuadTex() const;
+
+	void GLQuadTex(const UIVec2& offs) const;
 
 	/// <summary>
 	/// Function is a misnomer, does not use OpenGL -
@@ -123,4 +129,13 @@ public:
 
 	bool operator== (const UIRect& o) const;
 	bool operator!= (const UIRect& o) const;
+
+	inline static UIRect Lerp(const UIRect& a, const UIRect& b, float t)
+	{
+		return UIRect(
+			::Lerp(a.pos.x, b.pos.x, t),
+			::Lerp(a.pos.y, b.pos.y, t),
+			::Lerp(a.dim.x, b.dim.x, t),
+			::Lerp(a.dim.y, b.dim.y, t));
+	}
 };

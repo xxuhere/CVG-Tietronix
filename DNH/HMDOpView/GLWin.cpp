@@ -122,7 +122,7 @@ void GLWin::InitializeOptions()
 		// but either way if we save whatever is inside of it,
 		// the file and our options will match.
 		std::cout << "Creating default options file at " << szConfigLocation << std::endl;
-		this->cachedOptions.SaveToFile(szConfigLocation);
+		this->SaveOptions(szConfigLocation);
 	}
 	this->LoadHMDAppOptions();
 }
@@ -146,9 +146,16 @@ void GLWin::LoadHMDAppOptions(const cvgOptions& opts)
 	UISys::ToggleDebugView(opts.drawUIDebug);
 	//
 	this->fullscreen	= opts.fullscreen;
+}
 
+void GLWin::SaveOptions(const std::string& saveFilepath) const
+{
+	this->cachedOptions.SaveToFile(saveFilepath);
+}
 
-	// NOTE: Viewport offsets are not implemented yet.
+void GLWin::SaveOptions()
+{
+	this->SaveOptions(wxGetApp().appOptionsLoc);
 }
 
 void GLWin::OnResize(wxSizeEvent& evt)

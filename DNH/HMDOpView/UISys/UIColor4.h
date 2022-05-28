@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UIVec2.h" // Bring in ::Lerp()
+
 /// <summary>
 /// 4 component color representation.
 /// </summary>
@@ -46,6 +48,15 @@ public:
 	inline void SetColor_FMagenta()	{ this->Set(1.0f, 1.0f, 0.0f); }
 
 	bool operator== (const UIColor4& o) const;
+
+	inline static UIColor4 Lerp(const UIColor4& a, const UIColor4& b, float t)
+	{
+		return UIColor4(
+			::Lerp(a.r, b.r, t),
+			::Lerp(a.g, b.g, t),
+			::Lerp(a.b, b.b, t),
+			::Lerp(a.a, b.a, t));
+	}
 };
 
 /// <summary>

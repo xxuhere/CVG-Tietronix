@@ -209,6 +209,8 @@ public:
     void OnResize(wxSizeEvent& evt);
     void OnExit(wxCommandEvent& evt);
 
+    void OnAccelerator_SaveCurOptions(wxCommandEvent& evt);
+
 protected:
     wxDECLARE_EVENT_TABLE();
 };

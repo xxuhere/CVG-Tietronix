@@ -11,6 +11,7 @@
 #include "../UISys/UIText.h"
 #include "../UISys/UIVBulkSlider.h"
 #include "../UISys/UIHSlider.h"
+#include "../Carousel/Carousel.h"
 
 class UIButton;
 
@@ -282,6 +283,9 @@ public:
 	/// them all, we can just blindly iterate through the elements of this vector.
 	/// </summary>
 	std::vector<UIBase*> horizontalFloatingUISys;
+
+	CarouselStyle carouselStyle;
+	Carousel carousel;
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);

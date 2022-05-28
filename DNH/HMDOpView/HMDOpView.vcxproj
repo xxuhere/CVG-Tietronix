@@ -158,6 +158,7 @@
     <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\SnapRequest.h" />
     <ClInclude Include="CamVideo\VideoRequest.h" />
+    <ClInclude Include="Carousel\Carousel.h" />
     <ClInclude Include="FontMgr.h" />
     <ClInclude Include="glext.h" />
     <ClInclude Include="GLWin.h" />
@@ -193,6 +194,7 @@
     <ClInclude Include="UISys\UIText.h" />
     <ClInclude Include="UISys\UIVBulkSlider.h" />
     <ClInclude Include="UISys\UIVec2.h" />
+    <ClInclude Include="Utils\CarouselData.h" />
     <ClInclude Include="Utils\cvgAssert.h" />
     <ClInclude Include="Utils\cvgCamFeedSource.h" />
     <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
@@ -217,6 +219,7 @@
     <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\SnapRequest.cpp" />
     <ClCompile Include="CamVideo\VideoRequest.cpp" />
+    <ClCompile Include="Carousel\Carousel.cpp" />
     <ClCompile Include="FontMgr.cpp" />
     <ClCompile Include="GLWin.cpp" />
     <ClCompile Include="Hardware\HardwareMgr.cpp" />
@@ -247,6 +250,7 @@
     <ClCompile Include="UISys\UIVBulkSlider.cpp" />
     <ClCompile Include="UISys\UIVec2.cpp" />
     <ClCompile Include="UISys\UIHSlider.cpp" />
+    <ClCompile Include="Utils\CarouselData.cpp" />
     <ClCompile Include="Utils\cvgCamFeedSource.cpp" />
     <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
     <ClCompile Include="Utils\cvgOptions.cpp" />

@@ -63,7 +63,11 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this)
 {
-
+	//////////////////////////////////////////////////
+	//
+	//		LOAD COMMON ASSETS
+	//
+	//////////////////////////////////////////////////
 	this->texSliderSysPos = TexObj::MakeSharedLODE("Circle_Pos.png");
 	this->texSliderSysNeg = TexObj::MakeSharedLODE("Circle_Neg.png");
 
@@ -78,6 +82,12 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->ninePatchSmallCircle = NinePatcher::MakeFromPixelsMiddle(this->patch_smallCircle);
 
 	
+	//////////////////////////////////////////////////
+	//
+	//		CONSTRUCT RETAINED UI HEIRARCHY
+	//
+	//////////////////////////////////////////////////
+
 	const int btnTextSz = 14.0f;
 
 	// Build elements for the right menu bar
@@ -114,7 +124,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//
 	this->inspSetFrame = new UIPlate(this->inspSettingsPlate, -1, UIRect());
 	this->inspSetFrame->SetMode_Outline();
-	this->inspSetFrame->UseDyn()->AnchorsTop().SetOffsets(10.0f, titleHeight, -10.0f, 250.0f);
+	this->inspSetFrame->UseDyn()->AnchorsTop().SetOffsets(10.0f, titleHeight, -10.0f, 280.0f);
 	// TODO:
 	// this->inspSetFrame->filled = false;
 	this->inspSetFrame->SetAllColors(UIColor4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -390,6 +400,8 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 	this->uiSys.AlignSystem();
 	this->uiSys.Render();
+
+	this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
 }
 
 // NOTE: This function has been greatly reduce from its original purpose.
@@ -442,6 +454,7 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 	}
 }
 
+
 void StateHMDOp::Update(double dt)
 {
 	if(this->inspectorShow == true)
@@ -467,6 +480,8 @@ void StateHMDOp::Update(double dt)
 	this->btnAlign->Show(showRButtons);
 	this->btnCamSets->Show(showRButtons);
 	this->btnBack->Show(showRButtons);
+
+	this->carousel.Update(this->carouselStyle, dt);
 }
 
 void StateHMDOp::EnteredActive()
@@ -496,6 +511,9 @@ void StateHMDOp::ExitedActive()
 void StateHMDOp::Initialize() 
 {
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
+
+	this->carousel.Append(this->GetView()->cachedOptions.carouselEntries);
+	this->carousel.LoadAssets();
 }
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
@@ -520,6 +538,12 @@ void StateHMDOp::OnKeydown(wxKeyCode key)
 		this->GetCoreWindow()->StopRecording(0);
 	else if(key == WXK_NUMPAD2	|| key == WXK_NUMPAD_DOWN)
 		this->GetCoreWindow()->StopRecording(1);
+
+	else if(key == WXK_LEFT)
+		this->carousel.GotoPrev();
+	else if(key == WXK_RIGHT)
+		this->carousel.GotoNext();
+	
 
 	// Keyboard shortcut for the pull-out menu
 	else if(key == WXK_NUMPAD_ENTER)

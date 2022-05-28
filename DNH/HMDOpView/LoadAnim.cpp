@@ -14,12 +14,6 @@ bool LoadAnim::allLoaded = false;
 
 #define DIVF255(x) (x / 255.0f)
 
-// NOTE: The codebase is currently at c++2017. As of writing this comment,
-// std::lerp is too new to use because it's a C++2020 function.
-inline float Lerp(float a, float b, float t)
-{
-	return a + (b-a) * t;
-}
 
 std::vector<LoadAnim::LoadTarg> LoadAnim::GetLoadTargs()
 {

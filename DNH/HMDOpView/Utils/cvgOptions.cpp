@@ -24,9 +24,11 @@ static const char* szKey_mousepad_x			= "_mousepad_x";
 static const char* szKey_mousepad_y			= "_mousepad_y";
 static const char* szKey_mousepad_scale		= "_mousepad_scale";
 static const char* szKey_debugUI			= "_debug_ui";
-static const char* szkey_FeedOpts			= "feed_options";
 
-cvgOptions::cvgOptions(int defSources)
+static const char* szkey_FeedOpts			= "feed_options";
+static const char* szKey_Carousel			= "carousel_options";
+
+cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 {
 	for(int i = 0; i < defSources; ++i)
 	{
@@ -34,6 +36,18 @@ cvgOptions::cvgOptions(int defSources)
 		src.defPoll = VideoPollType::OpenCVUSB_Idx;
 		src.camIndex = i;
 		this->feedOpts.push_back(src);
+	}
+
+	if(sampleCarousels)
+	{ 
+		// Hardcode some example carousel items
+		//
+		// Note that this does mean these sample files, even if we never intend
+		// for them to be used during operation, MUST ALWAYS EXIST in case the
+		// default carousel items are used.
+		this->carouselEntries.push_back(CarouselData( "E1", "CarIco_Sample1.png", "SAM1", "Sample 1"));
+		this->carouselEntries.push_back(CarouselData( "E2", "CarIco_Sample2.png", "SAM2", "Sample 2"));
+		this->carouselEntries.push_back(CarouselData( "E3", "CarIco_Sample3.png", "SAM3", "Sample 3"));
 	}
 }
 
@@ -117,6 +131,23 @@ void cvgOptions::Apply(json& data)
 			this->feedOpts.push_back(src);
 		}
 	}
+
+	if(data.contains(szKey_Carousel) && data[szKey_Carousel].is_array())
+	{
+		for(const json& jsCarOpt : data[szKey_Carousel])
+		{
+			if(!jsCarOpt.is_object())
+				continue;
+
+			CarouselData cdData;
+			if(!cdData.ApplyJSON(jsCarOpt)) // TODO: better error notification
+				continue;
+
+			this->carouselEntries.push_back(cdData);
+		}
+	}
+
+
 }
 
 json cvgOptions::RepresentAsJSON() const
@@ -129,6 +160,9 @@ json cvgOptions::RepresentAsJSON() const
 	//
 	json ret = json::object();
 	ret[szKey_Comment	]		= "Application data used by the HMDOp application. See cvgOptions.h and cvgCamFeedSource.h for more info.";
+
+	//		DIRECT DOCUMENT ROOT ELEMENTS
+	//////////////////////////////////////////////////
 
 	// Semantic versioning, so we have to option to check reverse
 	// compatibility with these option files in the future.
@@ -147,12 +181,21 @@ json cvgOptions::RepresentAsJSON() const
 
 	ret[szKey_fullscreen]		= this->fullscreen;
 
+	//		VIDEO FEED ENTRIES
+	//////////////////////////////////////////////////
 	json feedOpts = json::array();
 	for(const cvgCamFeedSource& feedSrc: this->feedOpts)
 		feedOpts.push_back(feedSrc.AsJSON());
 	
 	ret[szkey_FeedOpts] = feedOpts;
 
+	//		CAROUSEL ENTRIES
+	//////////////////////////////////////////////////
+	json carouselOpts = json::array();
+	for(const CarouselData& car: this->carouselEntries)
+		carouselOpts.push_back(car.AsJSON());
+
+	ret[szKey_Carousel] = carouselOpts;
 
 	return ret;
 }
@@ -160,5 +203,5 @@ json cvgOptions::RepresentAsJSON() const
 void cvgOptions::Clear()
 {
 	// Take default values from default constructor.
-	*this = cvgOptions(0);
+	*this = cvgOptions(0, false);
 }

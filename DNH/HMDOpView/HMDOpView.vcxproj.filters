@@ -55,6 +55,12 @@
     <Filter Include="Header Files\UISys">
       <UniqueIdentifier>{28eb28a5-2cf3-4b9e-9b87-37cfc814cd7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Carousel">
+      <UniqueIdentifier>{578cb909-5740-41ee-bb41-f601f58c602a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Carousel">
+      <UniqueIdentifier>{dbf5c8a0-ed1a-4ccb-8499-dc8d857cf49c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -228,6 +234,12 @@
     <ClInclude Include="UISys\UIGraphic.h">
       <Filter>Header Files\UISys</Filter>
     </ClInclude>
+    <ClInclude Include="Carousel\Carousel.h">
+      <Filter>Header Files\Carousel</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\CarouselData.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -382,6 +394,12 @@
     </ClCompile>
     <ClCompile Include="UISys\UIGraphic.cpp">
       <Filter>Source Files\UISys</Filter>
+    </ClCompile>
+    <ClCompile Include="Carousel\Carousel.cpp">
+      <Filter>Source Files\Carousel</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\CarouselData.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

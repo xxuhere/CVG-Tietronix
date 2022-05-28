@@ -2,11 +2,11 @@
 
 #include "nlohmann/json.hpp"
 #include "cvgCamFeedSource.h"
+#include "CarouselData.h"
 #include <string>
 #include <vector>
 
 using json = nlohmann::json;
-
 
 /// <summary>
 /// Funtion to manage options in the HMD app that can be
@@ -90,8 +90,10 @@ public:
 	/// </summary>
 	std::vector<cvgCamFeedSource> feedOpts;
 
+	std::vector<CarouselData> carouselEntries;
+
 public:
-	cvgOptions(int defSources);
+	cvgOptions(int defSources, bool sampleCarousels = true);
 
 	/// <summary>
 	/// Load an options JSON file into the object.

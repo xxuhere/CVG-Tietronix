@@ -60,6 +60,7 @@ SUBDIR_HARDWARE = Hardware
 SUBDIR_CAMVIDEO = CamVideo
 SUBDIR_CAMIMPL = CamVideo/CamImpl
 SUBDIR_UISYS = UISys
+SUBDIR_CAROUSEL = Carousel
 
 SUBOBJ_MAIN = \
 	FontMgr GLWin HMDOpApp LoadAnim MainWin TexObj OpSession
@@ -71,7 +72,7 @@ SUBOBJ_LODEPNG = \
 	lodepng
 	
 SUBOBJ_UTILS = \
-	cvgCamFeedSource cvgCamTextureRegistry cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
+	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
 	
 SUBOBJ_HARDWARE = \
 	HardwareMgr IHardware LaserSys
@@ -85,6 +86,9 @@ SUBOBJ_CAMIMPL = \
 SUBOBJ_UISYS = \
 	CacheRecordUtils DynSize NinePatcher UIBase UIButton UIColor4 UIGraphic UIHSlider UIPlate UIRect UISink UISys UIText UIVBulkSlider UIVec2
 	
+SUBOBJ_CAROUSEL = \
+	Carousel
+	
 
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))
@@ -94,6 +98,7 @@ EXPOBJS_HARDWARE = $(patsubst %,$(SUBDIR_HARDWARE)/%.o,$(SUBOBJ_HARDWARE))
 EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
 EXPOBJS_CAMIMPL = $(patsubst %,$(SUBDIR_CAMIMPL)/%.o,$(SUBOBJ_CAMIMPL))
 EXPOBJS_UISYS = $(patsubst %,$(SUBDIR_UISYS)/%.o,$(SUBOBJ_UISYS))
+EXPOBJS_CAROUSEL = $(patsubst %,$(SUBDIR_CAROUSEL)/%.o,$(SUBOBJ_CAROUSEL))
 
 ##################################################
 #
@@ -120,7 +125,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking HMDOpView archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+	ar -rsc hmdopview.a $(EXPOBJS_CAROUSEL) $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -140,7 +145,7 @@ moves:
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I/opt/vc/include/ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(VEND_ALLINCLUDES)
 
-objs: $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	@echo "TARGET objs"
 
 .PHONY: clean

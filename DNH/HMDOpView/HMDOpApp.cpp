@@ -21,7 +21,12 @@ bool HMDOpApp::OnInit()
         break;
     }
 
-    MainWin *frame = new MainWin( "CVG HMD Operator View", wxPoint(50, 50), wxSize(450, 340) );
+    MainWin *frame = 
+        new MainWin( 
+            "CVG HMD Operator View", 
+            wxPoint(50, 50), 
+            wxSize(450, 340) );
+
     return true;
 }
 

@@ -29,6 +29,14 @@ void FontWU::RenderFont(const char * sz, float x, float y)
 	glPopMatrix();
 }
 
+void FontWU::_RenderFontRaw(const char* sz)
+{
+	if(!this->valid)
+		return;
+
+	this->font->Render(sz, -1);
+}
+
 void FontWU::RenderFontCenter(const char * sz, float x, float y, bool vertCenter)
 {
 	float adv = this->GetAdvance(sz);

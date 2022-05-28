@@ -71,6 +71,19 @@ void UIRect::GLQuad() const
 	glEnd();
 }
 
+void UIRect::GLQuad(const UIVec2& offs) const
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	glBegin(GL_QUADS);
+		glVertex2f(offs.x + this->pos.x,	offs.y + this->pos.y);
+		glVertex2f(offs.x + right,			offs.y + this->pos.y);
+		glVertex2f(offs.x + right,			offs.y + bottom );
+		glVertex2f(offs.x + this->pos.x,	offs.y + bottom );
+	glEnd();
+}
+
 void UIRect::GLQuad(std::vector<UIVec2>& outPts) const
 {
 	float right = this->pos.x + this->dim.x;
@@ -95,6 +108,19 @@ void UIRect::GLLineLoop() const
 	glEnd();
 }
 
+void UIRect::GLLineLoop(const UIVec2& offs) const
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	glBegin(GL_LINE_LOOP);
+		glVertex2f(offs.x + this->pos.x,	offs.y + this->pos.y);
+		glVertex2f(offs.x + right,			offs.y + this->pos.y);
+		glVertex2f(offs.x + right,			offs.y + bottom );
+		glVertex2f(offs.x + this->pos.x,	offs.y + bottom );
+	glEnd();
+}
+
 void UIRect::GLQuadTex() const
 {
 	float right = this->pos.x + this->dim.x;
@@ -112,6 +138,26 @@ void UIRect::GLQuadTex() const
 		//
 		glTexCoord2f(0.0f, 1.0f);
 		glVertex2f(this->pos.x,		bottom);
+	glEnd();
+}
+
+void UIRect::GLQuadTex(const UIVec2& offs) const
+{
+	float right = this->pos.x + this->dim.x;
+	float bottom = this->pos.y + this->dim.y;
+
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex2f(offs.x + this->pos.x,	offs.y + this->pos.y);
+		//
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex2f(offs.x + right,			offs.y + this->pos.y);
+		//
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex2f(offs.x + right,			offs.y + bottom);
+		//
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex2f(offs.x + this->pos.x,	offs.y + bottom);
 	glEnd();
 }
 
