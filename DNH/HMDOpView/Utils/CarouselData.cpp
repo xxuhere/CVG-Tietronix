@@ -35,7 +35,7 @@ bool CarouselData::ApplyJSON(const json& js)
 	bool allParsed = true;
 
 	if(js.contains(szJSKey_ID) && js[szJSKey_ID].is_string())
-		this->id = szJSKey_ID;
+		this->id = js[szJSKey_ID];
 	else
 		allParsed = false;
 
