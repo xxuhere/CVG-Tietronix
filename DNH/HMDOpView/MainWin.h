@@ -212,5 +212,9 @@ public:
     void OnAccelerator_SaveCurOptions(wxCommandEvent& evt);
 
 protected:
+
+    std::string EnsureAndGetCapturesFolder() const;
+
+protected:
     wxDECLARE_EVENT_TABLE();
 };

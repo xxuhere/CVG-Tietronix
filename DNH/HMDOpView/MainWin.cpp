@@ -129,15 +129,50 @@ void MainWin::ClearFinishedRecordings()
 	}
 }
 
+std::string MainWin::EnsureAndGetCapturesFolder() const
+{
+	std::string folderLoc = 
+		std::string("Captures/") + this->opSession.GenerateSessionPrefix();
+
+	// Check if the subfolders exist, if not, make them ahead of time.
+	// NOTE: This is just creating the request. We may want to defer this
+	// to when the requests are actually handled. 
+	//
+	// We don't rely on the return value of wxMkDir. For some reason it's
+	// always failing even when it creates a valid folder. Instead we 
+	// recheck the existence of the folder.
+	if(!wxDirExists("Captures"))
+	{
+		wxMkDir("Captures");
+		if(!wxDirExists("Captures"))
+			return "";
+	}
+
+	if(!wxDirExists(folderLoc))
+	{
+		wxMkDir(folderLoc);
+		if(!wxDirExists(folderLoc))
+			return "";
+	}
+
+	return folderLoc;
+}
+
 SnapRequest::SPtr MainWin::RequestSnap(int idx, const std::string& prefix)
 {
 	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
 	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
 		return SnapRequest::MakeRequest("_badreq_");
 
+	
+
+	std::string folderLoc = this->EnsureAndGetCapturesFolder();
+	if(folderLoc.empty())
+		return SnapRequest::MakeRequest("Could not allocate capture session folder");
+
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << "Snap_" << prefix << this->opSession.sessionName << this->snapCtr << ".png";
+	sstrmFilepath << folderLoc << "/Snap_" << prefix << this->opSession.sessionName << this->snapCtr << ".png";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;
@@ -154,9 +189,13 @@ VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)
 	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
 		return VideoRequest::MakeError("_badreq_");
 
+	std::string folderLoc = this->EnsureAndGetCapturesFolder();
+	if(folderLoc.empty())
+		return VideoRequest::MakeError("Could not allocate capture session folder");
+
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << "Video_" << prefix << this->opSession.sessionName << this->videoCtr << ".mkv";
+	sstrmFilepath << folderLoc << "/Video_" << prefix << this->opSession.sessionName << this->videoCtr << ".mkv";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->videoCtr;

@@ -26,4 +26,13 @@ struct OpSession
 		const std::string& last);
 
 	void SetSession(const std::string& session);
+
+	/// <summary>
+	/// Generate a unique string that can represent the session
+	/// as a name valid on file/folder names.
+	/// </summary>
+	/// <returns>
+	/// The valid string, or _invalid_ if there are no valid options.
+	/// </returns>
+	std::string GenerateSessionPrefix() const;
 };
