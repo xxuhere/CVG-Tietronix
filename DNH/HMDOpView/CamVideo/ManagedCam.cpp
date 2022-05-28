@@ -550,16 +550,23 @@ bool ManagedCam::BootupPollingThread(int camIdx)
 
 cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, int threshold)
 {
-	cv::Mat thresholding;
+	cv::Ptr<cv::Mat> grey;
+	if (src->elemSize() != 1)
+	{
+		grey = new cv::Mat();
+		cv::cvtColor(*src, *grey, cv::COLOR_RGBA2GRAY, 0);
+	}
+	else 
+		grey = src;
+
 	cv::threshold(
-		*src,
-		thresholding,
+		*grey,
+		*grey,
 		double(threshold),
 		255,
 		cv::THRESH_BINARY);
 
-	cv::Mat* thresholded = new cv::Mat(thresholding);
-	return thresholded;
+	return grey;
 }
 
 
