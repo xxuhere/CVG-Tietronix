@@ -9,15 +9,17 @@
 
 // The standard colors for buttons
 ColorSetInteractable colSetButton(
-	UIColor4(1.0f, 1.0f, 1.0f),	// White
-	UIColor4(0.5f, 1.0f, 0.5f),	// Green
-	UIColor4(0.7f, 1.0f, 0.7f));// Bright green
+	UIColor4(1.0f, 1.0f, 1.0f),	// NORM:	White
+	UIColor4(0.5f, 1.0f, 0.5f),	// HOVER:	Green
+	UIColor4(0.7f, 1.0f, 0.7f),	// PRESSED:	Bright green
+	UIColor4(0.7f, 1.0f, 0.5f));// SEL:		Orangeish
 
 // The standard colors for buttons that are toggled on
 ColorSetInteractable colSetButtonTog(
-	UIColor4(1.0f, 0.2f, 0.2f),	// Red
-	UIColor4(1.0f, 0.5f, 0.5f),	// Pink
-	UIColor4(1.0f, 0.7f, 0.7f));// Bright pink
+	UIColor4(1.0f, 0.2f, 0.2f),	// NORM:	Red
+	UIColor4(1.0f, 0.5f, 0.5f),	// HOVER:	Pink
+	UIColor4(1.0f, 0.7f, 0.7f), // PRESSED:	Bright pink
+	UIColor4(1.0f, 0.8f, 0.5f));// SEL:		
 
 void SetButtonStdCols(UIBase* uib, bool toggled = false)
 {
@@ -87,7 +89,11 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//		CONSTRUCT RETAINED UI HEIRARCHY
 	//
 	//////////////////////////////////////////////////
-
+	//
+	// This large wall of code sets up the UI items
+	// used in the application, as well as their starting
+	// positions and drawing/behaviour states.
+	// 
 	const int btnTextSz = 14.0f;
 
 	// Build elements for the right menu bar
@@ -229,6 +235,9 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->ApplyFormButtonStyle(this->camBtnOpacity);
 		this->camBtnOpacity->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(this->camBtnOpacity);
+		{
+			this->sliderSysOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, 0.25f, UIRect(), this->camBtnOpacity);
+		}
 		btnIt += BtnStride;
 		this->camBtnRegisterXY = new UIButton(this->camButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
 		this->ApplyFormButtonStyle(this->camBtnRegisterXY);
@@ -239,28 +248,33 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->ApplyFormButtonStyle(this->camBtnCalibrate);
 		this->camBtnCalibrate->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(this->camBtnCalibrate);
+		{
+			this->sliderSysCalibrate = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Calibrate_Slider,	"Calibrate", 0.0f, 1.0f, 0.25f, UIRect(), this->camBtnCalibrate);
+		}
 		btnIt += BtnStride;
 		this->camBtnThresh = new UIButton(this->camButtonGrid, UIID::CamSet_Threshold, UIRect(), "Threshold Settings", btnTextSz);
 		this->ApplyFormButtonStyle(this->camBtnThresh);
 		this->camBtnThresh->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(this->camBtnThresh);
+		{
+			this->sliderSysThresh = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_SlideThresh,	"Thresh", 0.0f, 255.0f, 127.0f, UIRect(), this->camBtnThresh);
+			this->sliderSysDispUp = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_DispUp,		"DispUp", 0.0f, 1.0f, 0.25f, UIRect(), this->camBtnThresh);
+		}
 		//btnIt += BtnStride;
-
-		this->plateSliderCalibrate = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Calibrate_Slider,	"Calibrate", 0.0f, 1.0f, 0.25f, UIRect());
-		this->horizontalFloatingUISys.push_back(this->plateSliderCalibrate);
 	}
-	{
-		this->plateSliderOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, 0.25f, UIRect());
-		this->horizontalFloatingUISys.push_back(this->plateSliderOpacity);
-	}
-	{	
-		this->plateSliderThresh = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_SlideThresh,	"Thresh", 0.0f, 255.0f, 127.0f, UIRect(), &this->sliderThresh);
-		this->horizontalFloatingUISys.push_back(this->plateSliderThresh);
-		this->plateSliderDispup = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Threshold_DispUp,		"DispUp", 0.0f, 1.0f, 0.25f, UIRect());
-		this->horizontalFloatingUISys.push_back(this->plateSliderDispup);
-	}
+	
 	this->ManageCamButtonPressed(-1, false);
 	
+}
+
+void StateHMDOp::AddCamGroupingEntry(UIButton* button, UIPlate* system, UIHSlider* slider)
+{
+	this->AddCamGroupingEntry(button, {system, slider});
+}
+
+void StateHMDOp::AddCamGroupingEntry(UIButton* button, PlateSliderPair pair)
+{
+	this->camButtonGrouping[button].push_back(pair);
 }
 
 void DrawOffsetVertices(
@@ -482,12 +496,21 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 		const float rowHeight = 40.0f;
 		const float rowOffs = 50.0f;
 
-		this->plateSliderCalibrate->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
-		//
-		this->plateSliderOpacity->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
-		//
-		this->plateSliderThresh->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f, r.LerpWidth(lerpWidth), rowHeight);
-		this->plateSliderDispup->SetRect(r.LerpHoriz(lerpLeft),  r.Bottom() - 20.0f + rowOffs, r.LerpWidth(lerpWidth), rowHeight);
+		for(auto itCBG : this->camButtonGrouping)
+		{
+			const std::vector<PlateSliderPair>& vecGroup = itCBG.second;
+
+			// For each group, recalculate the layout of their children sliders
+			// with respect to the new viewport rect properties.
+			for(int i = 0; i < vecGroup.size(); ++i)
+			{
+				vecGroup[i].plate->SetRect(
+					r.LerpHoriz(lerpLeft),  
+					r.Bottom() - 20.0f + i * rowOffs, 
+					r.LerpWidth(lerpWidth), 
+					rowHeight);
+			}
+		}
 	}
 }
 
@@ -590,7 +613,7 @@ void StateHMDOp::_SyncThresholdSlider()
 		return;
 
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
-	this->sliderThresh->SetCurValue(cmgr.GetFloat(targIdx, StreamParams::StaticThreshold));
+	this->sliderSysThresh.slider->SetCurValue(cmgr.GetFloat(targIdx, StreamParams::StaticThreshold));
 }
 
 void StateHMDOp::ExitedActive() 
@@ -687,13 +710,6 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 					this->GetCoreWindow()->RequestSnapAll(this->carousel.GetCurrentLabel());
 				}
 			}
-			else if(button == 1)
-			{
-				// If nothing is shown and the middle pedal is pressed, open the carousel.
-				if(!this->showVertMenu)
-					this->ToggleCarousel();
-
-			}
 			else if(button == 2)
 			{
 				if(this->IsCarouselShown())
@@ -709,6 +725,42 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 					this->GetCoreWindow()->RecordVideo(0, "video");
 				}
 			}
+		}
+	}
+	if(	dmr.evt == DelMouseRet::Event::MissedDown || 
+		dmr.evt == DelMouseRet::Event::MouseWhiffDown )
+	{
+		if(button == 1)
+		{
+			if(this->uiSys.IsUsingCustomTabOrder())
+			{
+				// Currently do do nothing, middle click whiff is handled 
+				// in the UISink portion - it's not a clean implementation,
+				// but regardless, it's the current authority on custom
+				// tab navigation.
+			}
+			else if(
+				this->inspSettingsPlate->IsSelfVisible() || 
+				this->inspAlignPlate->IsSelfVisible() || 
+				this->inspCamSetsPlate->IsSelfVisible())
+			{
+				// Else, if any of the inspector windows are open, middle mouse
+				// will close the window.
+				SetShownMenuBarUIPanel(-1);
+			}
+			else if(this->showVertMenu)
+			{
+				// If no submenu but the main menu is open, middle mouse will
+				// close that window.
+				this->uiSys.SubmitClick(this->btnBack, 2, UIVec2(), false);
+			}
+			else
+			{
+				// If nothing is shown and the middle pedal is pressed, 
+				// toggle the carousel.
+				this->ToggleCarousel();
+			}
+
 		}
 	}
 }
@@ -790,11 +842,20 @@ bool StateHMDOp::ToggleCarousel()
 	if(this->showCarousel)
 		return this->HideCarousel();
 	else
+	{ 
+		this->uiSys.ClearCustomTabOrder();
 		return this->ShowCarousel();
+	}
 }
 
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 {
+	// Regardless of why this is called, a custom tab navigation
+	// should not be setup when first entering into a panel. If we
+	// want to cycle through the custom sets, a middle whiff needs
+	// to occur.
+	this->uiSys.ClearCustomTabOrder();
+
 	bool toggleOff = false;
 	// Check if the thing is already on, if so, it's a complete toggle off...
 
@@ -881,8 +942,12 @@ void StateHMDOp::ManageCamButtonPressed(int buttonID, bool record)
 	// Hide everything that could be shown as a horizontal bar.
 	// If we need to see it again, it will be turned on again before
 	// the function exits...
-	for(UIBase* uib : this->horizontalFloatingUISys)
-		uib->Hide();
+	for(auto it : this->camButtonGrouping)
+	{
+		for(PlateSliderPair& psp : it.second)
+			psp.plate->Hide();
+	}
+
 
 	// The same goes for these toggle buttons
 	std::vector<UIButton*> camSettingsCtxSet = 
@@ -900,30 +965,51 @@ void StateHMDOp::ManageCamButtonPressed(int buttonID, bool record)
 		SetButtonStdCols(btn, false);
 	}
 
+	this->uiSys.ClearCustomTabOrder();
+
+	// Note we manually select the relevant button. Normally this isn't
+	// needed for actual UI handling (i.e., if the user actually clicks
+	// on the button) but becomes useful if we simulate clicking.
+	UIButton* btnToShow = nullptr;
 	switch(buttonID)
 	{
 		case CamSet_Exposure:
-			SetButtonStdCols(this->camBtnExposure, true);
+			btnToShow = this->camBtnExposure;
 			break;
 		case CamSet_Disparity:
-			SetButtonStdCols(this->camBtnDisparity, true);
+			btnToShow = this->camBtnDisparity;
 			break;
 		case CamSet_Opacity:
-			this->plateSliderOpacity->Show();
-			SetButtonStdCols(this->camBtnOpacity, true);
+			btnToShow = this->camBtnOpacity;
 			break;
 		case CamSet_Register:
-			SetButtonStdCols(this->camBtnRegisterXY, true);
+			btnToShow = this->camBtnRegisterXY;
 			break;
 		case CamSet_Calibrate:
-			this->plateSliderCalibrate->Show();
-			SetButtonStdCols(this->camBtnCalibrate, true);
+			btnToShow = this->camBtnCalibrate;
 			break;
 		case CamSet_Threshold:
-			this->plateSliderThresh->Show();
-			this->plateSliderDispup->Show();
-			SetButtonStdCols(this->camBtnThresh, true);
+			btnToShow = this->camBtnThresh;
 			break;
+	}
+
+	if(btnToShow)
+	{
+		// TODO: Show context-specific children content when it exists.
+		auto itFind = this->camButtonGrouping.find(btnToShow);
+		std::vector<UIBase*> customTab = {btnToShow};
+		if(itFind != this->camButtonGrouping.end())
+		{
+			std::vector<PlateSliderPair>& childContextSliders = itFind->second;
+			for(PlateSliderPair& psp : childContextSliders)
+			{ 
+				psp.plate->Show();
+				customTab.push_back(psp.slider);
+			}
+		}
+		SetButtonStdCols(btnToShow, true);
+		this->uiSys.Select(btnToShow);
+		this->uiSys.SetCustomTabOrder(customTab);
 	}
 }
 
@@ -992,6 +1078,34 @@ UIPlate* StateHMDOp::CreateSliderSystem(
 	return retPlate;
 }
 
+StateHMDOp::PlateSliderPair StateHMDOp::CreateSliderSystem(
+	UIBase* parent, 
+	int id,
+	const std::string& labelText,
+	float minVal,
+	float maxVal,
+	float startingVal,
+	const UIRect& r,
+	UIButton* btnCategory)
+{
+	PlateSliderPair ret;
+	ret.plate = 
+		this->CreateSliderSystem(
+			parent,
+			id,
+			labelText,
+			minVal,
+			maxVal,
+			startingVal,
+			r,
+			&ret.slider);
+
+	if(btnCategory != nullptr)
+		this->AddCamGroupingEntry(btnCategory, ret);
+
+	return ret;
+}
+
 void StateHMDOp::DoThresholdButton(int idxButton, ProcessingType type, bool skipSet)
 {
 	int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
@@ -1053,6 +1167,11 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 
 	case UIID::MBtnBack:
 		this->showVertMenu = false;
+		this->curVertWidth = this->minVertWidth;
+		this->SetShownMenuBarUIPanel(-1);
+		this->ManageCamButtonPressed(-1, false);
+		this->uiSys.ClearCustomTabOrder();
+		this->uiSys.Select(nullptr);
 		break;
 
 	case UIID::LaseWat_1:
@@ -1183,6 +1302,248 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 	case UIID::CamSet_Calibrate_Slider:
 		break;
 
+	}
+}
+
+void StateHMDOp::OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn)
+{
+	// There's a TON of duplicate logic going on that can be mechanized
+	// and automated.
+
+	// When left whiffing when the button is select, that will toggle
+	// moving to the next UI element.
+	//
+	// For now we do this by hand, ManageCamButtonPressed() should have
+	// everything we need to simulate button pressing and changing the
+	// context to the new button.
+	int uiId = uib->Idx();
+	switch(uiId)
+	{
+	case UIID::MBtnLaserTog:
+		if(mouseBtn == 0)
+		{
+			this->uiSys.SubmitClick(this->btnLaser, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 2)
+		{
+			this->uiSys.SubmitClick(this->btnSettings, 2, UIVec2(), true);
+		}
+		break;
+
+	case UIID::MBtnLaserSet:
+		if(mouseBtn == 0)
+		{ 
+			this->uiSys.SubmitClick(this->btnSettings, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+			this->uiSys.Select(this->btnLaseW_1);
+			this->uiSys.SetCustomTabOrder(
+				{
+					this->btnLaseW_1, 
+					this->btnLaseW_2, 
+					this->btnLaseW_3
+				});
+		}
+		else if(mouseBtn == 2)
+		{
+			this->uiSys.SubmitClick(this->btnAlign, 2, UIVec2(), true);
+		}
+		break;
+
+	case UIID::MBtnAlign:
+		if(mouseBtn == 0)
+		{ 
+			this->uiSys.SubmitClick(this->btnAlign, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+		}
+		else if(mouseBtn == 2)
+		{
+			this->uiSys.SubmitClick(this->btnCamSets, 2, UIVec2(), true);
+		}
+		break;
+
+	case UIID::MBtnSource:
+		if(mouseBtn == 0)
+		{ 
+			this->uiSys.SubmitClick(this->btnCamSets, 2, UIVec2(), true);
+		}
+		else if(mouseBtn == 1)
+		{
+			this->uiSys.Select(this->camBtnExposure);
+			this->uiSys.SetCustomTabOrder(
+				{
+					this->camBtnExposure, 
+					this->camBtnDisparity, 
+					this->camBtnOpacity,
+					this->camBtnRegisterXY,
+					this->camBtnCalibrate,
+					this->camBtnThresh
+				});
+		}
+		else if(mouseBtn == 2)
+		{
+			this->uiSys.Select(this->btnBack);
+			this->SetShownMenuBarUIPanel(-1);
+		}
+		break;
+
+	case UIID::MBtnBack:
+		if(mouseBtn == 0)
+		{
+			this->uiSys.SubmitClick(this->btnBack, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+		}
+		else if(mouseBtn == 2)
+		{
+			this->uiSys.Select(this->btnLaser);
+		}
+		break;
+
+	case UIID::LaseWat_1:
+	case UIID::LaseWat_2:
+	case UIID::LaseWat_3:
+		if(mouseBtn == 0)
+		{
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+			this->uiSys.AdvanceTabbingOrder(true);
+		}
+		else //if(mouseBtn == 2)
+		{
+			this->uiSys.Select(this->btnExp_1);
+			this->uiSys.SetCustomTabOrder(
+				{
+					this->btnExp_1, 
+					this->btnExp_2, 
+					this->btnExp_3, 
+					this->btnExp_4
+				});
+		}
+		break;
+
+	case UIID::Lase_Exposure_1:
+	case UIID::Lase_Exposure_2:
+	case UIID::Lase_Exposure_3:
+	case UIID::Lase_Exposure_4:
+		if(mouseBtn == 0)
+		{
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+			this->uiSys.AdvanceTabbingOrder(true);
+		}
+		else //if(mouseBtn == 2)
+		{
+			this->uiSys.Select(this->btnThreshSel_None);
+			this->uiSys.SetCustomTabOrder(
+				{
+					this->btnThreshSel_None, 
+					this->btnThreshTog_Simple, 
+					this->btnThreshTog_Mean2, 
+					this->btnThreshTog_Yen,
+					this->btnThreshTog_YenSimple
+				});
+		}
+		break;
+
+	case UIID::Lase_Threshold_None:
+	case UIID::Lase_Threshold_Simple:
+	case UIID::Lase_Threshold_Mean2:
+	case UIID::Lase_Threshold_Yen:
+	case UIID::Lase_Threshold_YenSimple:
+		if(mouseBtn == 0)
+		{
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		}
+		else if(mouseBtn == 1)
+		{
+			this->uiSys.AdvanceTabbingOrder(true);
+		}
+		else //if(mouseBtn == 2)
+		{
+			this->uiSys.Select(this->btnLaseW_1);
+			this->uiSys.SetCustomTabOrder(
+				{
+					this->btnLaseW_1, 
+					this->btnLaseW_2, 
+					this->btnLaseW_3
+				});
+		}
+		break;
+
+	case UIID::CamSet_Exposure:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Disparity:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Opacity:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Register:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Calibrate:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Threshold:
+		if(mouseBtn == 0)
+			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
+		else if(mouseBtn == 1)
+			this->uiSys.AdvanceTabbingOrder(true);
+		else if(mouseBtn == 2)
+			this->ManageCamButtonPressed(-1, false);
+		break;
+
+	case UIID::CamSet_Threshold_SlideThresh:
+	case UIID::CamSet_Calibrate_Slider:
+	case UIID::CamSet_Opacity_Meter:
+	case UIID::CamSet_Threshold_DispUp:
+		// For the sliders, left and right click are 
+		// taken up by the UIHSlider whiff handlers.
+		if(mouseBtn == 1)
+		{
+			this->uiSys.AdvanceTabbingOrder(true);
+		}
+		break;
 	}
 }
 

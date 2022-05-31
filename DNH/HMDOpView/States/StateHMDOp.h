@@ -12,6 +12,7 @@
 #include "../UISys/UIVBulkSlider.h"
 #include "../UISys/UIHSlider.h"
 #include "../Carousel/Carousel.h"
+#include <map>
 
 class UIButton;
 
@@ -235,6 +236,7 @@ public:
 	//
 	//////////////////////////////////////////////////
 	UIPlate* inspSettingsPlate	= nullptr;
+
 	UIPlate* inspSetFrame		= nullptr;
 	UIButton* btnLaseW_1		= nullptr;
 	UIButton* btnLaseW_2		= nullptr;
@@ -250,14 +252,12 @@ public:
 	UIButton* btnThreshTog_Yen			= nullptr;
 	UIButton* btnThreshTog_YenSimple	= nullptr;
 
-	UIPlate* plateSliderCalibrate	= nullptr;
-
 	//////////////////////////////////////////////////
 	//
 	//		ALIGNMENT SETTINGS MENU
 	//
 	//////////////////////////////////////////////////
-	UIPlate* inspAlignPlate			= nullptr;
+	UIPlate* inspAlignPlate = nullptr;
 
 	//////////////////////////////////////////////////
 	//
@@ -265,19 +265,41 @@ public:
 	//
 	//////////////////////////////////////////////////
 	UIPlate* inspCamSetsPlate		= nullptr;
+
+	// A mapping between buttons in the Cam. Setting
+	// selection (variable with the name camButton*) and
+	// their children slides and slider systems.
+	struct PlateSliderPair
+	{
+		UIPlate* plate;
+		UIHSlider* slider;
+	};
+
+	/// <summary>
+	/// A collection of all horizontal plates that are supposed to be docked
+	/// to the bottom of the camera viewport. So if we need to process or hide
+	/// them all, we can just blindly iterate through the elements of this vector.
+	/// </summary>
+	std::map<UIButton*, std::vector<PlateSliderPair>> camButtonGrouping;
+	void AddCamGroupingEntry(UIButton* button, UIPlate* system, UIHSlider* slider);
+	void AddCamGroupingEntry(UIButton* button, PlateSliderPair pair);
+
 	UIPlate* camButtonGrid			= nullptr;
 
 	UIButton* camBtnExposure		= nullptr;
 	UIButton* camBtnDisparity		= nullptr;
-	UIButton* camBtnOpacity			= nullptr;
 	UIButton* camBtnCalibrate		= nullptr;
-	UIButton* camBtnRegisterXY		= nullptr;
-	UIButton* camBtnThresh			= nullptr;
 
-	UIPlate* plateSliderOpacity		= nullptr;
-	UIPlate* plateSliderThresh		= nullptr;
-	UIHSlider* sliderThresh			= nullptr;
-	UIPlate* plateSliderDispup		= nullptr;
+	UIButton* camBtnRegisterXY		= nullptr;
+	PlateSliderPair sliderSysCalibrate;
+
+	UIButton* camBtnOpacity			= nullptr;
+	PlateSliderPair sliderSysOpacity;
+
+	UIButton* camBtnThresh			= nullptr;
+	PlateSliderPair sliderSysThresh;
+	PlateSliderPair sliderSysDispUp;
+
 
 	/// <summary>
 	/// The last button selected for the Cam. Settings submenu, so that
@@ -286,13 +308,6 @@ public:
 	int lastCamButtonSel = -1;
 
 	//////////////////////////////////////////////////
-
-	/// <summary>
-	/// A collection of all horizontal plates that are supposed to be docked
-	/// to the bottom of the camera viewport. So if we need to process or hide
-	/// them all, we can just blindly iterate through the elements of this vector.
-	/// </summary>
-	std::vector<UIBase*> horizontalFloatingUISys;
 
 	bool showCarousel = false;
 	CarouselStyle carouselStyle;
@@ -410,6 +425,19 @@ public:
 		const UIRect& r,
 		UIHSlider** outSlider = nullptr);
 
+	/// <summary>
+	/// Wrapper for CreateSliderSystem that returns a PlateSliderPair;
+	/// </summary>
+	PlateSliderPair CreateSliderSystem(
+		UIBase* parent, 
+		int id,
+		const std::string& labelText,
+		float minVal,
+		float maxVal,
+		float startingVal,
+		const UIRect& r,
+		UIButton* btnCategory);
+
 	~StateHMDOp();
 
 	bool ShowCarousel( bool show = true);
@@ -447,5 +475,6 @@ public:
 	//////////////////////////////////////////////////
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
 	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
+	void OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn);
 
 };

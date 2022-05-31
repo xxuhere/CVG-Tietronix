@@ -73,6 +73,17 @@ void UISys::_NotifyDeletedChild(UIBase* widget)
 		this->lastOver = nullptr;
 }
 
+void UISys::SubmitClick(UIBase* clickable, int button, const UIVec2& mousePos, bool sel)
+{
+	if(sel)
+		this->Select(clickable);
+
+	if(this->sink != nullptr)
+		this->sink->OnUISink_Clicked(clickable, button, mousePos);
+
+	clickable->HandleClick(button);
+}
+
 bool UISys::DelegateKeydown(wxKeyCode key)
 {
 	// Delegate to a child system, only if there is
@@ -150,13 +161,16 @@ DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 		// Perform whiff click notification
 		if(this->sel != nullptr)
 		{ 
-			if(this->sel->HandleSelectedWhiffDown(mouseButton))
-			{
-				// It needs to be decided whether we always dispatch a whiff notice, or only
-				// do so when it's handled by the parent widget.
-				if(this->sink != nullptr)
-					this->sink->OnUISink_SelMouseDownWhiff(this->sel, mouseButton);
+			bool whiffRet = this->sel->HandleSelectedWhiffDown(mouseButton);
 
+			// Always submit the whiff to the sink regardless of if the
+			// widget natively handled it - this convention just makes a lot
+			// of practical use cases easier.
+			if(this->sink != nullptr)
+				this->sink->OnUISink_SelMouseDownWhiff(this->sel, mouseButton);
+
+			if(whiffRet)
+			{
 				return DelMouseRet(
 					DelMouseRet::Event::MouseWhiffDown,
 					pt,
@@ -243,10 +257,7 @@ DelMouseRet UISys::DelegateMouseUp(int mouseButton, const UIVec2& pt)
 	UIBase* mouseOver = this->CheckMouseOver(pt, false);
 	if(mouseOver != nullptr && prevDown == mouseOver)
 	{ 
-		if(this->sink != nullptr)
-			this->sink->OnUISink_Clicked(mouseOver, mouseButton, pt);
-
-		mouseOver->HandleClick(mouseButton);
+		this->SubmitClick(mouseOver, mouseButton, pt, false);
 
 		return DelMouseRet(
 			DelMouseRet::Event::MouseUp,
@@ -351,7 +362,7 @@ void UISys::ResetSelection()
 	}
 }
 
-std::vector<UIBase*> UISys::GetTabbingOrder()
+std::vector<UIBase*> UISys::GetInnerTabbingOrder()
 {
 	std::vector<UIBase*> ret;
 
@@ -363,6 +374,10 @@ std::vector<UIBase*> UISys::GetTabbingOrder()
 			{
 				if(!parent->children[i]->IsSelfVisible())
 					continue;
+
+				if(!parent->children[i]->IsSelectable())
+					continue;
+
 
 				colls.push_back(parent->children[i]);
 			}
@@ -376,6 +391,7 @@ std::vector<UIBase*> UISys::GetTabbingOrder()
 	{
 		UIBase* uibIt = ret[idxIt];
 		$_::AddChildren(uibIt, ret);
+		++idxIt;
 	}
 
 	return ret;
@@ -383,56 +399,67 @@ std::vector<UIBase*> UISys::GetTabbingOrder()
 
 void UISys::AdvanceTabbingOrder(bool forward)
 {
-	std::vector<UIBase*> ret = this->GetTabbingOrder();
-	if(ret.empty())
+	if(this->IsUsingCustomTabOrder())
+	{ 
+		this->AdvanceTabbingOrder(forward, this->customNav);
+	}
+	else
+	{
+		std::vector<UIBase*> innerOrder = this->GetInnerTabbingOrder();
+		this->AdvanceTabbingOrder(forward, innerOrder);
+	}
+}
+
+void UISys::AdvanceTabbingOrder(bool forward, const std::vector<UIBase*>& order)
+{
+	if(order.empty())
 		return;
 
 	// If nothing was selected, start the selection cycle.
 	if(this->sel == nullptr)
 	{ 
-		this->sel = ret[0];
-		this->sel->HandleSelect();
+		this->Select(order[0]);
 		return;
 	}
 
-	if(ret.size() == 1)
+	if(order.size() == 1)
 	{
 		// If there's only one thing selected and it's already
 		// selected, cycling (through the set of 1 thing) won't
 		// do anything.
-		if(ret[0] == this->sel)
+		if(order[0] == this->sel)
 			return;
 
-		// If nothing known was selected, default to the first thing.
-		this->sel->HandleUnselect();
-		this->sel = ret[0];
-		this->sel->HandleSelect();
+		this->Select(order[0]);
 		return;
 	}
-	
+
 	// If nothing known was selection, start the selection cycle
 	// by chosing the first thing.
-	auto it = std::find(ret.begin(), ret.end(), this->sel);
-	if (it == ret.end())
+	auto it = std::find(order.begin(), order.end(), this->sel);
+	if (it == order.end())
 	{
-		this->sel->HandleUnselect();
-		this->sel = ret[0];
-		this->sel->HandleSelect();
+		this->Select(order[0]);
 		return;
 	}
 
 	// Find the thing to progress to in the selection cycle based
 	// off what's currently selected.
-	int idx = it - ret.begin();
+	int idx = it - order.begin();
 	if(forward)
-		idx = (idx + 1) % (int)ret.size();
+		idx = (idx + 1) % (int)order.size();
 	else
-		idx = ((idx - 1) + idx) % (int)ret.size();
+		idx = ((idx - 1) + idx) % (int)order.size();
 
-	// Select it.
-	this->sel->HandleUnselect();
-	this->sel = ret[idx];
-	this->sel->HandleSelect();
+	this->Select(order[idx]);
+}
+
+void UISys::SetCustomTabOrder(std::vector<UIBase*> newOrder)
+{
+	// There might be more we need to do involving state-keeping, but for
+	// now it's a simple/naive copy of values.
+
+	this->customNav = newOrder;
 }
 
 UISys* UISys::_GetSelfSys()
@@ -465,4 +492,35 @@ void UISys::AlignSystem()
 			true, 
 			this->IsTransformDirty());
 	}
+}
+
+bool UISys::Select(UIBase* newSel)
+{
+	if(newSel == nullptr)
+	{
+		if(!this->sel)
+			return false;
+
+		UIBase* oldSelClear = this->sel;
+		this->sel = nullptr;
+		oldSelClear->HandleUnselect();
+		return true;
+	}
+
+	if(this->sel == newSel)
+		return false;
+
+	if(newSel->system != this)
+		return false;
+
+	UIBase* oldSel = this->sel;
+	this->sel = newSel;
+
+	if(oldSel)
+		oldSel->HandleUnselect();
+
+	if(this->sel)
+		this->sel->HandleSelect();
+
+	return true;
 }

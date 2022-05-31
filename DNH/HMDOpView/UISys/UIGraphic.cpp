@@ -64,7 +64,8 @@ void UIGraphic::_DrawVerts()
 		UIColor4& col = 
 			this->uiCols.GetContexedColor(
 				this->pressedCt, 
-				this->isHovered);
+				this->isHovered,
+				this->IsRegisteredSelected());
 
 		switch(this->plateDraw)
 		{

@@ -69,16 +69,15 @@ bool UIHSlider::HandleSelectedWhiffDown(int button)
 	if(button != 0 && button != 2)
 		return false;
 
-	// The number of discrete increments the slider
-	// is broken into.
-	const int whiffTicks = 10;
+	if(this->discreteTicks <= 0)
+		return false;
 
 	// inverse lerp
 	float lambda = 
 		(this->curVal - this->minVal)/(this->maxVal - this->minVal);
 
 	// Convert from [0.0, 1.0] space to discrete [0, whiffTicks]
-	float quant = std::floor(lambda * whiffTicks);
+	float quant = std::floor(lambda * this->discreteTicks);
 
 	if(button == 0) 
 	{
@@ -93,7 +92,7 @@ bool UIHSlider::HandleSelectedWhiffDown(int button)
 
 	// Convert back to the expected range, clamp as appropriate and
 	// use the new value.
-	quant /= whiffTicks; // Turn quantized (possibly out of bounds) value into lambda range
+	quant /= this->discreteTicks; // Turn quantized (possibly out of bounds) value into lambda range
 	float newValue = this->minVal + (this->maxVal - this->minVal) * quant;
 	newValue = std::clamp(newValue, this->minVal, this->maxVal);
 	//

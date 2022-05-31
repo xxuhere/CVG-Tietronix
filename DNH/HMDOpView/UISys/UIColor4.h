@@ -67,9 +67,14 @@ struct ColorSetInteractable
 {
 public:
 	/// <summary>
-	/// The normal color when not in hover or pressed mode.
+	/// The normal color when unselected and not in hover or pressed mode.
 	/// </summary>
 	UIColor4 norm;
+
+	/// <summary>
+	/// The normal color when selected and not in hover or pressed mode.
+	/// </summary>
+	UIColor4 sel;
 
 	/// <summary>
 	/// The color when the mouse is hovered over the widget.
@@ -89,6 +94,12 @@ public:
 		const UIColor4& hover, 
 		const UIColor4& pressed);
 
+	ColorSetInteractable(
+		const UIColor4& norm, 
+		const UIColor4& hover, 
+		const UIColor4& pressed,
+		const UIColor4& selected);
+
 	/// <summary>
 	/// Set all colors in the object to the same color.
 	/// </summary>
@@ -99,6 +110,12 @@ public:
 		const UIColor4& norm, 
 		const UIColor4& hover, 
 		const UIColor4& pressed);
+
+	void Set(
+		const UIColor4& norm, 
+		const UIColor4& hover, 
+		const UIColor4& pressed,
+		const UIColor4& selected);
 
 	/// <summary>
 	/// Set all colors to the same color value.
@@ -116,9 +133,13 @@ public:
 	/// <param name="isHovering">
 	/// True if the mouse is hovering over the widget; else, false.
 	/// </param>
+	/// <param name="isSel">
+	/// True if the widget being colored is selected. 
+	/// False if not selected.
+	/// </param>
 	/// <returns>
 	/// The color that should be used to represent the widgets given
 	/// the specified context.
 	/// </returns>
-	UIColor4& GetContexedColor(int pressedCt, bool isHovering);
+	UIColor4& GetContexedColor(int pressedCt, bool isHovering, bool isSel);
 };

@@ -95,7 +95,18 @@ private:
 	/// </summary>
 	static bool showDebug;
 
-public:
+protected:
+
+	/// <summary>
+	/// If set, it can be used to override navigation with a custom
+	/// UI navigation order. Note that whoever sets this needs to
+	/// ensure proper navigation.
+	/// </summary>
+	std::vector<UIBase*> customNav;
+
+public: 
+	// TODO: these members need to be evaluated for proper encapsulation.
+
 	/// <summary>
 	/// An optional sink that can receive notifications of events when
 	/// things happen in the UISys.
@@ -157,13 +168,20 @@ public:
 	void _NotifyDeletedChild(UIBase* widget);
 
 public:
+	//////////////////////////////////////////////////
+	//
+	//		UTILITY FUNCTIONS
+	//
+	//////////////////////////////////////////////////
+
+	void SubmitClick(UIBase* clickable, int button, const UIVec2& mousePos, bool sel);
 
 	//////////////////////////////////////////////////
 	//
 	//		INTEGRATION FUNCTIONS
 	//
 	//////////////////////////////////////////////////
-	// The functions below can-be/should-be called by ouside code 
+	// The functions below can-be/should-be called by outside code 
 	// for the UI to properly function.
 
 	/// <summary>
@@ -181,6 +199,8 @@ public:
 	/// should be called once per update/draw loop before drawing occurs.
 	/// </summary>
 	void AlignSystem();
+
+	bool Select(UIBase* newSel);
 	
 	//		INPUT AND EVENT DELEGATION
 	//////////////////////////////////////////////////
@@ -203,8 +223,17 @@ public:
 	/// </summary>
 	void ResetSelection();
 
-	std::vector<UIBase*> GetTabbingOrder();
+	std::vector<UIBase*> GetInnerTabbingOrder();
 	void AdvanceTabbingOrder(bool forward);
+	void AdvanceTabbingOrder(bool forward, const std::vector<UIBase*>& order);
+
+	bool IsUsingCustomTabOrder() const 
+	{return !this->customNav.empty(); }
+
+	void ClearCustomTabOrder()
+	{ return this->customNav.clear(); }
+
+	void SetCustomTabOrder(std::vector<UIBase*> newOrder);
 
 	//		IS SYS REGISTERED STATE QUERIES
 	//////////////////////////////////////////////////

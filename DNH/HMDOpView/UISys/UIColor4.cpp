@@ -72,6 +72,7 @@ ColorSetInteractable::ColorSetInteractable(
 	const UIColor4& pressed)
 {
 	this->norm		= norm;
+	this->sel		= norm;
 	this->hover		= hover;
 	this->pressed	= pressed;
 }
@@ -79,6 +80,7 @@ ColorSetInteractable::ColorSetInteractable(
 ColorSetInteractable::ColorSetInteractable(const UIColor4& all)
 {
 	this->norm		= all;
+	this->sel		= all;
 	this->hover		= all;
 	this->pressed	= all;
 }
@@ -89,8 +91,33 @@ void ColorSetInteractable::Set(
 	const UIColor4& pressed)
 {
 	this->norm		= norm;
+	this->sel		= norm;
 	this->hover		= hover;
 	this->pressed	= pressed;
+}
+
+void ColorSetInteractable::Set(
+	const UIColor4& norm, 
+	const UIColor4& hover, 
+	const UIColor4& pressed,
+	const UIColor4& selected)
+{
+	this->norm		= norm;
+	this->hover		= hover;
+	this->pressed	= pressed;
+	this->sel		= selected;
+}
+
+ColorSetInteractable::ColorSetInteractable(
+	const UIColor4& norm, 
+	const UIColor4& hover, 
+	const UIColor4& pressed,
+	const UIColor4& selected)
+{
+	this->norm		= norm;
+	this->hover		= hover;
+	this->pressed	= pressed;
+	this->sel		= selected;
 }
 
 void ColorSetInteractable::SetAll(const UIColor4& all)
@@ -100,7 +127,7 @@ void ColorSetInteractable::SetAll(const UIColor4& all)
 	this->pressed	= all;
 }
 
-UIColor4& ColorSetInteractable::GetContexedColor(int pressedCt, bool isHovering)
+UIColor4& ColorSetInteractable::GetContexedColor(int pressedCt, bool isHovering, bool isSel)
 {
 	if(pressedCt != 0)
 		return this->pressed;
@@ -108,5 +135,8 @@ UIColor4& ColorSetInteractable::GetContexedColor(int pressedCt, bool isHovering)
 	if(isHovering)
 		return this->hover;
 	
+	if(isSel)
+		return this->sel;
+
 	return this->norm;
 }

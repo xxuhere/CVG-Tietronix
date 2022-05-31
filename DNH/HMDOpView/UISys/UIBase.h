@@ -88,8 +88,8 @@ public:
 	ColorSetInteractable uiCols;
 
 	/// <summary>
-	/// Not function. This can be arbitrarily set to more easily 
-	/// track widgets in the watch list while step-through debugging.
+	/// Not a functional variable. This can be arbitrarily set to more 
+	/// easily track widgets in the watch list while step-through debugging.
 	/// </summary>
 	std::string debugName;
 
@@ -344,15 +344,6 @@ protected:
 	virtual bool HandleKeyUp(int keycode);
 
 	/// <summary>
-	/// Query if the UI widget can be selected when interacted with the mouse.
-	/// 
-	/// NOTE: This may also be relevant if there's a tab navigation feature - which 
-	/// currently doesn't exist.
-	/// </summary>
-	/// <returns></returns>
-	virtual bool IsSelectable();
-
-	/// <summary>
 	/// Callback for when the UI widget is selected.
 	/// </summary>
 	virtual void HandleSelect();
@@ -371,6 +362,16 @@ protected:
 	/// <param name="vid"></param>
 	/// <returns>The value of the id.</returns>
 	virtual float GetValue(int vid);
+
+public:
+		/// <summary>
+		/// Query if the UI widget can be selected when interacted with the mouse.
+		/// 
+		/// NOTE: This may also be relevant if there's a tab navigation feature - which 
+		/// currently doesn't exist.
+		/// </summary>
+		/// <returns></returns>
+		virtual bool IsSelectable();
 
 public:
 	/// <summary>

@@ -127,7 +127,8 @@ bool UIVBulkSlider::Render()
 	UIColor4 colCur = 
 		this->uiCols.GetContexedColor(
 			this->pressedCt, 
-			this->isHovered);
+			this->isHovered,
+			this->IsRegisteredSelected());
 
 	colCur.GLColor4();
 	this->rectThumb.GLQuad();

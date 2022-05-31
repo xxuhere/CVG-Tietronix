@@ -83,6 +83,12 @@ public:
 	/// </summary>
 	std::function<void(float)> onSlide;
 
+	/// <summary>
+	/// The granularity to scroll when using whiffs or anything
+	/// that scrolls the slider in a discretized way.
+	/// </summary>
+	int discreteTicks = 10;
+
 protected:
 
 	/// <summary>
