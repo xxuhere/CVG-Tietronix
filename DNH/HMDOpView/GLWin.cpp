@@ -194,7 +194,7 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 	wxSize sz = this->GetSize();
 	this->DrawGraphics(sz);
 
-	if(this->fontMousePos.IsValid())
+	if(UISys::IsDebugView() && this->fontMousePos.IsValid())
 	{
 		glColor3f(1.0f, 0.0f, 1.0f);
 		std::stringstream sstrmDbg;
@@ -270,7 +270,7 @@ void GLWin::ReleaseStaticGraphicResources()
 
 void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
-	if(evt.GetKeyCode() == WXK_HOME)
+	if(evt.GetKeyCode() == WXK_INSERT)
 	{
 		// Reload options during runtime.
 		this->InitializeOptions();
