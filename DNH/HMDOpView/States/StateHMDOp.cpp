@@ -417,7 +417,8 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->uiSys.AlignSystem();
 	this->uiSys.Render();
 
-	this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
+	if(this->showCarousel)
+		this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
 }
 
 // NOTE: This function has been greatly reduce from its original purpose.
@@ -483,13 +484,15 @@ void StateHMDOp::Update(double dt)
 	this->mdsRight.Decay(dt);
 
 	bool showRButtons = false;
-	if(showVertMenu)
+	if(this->showVertMenu)
 	{ 
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
 		showRButtons = (curVertWidth == maxVertWidth);
+
+		this->HideCarousel();
 	}
 	else
-		curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
+		this->curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
 
 	this->btnLaser->Show(showRButtons);
 	this->btnSettings->Show(showRButtons);
@@ -497,7 +500,8 @@ void StateHMDOp::Update(double dt)
 	this->btnCamSets->Show(showRButtons);
 	this->btnBack->Show(showRButtons);
 
-	this->carousel.Update(this->carouselStyle, dt);
+	if(this->showCarousel)
+		this->carousel.Update(this->carouselStyle, dt);
 }
 
 void StateHMDOp::EnteredActive()
@@ -652,22 +656,38 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 		{
 			if(button == 0)
 			{
-				// If nothing is shown and the left pedal is pressed, take a photo from
-				// all video streams.
-				this->GetCoreWindow()->RequestSnapAll(this->carousel.GetCurrentLabel());
+				if (this->IsCarouselShown())
+				{
+					this->carousel.GotoPrev();
+				}
+				else
+				{
+					// If nothing is shown and the left pedal is pressed, take a photo from
+					// all video streams.
+					this->GetCoreWindow()->RequestSnapAll(this->carousel.GetCurrentLabel());
+				}
 			}
 			else if(button == 1)
 			{
 				// If nothing is shown and the middle pedal is pressed, open the carousel.
+				if(!this->showVertMenu)
+					this->ToggleCarousel();
 
 			}
 			else if(button == 2)
 			{
-				// If nothing is shown an the right pedal is pressed, start video recording
-				// of the composite stream
+				if(this->IsCarouselShown())
+				{ 
+					this->carousel.GotoNext();
+				}
+				else
+				{
+					// If nothing is shown an the right pedal is pressed, start video recording
+					// of the composite stream
 
-				// TODO: Record from composite stream instead of index 0
-				this->GetCoreWindow()->RecordVideo(0, "video");
+					// TODO: Record from composite stream instead of index 0
+					this->GetCoreWindow()->RecordVideo(0, "video");
+				}
 			}
 		}
 	}
@@ -726,6 +746,31 @@ void StateHMDOp::ClosingApp()
 
 StateHMDOp::~StateHMDOp()
 {
+}
+
+bool StateHMDOp::ShowCarousel( bool show)
+{
+
+	if(this->showCarousel == show)
+		return false;
+
+	this->showCarousel = show;
+	this->carousel.EndAnimation(this->carouselStyle, true);
+
+	return true;
+}
+
+bool StateHMDOp::HideCarousel()
+{
+	return this->ShowCarousel(false);
+}
+
+bool StateHMDOp::ToggleCarousel()
+{
+	if(this->showCarousel)
+		return this->HideCarousel();
+	else
+		return this->ShowCarousel();
 }
 
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)

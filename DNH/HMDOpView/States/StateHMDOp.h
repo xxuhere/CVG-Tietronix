@@ -86,7 +86,6 @@ public:
 		CamSet_Opacity_Back,
 		CamSet_Calibrate_Slider,
 	};
-
 public:
 	/// <summary>
 	/// If true, the submenu is being shown, else, it is not.
@@ -292,6 +291,7 @@ public:
 	/// </summary>
 	std::vector<UIBase*> horizontalFloatingUISys;
 
+	bool showCarousel = false;
 	CarouselStyle carouselStyle;
 	Carousel carousel;
 
@@ -408,6 +408,15 @@ public:
 		UIHSlider** outSlider = nullptr);
 
 	~StateHMDOp();
+
+	bool ShowCarousel( bool show = true);
+
+	bool HideCarousel();
+
+	bool ToggleCarousel();
+
+	inline bool IsCarouselShown() const
+	{ return this->showCarousel; }
 
 protected:
 	/// <summary>
