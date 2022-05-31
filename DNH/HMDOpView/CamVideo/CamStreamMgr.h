@@ -141,6 +141,8 @@ public:
 	/// <returns>The return value</returns>
 	SnapRequest::SPtr RequestSnapshot(int idx, const std::string& filename);
 
+	std::vector<SnapRequest::SPtr> RequestSnapshotAll(const std::string& filenameBase);
+
 	/// <summary>
 	/// Requests a video stream to be recorded to a video file.
 	/// </summary>
@@ -213,6 +215,10 @@ public:
 	float GetFloat(int id, StreamParams paramid);
 
 	bool SetFloat(int id, StreamParams paramid, float value);
+
+	void SetSnapCaption(int id, const std::string& caption);
+
+	void SetAllSnapCaption(const std::string& caption);
 
 private:
 	// Only the singleton systems should be in charge of its construction.

@@ -118,6 +118,25 @@ SnapRequest::SPtr CamStreamMgr::RequestSnapshot(int idx, const std::string& file
 	return this->cams[idx]->RequestSnapshot(filename);
 }
 
+std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::string& filenameBase)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+
+	std::vector<SnapRequest::SPtr> ret;
+
+	for(int i = 0; i < this->cams.size(); ++i)
+	{
+		std::string strIdx = std::to_string(i);
+		std::string fullFilename = filenameBase + "_" + strIdx + ".png";
+		SnapRequest::SPtr camSnap = this->cams[i]->RequestSnapshot(fullFilename);
+
+		if(camSnap)
+			ret.push_back(camSnap);
+	}
+
+	return ret;
+}
+
 void CamStreamMgr::ClearSnapshotRequests(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
@@ -260,4 +279,23 @@ bool CamStreamMgr::SetFloat(int id, StreamParams paramid, float value)
 		return false;
 
 	return this->cams[id]->SetFloat(paramid, value);
+}
+
+void CamStreamMgr::SetSnapCaption(int id, const std::string& caption)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return;
+
+	this->cams[id]->SetSnapCaption(caption);
+}
+
+void CamStreamMgr::SetAllSnapCaption(const std::string& caption)
+{
+	std::lock_guard<std::mutex> guard(this->camAccess);
+	if(this->cams.empty())
+		return;
+
+	for(int i = 0; i < this->cams.size(); ++i)
+		this->cams[i]->SetSnapCaption(caption);
 }

@@ -188,7 +188,6 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->ApplyFormButtonStyle(this->btnThreshTog_YenSimple);
 	SetButtonStdCols(this->btnThreshTog_YenSimple, false);
 	
-	
 	//
 	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspAlignPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
@@ -197,7 +196,6 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	UIText* alignTitle = new UIText(this->inspAlignPlate, -1, "Reregister", 20, UIRect());
 	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
 	alignTitle->uiCols.SetAll(menuTitleCol);
-
 
 	//
 	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
@@ -521,6 +519,9 @@ void StateHMDOp::EnteredActive()
 
 	this->_SyncImageProcessingSetUI();
 	this->_SyncThresholdSlider();
+
+	std::string curCapt = this->carousel.GetCurrentCaption();
+	CamStreamMgr::GetInstance().SetAllSnapCaption(curCapt);
 } 
 
 void StateHMDOp::_SyncImageProcessingSetUI()
@@ -606,9 +607,15 @@ void StateHMDOp::OnKeydown(wxKeyCode key)
 		this->GetCoreWindow()->StopRecording(1);
 
 	else if(key == WXK_LEFT)
+	{ 
 		this->carousel.GotoPrev();
+		CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
+	}
 	else if(key == WXK_RIGHT)
+	{ 
 		this->carousel.GotoNext();
+		CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
+	}
 	
 
 	// Keyboard shortcut for the pull-out menu
@@ -645,8 +652,9 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 		{
 			if(button == 0)
 			{
-				// If nothing is shown and the left pedal is pressed, take a photo.
-				this->GetCoreWindow()->RequestSnap(0, "snap");
+				// If nothing is shown and the left pedal is pressed, take a photo from
+				// all video streams.
+				this->GetCoreWindow()->RequestSnapAll(this->carousel.GetCurrentLabel());
 			}
 			else if(button == 1)
 			{
@@ -656,6 +664,9 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 			else if(button == 2)
 			{
 				// If nothing is shown an the right pedal is pressed, start video recording
+				// of the composite stream
+
+				// TODO: Record from composite stream instead of index 0
 				this->GetCoreWindow()->RecordVideo(0, "video");
 			}
 		}

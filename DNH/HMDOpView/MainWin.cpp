@@ -163,7 +163,6 @@ SnapRequest::SPtr MainWin::RequestSnap(int idx, const std::string& prefix)
 	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
 	if(camMgr.GetState(idx) != ManagedCam::State::Polling)
 		return SnapRequest::MakeRequest("_badreq_");
-
 	
 
 	std::string folderLoc = this->EnsureAndGetCapturesFolder();
@@ -172,7 +171,7 @@ SnapRequest::SPtr MainWin::RequestSnap(int idx, const std::string& prefix)
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Snap_" << prefix << this->opSession.sessionName << this->snapCtr << ".png";
+	sstrmFilepath << folderLoc << "/Snap_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr << ".png";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;
@@ -181,6 +180,42 @@ SnapRequest::SPtr MainWin::RequestSnap(int idx, const std::string& prefix)
 	this->waitingSnaps.push_back(snreq);
 	this->cameraSnap.Play();
 	return snreq;
+}
+
+std::vector<SnapRequest::SPtr> MainWin::RequestSnapAll(const std::string& prefix)
+{
+	std::vector<SnapRequest::SPtr> ret;
+
+	std::string folderLoc = this->EnsureAndGetCapturesFolder();
+	if(folderLoc.empty())
+	{ 
+		ret.push_back( SnapRequest::MakeRequest("Could not allocate capture session folder") );
+		return ret;
+	}
+
+	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
+	// Build snapshot image filename
+	std::stringstream sstrmFilebase;
+	sstrmFilebase << folderLoc << "/Snap_" << this->opSession.sessionName << "_" << prefix << "_" << this->snapCtr;
+	std::string filebase = sstrmFilebase.str();
+
+	++this->snapCtr;
+
+	std::vector<SnapRequest::SPtr> mgrRet = camMgr.RequestSnapshotAll(filebase);
+	bool any = false;
+	for(int i = 0; i < mgrRet.size(); ++i)
+	{ 
+		if(!mgrRet[i])
+			continue;
+
+		any = true;
+		this->waitingSnaps.push_back(mgrRet[i]);
+	}
+	if(any)
+		this->cameraSnap.Play();
+
+	return ret;
+
 }
 
 VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)

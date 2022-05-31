@@ -486,21 +486,44 @@ bool ManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		std::lock_guard<std::mutex> guardReqs(this->snapReqsAccess);
 		std::swap(sptrSwap, this->snapReqs);
 	}
-	// Attempt to save file and report the success status back to 
-	// the shared pointer.
-	for(SnapRequest::SPtr snreq : sptrSwap)
-	{
-		if(cv::imwrite(snreq->filename, *ptr))
+
+	if(!sptrSwap.empty())
+	{ 
+		// If we're saving with text, we need a seperate image with the text,
+		// without polluting the original. Note that this will incur the cost
+		// of a deep copy.
+		cv::Ptr<cv::Mat> saveMat = ptr;
+		if(!this->snapCaption.empty())
 		{
-			snreq->frameID = this->camFeedChanges;
-			snreq->status = SnapRequest::Status::Filled;
+			saveMat = new cv::Mat();
+			ptr->copyTo(*saveMat);
+
+			cv::putText(
+				*saveMat, 
+				this->snapCaption.c_str(), 
+				cv::Point(20, ptr->rows - 30), 
+				20, 
+				1.0, 
+				0xFF00FF);
 		}
-		else
+
+
+		// Attempt to save file and report the success status back to 
+		// the shared pointer.
+		for(SnapRequest::SPtr snreq : sptrSwap)
 		{
-			// Not the most in-depth error message, but using OpenCV
-			// this way doesn't give us too much grainularity.
-			snreq->err = "Error attempting to save file.";
-			snreq->status = SnapRequest::Status::Error;
+			if(cv::imwrite(snreq->filename, *saveMat))
+			{
+				snreq->frameID = this->camFeedChanges;
+				snreq->status = SnapRequest::Status::Filled;
+			}
+			else
+			{
+				// Not the most in-depth error message, but using OpenCV
+				// this way doesn't give us too much grainularity.
+				snreq->err = "Error attempting to save file.";
+				snreq->status = SnapRequest::Status::Error;
+			}
 		}
 	}
 
@@ -749,6 +772,11 @@ bool ManagedCam::SetFloat( StreamParams paramid, float value)
 		return true;
 	}
 	return false;
+}
+
+void ManagedCam::SetSnapCaption(const std::string& caption)
+{
+	this->snapCaption = caption;
 }
 
 bool ManagedCam::SetProcessingType(ProcessingType pt)

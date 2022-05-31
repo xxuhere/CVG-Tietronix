@@ -330,4 +330,12 @@ public:
 		const std::string& iconFilepath, 
 		const std::string& label,
 		const std::string& caption);
+
+	std::string GetCurrentLabel() const;
+
+	std::string GetCurrentCaption() const;
+
+	int GetCurrentIndex() const;
+
+	CarouselData GetCurrentData() const;
 };

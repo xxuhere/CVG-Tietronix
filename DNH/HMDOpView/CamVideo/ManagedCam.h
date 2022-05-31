@@ -212,6 +212,8 @@ public:
 	/// </summary>
 	ICamImpl* currentImpl = nullptr;
 
+	std::string snapCaption;
+
 private:
 
 	/// <summary>
@@ -430,6 +432,8 @@ public:
 	float GetFloat( StreamParams paramid);
 
 	bool SetFloat( StreamParams paramid, float value);
+
+	void SetSnapCaption(const std::string& caption);
 	
 
 	//////////////////////////////////////////////////

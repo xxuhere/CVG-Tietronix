@@ -437,3 +437,35 @@ Carousel::Entry::Entry(
 	: CarouselData(id, iconFilepath, label, caption)
 {
 }
+
+std::string Carousel::GetCurrentLabel() const
+{
+	if(this->entries.empty())
+		return "";
+
+	return this->entries[this->currentEntry].label;
+}
+
+std::string Carousel::GetCurrentCaption() const
+{
+	if(this->entries.empty())
+		return "";
+
+	return this->entries[this->currentEntry].caption;
+}
+
+int Carousel::GetCurrentIndex() const
+{
+	if(this->entries.empty())
+		return -1;
+
+	return this->currentEntry;
+}
+
+CarouselData Carousel::GetCurrentData() const
+{
+	if(this->entries.empty())
+		return CarouselData("", "", "", "");
+
+	return this->entries[this->currentEntry];
+}

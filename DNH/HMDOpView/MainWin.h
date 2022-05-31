@@ -123,6 +123,8 @@ public:
     /// <returns>The SnapRequest from CamStreamMgr.</returns>
     SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix);
 
+    std::vector<SnapRequest::SPtr> RequestSnapAll(const std::string& prefix);
+
     /// <summary>
     /// Set a camera to start saving to a video file.
     /// </summary>

@@ -240,6 +240,12 @@
     <ClInclude Include="Utils\CarouselData.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\IManagedCam.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\ManagedComposite.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -400,6 +406,12 @@
     </ClCompile>
     <ClCompile Include="Utils\CarouselData.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\IManagedCam.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\ManagedComposite.cpp">
+      <Filter>Source Files\CamVideo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
