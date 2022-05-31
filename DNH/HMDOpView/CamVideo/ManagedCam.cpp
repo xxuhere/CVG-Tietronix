@@ -148,7 +148,7 @@ VideoRequest::SPtr ManagedCam::OpenVideo(const std::string& filename)
 	{
 		// If we have a frame, that will set the size parameters.
 		std::lock_guard<std::mutex> imgGuard(imageAccess);
-		if(!curCamFrame->empty())
+		if(!curCamFrame.empty() && !curCamFrame->empty())
 			this->_DumpImageToVideofile(*this->curCamFrame);
 	}
 	return this->activeVideoReq;
