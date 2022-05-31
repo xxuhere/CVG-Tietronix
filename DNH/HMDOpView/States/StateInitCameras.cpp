@@ -41,7 +41,8 @@ std::string ConvertCVTypeToString(int ty)
 StateInitCameras::StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core)
 	: BaseState(BaseState::AppState::InitCams, app, view, core)
 {
-	this->nextState = false;
+	this->nextState		= false;
+	this->playBeepLatch = false;
 }
 
 bool StateInitCameras::FlagTransitionNextState(bool force)
@@ -187,6 +188,12 @@ void StateInitCameras::Draw(const wxSize& sz)
 			glEnd();
 		}
 	}
+
+	if(this->playBeepLatch == false && this->allCamsReady == true)
+	{
+		this->GetCoreWindow()->doubleBeep.Play();
+		this->playBeepLatch = true;
+	}
 }
 
 void StateInitCameras::Update(double dt)
@@ -201,6 +208,7 @@ void StateInitCameras::EnteredActive()
 	// Leave as false and wait for OnDraw() to have a chance to properly
 	// evaluate the state of this variable.
 	this->allCamsReady = false;
+	this->playBeepLatch = false;
 
 	this->nextState = false;
 	CamStreamMgr::GetInstance().BootConnectionToCamera(

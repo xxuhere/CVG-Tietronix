@@ -24,6 +24,8 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	if(!this->cameraSnap.IsOk())
 		wxMessageBox("Could not load camera snap audio", "Audio Err");
 
+	this->doubleBeep.Create("Audio/DoubleBeepAtn.wav");
+
 	this->opSession.SetName("William", "McGillicuddy", "Leu");
 	this->opSession.SetSession("__TEST_SESSION__");
 

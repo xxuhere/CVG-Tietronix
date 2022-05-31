@@ -43,6 +43,8 @@ public:
 	/// </summary>
 	cvgStopwatch loadAnimTimer;
 
+	bool playBeepLatch = false;
+
 public:
 	StateInitCameras(HMDOpApp* app, GLWin* view, MainWin* core);
 

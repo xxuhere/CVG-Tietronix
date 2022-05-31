@@ -71,6 +71,8 @@ public:
     /// </summary>
     wxSound cameraSnap;
 
+    wxSound doubleBeep;
+
 public:
     MainWin(const wxString& title, const wxPoint& pos, const wxSize& size);
 
