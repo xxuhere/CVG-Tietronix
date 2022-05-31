@@ -29,7 +29,7 @@ void SetButtonStdCols(UIBase* uib, bool toggled = false)
 
 void StateHMDOp::MouseDownState::Reset()
 {
-	this->sinceClick = 0.0f;
+	this->clickRecent = 0.0f;
 	this->isDown = false;
 }
 
@@ -38,7 +38,7 @@ void StateHMDOp::MouseDownState::Decay(double dt)
 	if(this->isDown)
 		return;
 
-	this->sinceClick = (float)std::max(0.0, this->sinceClick	- dt * clickDecayRate);
+	this->clickRecent = (float)std::max(0.0, this->clickRecent	- dt * clickDecayRate);
 }
 
 void StateHMDOp::MouseDownState::FlagUp()
@@ -49,7 +49,7 @@ void StateHMDOp::MouseDownState::FlagUp()
 void StateHMDOp::MouseDownState::FlagDown()
 {
 	this->isDown = true;
-	this->sinceClick = 1.0f;
+	this->clickRecent = 1.0f;
 }
 
 const float icoDim = 60.0f;					// (Square) Size of main menu icons/buttons in pixels
@@ -300,6 +300,22 @@ void DrawOffsetVertices(float x, float y, TexObj& to, float px, float py, float 
 	DrawOffsetVertices(x, y, to.width, to.height, px, py, scale);
 }
 
+UIColor4 GetMousepadColor(bool isDown, float timeSinceClick)
+{
+	// Pressed down
+	if(isDown)
+		return UIColor4(0.75f, 0.75f, 0.25f, 1.0f);
+
+	// Fading
+	float colorComp =  std::clamp(1.0f - timeSinceClick, 0.0f, 1.0f);
+	return UIColor4(colorComp, 1.0f, colorComp);
+}
+
+UIColor4 GetMousepadColor(float timeSinceClick)
+{
+	return GetMousepadColor((1.0f - timeSinceClick) == 0.0f, timeSinceClick);
+}
+
 void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown)
 {
 	glEnable(GL_TEXTURE_2D);
@@ -310,19 +326,20 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	// For all the quads we're about to lay down, we're starting at
 	// the top left and moving clockwise.
 	this->ico_MousePadCrevice.GLBind();
-	float invLeftCl		= 1.0f - this->mdsLeft.sinceClick;
-	float invRightCl	= 1.0f - this->mdsRight.sinceClick;
-	float invMiddle		= 1.0f - this->mdsMiddle.sinceClick;
+	UIColor4 colMLeft	= GetMousepadColor(this->mdsLeft.clickRecent		);
+	UIColor4 colMMiddle = GetMousepadColor(this->mdsMiddle.clickRecent	);
+	UIColor4 colMRight	= GetMousepadColor(this->mdsRight.clickRecent	);
+	
 	//
 	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
 	//
-	glColor3f(invMiddle, 1.0f, invMiddle);
+	colMMiddle.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
 	//
-	glColor3f(invLeftCl, 1.0f, invLeftCl);
+	colMLeft.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
 	//
-	glColor3f(invRightCl, 1.0f, invRightCl);
+	colMRight.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
 }
 

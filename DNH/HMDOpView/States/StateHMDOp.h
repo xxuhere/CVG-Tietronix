@@ -34,8 +34,11 @@ public:
 		const double clickDecayRate = 1.0f;
 
 	public:
-		// The time since the button was last clicked.
-		float sinceClick = 0.0f;
+		// A value from [0.0, 1.0], showing the render power to use based
+		// of when the button was last clicked.
+		// A value of 0.0 means the button was clicked long ago.
+		// A value of 1.0 means the button is pressed at the moment.
+		float clickRecent = 0.0f;
 
 		// True if the mouse button is currently down, else false.
 		bool isDown = false;
