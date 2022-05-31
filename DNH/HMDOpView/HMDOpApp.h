@@ -6,6 +6,9 @@
 class HMDOpApp: public wxApp
 {
 public:
+    // TODO: Encapsulate these application values with
+    // inline accessors.
+
     /// <summary>
     /// The filepath of the options json to load.
     /// 
@@ -13,6 +16,8 @@ public:
     /// (in HMDOpApp::OnInit())
     /// </summary>
     std::string appOptionsLoc = "AppOptions.json";
+
+    std::string sessionLoc = "Session.json";
 
 public:
     bool OnInit() override;

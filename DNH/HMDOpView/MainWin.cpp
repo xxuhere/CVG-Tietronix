@@ -20,14 +20,13 @@ wxEND_EVENT_TABLE()
 MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
+	this->InitializeSession();
+
 	this->cameraSnap.Create("Audio/camera-13695.wav");
 	if(!this->cameraSnap.IsOk())
 		wxMessageBox("Could not load camera snap audio", "Audio Err");
 
 	this->doubleBeep.Create("Audio/DoubleBeepAtn.wav");
-
-	this->opSession.SetName("William", "McGillicuddy", "Leu");
-	this->opSession.SetSession("__TEST_SESSION__");
 
 	//
 	//		GRAPHICS RENDERING RESOURCES
@@ -94,6 +93,19 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	}
 
 	this->Show();
+}
+
+bool MainWin::InitializeSession()
+{
+	const std::string& sessionLoc = wxGetApp().sessionLoc;
+
+	// Try to load from file
+	if(this->opSession.LoadFromFile(sessionLoc))
+		return true;
+
+	// If we can't load from file, take what we currently
+	// have (probably a default object) and save that for next time.
+	return this->opSession.SaveToFile(sessionLoc);
 }
 
 void MainWin::ClearWaitingSnaps()
