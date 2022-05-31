@@ -403,12 +403,15 @@ void StateHMDOp::Draw(const wxSize& sz)
 		false);
 
 	// Draw debug timings
-	const int camCt = 2;
-	for(int i = 0; i < camCt; ++i)
-	{
-		std::stringstream sstrm;
-		sstrm << "Cam: " << i << " - MS: " << camMgr.GetMSFrameTime(i);
-		this->fontInsTitle.RenderFont(sstrm.str().c_str(), 0, sz.y - (20 * camCt) + (20 * i));
+	if(UISys::IsDebugView())
+	{ 
+		const int camCt = 2;
+		for(int i = 0; i < camCt; ++i)
+		{
+			std::stringstream sstrm;
+			sstrm << "Cam: " << i << " - MS: " << camMgr.GetMSFrameTime(i);
+			this->fontInsTitle.RenderFont(sstrm.str().c_str(), 0, sz.y - (20 * camCt) + (20 * i));
+		}
 	}
 
 	this->vertMenuPlate->SetLocPos(cameraWindowRgn.EndX() + 10.0f, cameraWindowRgn.y + 25.0f);
