@@ -145,6 +145,26 @@ DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 			mouseButton,
 			mouseOver->Idx());
 	}
+	else
+	{
+		// Perform whiff click notification
+		if(this->sel != nullptr)
+		{ 
+			if(this->sel->HandleSelectedWhiffDown(mouseButton))
+			{
+				// It needs to be decided whether we always dispatch a whiff notice, or only
+				// do so when it's handled by the parent widget.
+				if(this->sink != nullptr)
+					this->sink->OnUISink_SelMouseDownWhiff(this->sel, mouseButton);
+
+				return DelMouseRet(
+					DelMouseRet::Event::MouseWhiffDown,
+					pt,
+					mouseButton,
+					this->sel->idx);
+			}
+		}
+	}
 
 	return DelMouseRet(
 		DelMouseRet::Event::MissedDown,
@@ -329,6 +349,90 @@ void UISys::ResetSelection()
 		this->sel = nullptr;
 		oldSel->HandleUnselect();
 	}
+}
+
+std::vector<UIBase*> UISys::GetTabbingOrder()
+{
+	std::vector<UIBase*> ret;
+
+	struct $_
+	{
+		static void AddChildren(UIBase* parent, std::vector<UIBase*>& colls)
+		{
+			for(int i = 0; i < parent->children.size(); ++i)
+			{
+				if(!parent->children[i]->IsSelfVisible())
+					continue;
+
+				colls.push_back(parent->children[i]);
+			}
+		}
+	};
+
+	$_::AddChildren(this, ret);
+
+	int idxIt = 0;
+	while(idxIt < ret.size())
+	{
+		UIBase* uibIt = ret[idxIt];
+		$_::AddChildren(uibIt, ret);
+	}
+
+	return ret;
+}
+
+void UISys::AdvanceTabbingOrder(bool forward)
+{
+	std::vector<UIBase*> ret = this->GetTabbingOrder();
+	if(ret.empty())
+		return;
+
+	// If nothing was selected, start the selection cycle.
+	if(this->sel == nullptr)
+	{ 
+		this->sel = ret[0];
+		this->sel->HandleSelect();
+		return;
+	}
+
+	if(ret.size() == 1)
+	{
+		// If there's only one thing selected and it's already
+		// selected, cycling (through the set of 1 thing) won't
+		// do anything.
+		if(ret[0] == this->sel)
+			return;
+
+		// If nothing known was selected, default to the first thing.
+		this->sel->HandleUnselect();
+		this->sel = ret[0];
+		this->sel->HandleSelect();
+		return;
+	}
+	
+	// If nothing known was selection, start the selection cycle
+	// by chosing the first thing.
+	auto it = std::find(ret.begin(), ret.end(), this->sel);
+	if (it == ret.end())
+	{
+		this->sel->HandleUnselect();
+		this->sel = ret[0];
+		this->sel->HandleSelect();
+		return;
+	}
+
+	// Find the thing to progress to in the selection cycle based
+	// off what's currently selected.
+	int idx = it - ret.begin();
+	if(forward)
+		idx = (idx + 1) % (int)ret.size();
+	else
+		idx = ((idx - 1) + idx) % (int)ret.size();
+
+	// Select it.
+	this->sel->HandleUnselect();
+	this->sel = ret[idx];
+	this->sel->HandleSelect();
 }
 
 UISys* UISys::_GetSelfSys()

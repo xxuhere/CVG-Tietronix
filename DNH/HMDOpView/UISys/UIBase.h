@@ -362,6 +362,8 @@ protected:
 	/// </summary>
 	virtual void HandleUnselect();
 
+	virtual bool HandleSelectedWhiffDown(int button);
+
 	/// <summary>
 	/// Get a float value from the widget. The types of values supports, their ids, 
 	/// and the format of the value will depend on the subclass.

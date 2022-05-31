@@ -12,6 +12,7 @@ public:
 	virtual void OnUISink_MouseDown(UIBase* uib, int mouseBtn, const UIVec2& mousePos);
 	virtual void OnUISink_MouseUp(UIBase* uib, int mouseBtn, const UIVec2& mousePos);
 	virtual void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos);
+	virtual void OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn);
 	virtual void OnUISink_MouseDrag(UIBase* uib, int mouseBtn, const UIVec2& mousePos);
 	virtual void OnUISink_MouseHover(UIBase* uib, const UIVec2& mousePos);
 	virtual void OnUISink_MouseExit(UIBase* uib);

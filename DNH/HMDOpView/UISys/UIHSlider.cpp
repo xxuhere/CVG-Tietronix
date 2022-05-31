@@ -63,6 +63,44 @@ void UIHSlider::HandleMouseUp(const UIVec2& pos, int button)
 	this->UIGraphic::HandleMouseUp(pos, button);
 }
 
+bool UIHSlider::HandleSelectedWhiffDown(int button)
+{
+	// Middle click isn't handled.
+	if(button != 0 && button != 2)
+		return false;
+
+	// The number of discrete increments the slider
+	// is broken into.
+	const int whiffTicks = 10;
+
+	// inverse lerp
+	float lambda = 
+		(this->curVal - this->minVal)/(this->maxVal - this->minVal);
+
+	// Convert from [0.0, 1.0] space to discrete [0, whiffTicks]
+	float quant = std::floor(lambda * whiffTicks);
+
+	if(button == 0) 
+	{
+		// Left button decreases
+		quant -= 1.0f;
+	}
+	else if(button == 2)
+	{
+		// Right button increases
+		quant += 1.0f;
+	}
+
+	// Convert back to the expected range, clamp as appropriate and
+	// use the new value.
+	quant /= whiffTicks; // Turn quantized (possibly out of bounds) value into lambda range
+	float newValue = this->minVal + (this->maxVal - this->minVal) * quant;
+	newValue = std::clamp(newValue, this->minVal, this->maxVal);
+	//
+	this->SetCurValue(newValue);
+	return true;
+}
+
 bool UIHSlider::Render()
 {
 	if(!this->selfVisible)
