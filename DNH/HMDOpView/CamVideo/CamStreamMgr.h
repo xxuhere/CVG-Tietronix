@@ -4,6 +4,8 @@
 #include "../Utils/VideoPollType.h"
 #include "../Utils/cvgCamFeedSource.h"
 
+class ManagedComposite;
+
 // NOTE: The terms camera stream and video streams are used 
 // somewhat synonamously for the comments and elements in this
 // system. The streams are really video streams - but often times
@@ -54,6 +56,8 @@ private:
 	/// </summary>
 	std::vector<ManagedCam*> cams;
 
+	ManagedComposite * composite;
+
 	/// <summary>
 	/// Ensure nothing is attempting to modify the cameras
 	/// and read from them at the same time.
@@ -61,6 +65,11 @@ private:
 	std::mutex camAccess;
 
 	int activeIndex = -1;
+
+private:
+	IManagedCam* _GetIManaged(int idx);
+
+	ManagedCam* _GetManaged(int idx);
 
 public:
 	~CamStreamMgr();
@@ -138,8 +147,13 @@ public:
 	/// Queue a snapshot request for the new camera frame.
 	/// </summary>
 	/// <param name="idx">The video index to queue.</param>
+	/// <param name="filename">The filename to save the snapshot as.</param>
+	/// <param name="procType">The processing type to save.</param>
 	/// <returns>The return value</returns>
-	SnapRequest::SPtr RequestSnapshot(int idx, const std::string& filename);
+	SnapRequest::SPtr RequestSnapshot(
+		int idx, 
+		const std::string& filename, 
+		SnapRequest::ProcessType procType);
 
 	std::vector<SnapRequest::SPtr> RequestSnapshotAll(const std::string& filenameBase);
 

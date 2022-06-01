@@ -632,41 +632,8 @@ void StateHMDOp::Initialize()
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
 {
-	// The numpad items will need to check for two keys, because it
-	// can vary based on if NumLock is on or not.
-	//
-	// DEV SHORTCUTS: Snap a picture
-	if(key == WXK_NUMPAD7		|| key == WXK_NUMPAD_HOME)
-		this->GetCoreWindow()->RequestSnap(0, "RGB");
-	else if(key == WXK_NUMPAD8	|| key == WXK_NUMPAD_UP)
-		this->GetCoreWindow()->RequestSnap(1, "NIR");
-	//
-	// DEV SHORTCUTS: START recording a camera to video 
-	else if(key == WXK_NUMPAD4	|| key == WXK_NUMPAD_LEFT)
-		this->GetCoreWindow()->RecordVideo(0, "RGB");
-	else if(key == WXK_NUMPAD5	|| key == WXK_CLEAR)
-		this->GetCoreWindow()->RecordVideo(1, "NIR");
-	//
-	// DEV SHORTCUTS: STOP recording a camera to video.
-	else if(key == WXK_NUMPAD1	|| key == WXK_NUMPAD_END)
-		this->GetCoreWindow()->StopRecording(0);
-	else if(key == WXK_NUMPAD2	|| key == WXK_NUMPAD_DOWN)
-		this->GetCoreWindow()->StopRecording(1);
-
-	else if(key == WXK_LEFT)
-	{ 
-		this->carousel.GotoPrev();
-		CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
-	}
-	else if(key == WXK_RIGHT)
-	{ 
-		this->carousel.GotoNext();
-		CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
-	}
-	
-
 	// Keyboard shortcut for the pull-out menu
-	else if(key == WXK_NUMPAD_ENTER)
+	if(key == WXK_NUMPAD_ENTER)
 		this->showVertMenu = !this->showVertMenu;
 	else
 	{
@@ -702,6 +669,7 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 				if (this->IsCarouselShown())
 				{
 					this->carousel.GotoPrev();
+					CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
 				}
 				else
 				{
@@ -715,6 +683,7 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 				if(this->IsCarouselShown())
 				{ 
 					this->carousel.GotoNext();
+					CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
 				}
 				else
 				{
@@ -722,7 +691,7 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 					// of the composite stream
 
 					// TODO: Record from composite stream instead of index 0
-					this->GetCoreWindow()->RecordVideo(0, "video");
+					this->GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
 				}
 			}
 		}

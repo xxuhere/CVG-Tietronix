@@ -130,8 +130,12 @@ public:
     /// <summary>
     /// Request a snapshot and cache the request in waitingSnaps.
     /// </summary>
+    /// <param name="prefix">
+    /// The filename prefix. An arbitrary string that can be changed in the filename pattern.
+    /// </param>
+    /// <param name="procType">The processing type to capture a snapshot of.</param>
     /// <returns>The SnapRequest from CamStreamMgr.</returns>
-    SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix);
+    SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix, SnapRequest::ProcessType procType);
 
     std::vector<SnapRequest::SPtr> RequestSnapAll(const std::string& prefix);
 

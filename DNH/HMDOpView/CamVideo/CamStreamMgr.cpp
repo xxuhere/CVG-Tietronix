@@ -2,6 +2,7 @@
 #include <thread>
 #include <mutex>
 #include "ManagedCam.h"
+#include "ManagedComposite.h"
 #include "../Utils/multiplatform.h"
 
 CamStreamMgr CamStreamMgr::_inst;
@@ -31,6 +32,40 @@ CamStreamMgr::~CamStreamMgr()
 	this->Shutdown();
 }
 
+IManagedCam* CamStreamMgr::_GetIManaged(int idx)
+{
+	switch(idx)
+	{
+	case SpecialCams::Composite:
+		return this->composite;
+		break;
+
+	case SpecialCams::ErrorCode:
+		return nullptr;
+		break;
+	}
+
+	// Below is a duplicate of _GetManaged().
+	if(this->cams.empty())
+		return nullptr;
+
+	if( idx < 0 || idx >= this->cams.size())
+		return nullptr;
+
+	return this->cams[idx];
+}
+
+ManagedCam* CamStreamMgr::_GetManaged(int idx)
+{
+	if(this->cams.empty())
+		return nullptr;
+
+	if( idx < 0 || idx >= this->cams.size())
+		return nullptr;
+
+	return this->cams[idx];
+}
+
 bool CamStreamMgr::BootConnectionToCamera(
 	int camCt, 
 	VideoPollType allDefaultPoll)
@@ -57,6 +92,12 @@ bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& s
 
 	std::lock_guard<std::mutex> guard(this->camAccess);
 
+	if(this->composite == nullptr)
+	{
+		this->composite = new ManagedComposite();
+		this->composite->BootupPollingThread(SpecialCams::Composite);
+	}
+
 	// Initializing threads to run in the background can only
 	// be allowed if there aren't already background threads
 	// running.
@@ -79,28 +120,31 @@ bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& s
 cv::Ptr<cv::Mat> CamStreamMgr::GetCurrentFrame(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return cv::Ptr<cv::Mat>();
 
-	return this->cams[idx]->GetCurrentFrame();
+	return imc->GetCurrentFrame();
 }
 
 long long CamStreamMgr::GetCameraFeedChanges(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return -1;
 
-	return this->cams[idx]->camFeedChanges;
+	return imc->camFeedChanges;
 }
 
 void CamStreamMgr::SetPollType(int idx, VideoPollType pty)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	ManagedCam* mc = this->_GetManaged(idx);
+	if(mc == nullptr)
 		return;
 
-	this->cams[idx]->SetPoll(pty);
+	mc->SetPoll(pty);
 }
 
 void CamStreamMgr::ClearAllSnapshotRequests()
@@ -111,11 +155,18 @@ void CamStreamMgr::ClearAllSnapshotRequests()
 		mc->ClearSnapshotRequests();
 }
 
-SnapRequest::SPtr CamStreamMgr::RequestSnapshot(int idx, const std::string& filename)
+SnapRequest::SPtr CamStreamMgr::RequestSnapshot(
+	int idx, 
+	const std::string& filename, 
+	SnapRequest::ProcessType procType)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
 
-	return this->cams[idx]->RequestSnapshot(filename);
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
+		return SnapRequest::MakeError("Could not find requested camera stream", filename);
+
+	return imc->RequestSnapshot(filename, procType);
 }
 
 std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::string& filenameBase)
@@ -124,14 +175,30 @@ std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::strin
 
 	std::vector<SnapRequest::SPtr> ret;
 
+	std::vector<IManagedCam*> allCams;
 	for(int i = 0; i < this->cams.size(); ++i)
-	{
-		std::string strIdx = std::to_string(i);
-		std::string fullFilename = filenameBase + "_" + strIdx + ".png";
-		SnapRequest::SPtr camSnap = this->cams[i]->RequestSnapshot(fullFilename);
+		allCams.push_back(this->cams[i]);
 
-		if(camSnap)
-			ret.push_back(camSnap);
+	if(this->composite != nullptr)
+		allCams.push_back(this->composite);
+
+	for(IManagedCam* mc : allCams)
+	{
+		std::string strIdx = mc->GetStreamName();
+		std::string fullFilename = filenameBase + "_" + strIdx + "RAW.png";
+		SnapRequest::SPtr camSnapRaw = mc->RequestSnapshot(fullFilename, SnapRequest::ProcessType::Cannot);
+
+		if(camSnapRaw)
+			ret.push_back(camSnapRaw);
+
+		if(mc->UsesImageProcessingChain())
+		{
+			std::string fullFilename = filenameBase + "_" + strIdx + "IMPROC.png";
+			SnapRequest::SPtr camSnapIProc = mc->RequestSnapshot(fullFilename, SnapRequest::ProcessType::HasTo);
+			if(camSnapIProc)
+				ret.push_back(camSnapIProc);
+		}
+
 	}
 
 	return ret;
@@ -140,100 +207,111 @@ std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::strin
 void CamStreamMgr::ClearSnapshotRequests(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return;
 
-	this->cams[idx]->ClearSnapshotRequests();
+	imc->ClearSnapshotRequests();
 }
 
 VideoRequest::SPtr CamStreamMgr::RecordVideo(int idx, const std::string& filename)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return VideoRequest::MakeError("__invalidstate__");
 
-	return this->cams[idx]->OpenVideo(filename);
+	return imc->OpenVideo(filename);
 }
 
 bool CamStreamMgr::StopRecording(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return false;
 
-	return this->cams[idx]->CloseVideo();
+	return imc->CloseVideo();
 }
 
 bool CamStreamMgr::IsRecording(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return false;
 
-	return this->cams[idx]->IsRecordingVideo();
+	return imc->IsRecordingVideo();
 }
 
 bool CamStreamMgr::IsThresholded(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	ManagedCam* mc = this->_GetManaged(idx);
+	if(mc == nullptr)
 		return false;
 
-	return this->cams[idx]->IsThresholded();
+	return mc->IsThresholded();
 }
 
 std::string CamStreamMgr::RecordingFilename(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return std::string();
 
-	return this->cams[idx]->VideoFilepath();
+	return imc->VideoFilepath();
 }
 
 int CamStreamMgr::GetMSFrameTime(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return -1;
 
-	return this->cams[idx]->msInterval;
+	return imc->msInterval;
 }
 
 int CamStreamMgr::GetStreamFrameCt(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return -1;
 
-	return this->cams[idx]->streamFrameCt;
+	return imc->streamFrameCt;
 }
 
 ProcessingType CamStreamMgr::GetProcessingType(int idx)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	ManagedCam* mc = this->_GetManaged(idx);
+	if(mc == nullptr)
 		return ProcessingType::None;
 
-	return this->cams[idx]->GetProcessingType();
+	return mc->GetProcessingType();
 }
 
 bool CamStreamMgr::SetProcessingType(int idx, ProcessingType pt)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	ManagedCam* mc = this->_GetManaged(idx);
+	if(mc == nullptr)
 		return false;
 
-	return this->cams[idx]->SetProcessingType(pt);
+	return mc->SetProcessingType(pt);
 }
 
 ManagedCam::State CamStreamMgr::GetState(int idx) 
 { 
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(idx);
+	if(imc == nullptr)
 		return ManagedCam::State::Unknown;
 
-	return this->cams[idx]->GetState();
+	return imc->GetState();
 }
 
 bool CamStreamMgr::Shutdown()
@@ -258,6 +336,24 @@ bool CamStreamMgr::Shutdown()
 	for(ManagedCam* mc : this->cams)
 		delete mc;
 
+	// The composite should be handled AFTER all the individual
+	// video feeds have been finished, so we know there's no risk
+	// that they'll continue to add frames to the composite while
+	// it's trying to shutdown.
+
+	if(this->composite != nullptr)
+	{
+		this->composite->ShutdownThread();
+
+		while(!this->composite->_isShutdown)
+			MSSleep(10);
+
+		this->composite->_JoinThread();
+
+		delete this->composite;
+		this->composite = nullptr;
+	}
+
 	this->cams.clear();
 	 return true;
 }
@@ -266,36 +362,40 @@ bool CamStreamMgr::Shutdown()
 float CamStreamMgr::GetFloat(int id, StreamParams paramid)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(id);
+	if(imc == nullptr)
 		return -1.0f;
 
-	return this->cams[id]->GetFloat(paramid);
+	return imc->GetFloat(paramid);
 }
 
 bool CamStreamMgr::SetFloat(int id, StreamParams paramid, float value)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(id);
+	if(imc == nullptr)
 		return false;
 
-	return this->cams[id]->SetFloat(paramid, value);
+	return imc->SetFloat(paramid, value);
 }
 
 void CamStreamMgr::SetSnapCaption(int id, const std::string& caption)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
+	IManagedCam* imc = this->_GetIManaged(id);
+	if(imc == nullptr)
 		return;
 
-	this->cams[id]->SetSnapCaption(caption);
+	imc->SetSnapCaption(caption);
 }
 
 void CamStreamMgr::SetAllSnapCaption(const std::string& caption)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
-	if(this->cams.empty())
-		return;
 
 	for(int i = 0; i < this->cams.size(); ++i)
 		this->cams[i]->SetSnapCaption(caption);
+
+	if(this->composite != nullptr)
+		this->composite->SetSnapCaption(caption);
 }

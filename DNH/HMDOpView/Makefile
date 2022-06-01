@@ -78,7 +78,7 @@ SUBOBJ_HARDWARE = \
 	HardwareMgr IHardware LaserSys
 	
 SUBOBJ_CAMVIDEO = \
-	CamStreamMgr ManagedCam SnapRequest VideoRequest
+	CamStreamMgr IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest
 	
 SUBOBJ_CAMIMPL = \
 	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath

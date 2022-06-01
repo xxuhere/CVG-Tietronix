@@ -20,7 +20,7 @@
 /// </summary>
 struct VideoRequest
 {
-	friend class ManagedCam;
+	friend class IManagedCam;
 
 public:
 	/// <summary>

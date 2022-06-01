@@ -9,9 +9,33 @@ class CamStreamMgr;
 /// </summary>
 class SnapRequest
 {
-	friend class ManagedCam;
+	friend class IManagedCam;
 
 public:
+
+	/// <summary>
+	/// The specification of what kind of snapshot to target saving.
+	/// </summary>
+	enum class ProcessType
+	{
+		/// <summary>
+		/// The snapshot must have image processing.
+		/// Only save the snapshots if it's an image processed version.
+		/// </summary>
+		HasTo,
+
+		/// <summary>
+		/// The snapshot cannot have images processing.
+		/// Only save the snapshots if it's the raw image WITHOUT image processing.
+		/// </summary>
+		Cannot,
+
+		/// <summary>
+		/// Try to save an image processed version, but if the feed isn't
+		/// image processed, just save a raw version.
+		/// </summary>
+		Indifferent
+	};
 
 	/// <summary>
 	/// The status of the request.
@@ -67,6 +91,8 @@ private:
 	/// </summary>
 	Status status = Status::Unknown;
 
+	ProcessType processType;
+
 public:
 	inline std::string Filename() const
 	{ return this->filename; }
@@ -86,6 +112,9 @@ public:
 	/// Utility function to create a shared pointer to a SnapRequest.
 	/// </summary>
 	/// <param name="filename">The request's filename.</param>
+	/// <param name="processType>The requirement for what stage of processing to record</param>
 	/// <returns>The created request.</returns>
-	static SPtr MakeRequest(const std::string& filename);
+	static SPtr MakeRequest(const std::string& filename, ProcessType pt);
+
+	static SPtr MakeError(const std::string& err, const std::string& filename);
 };

@@ -15,8 +15,6 @@
 	#include "CamImpl/CamImpl_MMAL.h"
 #endif
 
-
-
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedSource& camOptions)
 {
 	this->cameraId		= cameraId;
@@ -41,318 +39,6 @@ ManagedCam::~ManagedCam()
 
 		this->_JoinThread();
 	}
-}
-
-bool ManagedCam::ShutdownThread()
-{
-	if(this->camStreamThread == nullptr)
-		return true;
-
-	// Send the signal for the thread the shut down. Then it's up to
-	// to the thread to see the signal and shut itself down.
-	this->_sentShutdown = true;
-	return true;
-}
-
-bool ManagedCam::_JoinThread()
-{
-	if(this->camStreamThread == nullptr || !this->_isShutdown)
-		return false;
-
-	this->camStreamThread->join();
-	delete this->camStreamThread;
-	this->camStreamThread = nullptr;
-	return true;
-}
-
-cv::Ptr<cv::Mat> ManagedCam::GetCurrentFrame()
-{
-	// Get a copy of the shared ptr in a controlled manner, when we
-	// know it's stable.
-	cv::Ptr<cv::Mat> cpyRet;
-
-	{ // Mutex guard scope
-		std::lock_guard<std::mutex> guard(this->imageAccess);
-		cpyRet = this->curCamFrame;
-	}
-	return cpyRet;
-}
-
-bool ManagedCam::SetCurrentFrame(cv::Ptr<cv::Mat> mat)
-{
-	std::lock_guard<std::mutex> guard(this->imageAccess);
-	this->curCamFrame = mat;
-	++this->camFeedChanges;
-	return true;
-}
-
-SnapRequest::SPtr ManagedCam::RequestSnapshot(const std::string& filename)
-{
-	SnapRequest::SPtr req = SnapRequest::MakeRequest(filename);
-	{
-		// Thread protected add to the to-process list.
-		std::lock_guard<std::mutex> guard(this->snapReqsAccess);
-		req->status = SnapRequest::Status::Requested;
-		this->snapReqs.push_back(req);
-	}
-	return req;
-}
-
-void ManagedCam::ClearSnapshotRequests()
-{
-	std::vector<SnapRequest::SPtr> swapDst;
-	{
-		std::lock_guard<std::mutex> guard(this->snapReqsAccess);
-		std::swap(swapDst, this->snapReqs);
-	}
-
-	for(SnapRequest::SPtr s : swapDst)
-	{
-		// Technically not an error, but a cancellation. But, this
-		// will do.
-		s->status = SnapRequest::Status::Error;
-	}
-}
-
-VideoRequest::SPtr ManagedCam::OpenVideo(const std::string& filename)
-{
-	std::lock_guard<std::mutex> guard(this->videoAccess);
-
-	if (filename.empty())
-	{
-		this->_CloseVideo_NoMutex();
-		VideoRequest::SPtr noneRet = VideoRequest::MakeRequest(0, 0, this->cameraId, filename);
-		noneRet->err = "Empty filename";
-		noneRet->status = VideoRequest::Status::Error;
-		return noneRet;
-	}
-
-	// If we're already recording the target, just sent back the
-	// current active request.
-	if(this->activeVideoReq != nullptr)
-	{
-		if(
-			this->activeVideoReq->filename == filename && 
-			this->activeVideoReq->status == VideoRequest::Status::StreamingOut)
-		{
-			return this->activeVideoReq;
-		}
-	}
-
-	this->_CloseVideo_NoMutex();
-
-	// We may have a frame immediately write, but we'll open it
-	// tenatively first.
-	this->activeVideoReq = VideoRequest::MakeRequest(0, 0, this->cameraId, filename);
-	this->activeVideoReq->status = VideoRequest::Status::Requested;
-	{
-		// If we have a frame, that will set the size parameters.
-		std::lock_guard<std::mutex> imgGuard(imageAccess);
-		if(!curCamFrame.empty() && !curCamFrame->empty())
-			this->_DumpImageToVideofile(*this->curCamFrame);
-	}
-	return this->activeVideoReq;
-}
-
-bool ManagedCam::_CloseVideo_NoMutex()
-{
-	if(this->videoWrite.isOpened())
-		this->videoWrite.release();
-
-	if(this->activeVideoReq == nullptr)
-		return false;
-
-	this->activeVideoReq->status = VideoRequest::Status::Closed;
-	this->activeVideoReq = nullptr;
-
-	return true;
-}
-
-bool ManagedCam::_DumpImageToVideofile(const cv::Mat& img)
-{
-	if(img.empty())
-	{
-		this->_CloseVideo_NoMutex();
-		return false;
-	}
-
-	// No request of where to save it was set.
-	if(this->activeVideoReq == nullptr)
-		return false;
-
-	// If the user requested the stream to be stopped, using the
-	// request handle (via VideoRequest::RequestStop()).
-	if(this->activeVideoReq->_reqStopped)
-	{ 
-		this->_CloseVideo_NoMutex();
-
-		// Technically... it was handled properly... so I guess it's true.
-		return true;
-	}
-
-	// If the videowrite has not been opened yet, open it locked
-	// to the image size. Every image streamed to the video will
-	// now need to match the dimensions, or else it's considered
-	// an error.
-	if(!this->videoWrite.isOpened())
-	{
-		int mp4FourCC = cv::VideoWriter::fourcc('a', 'v', 'c', '1');
-		this->videoWrite.open(this->activeVideoReq->filename, mp4FourCC, 30.0, img.size());
-		if(!this->videoWrite.isOpened())
-		{
-			this->activeVideoReq->err = "Could not open requested file.";
-			this->activeVideoReq->status = VideoRequest::Status::Error;
-			this->_CloseVideo_NoMutex();
-		}
-		this->activeVideoReq->width		= img.size().width;
-		this->activeVideoReq->height	= img.size().height;
-		this->activeVideoReq->status	= VideoRequest::Status::StreamingOut;
-	}
-	else
-	{
-		// If contents have already been streamed, just make sure the dimensions
-		// continue to be the same.
-		if(
-			this->activeVideoReq->width		!= img.size().width ||
-			this->activeVideoReq->height	!= img.size().height )
-		{
-			this->activeVideoReq->err = "Closed when attempting to add misshapened image.";
-			this->activeVideoReq->status = VideoRequest::Status::Error;
-			this->_CloseVideo_NoMutex();
-		}
-
-		this->videoWrite.write(img);
-	}
-	return true;
-}
-
-void ManagedCam::_ClearImplementation(bool delCurrent, bool resetPollTy)
-{
-	if(this->currentImpl != nullptr)
-	{
-		this->currentImpl->Deactivate();
-
-		if(delCurrent)
-		{
-			this->currentImpl->Shutdown();
-			delete this->currentImpl;
-		}
-
-		this->currentImpl = nullptr;
-	}
-	if(resetPollTy)
-		this->pollType = VideoPollType::Deactivated;
-}
-
-bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent)
-{
-	//
-	//		REDUNDANCY AVOIDANCE
-	//////////////////////////////////////////////////
-	// If the same implementation, do nothing.
-	if(this->currentImpl != nullptr)
-	{
-		if(this->currentImpl->PollType() == newImplType)
-			return false;
-
-		this->_ClearImplementation();
-	}
-	else if(newImplType == VideoPollType::Deactivated)
-		return false;
-
-	//
-	//		SELECTING IMPLEMENTATION
-	//////////////////////////////////////////////////
-	// Anything created will use a default constructor, actual
-	// options and destinations are pulled later with the call
-	// to currentImpl->PullOptions() below.
-	//
-	switch(newImplType)
-	{
-	default:
-		cvgAssert(false,"Unhandled implementation switch");
-	case VideoPollType::Deactivated:
-		// Does nothing, and currentImpl should be left nullptr.
-		std::cout << "Deactivated " << std::endl;
-		return true;
-
-	case VideoPollType::OpenCVUSB_Idx:
-		std::cout << "OpenCVUSB_Idx " << std::endl;
-		this->currentImpl = new CamImpl_OCV_USB(0);
-		break;
-
-	case VideoPollType::OpenCVUSB_Named:
-		std::cout << "OpenCVUSB_Named " << std::endl;
-		this->currentImpl = new CamImpl_OCV_HWPath("");
-		break;
-
-	case VideoPollType::Web:
-		std::cout << "Web " << std::endl;
-		this->currentImpl = new CamImpl_OCV_Web("");
-		break;
-
-	case VideoPollType::Image:
-		std::cout << "Image " << std::endl;
-		this->currentImpl = new CamImpl_StaticImg("");
-		break;
-
-#if !_WIN32
-	case VideoPollType::MMAL:
-		this->currentImpl = new CamImpl_MMAL("");
-		break;
-#endif
-	}
-
-	//
-	//		BOOT UP IMPLEMENTATION
-	//////////////////////////////////////////////////
-	// Before the implementation is usable, we need to initialize it.
-	// While Initialize(), in theory, only needs to be done once, we create
-	// these implementation on the fly instead of caching them for the entire
-	// lifetime, so these brand new implementation will need an Initialize().
-	cvgAssert(this->currentImpl != nullptr,"currentImpl is null");
-	//
-	// Let the implementation library initialize any data it needs to.
-	if(!this->currentImpl->Initialize())
-	{
-		delete this->currentImpl;
-		this->currentImpl = nullptr;
-	}
-
-	this->currentImpl->PullOptions(this->camOptions);
-
-	// Actually turn on the device for use.
-	if(!this->currentImpl->Activate())
-	{
-		this->currentImpl->Shutdown();
-		delete this->currentImpl;
-		this->currentImpl = nullptr;
-	}
-
-	this->pollType = newImplType;
-
-	return true;
-}
-
-bool ManagedCam::CloseVideo()
-{
-	std::lock_guard<std::mutex> guard(this->videoAccess);
-	return this->_CloseVideo_NoMutex();
-}
-
-bool ManagedCam::IsRecordingVideo()
-{
-	std::lock_guard<std::mutex> guard(this->videoAccess);
-	return this->videoWrite.isOpened();
-}
-
-std::string ManagedCam::VideoFilepath()
-{
-	std::lock_guard<std::mutex> guard(this->videoAccess);
-	if(this->activeVideoReq == nullptr)
-		return std::string();
-
-	return this->activeVideoReq->filename;
 }
 
 void ManagedCam::ThreadFn(int camIdx)
@@ -452,126 +138,102 @@ void ManagedCam::ThreadFn(int camIdx)
 	}
 
 	this->_ClearImplementation();
+	this->_EndShutdown();
 	this->conState = State::Shutdown;
 }
 
-bool ManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
+
+bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent)
 {
-	if(ptr == nullptr)
+	//
+	//		REDUNDANCY AVOIDANCE
+	//////////////////////////////////////////////////
+	// If the same implementation, do nothing.
+	if(this->currentImpl != nullptr)
+	{
+		if(this->currentImpl->PollType() == newImplType)
+			return false;
+
+		this->_ClearImplementation();
+	}
+	else if(newImplType == VideoPollType::Deactivated)
 		return false;
 
-	if(ptr->empty())
-		return false;
-
-	//		PROCESS AND CACHE VIDEO
-	// 
+	//
+	//		SELECTING IMPLEMENTATION
 	//////////////////////////////////////////////////
+	// Anything created will use a default constructor, actual
+	// options and destinations are pulled later with the call
+	// to currentImpl->PullOptions() below.
+	//
+	switch(newImplType)
+	{
+	default:
+		cvgAssert(false,"Unhandled implementation switch");
+	case VideoPollType::Deactivated:
+		// Does nothing, and currentImpl should be left nullptr.
+		std::cout << "Deactivated " << std::endl;
+		return true;
 
-	ptr = this->ProcessImage(ptr);
+	case VideoPollType::OpenCVUSB_Idx:
+		std::cout << "OpenCVUSB_Idx " << std::endl;
+		this->currentImpl = new CamImpl_OCV_USB(0);
+		break;
 
-	if(ptr)
-		this->SetCurrentFrame(ptr);
+	case VideoPollType::OpenCVUSB_Named:
+		std::cout << "OpenCVUSB_Named " << std::endl;
+		this->currentImpl = new CamImpl_OCV_HWPath("");
+		break;
+
+	case VideoPollType::Web:
+		std::cout << "Web " << std::endl;
+		this->currentImpl = new CamImpl_OCV_Web("");
+		break;
+
+	case VideoPollType::Image:
+		std::cout << "Image " << std::endl;
+		this->currentImpl = new CamImpl_StaticImg("");
+		break;
+
+#if !_WIN32
+	case VideoPollType::MMAL:
+		this->currentImpl = new CamImpl_MMAL("");
+		break;
+#endif
+	}
 
 	//
-	//		SAVE IMAGE REQUESTS
-	//
+	//		BOOT UP IMPLEMENTATION
 	//////////////////////////////////////////////////
-	// If there's anything in the snap requests, swap this empty
-	// one with a copy of the requests and claim ownership.
+	// Before the implementation is usable, we need to initialize it.
+	// While Initialize(), in theory, only needs to be done once, we create
+	// these implementation on the fly instead of caching them for the entire
+	// lifetime, so these brand new implementation will need an Initialize().
+	cvgAssert(this->currentImpl != nullptr,"currentImpl is null");
 	//
-	// Possibly more overhead to always create the vector, but the
-	// swap minimized the amount of time the mutex is active.
-	std::vector<SnapRequest::SPtr> sptrSwap;
+	// Let the implementation library initialize any data it needs to.
+	if(!this->currentImpl->Initialize())
 	{
-		std::lock_guard<std::mutex> guardReqs(this->snapReqsAccess);
-		std::swap(sptrSwap, this->snapReqs);
+		delete this->currentImpl;
+		this->currentImpl = nullptr;
 	}
 
-	if(!sptrSwap.empty())
-	{ 
-		// If we're saving with text, we need a seperate image with the text,
-		// without polluting the original. Note that this will incur the cost
-		// of a deep copy.
-		cv::Ptr<cv::Mat> saveMat = ptr;
-		if(!this->snapCaption.empty())
-		{
-			saveMat = new cv::Mat();
-			ptr->copyTo(*saveMat);
+	this->currentImpl->PullOptions(this->camOptions);
 
-			cv::putText(
-				*saveMat, 
-				this->snapCaption.c_str(), 
-				cv::Point(20, ptr->rows - 30), 
-				20, 
-				1.0, 
-				0xFF00FF);
-		}
-
-
-		// Attempt to save file and report the success status back to 
-		// the shared pointer.
-		for(SnapRequest::SPtr snreq : sptrSwap)
-		{
-			if(cv::imwrite(snreq->filename, *saveMat))
-			{
-				snreq->frameID = this->camFeedChanges;
-				snreq->status = SnapRequest::Status::Filled;
-			}
-			else
-			{
-				// Not the most in-depth error message, but using OpenCV
-				// this way doesn't give us too much grainularity.
-				snreq->err = "Error attempting to save file.";
-				snreq->status = SnapRequest::Status::Error;
-			}
-		}
-	}
-
+	// Actually turn on the device for use.
+	if(!this->currentImpl->Activate())
 	{
-		//		SAVE VIDEO
-		//
-		//////////////////////////////////////////////////
-		// If we're holding on to a non-null video request, it will be 
-		// either waiting to stream, or already streaming - no misc or
-		// error conditions.
-		std::lock_guard<std::mutex> guardVideo(this->videoAccess);
-		if(this->activeVideoReq != nullptr)
-			this->_DumpImageToVideofile(*ptr);
+		this->currentImpl->Shutdown();
+		delete this->currentImpl;
+		this->currentImpl = nullptr;
 	}
+
+	this->pollType = newImplType;
 
 	return true;
 }
 
-bool ManagedCam::BootupPollingThread(int camIdx)
-{
-	// Once someone shuts down the camera system for the app,
-	// for the given app session, that's it- it's kaputskies 
-	// (by design) for the rest of the lifetime's app.
-	if(this->_sentShutdown)
-		return false;
-
-	// If the camera stream is already running, there's nothing that
-	// need booting.
-	if(this->camStreamThread != nullptr)
-		return false;
-
-	this->camStreamThread = 
-		new std::thread(
-			[this, camIdx]
-			{
-				// This thread is expected to run until 
-				// CamStreamMgr::Shutdown() is called at the end
-				// of the app's lifetime.
-
-				// Flag the command to start the video capturing for the thread
-				this->ThreadFn(camIdx);
-				this->_isShutdown = true;
-			});
-
-	return true;
-}
-
-cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, int threshold)
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, double threshold)
 {
 	cv::Ptr<cv::Mat> grey;
 	if (src->elemSize() != 1)
@@ -585,7 +247,7 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, int threshold)
 	cv::threshold(
 		*grey,
 		*grey,
-		double(threshold),
+		threshold,
 		255,
 		cv::THRESH_BINARY);
 
@@ -694,10 +356,10 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
 
 	cv::Mat mean, stddev;
 	cv::meanStdDev(*grey, mean, stddev);
-	float final_mean = mean.at<double>(0, 0);
-	float final_stddev = stddev.at<double>(0, 0);
+	double final_mean = mean.at<double>(0, 0);
+	double final_stddev = stddev.at<double>(0, 0);
 
-	return ImgProc_Simple(grey, final_mean + 2 * final_stddev);
+	return ImgProc_Simple(grey, final_mean + 2.0 * final_stddev);
 }
 
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
@@ -730,15 +392,9 @@ bool ManagedCam::IsThresholded()
 	return this->camOptions.processing != ProcessingType::None;
 }
 
-void ManagedCam::_DeactivateStreamState(bool deactivateShould)
+bool ManagedCam::UsesImageProcessingChain()
 {
-	if(deactivateShould)
-		this->pollType = VideoPollType::Deactivated;
-
-	this->_isStreamActive		= false;
-	this->streamWidth			= -1;
-	this->streamHeight			= -1;
-	this->msInterval			= 0;
+	return this->IsThresholded();
 }
 
 void ManagedCam::SetPoll(VideoPollType pollTy)
@@ -756,7 +412,7 @@ float ManagedCam::GetFloat( StreamParams paramid)
 	switch(paramid)
 	{
 	case StreamParams::StaticThreshold:
-		return this->camOptions.thresholdExplicit;
+		return (float)this->camOptions.thresholdExplicit;
 		break;
 	}
 
@@ -774,13 +430,49 @@ bool ManagedCam::SetFloat( StreamParams paramid, float value)
 	return false;
 }
 
-void ManagedCam::SetSnapCaption(const std::string& caption)
-{
-	this->snapCaption = caption;
-}
-
 bool ManagedCam::SetProcessingType(ProcessingType pt)
 {
 	this->camOptions.processing = pt;
 	return true;
+}
+
+void ManagedCam::_ClearImplementation(bool delCurrent, bool resetPollTy)
+{
+	if(this->currentImpl != nullptr)
+	{
+		this->currentImpl->Deactivate();
+
+		if(delCurrent)
+		{
+			this->currentImpl->Shutdown();
+			delete this->currentImpl;
+		}
+
+		this->currentImpl = nullptr;
+	}
+	if(resetPollTy)
+		this->pollType = VideoPollType::Deactivated;
+}
+
+CamType ManagedCam::GetCamType()
+{
+	return CamType::VideoFeed;
+}
+
+int ManagedCam::GetID() const
+{
+	return this->cameraId;
+}
+
+std::string ManagedCam::GetStreamName() const
+{
+	return std::to_string(this->cameraId);
+}
+
+void ManagedCam::_DeactivateStreamState(bool deactivateShould)
+{
+	if(deactivateShould)
+		this->pollType = VideoPollType::Deactivated;
+
+	this->IManagedCam::_DeactivateStreamState(deactivateShould);
 }
