@@ -22,11 +22,11 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 {
 	this->InitializeSession();
 
-	this->cameraSnap.Create("Audio/camera-13695.wav");
+	this->cameraSnap.Create("Assets/Audio/camera-13695.wav");
 	if(!this->cameraSnap.IsOk())
 		wxMessageBox("Could not load camera snap audio", "Audio Err");
 
-	this->doubleBeep.Create("Audio/DoubleBeepAtn.wav");
+	this->doubleBeep.Create("Assets/Audio/DoubleBeepAtn.wav");
 
 	//
 	//		GRAPHICS RENDERING RESOURCES
