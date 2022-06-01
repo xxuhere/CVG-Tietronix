@@ -24,7 +24,7 @@ int cvgStopwatchLeft::MSLeft(int msToPass)
 	if(this->excessMicroseconds)
 	{ 
 		msPassed += this->excessMicroseconds / 1000;
-		msPassed %= 1000;
+		this->excessMicroseconds %= 1000;
 	}
 
 	if(msPassed > msToPass)
