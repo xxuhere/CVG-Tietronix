@@ -691,7 +691,10 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 					// of the composite stream
 
 					// TODO: Record from composite stream instead of index 0
-					this->GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
+					if(this->GetCoreWindow()->IsRecording(SpecialCams::Composite))
+						this->GetCoreWindow()->StopRecording(SpecialCams::Composite);
+					else
+						this->GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
 				}
 			}
 		}
