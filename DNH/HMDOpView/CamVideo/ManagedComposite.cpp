@@ -97,6 +97,9 @@ void ManagedComposite::ThreadFn(int camIdx)
 				std::swap(cacheCpy, globalCache);
 			}
 
+			// The composite target. For now we'll start with black at the final
+			// save dimensions and add aall contributing images on top, similar
+			// (as similar as possible) to how StateHMDOp works.
 			cv::Ptr<cv::Mat> accumframe = 
 				new cv::Mat(
 					this->streamHeight, 
@@ -131,6 +134,14 @@ void ManagedComposite::ThreadFn(int camIdx)
 					};
 					cv::merge(chansComp, cpy);
 				}
+
+				// For how OpenCV functions work, images need to be of the same
+				// size (and probably the same channel count) - but we may not
+				//be guaranteed that 
+				// - Each camera/video-feed is the same size
+				// - The composite output is the same size as the video feeds.
+				// To compensate, we need to figure out a common "region of interest"
+				// (ROI) between the composite source and destination (accumFrame).
 
 				// Figure out the region of interest for the blitting.
 				// For now we're just centering.
