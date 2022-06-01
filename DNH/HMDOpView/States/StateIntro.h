@@ -2,6 +2,7 @@
 #include "BaseState.h"
 #include "../FontMgr.h"
 #include "../Utils/cvgStopwatch.h"
+#include "../TexObj.h"
 
 /// <summary>
 /// The first application state. The application is hard-coded
@@ -19,11 +20,21 @@ public:
 
 	FontWU mainFont;
 
+	FontWU titleFont;
+	FontWU nameFont;
+
 	/// <summary>
-	/// Timer for how long the state has been shown. This is used
-	/// the drive procedural animations.
+	/// The backplate for the splash screens.
 	/// </summary>
-	cvgStopwatch loadScreenTimer;
+	TexObj::SPtr backplate;
+
+	/// <summary>
+	/// The logos for the organization listing badges.
+	/// 
+	/// For now, it's assumed they're all square (256x256)
+	/// </summary>
+	std::vector<TexObj::SPtr> logos;
+
 
 public:
 	StateIntro(HMDOpApp* app, GLWin* view, MainWin* core);

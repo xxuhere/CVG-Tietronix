@@ -2,6 +2,7 @@
 
 #include <wx/glcanvas.h>
 #include <iostream>
+#include "Utils/cvgAssert.h"
 
 FontWU::FontWU()
 {
@@ -181,3 +182,4 @@ bool FontMgr::Shutdown()
 
 	return true;
 }
+

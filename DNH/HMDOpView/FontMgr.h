@@ -41,6 +41,7 @@ public:
 	/// </summary>
 	FontWU();
 
+
 	/// <summary>
 	/// Create a valid FontWU referencing a font at a specific font size.
 	/// 
@@ -91,6 +92,8 @@ private:
 		/// is canonicalized.
 		/// </summary>
 		std::string fontPath;
+
+		int refCt = 0;
 
 		/// <summary>
 		/// 
