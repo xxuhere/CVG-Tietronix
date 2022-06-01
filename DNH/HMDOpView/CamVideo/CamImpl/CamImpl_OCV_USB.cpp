@@ -33,6 +33,8 @@ bool CamImpl_OCV_USB::ChangeDeviceID(
 
 bool CamImpl_OCV_USB::PullOptions(const cvgCamFeedLocs& opts)
 {
+	this->ICamImpl::PullOptions(opts);
+
 	this->deviceID = opts.camIndex;
 	return true;
 }

@@ -47,6 +47,21 @@ public:
 	/// </summary>
 	int viewportY = 480;
 
+	// The composites should probably maintain the same aspect
+	// ratio (if not literally the same values) as the viewportX
+	// and viewportY, since they contain pretty much the same
+	// content.
+
+	/// <summary>
+	/// The width of the composited video.
+	/// </summary>
+	int compositeWidth = 640;
+
+	/// <summary>
+	/// The height of the composited video.
+	/// </summary>
+	int compositeHeight = 480;
+
 	/// <summary>
 	/// X pixel offset of the viewport from the center.
 	/// </summary>

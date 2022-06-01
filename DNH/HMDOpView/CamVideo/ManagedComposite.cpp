@@ -59,7 +59,6 @@ void ManagedComposite::ThreadFn(int camIdx)
 
 		this->_isStreamActive = false;
 
-		// TODO: Figure out how to properly specify and initialize from the outside.
 		this->streamWidth = 1920;
 		this->streamHeight = 1080;
 
@@ -199,6 +198,37 @@ void ManagedComposite::ThreadFn(int camIdx)
 	}
 	this->_EndShutdown();
 	this->conState = State::Shutdown;
+}
+
+float ManagedComposite::GetFloat( StreamParams paramid)
+{
+	switch(paramid)
+	{
+	case StreamParams::CompositeVideoWidth:
+		return this->streamWidth;
+
+	case StreamParams::CompositeVideoHeight:
+		return this->streamHeight;
+	}
+
+	return this->IManagedCam::GetFloat(paramid);
+}
+
+bool ManagedComposite::SetFloat( StreamParams paramid, float value)
+{
+	
+	switch(paramid)
+	{
+	case StreamParams::CompositeVideoWidth:
+		this->streamWidth = (int)value;
+		return true;
+
+	case StreamParams::CompositeVideoHeight:
+		this->streamHeight = (int)value;
+		return true;
+	}
+
+	return this->IManagedCam::SetFloat(paramid, value);
 }
 
 CamType ManagedComposite::GetCamType()

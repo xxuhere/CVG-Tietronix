@@ -17,9 +17,26 @@
 #include <memory>
 #include <vector>
 
+/// <summary>
+/// Parameter ID values for ALL items that can be used for 
+/// GetFloat() or SetFloat(), for ALL IManagedCam subclasses.
+/// </summary>
 enum StreamParams
 {
-	StaticThreshold
+	/// <summary>
+	/// For simple thresholding image processing. The pixel value to threshold.
+	/// </summary>
+	StaticThreshold,
+
+	/// <summary>
+	/// For composite video feeds, the width of the video to save.
+	/// </summary>
+	CompositeVideoWidth,
+
+	/// <summary>
+	/// For composite video feeds, the height of the video to save.
+	/// </summary>
+	CompositeVideoHeight
 };
 
 enum CamType

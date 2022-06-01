@@ -42,5 +42,7 @@ ICamImpl::~ICamImpl()
 
 bool ICamImpl::PullOptions(const cvgCamFeedLocs& opts)
 {
-	return false;
+	this->prefWidth		= opts.streamWidth;
+	this->prefHeight	= opts.streamHeight;
+	return true;
 }

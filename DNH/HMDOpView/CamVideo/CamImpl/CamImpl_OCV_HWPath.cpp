@@ -43,6 +43,8 @@ bool CamImpl_OCV_HWPath::ChangeDeviceID(
 
 bool CamImpl_OCV_HWPath::PullOptions(const cvgCamFeedLocs& opts)
 {
+	this->ICamImpl::PullOptions(opts);
+
 	this->path = opts.devicePath;
 	return true;
 }

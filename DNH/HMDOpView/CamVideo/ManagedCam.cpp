@@ -417,7 +417,7 @@ float ManagedCam::GetFloat( StreamParams paramid)
 		break;
 	}
 
-	return -1.0f;
+	return this->IManagedCam::GetFloat(paramid);
 }
 
 bool ManagedCam::SetFloat( StreamParams paramid, float value)
@@ -428,7 +428,8 @@ bool ManagedCam::SetFloat( StreamParams paramid, float value)
 		this->camOptions.thresholdExplicit = (int)std::clamp(value, 0.0f, 255.0f);
 		return true;
 	}
-	return false;
+
+	return this->IManagedCam::SetFloat(paramid, value);
 }
 
 bool ManagedCam::SetProcessingType(ProcessingType pt)

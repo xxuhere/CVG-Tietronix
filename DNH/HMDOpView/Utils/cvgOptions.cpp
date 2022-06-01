@@ -24,6 +24,8 @@ static const char* szKey_mousepad_x			= "_mousepad_x";
 static const char* szKey_mousepad_y			= "_mousepad_y";
 static const char* szKey_mousepad_scale		= "_mousepad_scale";
 static const char* szKey_debugUI			= "_debug_ui";
+static const char* szKey_compositeWidth		= "composite_width";
+static const char* szKey_compositeHeight	= "composite_height";
 
 static const char* szkey_FeedOpts			= "feed_options";
 static const char* szKey_Carousel			= "carousel_options";
@@ -97,6 +99,12 @@ void cvgOptions::Apply(json& data)
 
 	if(data.contains(szKey_VPHeight) && data[szKey_VPHeight].is_number())
 		this->viewportY = data[szKey_VPHeight];
+
+	if(data.contains(szKey_compositeWidth) && data[szKey_compositeWidth].is_number_integer())
+		this->compositeWidth = data[szKey_compositeWidth];
+
+	if(data.contains(szKey_compositeHeight) && data[szKey_compositeHeight].is_number_integer())
+		this->compositeHeight = data[szKey_compositeHeight];
 
 	if(data.contains(szKey_VPOffsX) && data[szKey_VPOffsX].is_number())
 		this->viewportOffsX = data[szKey_VPOffsX];
@@ -175,20 +183,22 @@ json cvgOptions::RepresentAsJSON() const
 
 	// Semantic versioning, so we have to option to check reverse
 	// compatibility with these option files in the future.
-	ret[szKey_Version	]		= "0.0.0";
+	ret[szKey_Version			]	= "0.0.0";
 
-	ret[szKey_TestImg	]		= this->testImagePath;
-	ret[szKey_VPWidth	]		= this->viewportX;
-	ret[szKey_VPHeight	]		= this->viewportY;
-	ret[szKey_VPOffsX   ]		= this->viewportOffsX;
-	ret[szKey_VPOffsY   ]		= this->viewportOffsY;
-	ret[szKey_mousepad_x]		= this->mousepadX;
-	ret[szKey_mousepad_y]		= this->mousepadY;
-	ret[szKey_mousepad_scale]	= this->mousepadScale;
+	ret[szKey_TestImg			]	= this->testImagePath;
+	ret[szKey_VPWidth			]	= this->viewportX;
+	ret[szKey_VPHeight			]	= this->viewportY;
+	ret[szKey_compositeWidth	]	= this->compositeWidth;
+	ret[szKey_compositeHeight	]	= this->compositeHeight;
+	ret[szKey_VPOffsX			]	= this->viewportOffsX;
+	ret[szKey_VPOffsY			]	= this->viewportOffsY;
+	ret[szKey_mousepad_x		]	= this->mousepadX;
+	ret[szKey_mousepad_y		]	= this->mousepadY;
+	ret[szKey_mousepad_scale	]	= this->mousepadScale;
 
-	ret[szKey_debugUI]			= this->drawUIDebug;
+	ret[szKey_debugUI			]	= this->drawUIDebug;
 
-	ret[szKey_fullscreen]		= this->fullscreen;
+	ret[szKey_fullscreen		]	= this->fullscreen;
 
 	//		VIDEO FEED ENTRIES
 	//////////////////////////////////////////////////

@@ -53,6 +53,8 @@ bool CamImpl_StaticImg::IsValid()
 
 bool CamImpl_StaticImg::PullOptions(const cvgCamFeedLocs& opts)
 {
+	this->ICamImpl::PullOptions(opts);
+
 	this->imgPath = opts.staticImagePath;
 	return true;
 }

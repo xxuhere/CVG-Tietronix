@@ -23,6 +23,16 @@ protected:
 	/// </summary>
 	bool hasShutdown = false;
 
+	/// <summary>
+	/// The preffered width to stream in data.
+	/// </summary>
+	int prefWidth = 0;
+
+	/// <summary>
+	/// The preffered height to stream in data.
+	/// </summary>
+	int prefHeight = 0;
+
 protected:
 	// Implementation methods.
 	// THESE SHOULD -=#=>NEVER<=#=- BE CALLED DIRECTLY except by the

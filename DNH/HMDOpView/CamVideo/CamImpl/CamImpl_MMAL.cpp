@@ -773,10 +773,16 @@ bool CamImpl_MMAL::ActivateImpl()
 	this->state = new RPiYUVState();
 	this->state->SetDefaults();
 
+	if(this->prefWidth != 0)
+		this->state->width = this->prefWidth;
+
+	if(this->prefHeight != 0)
+		this->state->height = this->prefHeight;
+
 	// Setup for sensor specific parameters, only set W/H settings if zero on entry
 	get_sensor_defaults(
 		this->state->cameraNum, 
-		this->state->camera_name,
+		this->state->camera_name, 
 		this->state->width, 
 		this->state->height);
 
@@ -885,6 +891,8 @@ bool CamImpl_MMAL::IsValid()
 	
 bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
 {
+	this->ICamImpl::PullOptions(opts);
+
 	// This will be the same option that CamImpl_OCV_HWPath uses,
 	// because it's essentially the same HW and same system.
 	this->devPath = opts.devicePath;

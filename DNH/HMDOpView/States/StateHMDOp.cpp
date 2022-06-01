@@ -567,8 +567,23 @@ void StateHMDOp::EnteredActive()
 	this->_SyncImageProcessingSetUI();
 	this->_SyncThresholdSlider();
 
+	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+
+	// Initialize the selected carousel name
 	std::string curCapt = this->carousel.GetCurrentCaption();
-	CamStreamMgr::GetInstance().SetAllSnapCaption(curCapt);
+	cmgr.SetAllSnapCaption(curCapt);
+
+	// Sync the composite saving resolution
+	cmgr.SetFloat(
+		SpecialCams::Composite, 
+		StreamParams::CompositeVideoWidth,
+		this->GetView()->cachedOptions.compositeWidth);
+
+	cmgr.SetFloat(
+		SpecialCams::Composite,
+		StreamParams::CompositeVideoHeight,
+		this->GetView()->cachedOptions.compositeHeight);
+
 } 
 
 void StateHMDOp::_SyncImageProcessingSetUI()

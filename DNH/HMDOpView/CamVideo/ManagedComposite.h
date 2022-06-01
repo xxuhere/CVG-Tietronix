@@ -22,6 +22,10 @@ public:
 
 	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg) override;
 
+	float GetFloat( StreamParams paramid) override;
+
+	bool SetFloat( StreamParams paramid, float value) override;
+
 	bool UsesImageProcessingChain() override;
 
 	virtual void ThreadFn(int camIdx) override;
@@ -31,4 +35,5 @@ public:
 	virtual int GetID() const override;
 
 	virtual std::string GetStreamName() const override;
+
 };

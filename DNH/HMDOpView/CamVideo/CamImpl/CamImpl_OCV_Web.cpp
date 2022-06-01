@@ -32,6 +32,8 @@ bool CamImpl_OCV_Web::ChangeDeviceID(
 
 bool CamImpl_OCV_Web::PullOptions(const cvgCamFeedLocs& opts)
 {
+	this->ICamImpl::PullOptions(opts);
+
 	this->url = opts.uriSource;
 	return true;
 }

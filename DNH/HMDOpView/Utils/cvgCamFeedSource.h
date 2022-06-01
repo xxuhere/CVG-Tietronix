@@ -64,6 +64,20 @@ public:
 	int pipeHeight = 480;
 
 	/// <summary>
+	/// The width of the camera stream (if using an OpenCV implementation)
+	/// 
+	/// A value of 0 will use the undefined default.
+	/// </summary>
+	int streamWidth = 640;
+
+	/// <summary>
+	/// The height of the camera stream (if using an OpenCV implementation)
+	/// 
+	/// A value of 0 will use the undefined default.
+	/// </summary>
+	int streamHeight = 480;
+
+	/// <summary>
 	/// For algorithms that specify an explict threshold value (from 0-255)
 	/// </summary>
 	int thresholdExplicit = 128;

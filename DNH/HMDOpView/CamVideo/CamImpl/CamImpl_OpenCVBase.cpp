@@ -57,6 +57,12 @@ bool CamImpl_OpenCVBase::InitCapture(cv::VideoCapture* capture)
 	// Standardize the FPS rate.
 	capture->set(cv::CAP_PROP_FPS, 30);
 
+	if(this->prefWidth != 0)
+		capture->set(cv::CAP_PROP_FRAME_WIDTH, this->prefWidth);
+
+	if(this->prefHeight != 0)
+		capture->set(cv::CAP_PROP_FRAME_HEIGHT, this->prefHeight);
+
 	// https://stackoverflow.com/a/69476456/2680066
 	// On some webcams, changing the exposure behaviour will
 	// allow it to run faster. Note that this may be naive
