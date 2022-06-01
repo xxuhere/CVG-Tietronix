@@ -200,6 +200,7 @@
     <ClInclude Include="Utils\cvgAssert.h" />
     <ClInclude Include="Utils\cvgCamFeedSource.h" />
     <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
+    <ClInclude Include="Utils\cvgGrabTimer.h" />
     <ClInclude Include="Utils\cvgOptions.h" />
     <ClInclude Include="Utils\cvgRect.h" />
     <ClInclude Include="Utils\cvgShapes.h" />
@@ -257,6 +258,7 @@
     <ClCompile Include="Utils\CarouselData.cpp" />
     <ClCompile Include="Utils\cvgCamFeedSource.cpp" />
     <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
+    <ClCompile Include="Utils\cvgGrabTimer.cpp" />
     <ClCompile Include="Utils\cvgOptions.cpp" />
     <ClCompile Include="Utils\cvgRect.cpp" />
     <ClCompile Include="Utils\cvgShapes.cpp" />

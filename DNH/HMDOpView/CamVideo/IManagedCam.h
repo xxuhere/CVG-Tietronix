@@ -8,8 +8,7 @@
 #include "VideoRequest.h"
 #include "../Utils/VideoPollType.h"
 #include "../Utils/cvgCamFeedSource.h"
-#include "../Utils/yen_threshold.h"
-
+#include "../Utils/cvgGrabTimer.h"
 
 #include "CamImpl/ICamImpl.h"
 
@@ -123,6 +122,13 @@ public:
 	/// thread locked with videoAccess before using.
 	/// </summary>
 	cv::VideoWriter videoWrite;
+
+	/// <summary>
+	/// Timer for how much time needs to be accounted for in the recorded video. This makes
+	/// sure the video being recorded matches up to real-world time, even if padded frames
+	/// and frame drops occur.
+	/// </summary>
+	cvgGrabTimer videoGrabTimer;
 
 	/// <summary>
 	/// Mutex to guard single thread access to the snap requests.

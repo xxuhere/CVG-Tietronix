@@ -72,7 +72,7 @@ SUBOBJ_LODEPNG = \
 	lodepng
 	
 SUBOBJ_UTILS = \
-	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
+	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgGrabTimer cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
 	
 SUBOBJ_HARDWARE = \
 	HardwareMgr IHardware LaserSys

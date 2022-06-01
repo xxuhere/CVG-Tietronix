@@ -131,6 +131,8 @@ bool IManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 		return true;
 	}
 
+	const int msFor30FPS = 33; // 1000 / 30
+
 	// If the videowrite has not been opened yet, open it locked
 	// to the image size. Every image streamed to the video will
 	// now need to match the dimensions, or else it's considered
@@ -144,12 +146,16 @@ bool IManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 			this->activeVideoReq->err = "Could not open requested file.";
 			this->activeVideoReq->status = VideoRequest::Status::Error;
 			this->_CloseVideo_NoMutex();
+			return false;
 		}
 		this->activeVideoReq->width		= img.size().width;
 		this->activeVideoReq->height	= img.size().height;
 		this->activeVideoReq->status	= VideoRequest::Status::StreamingOut;
+
+		this->videoGrabTimer.Reset(msFor30FPS);
 	}
-	else
+	
+	while(this->videoGrabTimer.GrabMS(msFor30FPS))
 	{
 		// If contents have already been streamed, just make sure the dimensions
 		// continue to be the same.
@@ -160,6 +166,7 @@ bool IManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 			this->activeVideoReq->err = "Closed when attempting to add misshapened image.";
 			this->activeVideoReq->status = VideoRequest::Status::Error;
 			this->_CloseVideo_NoMutex();
+			break;
 		}
 
 		this->videoWrite.write(img);

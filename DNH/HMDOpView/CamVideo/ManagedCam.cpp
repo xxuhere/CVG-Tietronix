@@ -10,6 +10,7 @@
 #include "CamImpl/CamImpl_StaticImg.h"
 #include <iostream>
 #include "../Utils/cvgAssert.h"
+#include "../Utils/yen_threshold.h"
 
 #if !_WIN32
 	#include "CamImpl/CamImpl_MMAL.h"

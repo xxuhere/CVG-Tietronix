@@ -4,6 +4,7 @@
 #include "ManagedCam.h"
 #include "ManagedComposite.h"
 #include "../Utils/multiplatform.h"
+#include <iostream>
 
 CamStreamMgr CamStreamMgr::_inst;
 
