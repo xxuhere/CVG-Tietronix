@@ -157,14 +157,14 @@ std::string MainWin::EnsureAndGetCapturesFolder() const
 	// recheck the existence of the folder.
 	if(!wxDirExists("Captures"))
 	{
-		wxMkDir("Captures");
+		wxMkDir("Captures", wxS_DIR_DEFAULT);
 		if(!wxDirExists("Captures"))
 			return "";
 	}
 
 	if(!wxDirExists(folderLoc))
 	{
-		wxMkDir(folderLoc);
+		wxMkDir(folderLoc, wxS_DIR_DEFAULT);
 		if(!wxDirExists(folderLoc))
 			return "";
 	}
