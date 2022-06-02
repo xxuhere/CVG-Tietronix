@@ -77,15 +77,12 @@ void UIGraphic::_DrawVerts()
 		{
 			cvgAssert(this->verts.size() >= 4, "Missing cached outline verts.");
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDisable(GL_TEXTURE_2D);
 			glColor3fv(col.ar);
 
-			glBegin(GL_QUADS);
+			glBegin(GL_LINE_LOOP);
 			FlushGLVerts(this->verts);
 			glEnd();
-
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 		break;
 
