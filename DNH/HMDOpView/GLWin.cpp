@@ -114,7 +114,7 @@ void GLWin::InitializeOptions()
 {
 	const char* szConfigLocation = wxGetApp().appOptionsLoc.c_str();
 
-	std::cout << "Initializing from options file ..." << std::endl;
+	std::cout << "Initializing from options file " << szConfigLocation << std::endl;
 	if(!this->cachedOptions.LoadFromFile(szConfigLocation))
 	{
 		// If there's no configuration file, make one. Chances
@@ -125,6 +125,7 @@ void GLWin::InitializeOptions()
 		this->SaveOptions(szConfigLocation);
 	}
 	this->LoadHMDAppOptions();
+	std::cout << "Finished loading." << std::endl;
 }
 
 void GLWin::LoadHMDAppOptions()
