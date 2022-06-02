@@ -93,7 +93,17 @@ void ManagedComposite::ThreadFn(int camIdx)
 			std::map<int, cv::Ptr<cv::Mat>> cacheCpy;
 			{
 				std::lock_guard<std::mutex> cpyGuard(cacheMutex);
-				std::swap(cacheCpy, globalCache);
+
+				// Get a copy, so if the pointers change, that doesn't affect
+				// what we're rendering to. While not necessarily a bad thing,
+				// when dealing with thread, our consideration is to make dealing
+				// with this data as stable as possible. 
+				//
+				// This use to swap out the contents instead of copy, but this
+				// could lead to a situation where the next pass doesn't re-supply
+				// all the composited cameras fast enough - leading to missing
+				// compositing elements randomly dropping out in the footage.
+				cacheCpy = globalCache;
 			}
 
 			// The composite target. For now we'll start with black at the final
