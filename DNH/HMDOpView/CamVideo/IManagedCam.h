@@ -39,20 +39,69 @@ enum StreamParams
 	CompositeVideoHeight
 };
 
+/// <summary>
+/// Enumeration of types to allow 
+/// </summary>
 enum CamType
 {
+	/// <summary>
+	/// Should never be used, represents an error.
+	/// </summary>
 	InvalidCam,
+
+	/// <summary>
+	/// Represents a camera stream.
+	/// </summary>
 	VideoFeed,
+
+	/// <summary>
+	/// Represents a special camera type, such as the composite video
+	/// feed.
+	/// </summary>
 	SpecialType
 };
 
-// Special camera IDs
+/// <summary>
+/// Special camera IDs. Except for ErrorCode, these are special
+/// video feeds that can be used as id values for the 
+/// CamStreamMgr interface functions.
+/// 
+/// These will be negative as positive values are reserved for
+/// real cameras (ManagedCam objects).
+/// 
+/// For more details, see the member functions of CamStreamMgr
+/// that have an 'int id' or 'int idx' parameter.
 enum SpecialCams
 {
+	/// <summary>
+	/// Not a usable video feed. Represents an invalid video feed
+	/// from an error.
+	/// </summary>
 	ErrorCode = -1,
+
+	/// <summary>
+	/// The composited video feed. See ManagedComposite.h for its
+	/// implementation.
+	/// </summary>
 	Composite = -2
 };
 
+/// <summary>
+/// The base class for various individual video feed. 
+/// A video streaming (usually from a camera/webcam) class. This system
+/// will poll a video stream (See ICamImpl for more details) in a thread
+/// as well as provide other services involved with polling the video
+/// stream:
+/// - Handling snapshot requests (See SnapRequest)
+/// - Handling video saving requests (See VideoRequest)
+/// - Staging polled image frames to other systems, such as rendering
+/// systems.
+/// - Performing the pipeline for image processing.
+/// 
+/// Note this class should not be used directly by outside calling 
+/// code. Instead, access should be limited by using the public member
+/// functions provided by the public functions of CamStreamMgr.
+/// </summary>
 class IManagedCam
 {
 	friend class CamStreamMgr;
@@ -287,10 +336,43 @@ protected:
 
 public:
 
+	/// <summary>
+	/// Set a parameter.
+	/// </summary>
+	/// <param name="paramid">
+	/// The parameter to set.
+	/// 
+	/// The values that are accepted will depend on the subclass implementation.
+	/// </param>
+	/// <returns>
+	/// The retrieved value.
+	/// If the value is not supported. -1 is returned.
+	/// 
+	/// In the future, this may change to a floating point error code; eg, NaN.
+	/// </returns>
 	virtual float GetFloat( StreamParams paramid);
 
+	/// <summary>
+	/// Set a parameter.
+	/// </summary>
+	/// <param name="paramid">
+	/// The parameter to set.
+	/// 
+	/// The values that are relevant and accepted will depend on the subclass
+	/// implementation.
+	/// </param>
+	/// <param name="value">The value to set the parameter to.</param>
+	/// <returns>
+	/// True if the value was successfully set. Else, there was an issue with
+	/// the value, OR the parameter is unsupported.
+	/// </returns>
 	virtual bool SetFloat( StreamParams paramid, float value);
 
+	/// <summary>
+	/// Set the caption that will be watermarked for saved snapshots
+	/// from this feed.
+	/// </summary>
+	/// <param name="value">caption</param>
 	void SetSnapCaption(const std::string& caption);
 
 	/// <summary>
@@ -383,11 +465,27 @@ public:
 	/// <returns></returns>
 	bool BootupPollingThread(int camIdx);
 
+	/// <summary>
+	/// Allows subclasses to tell the general IManagedCam functions what type
+	/// of video stream is being implemented.
+	/// </summary>
 	virtual CamType GetCamType() = 0;
 
+	/// <summary>
+	/// Gets the ID of the IManagedCam. This will either be the index of the
+	/// camera, for normal feeds, or a value from the SpecialCams enum.
+	/// </summary>
 	virtual int GetID() const = 0;
 
+	/// <summary>
+	/// Gets the string name of the IManagedCam, mainly used to decorate 
+	/// filenames and convert SpecialCams ids into readable values.
+	/// </summary>
 	virtual std::string GetStreamName() const = 0;
 
+	/// <summary>
+	/// Allow subclasses to tell the general IManagedCam functions if the 
+	/// video feed is currently applying an image processing chain.
+	/// </summary>
 	virtual bool UsesImageProcessingChain() = 0;
 };

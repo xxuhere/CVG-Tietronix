@@ -7,6 +7,9 @@
 
 class FontMgr;
 
+// NOTE: Currently after requesting a font for use in the application, there is
+// no way to release the font resources until the application closes.
+
 /// <summary>
 /// Font wrapper util to reference a loaded font at a specific size.
 /// 

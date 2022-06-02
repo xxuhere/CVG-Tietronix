@@ -56,6 +56,10 @@ private:
 	/// </summary>
 	std::vector<ManagedCam*> cams;
 
+	/// <summary>
+	/// The composite video feed, accessible by using the special
+	/// id SpecialCams::Composite
+	/// </summary>
 	ManagedComposite * composite;
 
 	/// <summary>

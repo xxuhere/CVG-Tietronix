@@ -138,6 +138,9 @@ public:
 
 	/// <summary>
 	/// Load options for how the ICamImpl should behave.
+	/// 
+	/// Subclasses should also call their base class implementations.
+	/// e.g. this->ICamImpl::PullOptions(opts);
 	/// </summary>
 	/// <param name="opts">A struct that contains camera behaviour
 	/// options, that we originally pulled from the AppOptions.json.

@@ -2,19 +2,7 @@
 #include "IManagedCam.h"
 
 /// <summary>
-/// A video streaming (usually from a camera/webcam) class. This system
-/// will poll a video stream (See ICamImpl for more details) in a thread
-/// as well as provide other services involved with polling the video
-/// stream:
-/// - Handling snapshot requests (See SnapRequest)
-/// - Handling video saving requests (See VideoRequest)
-/// - Staging polled image frames to other systems, such as rendering
-/// systems.
-/// - Performing the pipeline for image processing.
-/// 
-/// Note this class should not be used directly by outside calling 
-/// code. Instead, access should be limited by using the public member
-/// functions provided by the public functions of CamStreamMgr.
+/// Subclass of IManagedCam to represent a video feed.
 /// </summary>
 class ManagedCam : public IManagedCam
 {
@@ -28,8 +16,6 @@ public:
 	/// Do NOT confuse this with the OpenCV VideoCapture ID.
 	/// </summary>
 	int cameraId = -1;
-
-	
 
 	/// <summary>
 	/// The polling implementation to use. Depending on what this is

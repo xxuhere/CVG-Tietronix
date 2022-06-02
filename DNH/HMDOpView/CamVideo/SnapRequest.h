@@ -116,5 +116,14 @@ public:
 	/// <returns>The created request.</returns>
 	static SPtr MakeRequest(const std::string& filename, ProcessType pt);
 
+	/// <summary>
+	/// Generate a SnapRequest containing an error state.
+	/// </summary>
+	/// <param name="err">The error.</param>
+	/// <param name="filename">
+	/// The requested filename that generated the error.
+	/// This can be set to an empty string if not relevant.
+	/// </param>
+	/// <returns>The created error.</returns>
 	static SPtr MakeError(const std::string& err, const std::string& filename);
 };
