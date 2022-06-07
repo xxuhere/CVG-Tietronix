@@ -198,9 +198,21 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 	if(UISys::IsDebugView() && this->fontMousePos.IsValid())
 	{
 		glColor3f(1.0f, 0.0f, 1.0f);
-		std::stringstream sstrmDbg;
-		sstrmDbg << "x: " << this->lastDownDbgMouse.x << " - y: " << this->lastDownDbgMouse.y;
-		this->fontMousePos.RenderFont(sstrmDbg.str().c_str(), sz.x - 200, sz.y - 50);
+		// Show ellapsed application time
+		std::stringstream sstrmEll;
+		sstrmEll << std::fixed << std::setprecision(2);
+		sstrmEll << "Seconds: " << this->appEllapsedTimer.Milliseconds(false) / 1000.0f;
+		this->fontMousePos.RenderFont(sstrmEll.str().c_str(), sz.x - 200, sz.y - 75);
+
+		// Show mouse position.
+		std::stringstream sstrmDbgMouse;
+		sstrmDbgMouse << "x: " << this->lastDownDbgMouse.x << " - y: " << this->lastDownDbgMouse.y;
+		this->fontMousePos.RenderFont(sstrmDbgMouse.str().c_str(), sz.x - 200, sz.y - 50);
+
+		// Show rendered screen resolution.
+		std::stringstream sstrmDbgRes;
+		sstrmDbgRes << "Res W: " << sz.x << " - H: " << sz.y;
+		this->fontMousePos.RenderFont(sstrmDbgRes.str().c_str(), sz.x - 200, sz.y - 25);
 	}
 
 	this->SwapBuffers();

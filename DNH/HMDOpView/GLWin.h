@@ -5,6 +5,7 @@
 #include <wx/timer.h>
 #include "Utils/cvgOptions.h"
 #include "FontMgr.h"
+#include "Utils/cvgStopwatch.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -32,6 +33,8 @@ private:
 	MainWin* typedParent;
 	wxGLContext* ctx = nullptr;
 	wxTimer redrawTimer;
+
+	cvgStopwatch appEllapsedTimer;
 
 	/// <summary>
 	/// The app is in a draw loop (i.e., redraw once every 30 seconds).
