@@ -1,5 +1,10 @@
 #pragma once
 #include "IHardware.h"
+#include "../Utils/multiplatform.h"
+
+#if IS_RPI
+	#include <wiringPi.h>
+#endif
 
 /// <summary>
 /// The laser/lamp system.
@@ -14,7 +19,8 @@ public:
 	enum class Light
 	{
 		White,
-		NIR
+		NIR,
+		Totalnum
 	};
 
 	// For now (until there's more direction), the

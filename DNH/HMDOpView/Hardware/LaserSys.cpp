@@ -1,5 +1,9 @@
 #include "LaserSys.h"
 #include <algorithm>
+#include <iostream>
+
+#define PIN_NIR_BCM_PIN 25
+#define PIN_WHITE_BCM_PIN 6
 
 // The current version of C++ we're using doesn't
 // have std::clamp().
@@ -24,9 +28,35 @@ void LaserSys::ShowLight(Light l, bool onoff)
 	{
 	case Light::NIR:
 		if(!onoff)
+		{	// Turn off
+#if IS_RPI 
+			std::cout << "Turning NIR OFF." << std::endl;
+			//
+			// Line below doesn't work for unknown reasons, so
+			// instead the pin mode is changed.
+			//
+			// digitalWrite(PIN_NIR_BCM_PIN, 1);
+			//
+			pinMode(PIN_NIR_BCM_PIN, INPUT);
+#else
+			std::cout <<"Unhandled request to turn NIR OFF." << std::endl;
+#endif
+
 			this->SetNIRIntensity(0.0f);
+		}
 		else
-		{ 
+		{	// Turn on
+
+#if IS_RPI
+			std::cout << "Turning NIR ON." << std::endl;
+			pinMode(PIN_NIR_BCM_PIN, OUTPUT);
+			digitalWrite(PIN_NIR_BCM_PIN, 1);
+#else
+			std::cout <<"Unhandled request to turn NIR ON." << std::endl;
+#endif
+
+			std::cout << "Unhandled request to turn NIR to analog power." << std::endl;
+
 			if(this->intensityNIR == 0.0f)
 				this->SetNIRIntensity(this->defIntensityNIR);
 		}
@@ -34,9 +64,14 @@ void LaserSys::ShowLight(Light l, bool onoff)
 
 	case Light::White:
 		if(!onoff)
+		{ 
 			this->SetWhiteIntensity(0.0f);
+			std::cout << "Unhandled message to turn white light off" << std::endl;
+		}
 		else
 		{
+			std::cout << "Unhandled message to turn white light to analog power" << std::endl;
+
 			if(this->intensityWhite == 0.0f)
 				this->SetWhiteIntensity(this->defIntensityWhite);
 		}
@@ -63,7 +98,14 @@ void LaserSys::SetLight(Light l, float intensity)
 }
 
 bool LaserSys::Initialize()
-{ return true; }
+{ 
+	cvg::multiplatform::InitGPIO();
+
+	for(int i = 0; i < (int)Light::Totalnum; ++i)
+		this->ShowLight((Light)i, false);
+
+	return true; 
+}
 
 bool LaserSys::Validate()
 { return true; }

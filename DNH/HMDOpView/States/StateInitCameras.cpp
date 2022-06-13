@@ -99,9 +99,9 @@ void StateInitCameras::Draw(const wxSize& sz)
 		ManagedCam::State camPollState = 
 			CamStreamMgr::GetInstance().GetState(camIt);
 
-		const int verticalOffsetBetweenCamPreviews = 350;
+		const int verticalOffsetBetweenCamPreviews = 300;
 		int outpX = midScrX + 10;
-		int outpY = 450 + camIt * verticalOffsetBetweenCamPreviews;
+		int outpY = 400 + camIt * verticalOffsetBetweenCamPreviews;
 
 		static const float titleOffsetX = 30.0f;
 

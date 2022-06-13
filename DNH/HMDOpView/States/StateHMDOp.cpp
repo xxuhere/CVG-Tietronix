@@ -1129,12 +1129,12 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		{
 			if(this->GetCoreWindow()->hwLaser->intensityNIR == 0.0f)
 			{ 
-				this->GetCoreWindow()->hwLaser->SetNIRIntensity(1.0f);
+				this->GetCoreWindow()->hwLaser->ShowNIR();
 				SetButtonStdCols(this->btnLaser, true);
 			}
 			else
 			{ 
-				this->GetCoreWindow()->hwLaser->SetNIRIntensity(0.0f);
+				this->GetCoreWindow()->hwLaser->HideNIR();
 				SetButtonStdCols(this->btnLaser, false);
 			}
 		}

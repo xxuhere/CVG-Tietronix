@@ -2,6 +2,7 @@
 #include "UIGraphic.h"
 #include "UIDefines.h"
 #include "UIColor4.h"
+
 /// <summary>
 /// Pretty much a usable version of UIGraphic. UIGraphic should not be used
 /// directly because it's purpose is not to be used in the UI as a plate, but
