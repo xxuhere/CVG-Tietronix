@@ -16,15 +16,18 @@
 ##################################################
 
 # The commit that was last tested to successfully rebuild from.
-SUPPORTED_COMMIT=bfe140668919684bffeb798a9b496e07d2abdaf9
+SUPPORTED_COMMIT=84b79af9900a94d9dd8a706faeeae24b8424e3f2
 
-# MAINTENENCE, INIT MACHINE
 sudo apt update
 
+# Make sure all apt-get install commands have a `-y` to 
+# automatically accept the "yes" option and avoid the 
+# installer needing to respond to queries.
+
 # OPTIONAL, ENABLE SSH
-sudo apt install openssh-server
+sudo apt-get -y install openssh-server
 sudo systemctl status ssh
-sudo apt-get install ufw
+sudo apt-get -y install ufw
 sudo ufw allow ssh
 
 ##################################################
@@ -32,15 +35,15 @@ sudo ufw allow ssh
 #	PULL DEPENDENCIES FROM APT
 #
 ##################################################
-sudo apt-get install libssl-dev
-sudo apt-get install libopencv-dev
-sudo apt-get install mesa-common-dev freeglut3-dev
-sudo apt-get install libboost1.67-all
-sudo apt-get install g++
-sudo apt-get install make
-sudo apt-get install libftgl-dev
-sudo apt-get install libfreetype6-dev
-sudo apt-get install cmake
+sudo apt-get -y install libssl-dev
+sudo apt-get -y install libopencv-dev
+sudo apt-get -y install mesa-common-dev freeglut3-dev
+sudo apt-get -y install libboost1.67-all
+sudo apt-get -y install g++
+sudo apt-get -y install make
+sudo apt-get -y install libftgl-dev
+sudo apt-get -y install libfreetype6-dev
+sudo apt-get -y install cmake
 
 ##################################################
 #
@@ -49,8 +52,8 @@ sudo apt-get install cmake
 ##################################################
 
 # Install 7-zip to extract downloaded snapshot
-sudo apt-get install p7zip-full
-sudo apt-get install libgtk-3-dev build-essential 
+sudo apt-get -y install p7zip-full
+sudo apt-get -y install libgtk-3-dev build-essential 
 
 if [ -z $(command -v wx-config) ]
 then
@@ -116,7 +119,7 @@ fi
 
 pushd cancer-goggles
 git fetch
-git checkout Tie $SUPPORTED_COMMIT
+git checkout $SUPPORTED_COMMIT
 
 cd DNH/HMDOpView
 if [ ! -f /lib/libmmal.so ]
