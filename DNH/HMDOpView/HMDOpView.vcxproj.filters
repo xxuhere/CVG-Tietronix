@@ -249,6 +249,9 @@
     <ClInclude Include="Utils\cvgGrabTimer.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Hardware\FauxMouse.h">
+      <Filter>Header Files\Hardware</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -418,6 +421,9 @@
     </ClCompile>
     <ClCompile Include="Utils\cvgGrabTimer.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardware\FauxMouse.cpp">
+      <Filter>Source Files\Hardware</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

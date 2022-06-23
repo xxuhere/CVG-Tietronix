@@ -10,6 +10,10 @@
 #include "States/StateInitCameras.h"
 #include "States/StateHMDOp.h"
 
+#if IS_RPI
+#include "Hardware/FauxMouse.h"
+#endif
+
 wxBEGIN_EVENT_TABLE(MainWin, wxFrame)
 	EVT_MENU		(wxID_EXIT,  MainWin::OnExit)
 	EVT_MENU		(wxID_SAVE,  MainWin::OnAccelerator_SaveCurOptions)
@@ -55,6 +59,14 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	// can now leave cleanup and management to the manager.
 	this->hwLaser = new LaserSys();
 	this->hmgr.Add(this->hwLaser);
+
+#if IS_RPI
+	// Faux-Mouse will use GPIO pins to emulate the mouse
+	// behind the scenes on the RPi. Comment out adding it
+	// to disable it.
+	this->hmgr.Add(new FauxMouse(this->innerGLWin));
+#endif
+
 	// When we actually initialize and validate, and how errors
 	// are presented is something still TBD.
 	this->hmgr.Initialize(std::cerr);

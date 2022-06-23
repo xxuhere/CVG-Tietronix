@@ -75,7 +75,7 @@ SUBOBJ_UTILS = \
 	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgGrabTimer cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
 	
 SUBOBJ_HARDWARE = \
-	HardwareMgr IHardware LaserSys
+	FauxMouse HardwareMgr IHardware LaserSys
 	
 SUBOBJ_CAMVIDEO = \
 	CamStreamMgr IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest
