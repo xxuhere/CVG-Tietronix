@@ -8,6 +8,7 @@ static const char* szKey_DefPoll		= "default_poll";
 static const char* szKey_WinPoll		= "windows_poll";
 static const char* szKey_LinuxPoll		= "linux_poll";
 static const char* szKey_Index			= "index";
+static const char* szKey_MMALIndex		= "mmal_index";
 static const char* szKey_Uri			= "uri";
 static const char* szKey_DevPath		= "dev_path";
 static const char* szKey_PipeCmd		= "pipe_cmd";
@@ -36,6 +37,7 @@ json cvgCamFeedSource::AsJSON() const
 		ret[szKey_LinuxPoll	] = to_string(this->linuxOverRidePoll.value());
 
 	ret[szKey_Index			] = this->camIndex;
+	ret[szKey_MMALIndex		] = this->camMMALIdx;
 	ret[szKey_Uri			] = this->uriSource;
 	ret[szKey_DevPath		] = this->devicePath;
 	ret[szKey_PipeCmd		] = this->externalPipeCmd;
@@ -73,6 +75,9 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains(szKey_Index) && js[szKey_Index].is_number())
 		this->camIndex = js[szKey_Index];
+
+	if(js.contains(szKey_MMALIndex) && js[szKey_MMALIndex].is_number())
+		this->camMMALIdx = js[szKey_MMALIndex];
 
 	if(js.contains(szKey_Uri) && js[szKey_Uri].is_string())
 		this->uriSource = js[szKey_Uri];

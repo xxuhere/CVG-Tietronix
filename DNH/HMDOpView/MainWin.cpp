@@ -64,7 +64,8 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	// Faux-Mouse will use GPIO pins to emulate the mouse
 	// behind the scenes on the RPi. Comment out adding it
 	// to disable it.
-	this->hmgr.Add(new FauxMouse(this->innerGLWin));
+
+	//this->hmgr.Add(new FauxMouse(this->innerGLWin));
 #endif
 
 	// When we actually initialize and validate, and how errors

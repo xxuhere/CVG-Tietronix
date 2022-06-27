@@ -3,6 +3,7 @@
 #endif
 
 #include <stdbool.h>
+#include <mutex>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,6 +86,12 @@ const int minVideoOutputBuffers = 3;
 /// Transfered from RaspiVidYUV with some member containers spilled out
 /// and the naming convention changed a bit for C++ and code convention
 /// confort.
+/// 
+/// At a certain point, it may be sensible to refactor this class to be
+/// absorbed into CamImpl_MMAL and remove RPiYUVState. But this would
+/// require testing, and make the codebase quite a bit harder to compare
+/// against the original raspivid(yuv) source code that this came from.
+/// (wleu 06/27/2022)
 /// </summary>
 class RPiYUVState
 {
@@ -154,9 +161,17 @@ inline void check_disable_port(MMAL_PORT_T* port)
  * If we are configured to use /dev/video0 as unicam (e.g. for libcamera) then
  * these legacy camera apps can't work. Fail immediately with an obvious message.
  */
-bool check_camera_stack(const std::string& devPath)
+bool check_camera_stack()
 {
-	int fd = open(devPath.c_str(), O_RDWR, 0);
+	// NOTES (wleu 06/27/2022)
+	// For a single camera, dev/video0 is expected to be the CSI camera, if
+	// connected. But this is more to see if ANY CSI cameras are connected and
+	// if the RPi is properly configured for using the legacy camera stack.
+	//
+	// When involving multiple CSI cameras, the path being opened doesn't have
+	// much to do with the SPECIFIC camera used, because the MMAL API doesn't use
+	// the device path to specify which camera is being referenced (if uses integer IDs).
+	int fd = open("dev/video0", O_RDWR, 0);
 	if (fd < 0)
 		return false;
 
@@ -231,6 +246,8 @@ void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& hei
 	  param.hdr.id = MMAL_PARAMETER_CAMERA_INFO;
 	  param.hdr.size = sizeof(param)-4;  // Deliberately undersize to check firmware version
 	  status = mmal_port_parameter_get(camera_info->control, &param.hdr);
+
+	  std::cout << "Detected " << param.num_cameras << " MMAL cameras." << std::endl;
 
 	  if (status != MMAL_SUCCESS)
 	  {
@@ -725,19 +742,40 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 
 void CamImpl_MMAL::InitPrereqs()
 {
-	++instsInit;
-	if(instsInit != 1)
-		return;
+	static std::mutex initMut;
+	std::cout << "BEGIN CamImpl_MMAL::InitPrereqs()" << std::endl;
+
+	// It's not known if this init process is thread safe, so we're only
+	// allowing once peice of code to be here at a time.
+	//
+	// The risk is CamImpl_MMAL::ActivateImpl(), which invokes this
+	// function, could be called from multiple cameras being initialized 
+	// at once.
+	{
+
+		std::lock_guard<std::mutex> initGuard(initMut);
+		std::cout << "\tENTER CamImpl_MMAL::InitPrereqs() GUARD" << std::endl;
+
+		++instsInit;
+		if(instsInit != 1)
+			return;
+
+		std::cout << "\tDoing on-time MMAL inits" << std::endl;
 	
-	// The Raspberry Pi requires that the bcm_host_init() function is called first before any GPU calls can be made.
-	// https://elinux.org/Raspberry_Pi_VideoCore_APIs
-	bcm_host_init();
+		// The Raspberry Pi requires that the bcm_host_init() function is called first before any GPU calls can be made.
+		// https://elinux.org/Raspberry_Pi_VideoCore_APIs
+		bcm_host_init();
 
-	// Register our application with the logging system
-	vcos_log_register("HMDOpView", VCOS_LOG_CATEGORY);
+		// Register our application with the logging system
+		vcos_log_register("HMDOpView", VCOS_LOG_CATEGORY);
 
-	signal(SIGINT, default_signal_handler);
-	signal(SIGUSR1, SIG_IGN);		// Disable USR1 for the moment - may be reenabled if go in to signal capture mode
+		signal(SIGINT, default_signal_handler);
+		// Disable USR1 for the moment - may be reenabled if go in to signal capture mode
+		signal(SIGUSR1, SIG_IGN);
+
+		std::cout << "\tEXIT CamImpl_MMAL::InitPrereqs() GUARD" << std::endl;
+	}
+	std::cout << "EXIT CamImpl_MMAL::InitPrereqs()" << std::endl;
 }
 
 bool CamImpl_MMAL::InitializeImpl()
@@ -764,14 +802,14 @@ bool CamImpl_MMAL::ShutdownImpl()
 
 bool CamImpl_MMAL::ActivateImpl()
 {
-	// Our main data storage vessel..
-	check_camera_stack(this->devPath);
+	std::cout << "Activating MMAL Impl" << std::endl;
 
 	InitPrereqs();
 
 	// TODO: Assert non-null
 	this->state = new RPiYUVState();
 	this->state->SetDefaults();
+	this->state->cameraNum = this->devCamID;
 
 	if(this->prefWidth != 0)
 		this->state->width = this->prefWidth;
@@ -780,11 +818,17 @@ bool CamImpl_MMAL::ActivateImpl()
 		this->state->height = this->prefHeight;
 
 	// Setup for sensor specific parameters, only set W/H settings if zero on entry
+
+	std::cout << "Getting sensor defaults" << std::endl;
+
 	get_sensor_defaults(
 		this->state->cameraNum, 
 		this->state->camera_name, 
 		this->state->width, 
 		this->state->height);
+
+	std::cout << "Queried camera " << this->devCamID << " defaults with Width : " << this->state->width << " - Height : " << this->state->height << std::endl;
+	std::cout << "BEGIN Creating camera component : " << this->devCamID << std::endl;
 
 	std::cout << 
 		"Get sensor defaults - camera num: "	<< this->state->cameraNum << std::endl <<
@@ -793,6 +837,8 @@ bool CamImpl_MMAL::ActivateImpl()
 		"Get sensor defaults - camera num: "	<< this->state->height << std::endl;
 
 	MMAL_STATUS_T status = create_camera_component(state);
+
+	std::cout << "END Creating camera component : " <<  this->devCamID << std::endl;
 
 
 	if(status != MMAL_SUCCESS)
@@ -844,6 +890,8 @@ bool CamImpl_MMAL::ActivateImpl()
 		MMAL_PARAMETER_CAPTURE, 
 		true);
 
+	std::cout << "Successful MMAL activation : " << this->devCamID << std::endl;
+
 	return true;
 }
 
@@ -872,9 +920,9 @@ cv::Ptr<cv::Mat> CamImpl_MMAL::PollFrameImpl()
 	return ret;
 }
 
-CamImpl_MMAL::CamImpl_MMAL(const std::string& devPath)
+CamImpl_MMAL::CamImpl_MMAL(int devCamID)
 {
-	this->devPath = devPath;
+	this->devCamID = devCamID;
 }
 	
 VideoPollType CamImpl_MMAL::PollType()
@@ -892,9 +940,6 @@ bool CamImpl_MMAL::IsValid()
 bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
 {
 	this->ICamImpl::PullOptions(opts);
-
-	// This will be the same option that CamImpl_OCV_HWPath uses,
-	// because it's essentially the same HW and same system.
-	this->devPath = opts.devicePath;
+	this->devCamID = opts.camMMALIdx;
 	return true;
 }

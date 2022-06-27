@@ -196,9 +196,9 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 		this->currentImpl = new CamImpl_StaticImg("");
 		break;
 
-#if !_WIN32
+#if IS_RPI
 	case VideoPollType::MMAL:
-		this->currentImpl = new CamImpl_MMAL("");
+		this->currentImpl = new CamImpl_MMAL(0);
 		break;
 #endif
 	}

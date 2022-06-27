@@ -24,6 +24,11 @@ public:
 	/// </summary>
 	int camIndex = 0;
 
+	// <summary>
+	/// The index for MMAL
+	/// </summary>
+	int camMMALIdx = 0;
+
 	/// <summary>
 	/// The URI for web server locations
 	/// </summary>

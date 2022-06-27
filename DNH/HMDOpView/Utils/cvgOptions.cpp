@@ -37,6 +37,7 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		cvgCamFeedSource src;
 		src.defPoll = VideoPollType::OpenCVUSB_Idx;
 		src.camIndex = i;
+		src.camMMALIdx = i;
 		this->feedOpts.push_back(src);
 	}
 

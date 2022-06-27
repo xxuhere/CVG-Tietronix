@@ -20,9 +20,9 @@ private:
 	
 private:
 	/// <summary>
-	/// Cache of the current device path being used.
+	/// Cache of the current device camera ID.
 	/// </summary>
-	std::string devPath;
+	int devCamID;
 
 	/// <summary>
 	/// YUV stuff, hidden behind a Pimpl.
@@ -84,7 +84,7 @@ protected:
 	bool _ShutdownGlobal();
 public:
 
-	CamImpl_MMAL(const std::string& devPath);
+	CamImpl_MMAL(int devCamID);
 	
 	VideoPollType PollType() override;
 	bool IsValid() override;
