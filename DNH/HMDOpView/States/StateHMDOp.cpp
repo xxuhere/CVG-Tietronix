@@ -2,6 +2,7 @@
 #include "StateIncludes.h"
 #include "../CamVideo/CamStreamMgr.h"
 #include "../Utils/cvgShapes.h"
+#include "../Utils/cvgAssert.h"
 #include "../UISys/UIPlate.h"
 #include "../UISys/UIButton.h"
 #include "../UISys/UIVBulkSlider.h"
@@ -20,6 +21,22 @@ ColorSetInteractable colSetButtonTog(
 	UIColor4(1.0f, 0.5f, 0.5f),	// HOVER:	Pink
 	UIColor4(1.0f, 0.7f, 0.7f), // PRESSED:	Bright pink
 	UIColor4(1.0f, 0.8f, 0.5f));// SEL:		
+
+// Data flags for custom behaviour in the UI System.
+enum CustomUIFlag
+{
+	/// <summary>
+	/// When nagivating items in the inspector, IsGroupStart will have 
+	// the start of groups
+	/// </summary>
+	IsGroupStart				= 1 << 0,
+
+	/// <summary>
+	/// For main menu buttons, this should be used to tag menus that don't
+	/// have inspector content.
+	/// </summary>
+	IsMainOptWithNoContents		= 1<<1
+};
 
 void SetButtonStdCols(UIBase* uib, bool toggled = false)
 {
@@ -60,6 +77,544 @@ const float menuYPiv = 1.05f / 7.0f;		// Separation of main menu icons, in terms
 const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
 const UIColor4 menuTitleCol(0.0f, 0.0f, 0.0f, 1.0f);
 const float titleHeight = 40.0f;
+
+
+void UICtxSubstate::OnLeftDown(StateHMDOp& targ){}
+void UICtxSubstate::OnLeftUp(StateHMDOp& targ){}
+void UICtxSubstate::OnMiddleDown(StateHMDOp& targ){}
+void UICtxSubstate::OnMiddleUp(StateHMDOp& targ){}
+void UICtxSubstate::OnMiddleUpHold(StateHMDOp& targ){}
+void UICtxSubstate::OnRightDown(StateHMDOp& targ){}
+void UICtxSubstate::OnRightUp(StateHMDOp& targ){}
+void UICtxSubstate::OnEnterContext(StateHMDOp& targ){}
+void UICtxSubstate::OnExitContext(StateHMDOp& targ){}
+
+class UICtx_WidgetCtrl : public UICtxSubstate
+{
+public:
+	UIButton* categoryBtn;
+	std::vector<UIHSlider*> sliders;
+
+	UICtx_WidgetCtrl(UIButton* btn)
+	{
+		this->categoryBtn = btn;
+	}
+
+	void OnLeftDown(StateHMDOp& targ) override 
+	{
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		// Validate and typecast.
+		auto it = std::find(this->sliders.begin(), this->sliders.end(), (UIHSlider*)uiSel);
+		if(it == this->sliders.end())
+			return;
+
+		(*it)->MoveQuantizedAmt(10, -1);
+	}
+
+	void OnLeftUp(StateHMDOp& targ) override {}
+
+	void OnMiddleUp(StateHMDOp& targ) override
+	{
+		if(this->sliders.size() <= 1)
+			return;
+
+		UIHSlider* uiSel = (UIHSlider*)targ.uiSys.GetSelected();
+		if(uiSel == nullptr)
+			return;
+
+		auto itFind = std::find(this->sliders.begin(), this->sliders.end(), uiSel);
+		if(itFind == this->sliders.end())
+		{
+			targ.uiSys.Select(sliders[0]);
+			return;
+		}
+
+		++itFind;
+		if(itFind == this->sliders.end())
+			targ.uiSys.Select(sliders[0]);
+		else
+			targ.uiSys.Select(*itFind);
+
+	}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override
+	{
+		targ.PopSubstate();
+	}
+
+	void OnRightDown(StateHMDOp& targ) override 
+	{
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		// Validate and typecast.
+		auto it = std::find(this->sliders.begin(), this->sliders.end(), (UIHSlider*)uiSel);
+		if(it == this->sliders.end())
+			return;
+
+		(*it)->MoveQuantizedAmt(10, 1);
+	}
+
+	void OnRightUp(StateHMDOp& targ) override {}
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		auto it = targ.camButtonGrouping.find(this->categoryBtn);
+		if(it == targ.camButtonGrouping.end())
+			return;
+
+		for(StateHMDOp::PlateSliderPair psp : it->second)
+			this->sliders.push_back(psp.slider);
+
+		if(!this->sliders.empty())
+			targ.uiSys.Select(this->sliders[0]);
+	}
+
+	void OnExitContext(StateHMDOp& targ) override 
+	{
+		targ.uiSys.Select(this->categoryBtn);
+	}
+
+	std::string GetStateName() const override
+	{
+		return "WidgetCtrl";
+	}
+};
+
+class UICtx_TempInspNavForm : public UICtxSubstate
+{
+	UIBase* inspectorPlate;
+	UIBase* optButton;
+	std::vector<UIBase*> widgets;
+
+public:
+
+	static void CollectSelectable(UIBase* root, std::vector<UIBase*>& vecw)
+	{
+		std::vector<UIBase*> todo;
+		todo.push_back(root);
+
+		// Collect selectables in the entire heirarchy.
+		while(!todo.empty())
+		{
+			UIBase* t = todo.back();
+			todo.pop_back();
+
+			if(t->IsSelectable())
+				vecw.push_back(t);
+
+			for(int i = t->ChildCt() - 1; i >= 0; --i)
+				todo.push_back(t->GetChild(i));
+		}
+	}
+
+	UICtx_TempInspNavForm(UIBase* optButton, UIBase* inspPlate)
+	{
+		this->inspectorPlate = inspPlate;
+		this->optButton = optButton;
+
+		CollectSelectable(inspPlate, this->widgets);
+	}
+
+	void JumpSelectionToNextGroup(UISys& uiSys)
+	{
+		UIBase* uiSel = uiSys.GetSelected();
+		if(uiSel == nullptr)
+		{ 
+			uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		auto itFind = std::find(this->widgets.begin(), this->widgets.end(), uiSel);
+		if(itFind == this->widgets.end())
+		{
+			uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		++itFind;
+		for( ; itFind != this->widgets.end(); ++itFind)
+		{
+			if(!(*itFind)->HasCustomFlags(CustomUIFlag::IsGroupStart))
+				continue;
+
+			uiSys.Select(*itFind);
+			return;
+		}
+
+		uiSys.Select(this->widgets[0]);
+	}
+
+	void MoveSelectionToNextChildInGroup(UISys& uiSys)
+	{
+		UIBase* uiSel = uiSys.GetSelected();
+		if(uiSel == nullptr)
+		{ 
+			uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		auto itFind = std::find(this->widgets.begin(), this->widgets.end(), uiSel);
+		if(itFind == this->widgets.end())
+		{
+			uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		auto itNext = itFind;
+		++itNext;
+		if(itNext != this->widgets.end() && !(*itNext)->HasCustomFlags(CustomUIFlag::IsGroupStart))
+		{
+			uiSys.Select(*itNext);
+			return;
+		}
+		while(itFind != this->widgets.begin() && !(*itFind)->HasCustomFlags(CustomUIFlag::IsGroupStart))
+		{
+			--itFind;
+		}
+		uiSys.Select(*itFind);
+	}
+
+	void OnLeftUp(StateHMDOp& targ) override 
+	{
+		// Cycle group
+		this->MoveSelectionToNextChildInGroup(targ.uiSys);
+	}
+
+	void OnMiddleUp(StateHMDOp& targ) override
+	{
+		// MenuOpt
+		this->JumpSelectionToNextGroup(targ.uiSys);
+	}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override
+	{
+		targ.PopSubstate();
+	}
+
+	void OnRightUp(StateHMDOp& targ) override 
+	{
+		UIBase* sel = targ.uiSys.GetSelected();
+		if(sel != nullptr)
+			targ.uiSys.SubmitClick(sel, 2, UIVec2(), false);
+	}
+
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		if(!this->widgets.empty())
+		targ.uiSys.Select(this->widgets[0]);
+	}
+
+	void OnExitContext(StateHMDOp& targ) override 
+	{
+		if(this->optButton != nullptr)
+			targ.uiSys.Select(this->optButton);
+		//this->inspectorPlate->Hide();
+	}
+
+	std::string GetStateName() const override
+	{
+		return "FormNav";
+	}
+};
+
+class UICtx_TempNavSliderListing : public UICtxSubstate
+{
+	UIBase* inspPlate;
+	UIBase* optnBtn;
+	std::vector<UIBase*> widgets;
+
+public:
+
+	UICtx_TempNavSliderListing(UIBase* optBtn, UIBase* inspPlate)
+	{
+		this->optnBtn = optBtn;
+		this->inspPlate = inspPlate;
+
+		UICtx_TempInspNavForm::CollectSelectable(inspPlate, this->widgets);
+	}
+
+	void MoveFocus(StateHMDOp& targ)
+	{
+		if(this->widgets.empty())
+			return;
+
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		if(uiSel == nullptr)
+		{
+			targ.uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		auto itFind = std::find(this->widgets.begin(), this->widgets.end(), uiSel);
+		if(itFind == this->widgets.end())
+		{
+			targ.uiSys.Select(this->widgets[0]);
+			return;
+		}
+
+		++itFind;
+		if(itFind != this->widgets.end())
+			targ.uiSys.Select(*itFind);
+		else
+			targ.uiSys.Select(this->widgets[0]);
+	}
+
+	void OnLeftUp(StateHMDOp& targ) override 
+	{
+		this->MoveFocus(targ);
+
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		targ.ManageCamButtonPressed(uiSel->Idx(), true);
+	}
+
+	void OnMiddleUp(StateHMDOp& targ) override
+	{
+		this->MoveFocus(targ);
+
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		targ.ManageCamButtonPressed(uiSel->Idx(), true);
+
+	}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override
+	{
+		targ.PopSubstate();
+	}
+
+	void OnRightUp(StateHMDOp& targ) override 
+	{
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		if(uiSel == nullptr)
+			return;
+
+		if(targ.camButtonGrouping.find((UIButton*)uiSel) == targ.camButtonGrouping.end())
+			return;
+
+		if(targ.camButtonGrouping[(UIButton*)uiSel].size() == 0)
+			return;
+
+		targ.PushSubstate(std::shared_ptr<UICtxSubstate>(new UICtx_WidgetCtrl((UIButton*)uiSel)));
+	}
+
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		if(!this->widgets.empty())
+		{
+			UIBase* uiSel = targ.uiSys.GetSelected();
+
+			// If a button is already selected, don't force the selection.
+			//
+			// But if nothing or and unknown thing is selected, for a 
+			// default selection.
+			if(std::find(this->widgets.begin(), this->widgets.end(), uiSel) == this->widgets.end())
+				targ.uiSys.Select(this->widgets[0]);
+		}
+	}
+
+	void OnExitContext(StateHMDOp& targ) override 
+	{
+		if(this->optnBtn != nullptr)
+			targ.uiSys.Select(this->optnBtn);
+	}
+
+	std::string GetStateName() const override
+	{
+		return "SliderListing";
+	}
+};
+
+class UICtx_Carousel : public UICtxSubstate
+{
+	void OnLeftDown(StateHMDOp& targ)
+	{
+		targ.carousel.GotoPrev();
+	}
+
+	void OnLeftUp(StateHMDOp& targ) override {}
+
+	void OnMiddleUp(StateHMDOp& targ) override 
+	{
+		targ.PopSubstate();
+	}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override 
+	{
+		targ.PopSubstate();
+	}
+
+	void OnRightDown(StateHMDOp& targ)
+	{
+		targ.carousel.GotoNext();
+	}
+
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		targ.showMainMenu = false;
+		targ.ShowCarousel(true);
+	}
+
+	void OnExitContext(StateHMDOp& targ) override 
+	{
+		targ.ShowCarousel(false);
+	}
+
+	std::string GetStateName() const override
+	{
+		return "Carousel";
+	}
+};
+
+class UICtx_Empty : public UICtxSubstate
+{
+	void OnLeftDown(StateHMDOp& targ)
+	{
+		targ.GetCoreWindow()->RequestSnapAll(targ.carousel.GetCurrentLabel());
+	}
+
+	void OnLeftUp(StateHMDOp& targ) override {}
+	void OnMiddleUp(StateHMDOp& targ) override 
+	{
+		targ.PushSubstate(Type::MenuNav);
+	}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override 
+	{
+		targ.PushSubstate(Type::CarouselStage);
+	}
+
+	void OnRightDown(StateHMDOp& targ)
+	{
+		// If nothing is shown an the right pedal is pressed, start video recording
+		// of the composite stream
+		if(targ.GetCoreWindow()->IsRecording(SpecialCams::Composite))
+			targ.GetCoreWindow()->StopRecording(SpecialCams::Composite);
+		else
+			targ.GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
+	}
+
+	void OnRightUp(StateHMDOp& targ) override {}
+
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		targ.CloseShownMenuBarUIPanel();
+		targ.showMainMenu = false;
+	}
+
+	void OnExitContext(StateHMDOp& targ) override 
+	{}
+
+	std::string GetStateName() const override
+	{
+		return "Default";
+	}
+};
+
+class UICtx_MainMenuNav : public UICtxSubstate
+{
+	std::vector<UIBase*> menuButtons;
+
+	void OnLeftDown(StateHMDOp& targ) override 
+	{
+		this->EnforceTabOrder(targ);
+		targ.uiSys.AdvanceTabbingOrder(true);
+
+		UIBase* curSel = targ.uiSys.GetSelected();
+		if(curSel->HasCustomFlags(CustomUIFlag::IsMainOptWithNoContents))
+		{
+			targ.CloseShownMenuBarUIPanel();
+		}
+		else
+		{
+			targ.SetShownMenuBarUIPanel(curSel->Idx());
+		}
+	}
+
+	void OnLeftUp(StateHMDOp& targ)  override {}
+
+	void OnMiddleUp(StateHMDOp& targ) override 
+	{}
+
+	void OnMiddleUpHold(StateHMDOp& targ) override 
+	{
+		targ.PopSubstate();
+	}
+
+	void OnRightUp(StateHMDOp& targ) override 
+	{
+		UIBase* uiSel = targ.uiSys.GetSelected();
+		
+		if(uiSel != nullptr)
+		{ 
+			switch(uiSel->Idx())
+			{
+			case StateHMDOp::UIID::MBtnLaserTog:
+				targ.uiSys.SubmitClick(targ.btnLaser, 2, UIVec2(), false);
+				break;
+
+			case StateHMDOp::UIID::MBtnLaserSet:
+				if(!targ.inspSettingsPlate->IsSelfVisible())
+					targ.SetShownMenuBarUIPanel(StateHMDOp::UIID::MBtnLaserSet);
+
+				targ.PushSubstate(std::shared_ptr<UICtxSubstate>(
+					new UICtx_TempInspNavForm(
+						targ.btnSettings, 
+						targ.inspSettingsPlate)));
+				break;
+
+			case StateHMDOp::UIID::MBtnSource:
+				if(targ.inspSetFrame->IsSelfVisible())
+					targ.SetShownMenuBarUIPanel(StateHMDOp::UIID::MBtnSource);
+
+				targ.PushSubstate(std::shared_ptr<UICtxSubstate>(
+					new UICtx_TempNavSliderListing(
+						targ.btnCamSets, 
+						targ.inspCamSetsPlate)));
+				break;
+
+			case StateHMDOp::UIID::MBtnBack:
+				// TODO: This is broken if not using whiffs
+				targ.PopSubstate();
+				break;
+			}
+		}
+	}
+
+	void OnEnterContext(StateHMDOp& targ) override 
+	{
+		targ.showMainMenu = true;
+
+		if(this->menuButtons.empty())
+		{ 
+			this->menuButtons = 
+			{
+				targ.btnLaser, 
+				targ.btnSettings, 
+				targ.btnAlign, 
+				targ.btnCamSets, 
+				targ.btnBack
+			};
+		}
+
+		this->EnforceTabOrder(targ);
+	}
+	void OnExitContext(StateHMDOp& targ) override 
+	{
+		targ.uiSys.ClearCustomTabOrder();
+	}
+
+	void EnforceTabOrder(StateHMDOp& targ)
+	{
+		targ.uiSys.SetCustomTabOrder(menuButtons);
+
+		UIBase* curSel = targ.uiSys.GetSelected();
+		if(std::find(menuButtons.begin(), menuButtons.end(), curSel) == menuButtons.end())
+			targ.uiSys.Select(menuButtons[0]);
+	}
+
+	std::string GetStateName() const override
+	{
+		return "MenuNav";
+	}
+};
+
 
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
@@ -103,6 +658,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//
 	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Laser.png"	);
 	this->btnLaser->SetPivot(0.0f, 0.5f - menuYPiv * 2.0f);
+	this->btnLaser->customFlags |= CustomUIFlag::IsMainOptWithNoContents;
 	SetButtonStdCols(this->btnLaser);
 	this->btnSettings	= new UIButton(this->vertMenuPlate, UIID::MBtnLaserSet, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Sliders.png");
 	this->btnSettings->SetPivot(0.0f, 0.5f - menuYPiv * 0.5f);
@@ -115,6 +671,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	SetButtonStdCols(this->btnCamSets);
 	this->btnBack		= new UIButton(this->vertMenuPlate, UIID::MBtnBack,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Assets/MenubarIcos/Menu_Back.png"	)	;
 	this->btnBack->SetPivot(0.0f, 0.5f + menuYPiv * 3.15f);
+	this->btnBack->customFlags |= CustomUIFlag::IsMainOptWithNoContents;
 	SetButtonStdCols(this->btnBack);
 
 	UIRect defInspPlateDim(800, 200, 400, 600);
@@ -141,6 +698,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnLaseW_1->UseDyn()->SetAnchors(0.0f, 0.0f, 0.33f, 0.0f).SetOffsets(0.0f, 40.0f, 0.0f, 70.0f);
 	this->ApplyFormButtonStyle(this->btnLaseW_1);
 	SetButtonStdCols(this->btnLaseW_1, true);
+	this->btnLaseW_1->customFlags |= CustomUIFlag::IsGroupStart;
 	this->btnLaseW_2 = new UIButton(this->inspSetFrame, UIID::LaseWat_2, UIRect(),	"L2", btnTextSz);
 	this->btnLaseW_2->UseDyn()->SetAnchors(0.33f, 0.0f, 0.66f, 0.0f).SetOffsets(0.0f, 40.0f, 0.0f, 70.0f);
 	this->ApplyFormButtonStyle(this->btnLaseW_2);
@@ -156,6 +714,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnExp_1->UseDyn()->SetAnchors(0.0f, 0.0f, 0.5f, 0.0f).SetOffsets(0.0f, 140.0f, 0.0f, 170.0f);
 	this->ApplyFormButtonStyle(this->btnExp_1);
 	SetButtonStdCols(this->btnExp_1, true);
+	this->btnExp_1->customFlags |= CustomUIFlag::IsGroupStart;
 	this->btnExp_2	= new UIButton(this->inspSetFrame, UIID::Lase_Exposure_2, UIRect(80, 150, 50, 30), "E2", btnTextSz);
 	this->btnExp_2->UseDyn()->SetAnchors(0.5f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 140.0f, 0.0f, 170.0f);
 	this->ApplyFormButtonStyle(this->btnExp_2);
@@ -177,6 +736,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnThreshSel_None->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 330.0f, 0.0f, 360.0f);
 	this->ApplyFormButtonStyle(this->btnThreshSel_None);
 	SetButtonStdCols(this->btnThreshSel_None, false);
+	this->btnThreshSel_None->customFlags |= CustomUIFlag::IsGroupStart;
 	this->btnThreshTog_Simple = new UIButton(inspSettingsPlate, Lase_Threshold_Simple, UIRect(), "Simple", 14 );
 	this->btnThreshTog_Simple->UseDyn()->SetAnchors(0.0f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 360.0f, 0.0f, 390.0f);
 	this->ApplyFormButtonStyle(this->btnThreshTog_Simple);
@@ -264,6 +824,10 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	}
 	
 	this->ManageCamButtonPressed(-1, false);
+
+	this->subStates[UICtxSubstate::Type::CarouselStage	] = std::shared_ptr<UICtxSubstate>(new UICtx_Carousel());
+	this->subStates[UICtxSubstate::Type::Empty			] = std::shared_ptr<UICtxSubstate>(new UICtx_Empty());
+	this->subStates[UICtxSubstate::Type::MenuNav		] = std::shared_ptr<UICtxSubstate>(new UICtx_MainMenuNav());
 	
 }
 
@@ -349,6 +913,45 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	//
 	colMMiddle.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
+
+	if(this->middleDown)
+	{
+		glDisable(GL_TEXTURE_2D);
+
+		// TODO:
+		const float PI = 3.14159f;
+		const int circleParts = 32;
+		float secondsMidDown = this->middleDownTimer.Milliseconds(false) / 1000.0f;
+		float arcLen = std::min(1.0f, secondsMidDown / MiddleHold) * 2.0f * PI;
+
+		if(secondsMidDown < MiddleHold)
+			glColor3f(0.0f, 1.0f, 0.0f);
+		else
+			glColor3f(1.0f, 0.5f, 0.0f);
+
+		float radOut = 50.0f * scale;
+		float radIn = radOut - 10.0f;
+		glBegin(GL_QUADS);
+			for(int i = 0; i < circleParts; ++i)
+			{
+				float lam_0 = -PI * 0.5f + ((float)(i + 0) / (float)circleParts) * arcLen;
+				float lam_1 = -PI * 0.5f + ((float)(i + 1) / (float)circleParts) * arcLen;
+
+				float seg_0x = cos(lam_0);
+				float seg_0y = sin(lam_0);
+				float seg_1x = cos(lam_1);
+				float seg_1y = sin(lam_1);
+
+				glVertex2f(x + seg_0x * radOut, y + seg_0y * radOut);
+				glVertex2f(x + seg_1x * radOut, y + seg_1y * radOut);
+				glVertex2f(x + seg_1x * radIn,	y + seg_1y * radIn);
+				glVertex2f(x + seg_0x * radIn,	y + seg_0y * radIn);
+
+			}
+		glEnd();
+		glEnable(GL_TEXTURE_2D);
+	}
+
 	//
 	colMLeft.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
@@ -453,6 +1056,13 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 	if(this->showCarousel)
 		this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
+
+	std::shared_ptr<UICtxSubstate> curSub = this->GetCurSubtate();
+	if(curSub != nullptr)
+	{
+		glColor3f(1.0f, 0.0f, 1.0f);
+		this->fontInsTitle.RenderFont(curSub->GetStateName().c_str(), 50, 50);
+	}
 }
 
 // NOTE: This function has been greatly reduce from its original purpose.
@@ -527,7 +1137,7 @@ void StateHMDOp::Update(double dt)
 	this->mdsRight.Decay(dt);
 
 	bool showRButtons = false;
-	if(this->showVertMenu)
+	if(this->showMainMenu)
 	{ 
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
 		showRButtons = (curVertWidth == maxVertWidth);
@@ -564,6 +1174,8 @@ void StateHMDOp::EnteredActive()
 	this->mdsMiddle.Reset();
 	this->mdsRight.Reset();
 
+	this->middleDown = false;
+
 	this->_SyncImageProcessingSetUI();
 	this->_SyncThresholdSlider();
 
@@ -584,6 +1196,7 @@ void StateHMDOp::EnteredActive()
 		StreamParams::CompositeVideoHeight,
 		this->GetView()->cachedOptions.compositeHeight);
 
+	this->ChangeSubstate(UICtxSubstate::Type::Empty);
 } 
 
 void StateHMDOp::_SyncImageProcessingSetUI()
@@ -635,6 +1248,7 @@ void StateHMDOp::ExitedActive()
 {
 	this->camTextureRegistry.ClearTextures();
 	this->uiSys.DelegateReset();
+	this->ForceExitSubstate();
 }
 
 void StateHMDOp::Initialize() 
@@ -649,7 +1263,7 @@ void StateHMDOp::OnKeydown(wxKeyCode key)
 {
 	// Keyboard shortcut for the pull-out menu
 	if(key == WXK_NUMPAD_ENTER)
-		this->showVertMenu = !this->showVertMenu;
+		this->showMainMenu = !this->showMainMenu;
 	else
 	{
 		// If not handled by an element outside the UI system,
@@ -674,97 +1288,74 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 		this->mdsRight.FlagDown();
 
 	DelMouseRet dmr = this->uiSys.DelegateMouseDown(button, UIVec2(pt.x, pt.y));
+	std::shared_ptr<UICtxSubstate> curSub = this->GetCurSubtate();
 
 	if(dmr.evt == DelMouseRet::Event::MissedDown)
 	{
-		if(!this->AnyUIUp())
+		if(button == 0)
 		{
-			if(button == 0)
-			{
-				if (this->IsCarouselShown())
-				{
-					this->carousel.GotoPrev();
-					CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
-				}
-				else
-				{
-					// If nothing is shown and the left pedal is pressed, take a photo from
-					// all video streams.
-					this->GetCoreWindow()->RequestSnapAll(this->carousel.GetCurrentLabel());
-				}
-			}
-			else if(button == 2)
-			{
-				if(this->IsCarouselShown())
-				{ 
-					this->carousel.GotoNext();
-					CamStreamMgr::GetInstance().SetAllSnapCaption(this->carousel.GetCurrentCaption());
-				}
-				else
-				{
-					// If nothing is shown an the right pedal is pressed, start video recording
-					// of the composite stream
+			if(curSub != nullptr)
+				curSub->OnLeftDown(*this);
+		}
+		else if(button == 1)
+		{
+			this->middleDownTimer.Restart();
+			this->middleDown = true;
 
-					// TODO: Record from composite stream instead of index 0
-					if(this->GetCoreWindow()->IsRecording(SpecialCams::Composite))
-						this->GetCoreWindow()->StopRecording(SpecialCams::Composite);
-					else
-						this->GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
-				}
-			}
+			if(curSub != nullptr)
+				curSub->OnMiddleDown(*this);
+		}
+		else if(button == 2)
+		{
+			if(curSub != nullptr)
+				curSub->OnRightDown(*this);
 		}
 	}
 	if(	dmr.evt == DelMouseRet::Event::MissedDown || 
 		dmr.evt == DelMouseRet::Event::MouseWhiffDown )
 	{
-		if(button == 1)
-		{
-			if(this->uiSys.IsUsingCustomTabOrder())
-			{
-				// Currently do do nothing, middle click whiff is handled 
-				// in the UISink portion - it's not a clean implementation,
-				// but regardless, it's the current authority on custom
-				// tab navigation.
-			}
-			else if(
-				this->inspSettingsPlate->IsSelfVisible() || 
-				this->inspAlignPlate->IsSelfVisible() || 
-				this->inspCamSetsPlate->IsSelfVisible())
-			{
-				// Else, if any of the inspector windows are open, middle mouse
-				// will close the window.
-				SetShownMenuBarUIPanel(-1);
-			}
-			else if(this->showVertMenu)
-			{
-				// If no submenu but the main menu is open, middle mouse will
-				// close that window.
-				this->uiSys.SubmitClick(this->btnBack, 2, UIVec2(), false);
-			}
-			else
-			{
-				// If nothing is shown and the middle pedal is pressed, 
-				// toggle the carousel.
-				this->ToggleCarousel();
-			}
-
-		}
+		
 	}
 }
 
 void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 {
+	DelMouseRet delStatus = this->uiSys.DelegateMouseUp(button, UIVec2(pt.x, pt.y));
+	std::shared_ptr<UICtxSubstate> curSub = this->GetCurSubtate();
+
 	if(button == 0)
+	{ 
+		if( curSub != nullptr)
+			curSub->OnLeftUp(*this);
+
 		this->mdsLeft.FlagUp();
+	}
 	else if(button == 1)
 	{
-		this->showVertMenu = false;
-		this->mdsMiddle.FlagUp();
-	}
-	else if(button == 2)
-		this->mdsRight.FlagUp();
+		int msMidDown = this->middleDownTimer.Milliseconds();
+		float secDown = (float)msMidDown/1000.0f;
+		if( secDown >= MiddleHold)
+		{
+			if(curSub != nullptr)
+				curSub->OnMiddleUpHold(*this);
+			
+		}
+		else
+		{
+			if(curSub != nullptr)
+				curSub->OnMiddleUp(*this);
+		}
 
-	this->uiSys.DelegateMouseUp(button, UIVec2(pt.x, pt.y));
+		this->mdsMiddle.FlagUp();
+		this->middleDown = false;
+	}
+	else if (button == 2)
+	{
+		if(curSub != nullptr)
+			curSub->OnRightUp(*this);
+
+		this->mdsRight.FlagUp();
+	}
 }
 
 /// <summary>
@@ -795,7 +1386,7 @@ void StateHMDOp::OnMouseMove(const wxPoint& pt)
 	if(m.evt == DelMouseRet::Event::Hovered)
 	{
 		if(IsRightMenuItem(m.idx))
-			this->showVertMenu = true;
+			this->showMainMenu = true;
 	}	
 }
 
@@ -837,12 +1428,6 @@ bool StateHMDOp::ToggleCarousel()
 
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 {
-	// Regardless of why this is called, a custom tab navigation
-	// should not be setup when first entering into a panel. If we
-	// want to cycle through the custom sets, a middle whiff needs
-	// to occur.
-	this->uiSys.ClearCustomTabOrder();
-
 	bool toggleOff = false;
 	// Check if the thing is already on, if so, it's a complete toggle off...
 
@@ -1000,12 +1585,6 @@ void StateHMDOp::ManageCamButtonPressed(int buttonID, bool record)
 	}
 }
 
-bool StateHMDOp::AnyUIUp()
-{
-	// TODO: Used to check if mouse buttons perform captures
-	return false;
-}
-
 UIPlate* StateHMDOp::CreateSliderSystem(
 	UIBase* parent, 
 	int id,
@@ -1118,6 +1697,7 @@ void StateHMDOp::DoThresholdButton(int idxButton, ProcessingType type, bool skip
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)
 {
+	
 	// Only right click is supported
 	if(mouseBtn != (int)MouseBtn::Right)
 		return;
@@ -1141,7 +1721,7 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	case UIID::MBtnLaserSet:
-		this->SetShownMenuBarUIPanel(uib->Idx());
+		//this->SetShownMenuBarUIPanel(uib->Idx());
 		break;
 
 	case UIID::MBtnAlign:
@@ -1153,9 +1733,9 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	case UIID::MBtnBack:
-		this->showVertMenu = false;
+		this->showMainMenu = false;
 		this->curVertWidth = this->minVertWidth;
-		this->SetShownMenuBarUIPanel(-1);
+		this->CloseShownMenuBarUIPanel();
 		this->ManageCamButtonPressed(-1, false);
 		this->uiSys.ClearCustomTabOrder();
 		this->uiSys.Select(nullptr);
@@ -1290,249 +1870,11 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	}
+	
 }
 
 void StateHMDOp::OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn)
-{
-	// There's a TON of duplicate logic going on that can be mechanized
-	// and automated.
-
-	// When left whiffing when the button is select, that will toggle
-	// moving to the next UI element.
-	//
-	// For now we do this by hand, ManageCamButtonPressed() should have
-	// everything we need to simulate button pressing and changing the
-	// context to the new button.
-	int uiId = uib->Idx();
-	switch(uiId)
-	{
-	case UIID::MBtnLaserTog:
-		if(mouseBtn == 0)
-		{
-			this->uiSys.SubmitClick(this->btnLaser, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 2)
-		{
-			this->uiSys.SubmitClick(this->btnSettings, 2, UIVec2(), true);
-		}
-		break;
-
-	case UIID::MBtnLaserSet:
-		if(mouseBtn == 0)
-		{ 
-			this->uiSys.SubmitClick(this->btnSettings, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-			this->uiSys.Select(this->btnLaseW_1);
-			this->uiSys.SetCustomTabOrder(
-				{
-					this->btnLaseW_1, 
-					this->btnLaseW_2, 
-					this->btnLaseW_3
-				});
-		}
-		else if(mouseBtn == 2)
-		{
-			this->uiSys.SubmitClick(this->btnAlign, 2, UIVec2(), true);
-		}
-		break;
-
-	case UIID::MBtnAlign:
-		if(mouseBtn == 0)
-		{ 
-			this->uiSys.SubmitClick(this->btnAlign, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-		}
-		else if(mouseBtn == 2)
-		{
-			this->uiSys.SubmitClick(this->btnCamSets, 2, UIVec2(), true);
-		}
-		break;
-
-	case UIID::MBtnSource:
-		if(mouseBtn == 0)
-		{ 
-			this->uiSys.SubmitClick(this->btnCamSets, 2, UIVec2(), true);
-		}
-		else if(mouseBtn == 1)
-		{
-			this->uiSys.Select(this->camBtnExposure);
-			this->uiSys.SetCustomTabOrder(
-				{
-					this->camBtnExposure, 
-					this->camBtnDisparity, 
-					this->camBtnOpacity,
-					this->camBtnRegisterXY,
-					this->camBtnCalibrate,
-					this->camBtnThresh
-				});
-		}
-		else if(mouseBtn == 2)
-		{
-			this->uiSys.Select(this->btnBack);
-			this->SetShownMenuBarUIPanel(-1);
-		}
-		break;
-
-	case UIID::MBtnBack:
-		if(mouseBtn == 0)
-		{
-			this->uiSys.SubmitClick(this->btnBack, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-		}
-		else if(mouseBtn == 2)
-		{
-			this->uiSys.Select(this->btnLaser);
-		}
-		break;
-
-	case UIID::LaseWat_1:
-	case UIID::LaseWat_2:
-	case UIID::LaseWat_3:
-		if(mouseBtn == 0)
-		{
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-			this->uiSys.AdvanceTabbingOrder(true);
-		}
-		else //if(mouseBtn == 2)
-		{
-			this->uiSys.Select(this->btnExp_1);
-			this->uiSys.SetCustomTabOrder(
-				{
-					this->btnExp_1, 
-					this->btnExp_2, 
-					this->btnExp_3, 
-					this->btnExp_4
-				});
-		}
-		break;
-
-	case UIID::Lase_Exposure_1:
-	case UIID::Lase_Exposure_2:
-	case UIID::Lase_Exposure_3:
-	case UIID::Lase_Exposure_4:
-		if(mouseBtn == 0)
-		{
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-			this->uiSys.AdvanceTabbingOrder(true);
-		}
-		else //if(mouseBtn == 2)
-		{
-			this->uiSys.Select(this->btnThreshSel_None);
-			this->uiSys.SetCustomTabOrder(
-				{
-					this->btnThreshSel_None, 
-					this->btnThreshTog_Simple, 
-					this->btnThreshTog_Mean2, 
-					this->btnThreshTog_Yen,
-					this->btnThreshTog_YenSimple
-				});
-		}
-		break;
-
-	case UIID::Lase_Threshold_None:
-	case UIID::Lase_Threshold_Simple:
-	case UIID::Lase_Threshold_Mean2:
-	case UIID::Lase_Threshold_Yen:
-	case UIID::Lase_Threshold_YenSimple:
-		if(mouseBtn == 0)
-		{
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		}
-		else if(mouseBtn == 1)
-		{
-			this->uiSys.AdvanceTabbingOrder(true);
-		}
-		else //if(mouseBtn == 2)
-		{
-			this->uiSys.Select(this->btnLaseW_1);
-			this->uiSys.SetCustomTabOrder(
-				{
-					this->btnLaseW_1, 
-					this->btnLaseW_2, 
-					this->btnLaseW_3
-				});
-		}
-		break;
-
-	case UIID::CamSet_Exposure:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Disparity:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Opacity:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Register:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Calibrate:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Threshold:
-		if(mouseBtn == 0)
-			this->uiSys.SubmitClick(uib, 2, UIVec2(), false);
-		else if(mouseBtn == 1)
-			this->uiSys.AdvanceTabbingOrder(true);
-		else if(mouseBtn == 2)
-			this->ManageCamButtonPressed(-1, false);
-		break;
-
-	case UIID::CamSet_Threshold_SlideThresh:
-	case UIID::CamSet_Calibrate_Slider:
-	case UIID::CamSet_Opacity_Meter:
-	case UIID::CamSet_Threshold_DispUp:
-		// For the sliders, left and right click are 
-		// taken up by the UIHSlider whiff handlers.
-		if(mouseBtn == 1)
-		{
-			this->uiSys.AdvanceTabbingOrder(true);
-		}
-		break;
-	}
-}
+{}
 
 void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 {
@@ -1550,4 +1892,92 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 		}
 		break;
 	}
+}
+
+bool StateHMDOp::ChangeSubstate(UICtxSubstate::Type type, bool force)
+{
+	auto itFind = this->subStates.find(type);
+	if(itFind == this->subStates.end())
+		return false;
+
+	std::shared_ptr<UICtxSubstate> newSubstate = itFind->second;
+	cvgAssert(newSubstate.get() != nullptr, "Detected illegal null HMDOp substate");
+
+	
+	return ChangeSubstate(newSubstate, force);
+}
+
+bool StateHMDOp::ChangeSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force)
+{
+	if(this->stateStack.empty())
+		return this->PushSubstate(newSubstate, force);
+
+	if(!force && this->stateStack.back() == newSubstate)
+		return false;
+
+	this->stateStack.back()->OnExitContext(*this);
+	this->stateStack[this->stateStack.size() - 1] = newSubstate;
+	newSubstate->OnEnterContext(*this);
+
+	return true;
+}
+
+bool StateHMDOp::PushSubstate(UICtxSubstate::Type type, bool force)
+{
+	auto itFind = this->subStates.find(type);
+	if(itFind == this->subStates.end())
+		return false;
+
+	std::shared_ptr<UICtxSubstate> newSubstate = itFind->second;
+	cvgAssert(newSubstate.get() != nullptr, "Detected illegal null HMDOp substate");
+
+	return this->PushSubstate(newSubstate, force);
+}
+
+bool StateHMDOp::PushSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force)
+{
+	if(this->stateStack.empty())
+	{
+		this->stateStack.push_back(newSubstate);
+		newSubstate->OnEnterContext(*this);
+		return true;
+	}
+
+	if(!force && this->stateStack.back() == newSubstate)
+		return false;
+
+	this->stateStack.back()->OnExitContext(*this);
+	this->stateStack.push_back(newSubstate);
+	newSubstate->OnEnterContext(*this);
+	return true;
+}
+
+bool StateHMDOp::PopSubstate(bool allowEmpty)
+{
+	if(this->stateStack.empty())
+		return false;
+
+	if(this->stateStack.size() == 1 && allowEmpty == false)
+		return false;
+
+	std::shared_ptr<UICtxSubstate> top = this->stateStack.back();
+	this->stateStack.pop_back();
+	top->OnExitContext(*this);
+
+	if(!this->stateStack.empty())
+		this->stateStack.back()->OnEnterContext(*this);
+
+	return true;
+}
+
+bool StateHMDOp::ForceExitSubstate()
+{
+	if(this->stateStack.empty())
+		return false;
+
+	// We could just clear the stateStack and be done with it without doing
+	// formal pops, but until there's a reason to, we're going to remove
+	// items by-the-numbers.
+	while(this->PopSubstate(true)){}
+	return true;
 }

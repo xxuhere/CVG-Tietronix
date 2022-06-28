@@ -145,6 +145,7 @@ void MainWin::ClearFinishedRecordings()
 {
 	for(int i = this->recordingVideos.size() -1; i >= 0; --i)
 	{
+
 		switch(this->recordingVideos[i]->GetStatus())
 		{
 		case VideoRequest::Status::Error:

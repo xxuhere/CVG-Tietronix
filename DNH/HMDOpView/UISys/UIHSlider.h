@@ -109,6 +109,8 @@ public:
 	bool Render() override;
 	float GetValue(int vid) override;
 
+	void MoveQuantizedAmt(int quantSlices, int movedChunks);
+
 	/// <summary>
 	/// Set the value of curVal.
 	/// 

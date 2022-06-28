@@ -132,54 +132,6 @@ DelMouseRet UISys::DelegateMouseDown(int mouseButton, const UIVec2& pt)
 	if(this->onDown[mouseButton] != nullptr)
 		this->onDown[mouseButton]->_RecordMouseDown();
 
-	if(mouseOver != nullptr)
-	{
-		// Left clicking selects
-		if(this->IsSelectingButton(mouseButton)) 
-		{
-			if(mouseOver->IsSelectable())
-			{
-				this->ResetSelection();
-				this->sel = mouseOver;
-				this->sel->HandleSelect();
-			}
-			this->sel = mouseOver;
-		}
-
-		mouseOver->HandleMouseDown(pt, mouseButton);
-		if(this->sink != nullptr)
-			this->sink->OnUISink_MouseDown(mouseOver, mouseButton, pt);
-
-		return DelMouseRet(
-			DelMouseRet::Event::MouseDown,
-			pt,
-			mouseButton,
-			mouseOver->Idx());
-	}
-	else
-	{
-		// Perform whiff click notification
-		if(this->sel != nullptr)
-		{ 
-			bool whiffRet = this->sel->HandleSelectedWhiffDown(mouseButton);
-
-			// Always submit the whiff to the sink regardless of if the
-			// widget natively handled it - this convention just makes a lot
-			// of practical use cases easier.
-			if(this->sink != nullptr)
-				this->sink->OnUISink_SelMouseDownWhiff(this->sel, mouseButton);
-
-			if(whiffRet)
-			{
-				return DelMouseRet(
-					DelMouseRet::Event::MouseWhiffDown,
-					pt,
-					mouseButton,
-					this->sel->idx);
-			}
-		}
-	}
-
 	return DelMouseRet(
 		DelMouseRet::Event::MissedDown,
 		pt,

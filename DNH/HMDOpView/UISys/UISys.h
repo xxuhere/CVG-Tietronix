@@ -104,6 +104,12 @@ protected:
 	/// </summary>
 	std::vector<UIBase*> customNav;
 
+	/// <summary>
+	/// The current UIBase in the hierarchy that is considered selected -
+	/// and that has keyboard focus.
+	/// </summary>
+	UIBase* sel = nullptr;
+
 public: 
 	// TODO: these members need to be evaluated for proper encapsulation.
 
@@ -112,12 +118,6 @@ public:
 	/// things happen in the UISys.
 	/// </summary>
 	UISink* sink = nullptr;
-
-	/// <summary>
-	/// The current UIBase in the hierarchy that is considered selected -
-	/// and that has keyboard focus.
-	/// </summary>
-	UIBase* sel = nullptr;
 
 	/// <summary>
 	/// The current UIBase in the hierarchy that the mouse was last over.
@@ -201,6 +201,9 @@ public:
 	void AlignSystem();
 
 	bool Select(UIBase* newSel);
+
+	UIBase * GetSelected()
+	{ return this->sel; }
 	
 	//		INPUT AND EVENT DELEGATION
 	//////////////////////////////////////////////////

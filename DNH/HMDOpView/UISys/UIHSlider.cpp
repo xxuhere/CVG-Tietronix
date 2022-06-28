@@ -63,6 +63,29 @@ void UIHSlider::HandleMouseUp(const UIVec2& pos, int button)
 	this->UIGraphic::HandleMouseUp(pos, button);
 }
 
+void UIHSlider::MoveQuantizedAmt(int quantSlices, int movedChunks)
+{
+	if(quantSlices <= 0 || movedChunks == 0)
+		return;
+
+	// inverse lerp
+	float lambda = 
+		(this->curVal - this->minVal)/(this->maxVal - this->minVal);
+
+	// Convert from [0.0, 1.0] space to discrete [0, whiffTicks]
+	float quant = std::floor(lambda * quantSlices);
+
+	quant += movedChunks;
+
+	// Convert back to the expected range, clamp as appropriate and
+	// use the new value.
+	quant /= quantSlices; // Turn quantized (possibly out of bounds) value into lambda range
+	float newValue = this->minVal + (this->maxVal - this->minVal) * quant;
+	newValue = std::clamp(newValue, this->minVal, this->maxVal);
+	//
+	this->SetCurValue(newValue);
+}
+
 bool UIHSlider::HandleSelectedWhiffDown(int button)
 {
 	// Middle click isn't handled.
@@ -72,31 +95,18 @@ bool UIHSlider::HandleSelectedWhiffDown(int button)
 	if(this->discreteTicks <= 0)
 		return false;
 
-	// inverse lerp
-	float lambda = 
-		(this->curVal - this->minVal)/(this->maxVal - this->minVal);
-
-	// Convert from [0.0, 1.0] space to discrete [0, whiffTicks]
-	float quant = std::floor(lambda * this->discreteTicks);
+	
 
 	if(button == 0) 
 	{
 		// Left button decreases
-		quant -= 1.0f;
+		this->MoveQuantizedAmt(this->discreteTicks, -1);
 	}
 	else if(button == 2)
 	{
 		// Right button increases
-		quant += 1.0f;
+		this->MoveQuantizedAmt(this->discreteTicks, 1);
 	}
-
-	// Convert back to the expected range, clamp as appropriate and
-	// use the new value.
-	quant /= this->discreteTicks; // Turn quantized (possibly out of bounds) value into lambda range
-	float newValue = this->minVal + (this->maxVal - this->minVal) * quant;
-	newValue = std::clamp(newValue, this->minVal, this->maxVal);
-	//
-	this->SetCurValue(newValue);
 	return true;
 }
 

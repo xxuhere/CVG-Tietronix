@@ -93,6 +93,18 @@ public:
 	/// </summary>
 	std::string debugName;
 
+	/// <summary>
+	/// A custom int ID associated with the widget. This is free to be used
+	/// by outside code.
+	/// </summary>
+	int clientData = 0;
+
+	/// <summary>
+	/// A custom set of flags associated with the widget. This is free to be used
+	/// byh outside code.
+	/// </summary>
+	int customFlags = 0;
+
 protected:
 
 	/// <summary>
@@ -405,6 +417,9 @@ public:
 
 	inline int Idx() const {return this->idx;};
 
+	inline bool HasCustomFlags(int flags) const
+	{ return (this->customFlags & flags) != 0; }
+
 	void FlagTransformDirty(bool flagHierarchy = true);
 	void FlagHierarchyDirty();
 	inline void FlagContentsDirty() { this->dirtyContents = true; }
@@ -529,6 +544,12 @@ public:
 	/// If the subclass only has 1 type of value, this will be ignored.
 	/// </param>
 	void SubmitValue(float value, int vid);
+
+	inline int ChildCt() const
+	{ return this->children.size(); }
+
+	inline UIBase* GetChild(int idx)
+	{ return this->children[idx]; }
 
 	/// <summary>
 	/// Enable using dynamic sizing data and get access to the 

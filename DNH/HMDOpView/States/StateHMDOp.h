@@ -6,6 +6,7 @@
 #include "../TexObj.h"
 #include "../Utils/cvgRect.h"
 #include "../Utils/cvgCamTextureRegistry.h"
+#include "../Utils/cvgStopwatch.h"
 #include "../UISys/UISys.h"
 #include "../UISys/UIPlate.h"
 #include "../UISys/UIText.h"
@@ -13,8 +14,42 @@
 #include "../UISys/UIHSlider.h"
 #include "../Carousel/Carousel.h"
 #include <map>
+#include <memory>
 
 class UIButton;
+class StateHMDOp;
+
+
+class UICtx_Carousel;
+class UICtx_Empty;
+class UICtx_MainMenuNav;
+class UICtx_WidgetCtrl;
+
+/// <summary>
+/// A substate of UI and input logic. These are made into classes
+/// so their logic can be cohesively grouped together.
+/// </summary>
+class UICtxSubstate
+{
+public:
+	enum class Type
+	{
+		CarouselStage,
+		Empty,
+		MenuNav
+	};
+
+	virtual void OnLeftDown(StateHMDOp& targ);
+	virtual void OnLeftUp(StateHMDOp& targ);
+	virtual void OnMiddleDown(StateHMDOp& targ);
+	virtual void OnMiddleUp(StateHMDOp& targ);
+	virtual void OnMiddleUpHold(StateHMDOp& targ);
+	virtual void OnRightDown(StateHMDOp& targ);
+	virtual void OnRightUp(StateHMDOp& targ);
+	virtual void OnEnterContext(StateHMDOp& targ);
+	virtual void OnExitContext(StateHMDOp& targ);
+	virtual std::string GetStateName() const = 0;
+};
 
 /// <summary>
 /// The application state for the main operator loop.
@@ -23,6 +58,12 @@ class StateHMDOp :
 	public BaseState,
 	public UISink
 {
+	friend class UICtxSubstate;
+	friend class UICtx_Carousel;
+	friend class UICtx_Empty;
+	friend class UICtx_MainMenuNav;
+	friend class UICtx_WidgetCtrl;
+
 public:
 
 	/// <summary>
@@ -90,7 +131,15 @@ public:
 		CamSet_Opacity_Back,
 		CamSet_Calibrate_Slider,
 	};
+
 public:
+
+	std::map<UICtxSubstate::Type, std::shared_ptr<UICtxSubstate>> subStates;
+	std::vector<std::shared_ptr<UICtxSubstate>> stateStack;
+
+	inline std::shared_ptr<UICtxSubstate> GetCurSubtate()
+	{ return this->stateStack.empty() ? nullptr : this->stateStack.back(); }
+
 	/// <summary>
 	/// If true, the submenu is being shown, else, it is not.
 	/// 
@@ -144,13 +193,13 @@ public:
 	float curVertWidth = minVertWidth;
 
 	/// <summary>
-	/// If true, the vertical menu should be shown, else it 
+	/// If true, the main menu should be shown, else it 
 	/// should be hidden.
 	/// 
 	/// This variable is used to drive the state of the main 
 	/// menubar sliding animation.
 	/// </summary>
-	bool showVertMenu = false;
+	bool showMainMenu = false;
 
 	/// <summary>
 	/// A cache of the OpenGL textures for the last down camera
@@ -313,6 +362,10 @@ public:
 	CarouselStyle carouselStyle;
 	Carousel carousel;
 
+	const float MiddleHold = 1.0f;
+	bool middleDown = false;
+	cvgStopwatch middleDownTimer;
+
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
 
@@ -371,20 +424,6 @@ public:
 	/// If true, record the buttonID as the new state.
 	/// </param>
 	void ManageCamButtonPressed(int buttonID, bool record);
-
-	/// <summary>
-	/// Query if any UI context is active.
-	/// 
-	/// NOTE: Right now it's an unimplemented placeholder.
-	/// </summary>
-	/// <returns>
-	/// True if any UI context is active, else false.
-	/// 
-	/// Note: This should not be confused with if any UI is shown. 
-	/// As UI elements can be shown but not active, such as an undeployed
-	/// main menubar.
-	/// </returns>
-	bool AnyUIUp();
 
 	/// <summary>
 	/// Create a complex slider system that's designed to be arrayed
@@ -460,6 +499,9 @@ protected:
 	/// </param>
 	void SetShownMenuBarUIPanel(int idx);
 
+	inline void CloseShownMenuBarUIPanel()
+	{ this->SetShownMenuBarUIPanel(-1); }
+
 	/// <summary>
 	/// Set a UI element to use the shared style across the entire UI.
 	/// </summary>
@@ -470,6 +512,13 @@ protected:
 
 public:
 
+	bool ChangeSubstate(UICtxSubstate::Type type, bool force = false);
+	bool ChangeSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force = false);
+	bool PushSubstate(UICtxSubstate::Type type, bool force = false);
+	bool PushSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force = false);
+	bool PopSubstate(bool allowEmpty = false);
+	bool ForceExitSubstate();
+
 	//		UISink overrides
 	//
 	//////////////////////////////////////////////////
@@ -478,3 +527,4 @@ public:
 	void OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn);
 
 };
+
