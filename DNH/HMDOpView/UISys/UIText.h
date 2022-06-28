@@ -54,6 +54,7 @@ public:
 	UIText& operator << (VTextAlign valign);
 
 	void SetText(const std::string& text);
+	bool IsSelectable();
 
 	bool Render() override;
 };

@@ -108,3 +108,8 @@ bool UIText::Render()
 	this->fontHandle.RenderFont(this->text.c_str(), xPos, yPos);
 	return true;
 }
+
+bool UIText::IsSelectable()
+{
+	return false;
+}
