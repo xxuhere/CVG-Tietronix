@@ -169,6 +169,7 @@ public:
 
 	void OnExitContext(StateHMDOp& targ) override 
 	{
+		targ.ManageCamButtonPressed(-1);
 		targ.uiSys.Select(this->categoryBtn);
 	}
 
@@ -321,6 +322,9 @@ class UICtx_TempNavSliderListing : public UICtxSubstate
 	UIBase* optnBtn;
 	std::vector<UIBase*> widgets;
 
+	// Are we exiting because we're pushing in deeper?
+	bool entered = false;
+
 public:
 
 	UICtx_TempNavSliderListing(UIBase* optBtn, UIBase* inspPlate)
@@ -362,7 +366,7 @@ public:
 		this->MoveFocus(targ);
 
 		UIBase* uiSel = targ.uiSys.GetSelected();
-		targ.ManageCamButtonPressed(uiSel->Idx(), true);
+		targ.ManageCamButtonPressed(uiSel->Idx());
 	}
 
 	void OnMiddleUp(StateHMDOp& targ) override
@@ -370,7 +374,7 @@ public:
 		this->MoveFocus(targ);
 
 		UIBase* uiSel = targ.uiSys.GetSelected();
-		targ.ManageCamButtonPressed(uiSel->Idx(), true);
+		targ.ManageCamButtonPressed(uiSel->Idx());
 
 	}
 
@@ -391,6 +395,7 @@ public:
 		if(targ.camButtonGrouping[(UIButton*)uiSel].size() == 0)
 			return;
 
+		this->entered = true;
 		targ.PushSubstate(std::shared_ptr<UICtxSubstate>(new UICtx_WidgetCtrl((UIButton*)uiSel)));
 	}
 
@@ -406,6 +411,8 @@ public:
 			// default selection.
 			if(std::find(this->widgets.begin(), this->widgets.end(), uiSel) == this->widgets.end())
 				targ.uiSys.Select(this->widgets[0]);
+
+			targ.ManageCamButtonPressed(uiSel->Idx());
 		}
 	}
 
@@ -413,6 +420,17 @@ public:
 	{
 		if(this->optnBtn != nullptr)
 			targ.uiSys.Select(this->optnBtn);
+
+		if(this->entered)
+		{ 
+			// If we're exiting because we pushed a UI context, because what we have selected.
+			this->entered = false;
+		}
+		else
+		{
+			// Else if we popped, get rid of what's selected.
+			targ.ManageCamButtonPressed(-1);
+		}
 	}
 
 	std::string GetStateName() const override
@@ -823,7 +841,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		//btnIt += BtnStride;
 	}
 	
-	this->ManageCamButtonPressed(-1, false);
+	this->ManageCamButtonPressed(-1);
 
 	this->subStates[UICtxSubstate::Type::CarouselStage	] = std::shared_ptr<UICtxSubstate>(new UICtx_Carousel());
 	this->subStates[UICtxSubstate::Type::Empty			] = std::shared_ptr<UICtxSubstate>(new UICtx_Empty());
@@ -1503,7 +1521,7 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 
 	if(toggleOff)
 	{
-		this->ManageCamButtonPressed(-1, false);
+		this->ManageCamButtonPressed(-1);
 
 		UpdateGroupColorSet( 
 			-1,
@@ -1527,17 +1545,17 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 	{
 	case UIID::MBtnLaserSet:
 		this->inspSettingsPlate->Show();
-		this->ManageCamButtonPressed(-1, false); // Turn all cam stuff off
+		this->ManageCamButtonPressed(-1); // Turn all cam stuff off
 		break;
 
 	case UIID::MBtnAlign:
 		this->inspAlignPlate->Show();
-		this->ManageCamButtonPressed(-1, false); // Turn all cam stuff off
+		this->ManageCamButtonPressed(-1); // Turn all cam stuff off
 		break;
 
 	case UIID::MBtnSource:
 		this->inspCamSetsPlate->Show();
-		this->ManageCamButtonPressed(this->lastCamButtonSel, false); // Restore last state
+		this->ManageCamButtonPressed(-1);
 		break;
 	}
 }
@@ -1549,11 +1567,8 @@ void StateHMDOp::ApplyFormButtonStyle(UIGraphic* uib)
 		this->ninePatchSmallCircle);
 }
 
-void StateHMDOp::ManageCamButtonPressed(int buttonID, bool record)
+void StateHMDOp::ManageCamButtonPressed(int buttonID)
 {
-	if(record)
-		this->lastCamButtonSel = buttonID;
-
 	// Hide everything that could be shown as a horizontal bar.
 	// If we need to see it again, it will be turned on again before
 	// the function exits...
@@ -1779,7 +1794,7 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		this->showMainMenu = false;
 		this->curVertWidth = this->minVertWidth;
 		this->CloseShownMenuBarUIPanel();
-		this->ManageCamButtonPressed(-1, false);
+		this->ManageCamButtonPressed(-1);
 		this->uiSys.ClearCustomTabOrder();
 		this->uiSys.Select(nullptr);
 		break;
@@ -1870,27 +1885,27 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	case UIID::CamSet_Exposure:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Disparity:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Opacity:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Register:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Calibrate:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Threshold:
-		this->ManageCamButtonPressed(uiId, true);
+		this->ManageCamButtonPressed(uiId);
 		break;
 
 	case UIID::CamSet_Threshold_SlideThresh:

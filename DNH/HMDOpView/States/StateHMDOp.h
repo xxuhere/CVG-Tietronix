@@ -349,13 +349,6 @@ public:
 	PlateSliderPair sliderSysThresh;
 	PlateSliderPair sliderSysDispUp;
 
-
-	/// <summary>
-	/// The last button selected for the Cam. Settings submenu, so that
-	/// if it's switched and revisited, it can retain its same UI state.
-	/// </summary>
-	int lastCamButtonSel = -1;
-
 	//////////////////////////////////////////////////
 
 	bool showCarousel = false;
@@ -423,10 +416,7 @@ public:
 	/// The UIID of a button in the "Cam. Settings" group. Or -1 to
 	/// deselect everything.
 	/// </param>
-	/// <param name="record">
-	/// If true, record the buttonID as the new state.
-	/// </param>
-	void ManageCamButtonPressed(int buttonID, bool record);
+	void ManageCamButtonPressed(int buttonID);
 
 	/// <summary>
 	/// Create a complex slider system that's designed to be arrayed
