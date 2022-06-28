@@ -960,6 +960,38 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
 }
 
+void StateHMDOp::DrawRecordingDot(float x, float y, float rad)
+{
+	double strobe = (double)clock() / CLOCKS_PER_SEC;
+	strobe = (sin(strobe) + 1.0f)/2.0f * 0.5f + 0.5f; // [0.5, 1.0]
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+	glColor3f(strobe * 1.0f, strobe * 0.25f, strobe * 0.25f);
+	const int RecCircPts = 32;
+	
+	// This would probably be cheaper if we switch this to a triangle fan
+	glBegin(GL_TRIANGLES);
+	for(int i = 0; i < RecCircPts; ++i)
+	{
+		const float PI = 3.14159f;
+		float th0 = (float)(i + 0) / RecCircPts;
+		float th1 = (float)(i + 1) / RecCircPts;
+		th0 *= 2.0f * PI;
+		th1 *= 2.0f * PI;
+		float x0 = cos(th0);
+		float y0 = sin(th0);
+		float x1 = cos(th1);
+		float y1 = sin(th1);
+		glVertex2f(x, y);
+		glVertex2f( x + x1 * rad, y + y1 * rad);
+		glVertex2f( x + x0 * rad, y + y0 * rad);
+
+	}
+	glEnd();
+
+	// NOTE: Should we draw a "REC" inside of it?
+}
+
 void StateHMDOp::Draw(const wxSize& sz)
 {	
 	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
@@ -1028,13 +1060,23 @@ void StateHMDOp::Draw(const wxSize& sz)
 	
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
 
+	float mousepadX = sz.x /2 + (float)this->GetView()->mousepadOffsX;		// Horizontally at the center
+	float mousepadY = sz.y / 2 + (float)this->GetView()->mousepadOffsY;		// Near the bottom
 	this->DrawMousePad(
-		sz.x /2 + (float)this->GetView()->mousepadOffsX,		// Horizontally at the center
-		sz.y / 2 + (float)this->GetView()->mousepadOffsY,		// Near the bottom
+		mousepadX,
+		mousepadY,
 		(float)this->GetView()->mousepadScale, 
 		false, 
 		false, 
 		false);
+
+	if(camMgr.IsRecording(SpecialCams::Composite))
+	{
+		const float RecOffX = 125.0f;
+		const float RecOffY = -50;
+		const float RecCircRad = 25.0f;
+		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
+	}
 
 	// Draw debug timings
 	if(UISys::IsDebugView())
@@ -1051,6 +1093,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->vertMenuPlate->SetLocPos(cameraWindowRgn.EndX() + 10.0f, cameraWindowRgn.y + 25.0f);
 	this->vertMenuPlate->SetDim(this->curVertWidth, cameraWindowRgn.h - 50.0f);
 
+	glEnable(GL_BLEND);
 	this->uiSys.AlignSystem();
 	this->uiSys.Render();
 

@@ -391,6 +391,9 @@ public:
 	/// <param name="mdown">UNUSED: Consider removal</param>
 	void DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown);
 
+
+	void DrawRecordingDot(float x, float y, float rad);
+
 	//		BaseState FUNCTIONS
 	//
 	//////////////////////////////////////////////////
