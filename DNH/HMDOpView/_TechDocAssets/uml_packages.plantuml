@@ -1,0 +1,22 @@
+@startuml
+
+package "App and UI" {
+  [UISys]
+  [UIState]
+  [wxWidgets]
+}
+
+package "Video Stream" {
+  [CamVideo]  
+}
+
+
+package "External IO"{
+  [Hardware]
+}
+
+package "Misc"{
+  [Utils]
+}
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+
+start 
+floating note : Thread started for camera x by CamStreamMgr
+group Camera polling thread
+:Initialize camera connection;
+
+group Polling loop
+
+while (end_polling?) is (not true)
+  :Poll camera frame;
+  if (has snap pre-processed tokens?) is (yes) then
+    :save frame images;
+    :clear tokens;
+  endif
+
+  if (image process frame?) is (yes) then
+    :image process frame;
+    :set processed frame as frame;
+  endif
+
+  if(has snap post-process tokens?) is (yes) then
+    :save frame images;
+  endif
+
+  if(has video capture token?) is (yes) then
+    :add frame to video;
+  endif
+  
+  :cache frame as latest camera frame for compositor;
+endwhile  
+
+end group
+
+:Shutdown camera connection;
+end group
+stop
+floating note: Thread ends
+@enduml

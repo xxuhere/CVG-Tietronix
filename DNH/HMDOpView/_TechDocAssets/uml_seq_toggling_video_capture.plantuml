@@ -1,0 +1,41 @@
+	
+@startuml
+
+== Requesting video capture ==
+
+User -> Application : Presses video capture key\nfor camera x
+note right
+  The composited feed also has an implementation
+  of IManagedCam via ManagedComposite. This means
+  camera x may also be the composited video.
+end note
+Application -> CamStreamMgr : Request video capture\nfor camera x
+CamStreamMgr -> camera_x : Requests snapshot
+camera_x -> camera_x : Toggles on video capture
+camera_x -> camera_x : Creates video file
+camera_x -> Token ++ : Create token
+Token -> CamStreamMgr : Return token
+CamStreamMgr -> Application : Relay token
+Application -> Application : Stores token
+hnote over Application: UI also updates to show\nto the user a recording is occuring.\nHardcoded for the composite feed.
+
+== Performing video capture ==
+
+hnote across: Operation continues while video recording occurs.
+
+== Ending video capture ==
+
+User -> Application : Presses video capture key\nfor camera x\n(while already recording)
+note right
+  App observes it's holding on to a valid
+  recording token for camera x.
+end note
+
+Application -> Token : Requests video capture stops
+Token -> camera_x : Stops video capture.
+Token ->x Token -- : Invalidates self
+Application -> Application : Forgets token
+
+hnote over Application: UI updates to show\nchanged non-recording status
+
+@enduml

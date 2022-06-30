@@ -1,0 +1,1 @@
+echo /C/Users/Reavenk/Desktop/plantuml-1.2022.6.jar

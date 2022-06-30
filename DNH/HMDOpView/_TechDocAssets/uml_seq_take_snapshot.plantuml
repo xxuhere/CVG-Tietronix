@@ -1,0 +1,12 @@
+@startuml
+
+User -> Application : Presses Snapshot request\nfor camera x
+Application -> CamStreamMgr : Request snapshot\nfor camera x
+CamStreamMgr -> camera_x : Requests snapshot
+camera_x -> camera_x : Takes photo
+camera_x -> camera_x : Saves image
+camera_x -> CamStreamMgr : Returns success token
+CamStreamMgr -> Application : Relays success token
+Application -> User : Plays snapshot audio
+
+@enduml

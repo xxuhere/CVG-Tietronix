@@ -1,0 +1,111 @@
+	
+@startuml
+left to right direction
+
+class UIBase{
+  +clientData : int
+  +customFlags : int
+  #visible : bool
+  #system : UISys
+  #parent : UIBase
+  #children : UIBase[]
+  __ Methods __
+  +Show()
+  +Hide()
+  {abstract}+GetValue(vid: int) : float
+  __ Event Handlers __
+  {abstract}#OnEnabled()
+  {abstract}#OnDisabled()
+  {abstract}#OnAligned()
+  {abstract}#HandleSelect()
+  {abstract}#HandleUnselect()
+  {abstract}#Render()
+  __ Mouse Event Handlers __
+  {abstract}#HandleMouseEnter()
+  {abstract}#HandleMouseExit()
+  {abstract}#HandleMouseUp()
+  {abstract}#HandleClick()
+  {abstract}#HandleMouseMove()
+  {abstract}#HandleMouseDrag()
+  __ Keyboard Evt Handlers __
+  {abstract}#HandleKeyDown()
+  {abstract}#HandleKeyUp()
+  
+}
+
+class UISys{
+  sink : UISink*
+  __ Methods __
+  +Select(newSel : UIBase)
+  +GetSelected() : UIBase
+  +AdvanceTabbingOrder()
+  __ Integration Fns __
+  +Render()
+  +AlignSystem()
+  +DelegateKeydown(...)
+  +DelegateKeyup(...)
+  +DelegateMouseDown(...)
+  +DelegateMouseUp(...)
+  +DelegateReset()
+}
+note top of UISys
+A UISys will be the root of a UI hierarchy. It
+has the required utilities to support integrating
+the UI into the application.
+end note
+
+class UIGraphic{
+}
+
+class UIHSlider{
+}
+
+class UIRect{
+}
+
+class UISink{
+}
+note right of UISink
+An interface that can be 
+implemented and attached to a UISys
+to subscribe to event notifications 
+in the UI system.
+end note
+
+class UIText{
+}
+
+class UIButton{
+}
+
+class UIPlate{
+}
+
+class UIVec2
+{
+  +x : float
+  +y : float
+}
+
+class UIRect {
+  +pos : UIVec2
+  +dim : UIVec2
+}
+
+class UIColor4 {
+  +r : float
+  +g : float
+  +b : float
+  +a : float
+}
+
+UIVec2 -[hidden]- UIRect
+UIRect -[hidden]- UIColor4
+
+UIBase <|-- UISys
+UIBase <|-- UIGraphic
+UIBase <|-- UIText
+UIGraphic <|-- UIButton
+UIGraphic <|-- UIHSlider
+UIGraphic <|-- UIPlate
+@enduml

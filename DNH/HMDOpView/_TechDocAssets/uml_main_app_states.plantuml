@@ -1,0 +1,21 @@
+@startuml
+
+[*] --> StateIntro : User clicks
+StateIntro: Intro app splash screen.
+StateIntro: Shows product name.
+StateIntro: Shows branding & attributions.
+
+StateIntro --> StateInitCameras : User clicks
+state StateInitCameras {
+  [*] --> Init_Camera
+  Init_Camera --> Init_Camera : initializing
+  Init_Camera --> Both_Initialized
+  Both_Initialized --> [*] : User clicks
+}
+StateInitCameras : Don't allow going into the operator state\nuntil cameras are valid and ready.
+
+StateInitCameras --> StateHMDOp : Both cameras init\nand user clicks
+StateHMDOp : Operator performs operation
+
+StateHMDOp --> [*] : Operation complete
+@enduml
