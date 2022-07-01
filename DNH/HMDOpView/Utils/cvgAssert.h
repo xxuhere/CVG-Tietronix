@@ -3,9 +3,11 @@
 #include <iostream>
 
 #if _DEBUG
+	// A custom extention to the assert macro that allows adding
+	// in a custom message to the terminal when an assert is detected.
 	#define cvgAssert(a, msg) \
 	if (!(a)) {\
-		std::cout<<"ASSERT! "<<msg<<std::endl;\
+		std::cerr<<"ASSERT! "<<msg<<std::endl;\
 		assert(a);\
 	}
 #else
