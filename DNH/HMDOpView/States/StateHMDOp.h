@@ -1,6 +1,8 @@
 #pragma once
 
 #include "BaseState.h"
+#include "Substate.hpp"
+#include "SubstateMachine.hpp"
 #include "../FontMgr.h"
 #include "../CamVideo/CamStreamMgr.h"
 #include "../TexObj.h"
@@ -19,37 +21,58 @@
 class UIButton;
 class StateHMDOp;
 
+// Forward declaration of substate classes to later have
+// them to reference for friend declarations to StateHMDOp.
+class HMDOpSub_Carousel;
+class HMDOpSub_Empty;
+class HMDOpSub_MainMenuNav;
+class HMDOpSub_WidgetCtrl;
+class HMDOpSub_TempNavSliderListing;
 
-class UICtx_Carousel;
-class UICtx_Empty;
-class UICtx_MainMenuNav;
-class UICtx_WidgetCtrl;
+// Data flags for custom behaviour in the UI System.
+enum CustomUIFlag
+{
+	/// <summary>
+	/// When nagivating items in the inspector, IsGroupStart will have 
+	// the start of groups
+	/// </summary>
+	IsGroupStart				= 1 << 0,
+
+	/// <summary>
+	/// For main menu buttons, this should be used to tag menus that don't
+	/// have inspector content.
+	/// </summary>
+	IsMainOptWithNoContents		= 1<<1
+};
 
 /// <summary>
-/// A substate of UI and input logic. These are made into classes
-/// so their logic can be cohesively grouped together.
+/// IDs for the cached substates in the StateHMDOp substate machine.
+/// 
+/// Note that these should not be confused for ALL the substates used,
+/// although the non-cached substates are created on-demand instead of
+/// in a reusable cache.
 /// </summary>
-class UICtxSubstate
+enum class CoreSubState
 {
-public:
-	enum class Type
-	{
-		CarouselStage,
-		Empty,
-		MenuNav
-	};
+	/// <summary>
+	/// The carousel substate - where the surgery phase is modified
+	/// through a carousel UI.
+	/// </summary>
+	CarouselStage,
 
-	virtual void OnLeftDown(StateHMDOp& targ);
-	virtual void OnLeftUp(StateHMDOp& targ);
-	virtual void OnMiddleDown(StateHMDOp& targ);
-	virtual void OnMiddleUp(StateHMDOp& targ);
-	virtual void OnMiddleUpHold(StateHMDOp& targ);
-	virtual void OnRightDown(StateHMDOp& targ);
-	virtual void OnRightUp(StateHMDOp& targ);
-	virtual void OnEnterContext(StateHMDOp& targ);
-	virtual void OnExitContext(StateHMDOp& targ);
-	virtual std::string GetStateName() const = 0;
+	/// <summary>
+	/// The default substate - where the screen is mostly empty
+	/// and no menus are shown.
+	/// </summary>
+	Default,
+
+	/// <summary>
+	/// Main menu navigation substate.
+	/// </summary>
+	MenuNav
 };
+
+class StateHMDOp;
 
 /// <summary>
 /// The application state for the main operator loop.
@@ -58,11 +81,11 @@ class StateHMDOp :
 	public BaseState,
 	public UISink
 {
-	friend class UICtxSubstate;
-	friend class UICtx_Carousel;
-	friend class UICtx_Empty;
-	friend class UICtx_MainMenuNav;
-	friend class UICtx_WidgetCtrl;
+	friend class HMDOpSub_Carousel;
+	friend class HMDOpSub_Default;
+	friend class HMDOpSub_MainMenuNav;
+	friend class HMDOpSub_WidgetCtrl;
+	friend class HMDOpSub_TempNavSliderListing;
 
 public:
 
@@ -133,12 +156,6 @@ public:
 	};
 
 public:
-
-	std::map<UICtxSubstate::Type, std::shared_ptr<UICtxSubstate>> subStates;
-	std::vector<std::shared_ptr<UICtxSubstate>> stateStack;
-
-	inline std::shared_ptr<UICtxSubstate> GetCurSubtate()
-	{ return this->stateStack.empty() ? nullptr : this->stateStack.back(); }
 
 	/// <summary>
 	/// If true, the submenu is being shown, else, it is not.
@@ -372,6 +389,8 @@ protected:
 	void _SyncImageProcessingSetUI();
 	void _SyncThresholdSlider();
 
+	SubstateMachine<StateHMDOp> substateMachine;
+
 public:
 	/// <summary>
 	/// Draw the mousepad graphic.
@@ -505,19 +524,18 @@ protected:
 
 public:
 
-	bool ChangeSubstate(UICtxSubstate::Type type, bool force = false);
-	bool ChangeSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force = false);
-	bool PushSubstate(UICtxSubstate::Type type, bool force = false);
-	bool PushSubstate(std::shared_ptr<UICtxSubstate> newSubstate, bool force = false);
-	bool PopSubstate(bool allowEmpty = false);
-	bool ForceExitSubstate();
-
 	//		UISink overrides
 	//
 	//////////////////////////////////////////////////
+	// This class, StateHMDOp is inherited off of UISink. See UISink for
+	// more details on functions.
+
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
 	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
 	void OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn);
 
+public:
+
+	typedef typename Substate<StateHMDOp>::Ptr SubPtr;
 };
 

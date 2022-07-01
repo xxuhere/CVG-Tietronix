@@ -61,6 +61,12 @@
     <Filter Include="Source Files\Carousel">
       <UniqueIdentifier>{dbf5c8a0-ed1a-4ccb-8499-dc8d857cf49c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\States\HMDOpSubs">
+      <UniqueIdentifier>{fdfd9479-3e2e-477e-82e9-e9037ff2fccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\States\HMDOpSubs">
+      <UniqueIdentifier>{d8b05f2d-df70-44bd-881b-b752f23e8a8f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -252,6 +258,36 @@
     <ClInclude Include="Hardware\FauxMouse.h">
       <Filter>Header Files\Hardware</Filter>
     </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Default.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_InspNavForm.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Carousel.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
+    <ClInclude Include="States\Substate.h">
+      <Filter>Header Files\States</Filter>
+    </ClInclude>
+    <ClInclude Include="States\SubstateMachine.h">
+      <Filter>Header Files\States</Filter>
+    </ClInclude>
+    <ClInclude Include="States\Substate.hpp">
+      <Filter>Header Files\States</Filter>
+    </ClInclude>
+    <ClInclude Include="States\SubstateMachine.hpp">
+      <Filter>Header Files\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -424,6 +460,24 @@
     </ClCompile>
     <ClCompile Include="Hardware\FauxMouse.cpp">
       <Filter>Source Files\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Carousel.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Default.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_InspNavForm.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
