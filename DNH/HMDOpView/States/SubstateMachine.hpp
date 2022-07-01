@@ -123,3 +123,12 @@ bool SubstateMachine<ty>::ForceExitSubstate()
 	while(this->PopSubstate(true)){}
 	return true;
 }
+
+template <typename ty>
+std::string SubstateMachine<ty>::PeekNameOfDepth(int depth)
+{
+	if(depth < 0 || depth >= this->stateStack.size())
+		return "";
+
+	return this->stateStack[depth]->GetStateName();
+}

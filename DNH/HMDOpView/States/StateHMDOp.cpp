@@ -552,12 +552,30 @@ void StateHMDOp::Draw(const wxSize& sz)
 	if(this->showCarousel)
 		this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
 
-	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
-	if(curSub != nullptr)
-	{
+	if(UISys::IsDebugView())
+	{ 
 		glColor3f(1.0f, 0.0f, 1.0f);
-		this->fontInsTitle.RenderFont(curSub->GetStateName().c_str(), 50, 50);
+
+		// Debug of the states in the substateMachine stack.
+		// We render with the current substate at the top.
+		int yDbgRender = 50;
+		int subDepth = this->substateMachine.GetStackDepth();
+		for(int i = subDepth - 1; i >= 0; --i )
+		{
+			std::string subName = this->substateMachine.PeekNameOfDepth(i);
+			if(i == subDepth - 1)
+				this->fontInsTitle.RenderFont(subName.c_str(), 50, yDbgRender);
+			else
+			{
+				// Indent the non-topmost to visually supress them and 
+				// convey how they're not the current state.
+				this->fontInsTitle.RenderFont(subName.c_str(), 75, yDbgRender);
+			}
+
+			yDbgRender += 20;
+		}
 	}
+	
 }
 
 // NOTE: This function has been greatly reduce from its original purpose.

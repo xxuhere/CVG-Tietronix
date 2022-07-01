@@ -171,6 +171,29 @@ public:
 	inline typename Substate<ty>::Ptr GetCurSubtate()
 	{ return this->stateStack.empty() ? nullptr : this->stateStack.back(); }
 
+	/// <summary>
+	/// Get the depth of the stack for the state machine. 
+	/// 
+	/// Only intended for debug/diagnostics.
+	/// </summary>
+	/// <returns>The stack size of the state machine.</returns>
+	int GetStackDepth()
+	{ return this->stateStack.size(); }
+
+	/// <summary>
+	/// Get the name of the substate at a specific depth.
+	/// 
+	/// Only intended for debug/diagnostics.
+	/// </summary>
+	/// <param name="depth">
+	/// The depth to retrieve, where the current depth is GetStackDepth() - 1.
+	/// </param>
+	/// <returns>
+	/// The name of the substate at the specified depth, or an empty string
+	/// if there was nothing to return.
+	/// </returns>
+	std::string PeekNameOfDepth(int depth);
+
 	~SubstateMachine()
 	{ }
 };
