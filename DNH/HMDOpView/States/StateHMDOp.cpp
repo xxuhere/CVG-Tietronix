@@ -793,49 +793,43 @@ void StateHMDOp::OnKeyup(wxKeyCode key)
 
 void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 {
-	if(button == 0)
-		this->mdsLeft.FlagDown();
-	else if(button == 1)
-		this->mdsMiddle.FlagDown();
-	else if(button == 2)
-		this->mdsRight.FlagDown();
-
-	DelMouseRet dmr = this->uiSys.DelegateMouseDown(button, UIVec2(pt.x, pt.y));
+	// The delegation to the UI system to handle mouse interaction
+	// has been removed. Now it's exclusively the substates' job to
+	// manage this interaction.
 	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
 
-	if(dmr.evt == DelMouseRet::Event::MissedDown)
-	{
-		if(button == 0)
-		{
-			if(curSub != nullptr)
-				curSub->OnLeftDown(*this, this->substateMachine);
-		}
-		else if(button == 1)
-		{
-			this->middleDownTimer.Restart();
-			this->middleDown = true;
+	if(button == 0)
+	{ 
+		this->mdsLeft.FlagDown();
 
-			if(curSub != nullptr)
-				curSub->OnMiddleDown(*this, this->substateMachine);
-		}
-		else if(button == 2)
-		{
-			if(curSub != nullptr)
-				curSub->OnRightDown(*this, this->substateMachine);
-		}
+		if(curSub != nullptr)
+			curSub->OnLeftDown(*this, this->substateMachine);
 	}
-	if(	dmr.evt == DelMouseRet::Event::MissedDown || 
-		dmr.evt == DelMouseRet::Event::MouseWhiffDown )
+	else if(button == 1)
 	{
-		
+		this->mdsMiddle.FlagDown();
+
+		this->middleDownTimer.Restart();
+		this->middleDown = true;
+
+		if(curSub != nullptr)
+			curSub->OnMiddleDown(*this, this->substateMachine);
+	}
+	else if(button == 2)
+	{
+		this->mdsRight.FlagDown();
+
+		if(curSub != nullptr)
+			curSub->OnRightDown(*this, this->substateMachine);
 	}
 }
 
 void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 {
-	DelMouseRet delStatus = this->uiSys.DelegateMouseUp(button, UIVec2(pt.x, pt.y));
-	StateHMDOp::SubPtr curSub = 
-		this->substateMachine.GetCurSubtate();
+	// The delegation to the UI system to handle mouse interaction
+	// has been removed. Now it's exclusively the substates' job to
+	// manage this interaction.
+	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
 
 	if(button == 0)
 	{ 
@@ -895,13 +889,11 @@ bool IsRightMenuItem(int id)
 
 void StateHMDOp::OnMouseMove(const wxPoint& pt)
 {
-	DelMouseRet m = this->uiSys.DelegateMouseMove(UIVec2(pt.x, pt.y));
-
-	if(m.evt == DelMouseRet::Event::Hovered)
-	{
-		if(IsRightMenuItem(m.idx))
-			this->showMainMenu = true;
-	}	
+	// The delegation to the UI system to handle mouse interaction
+	// has been removed. Now it's exclusively the substates' job to
+	// manage this interaction.
+	//
+	// No mousemove logic ATM.
 }
 
 void StateHMDOp::ClosingApp() 

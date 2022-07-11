@@ -38,8 +38,6 @@ public:
 		/// </summary>
 		MouseUp,
 
-		MouseWhiffDown,
-
 		/// <summary>
 		/// Mouse was pressed, but was not found to be on top of a 
 		/// widget when that happened.
