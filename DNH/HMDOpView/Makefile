@@ -158,5 +158,6 @@ clean :
 	@echo "COMPILING TARGET clean"
 	find . -type f -name "*.o" -delete
 	find . -type f -name "*.a" -delete
-	rm ../hmdopview.a
-	rm ../hmdopapp
+	rm -f ../hmdopview.a
+	rm -f ../hmdopapp
+	@echo "Finished cleaning precompiled files."
