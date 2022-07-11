@@ -7,6 +7,7 @@
 
 // Imitating how compositing happens in OpenGL for StateHMDOp
 #include "../Utils/cvgRect.h"
+#include "ROIRect.h"
 
 #include <mutex>
 
@@ -151,43 +152,80 @@ void ManagedComposite::ThreadFn(int camIdx)
 				// - The composite output is the same size as the video feeds.
 				// To compensate, we need to figure out a common "region of interest"
 				// (ROI) between the composite source and destination (accumFrame).
-
+				//
 				// Figure out the region of interest for the blitting.
 				// For now we're just centering.
-				int roiAx = 0;
-				int roiAy = 0;
-				int roiAw = this->streamWidth;
-				int roiAh = this->streamHeight;
+				
 
-				int roiBx = 0;
-				int roiBy = 0;
-				int roiBw = cpy.cols;
-				int roiBh = cpy.rows;
+				// STEP 1 : DECLARE OUR REPRESENTATION OF THE RECTANGLES
+				//////////////////////////////////////////////////
 
-				if(roiAw > roiBw)
+				// The rect of the whole destination region.
+				ROIRect roiActDst(0, 0, this->streamWidth, this->streamHeight);
+				//
+				// The rect of the DST where the DST will be placed into.
+				ROIRect roiVirtDst(
+					(this->streamWidth - cpy.cols)/2,		// Centered
+					(this->streamHeight - cpy.rows)/2,		// Centered
+					cpy.cols, 
+					cpy.rows);
+				//
+				// ROI for the source image being composited
+				// (wleu 07/11/2022)
+				ROIRect roiSrc(
+					0, 
+					0,
+					cpy.cols,
+					cpy.rows);
+
+				// STEP 2 : CLIP
+				//////////////////////////////////////////////////
+				// Make sure roiVirtDst is bounded to roiActDst to make sure the
+				// image will into the drawable area. Any change to where the
+				// image will be drawn to, will also change the position and
+				// dimensions of where we take our source pixels from.
+				if(roiVirtDst.x < 0)
 				{
-					roiAx = (int)(roiAw - roiBw) * 0.5f;
-					roiAw = roiBw;
+					// Keep the right of the roiVirtDst rect in place, but move the left
+					// over to be at 0.
+					roiVirtDst.w -= roiVirtDst.x;	// Add the absolute value, remember it's negative right now
+					roiSrc.x -= roiVirtDst.x;		// Apply same to non-virtual
+					roiSrc.w = roiVirtDst.w;		// Apply same to non-virtual, they started the same so they'll end the same.
+					roiVirtDst.x = 0;			
 				}
-				else
+				if(roiVirtDst.y < 0)
 				{
-					roiBx = (int)(roiBw - roiAw) * 0.5f;
-					roiBw = roiAw;
+					roiVirtDst.h -= roiVirtDst.y;	// Add the absolute value, remember it's negative right now
+					roiSrc.y -= roiVirtDst.y;		// Apply same to non-virtual
+					roiSrc.h = roiVirtDst.h;		// Apply same to non-virtual, they started the same so they'll end the same.
+					roiVirtDst.y = 0;
+				}
+				if(roiVirtDst.Right() > roiActDst.Right())
+				{
+					int overAmt = roiVirtDst.Right() - roiActDst.Right();
+					roiVirtDst.w -= overAmt;		// Move the right inwards so it's not out of bounds.
+					roiSrc.w -= overAmt;			// Apply same to non-virtual
+				}
+				if(roiVirtDst.Bottom() > roiActDst.Bottom())
+				{
+					int overAmt = roiVirtDst.Bottom() - roiActDst.Bottom();
+					roiVirtDst.h -= overAmt;		// Move the bottom inwards so it's not out of bounds.
+					roiSrc.h -= overAmt;			// Apply same to non-virtual
 				}
 
-				if(roiBh > roiBh)
-				{
-					roiAy = (int)(roiAh - roiBh) * 0.5f;
-					roiAh = roiBh;
-				}
-				else
-				{
-					roiBy = (int)(roiBh - roiAh) * 0.5f;
-					roiBh = roiAh;
-				}
+				// STEP 3 : BLITT
+				//////////////////////////////////////////////////
 
-				cv::Mat acRoi = (*accumframe)(cv::Rect(roiAx, roiAy, roiAw, roiAh));
-				cv::Mat cpyRoi = cpy(cv::Rect(roiBx, roiBy, roiBw, roiBh));
+
+				// Draw the region of the image being composited into the
+				// compositing canvas in a way where we identify perfectly
+				// what parts will map to what images their pixels are
+				// mapped to (roiVirtDst.w/h should match roiDst.w/h and 
+				// both should be in bounds of their respective image) while
+				// producting an image similar to how things are drawn in
+				// the display.
+				cv::Mat acRoi = (*accumframe)(roiVirtDst.ToCVRect());
+				cv::Mat cpyRoi = cpy(roiSrc.ToCVRect());
 				cv::add(acRoi, cpyRoi, acRoi);
 			}
 

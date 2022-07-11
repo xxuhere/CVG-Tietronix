@@ -155,7 +155,13 @@ bool IManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 		this->videoGrabTimer.Reset(msFor30FPS);
 	}
 	
-	while(this->videoGrabTimer.GrabMS(msFor30FPS))
+	// Safeguard for how much we pad. In the worst case scenario, 
+	// the device will be so slow that by the time it writes a frame, 
+	// the next 33ms have passed and we'll be busy writing video 
+	// padding for this single frame forever.
+	const int maxFramePadding = 10;
+	int i = 0;
+	while(this->videoGrabTimer.GrabMS(msFor30FPS) && i < maxFramePadding)
 	{
 		// If contents have already been streamed, just make sure the dimensions
 		// continue to be the same.
@@ -170,6 +176,7 @@ bool IManagedCam::_DumpImageToVideofile(const cv::Mat& img)
 		}
 
 		this->videoWrite.write(img);
+		++i;
 	}
 	return true;
 }

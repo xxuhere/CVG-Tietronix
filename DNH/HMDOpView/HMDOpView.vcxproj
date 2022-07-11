@@ -158,6 +158,7 @@
     <ClInclude Include="CamVideo\IManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedComposite.h" />
+    <ClInclude Include="CamVideo\ROIRect.h" />
     <ClInclude Include="CamVideo\SnapRequest.h" />
     <ClInclude Include="CamVideo\VideoRequest.h" />
     <ClInclude Include="Carousel\Carousel.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="CamVideo\IManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedComposite.cpp" />
+    <ClCompile Include="CamVideo\ROIRect.cpp" />
     <ClCompile Include="CamVideo\SnapRequest.cpp" />
     <ClCompile Include="CamVideo\VideoRequest.cpp" />
     <ClCompile Include="Carousel\Carousel.cpp" />

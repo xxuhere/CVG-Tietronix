@@ -312,10 +312,24 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 		// resolution
 		// 1920 x (1080 + 8)
 		//
+		// For more on the +8, see
+		// https://forums.raspberrypi.com/viewtopic.php?t=203276
+		// For some reason it doesn't seem to always rear its ugly head.
+		//
+		// The actual height to use when sending to OpenCV.
+		int useHeight = port->format->es->video.height;
+		// It may be the case that the target resolution isn't supported, in which case
+		// it could be drastically different, but if it looks like we have a few extra
+		// rows because our requested size was rounded up, detect the round-up and discard
+		// the few extra lines
+		int offTargV = useHeight - camImpl->prefHeight;
+		if(offTargV > 1 && offTargV <= 32)
+			useHeight = camImpl->prefHeight;
+
 		int bytes_to_write = 
 			vcos_min(
 				buffer->length, 
-				port->format->es->video.width * port->format->es->video.height);
+				port->format->es->video.width * useHeight);
 
 		if (bytes_to_write)
 		{
@@ -323,14 +337,17 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 			{
 				cv::Ptr<cv::Mat> matImg = 
 					new cv::Mat(
-						port->format->es->video.height,
+						useHeight,
 						port->format->es->video.width,
 						CV_8UC1);
 
 				// The data in buffer->data is locked hardware memory so for the sake
 				// of sanity we're not going to hang onto it. This means we're going
 				// to make a copy of it.
-				memcpy( &matImg->data[0], buffer->data, bytes_to_write);
+				memcpy( 
+					&matImg->data[0], 
+					buffer->data, 
+					bytes_to_write);
 
 				std::lock_guard<std::mutex> guardPollSwap(camImpl->mutPolled);
 				{

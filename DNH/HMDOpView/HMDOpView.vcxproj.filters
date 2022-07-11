@@ -288,6 +288,9 @@
     <ClInclude Include="States\SubstateMachine.hpp">
       <Filter>Header Files\States</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\ROIRect.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -478,6 +481,9 @@
     </ClCompile>
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_InspNavForm.cpp">
       <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\ROIRect.cpp">
+      <Filter>Source Files\CamVideo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
