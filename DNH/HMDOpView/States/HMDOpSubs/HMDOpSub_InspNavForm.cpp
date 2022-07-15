@@ -130,7 +130,7 @@ std::string HMDOpSub_InspNavForm::GetStateName() const
 	return "FormNav";
 }
 
-std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid)
+std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -150,7 +150,7 @@ std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid)
+std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -168,4 +168,24 @@ std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_InspNavForm::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return true;
+
+	case ButtonID::Middle:
+		return true;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		return true;
+
+	}
+	return false;
 }

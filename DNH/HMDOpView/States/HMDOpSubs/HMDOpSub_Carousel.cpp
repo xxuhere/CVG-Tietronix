@@ -43,7 +43,7 @@ std::string HMDOpSub_Carousel::GetStateName() const
 	return "Carousel";
 }
 
-std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid)
+std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -63,7 +63,7 @@ std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_Carousel::GetActionName(ButtonID bid)
+std::string HMDOpSub_Carousel::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -81,4 +81,34 @@ std::string HMDOpSub_Carousel::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_Carousel::HasMoreLeftCarousel(Carousel& car)
+{
+	return car.GetCurrentIndex() > 0;
+}
+
+bool HMDOpSub_Carousel::HasMoreRightCarousel(Carousel& car)
+{
+	return car.GetCurrentIndex() < car.GetIndexCount() - 1;
+}
+
+bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return this->HasMoreLeftCarousel(targ.carousel);
+
+	case ButtonID::Middle:
+		return true;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		return this->HasMoreRightCarousel(targ.carousel);
+
+	}
+	return false;
 }

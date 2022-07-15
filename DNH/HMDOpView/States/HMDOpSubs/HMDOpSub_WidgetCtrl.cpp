@@ -92,7 +92,7 @@ std::string HMDOpSub_WidgetCtrl::GetStateName() const
 	return "WidgetCtrl";
 }
 
-std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid)
+std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -112,7 +112,7 @@ std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid)
+std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -130,4 +130,24 @@ std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_WidgetCtrl::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return true;
+
+	case ButtonID::Middle:
+		return this->sliders.size() > 1;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		return true;
+
+	}
+	return false;
 }

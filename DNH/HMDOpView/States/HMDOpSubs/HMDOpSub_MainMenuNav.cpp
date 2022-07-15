@@ -112,7 +112,7 @@ std::string HMDOpSub_MainMenuNav::GetStateName() const
 	return "MenuNav";
 }
 
-std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid)
+std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -132,7 +132,7 @@ std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid)
+std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -150,4 +150,31 @@ std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return true;
+
+	case ButtonID::Middle:
+		return false;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		{
+			// This subme
+			UIBase* uibSel = targ.uiSys.GetSelected();
+			if(uibSel == nullptr)
+				return false;
+
+			return uibSel->Idx() != StateHMDOp::MBtnAlign;
+		}
+
+	}
+	return false;
 }

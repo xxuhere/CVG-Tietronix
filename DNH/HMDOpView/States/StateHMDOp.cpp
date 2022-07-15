@@ -348,6 +348,8 @@ UIColor4 GetMousepadColor(float timeSinceClick)
 
 void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown)
 {
+	static UIColor4 disabledBtnColor(0.2f, 0.2f, 0.2f, 1.0f);
+
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -356,17 +358,33 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	// For all the quads we're about to lay down, we're starting at
 	// the top left and moving clockwise.
 	this->ico_MousePadCrevice.GLBind();
-	UIColor4 colMLeft	= GetMousepadColor(this->mdsLeft.clickRecent		);
+	UIColor4 colMLeft	= GetMousepadColor(this->mdsLeft.clickRecent	);
 	UIColor4 colMMiddle = GetMousepadColor(this->mdsMiddle.clickRecent	);
 	UIColor4 colMRight	= GetMousepadColor(this->mdsRight.clickRecent	);
 	
-	//
+	// Setup the substate, and collect what buttons are allowed to be shown.
+	HMDOpSub_Base* subTyped = nullptr;
+	int hasButton[4] = {true, true, true, true};
+	auto ss = this->substateMachine.GetCurSubtate();
+	if(ss)
+	{
+		subTyped = (HMDOpSub_Base*)ss.get();
+		for(int i = 0; i < (int)HMDOpSub_Base::ButtonID::Totalnum; ++i)
+			hasButton[i] = subTyped->GetButtonUsable((HMDOpSub_Base::ButtonID)i, *this);
+	}
+
+	// Draw the middle mouse button.
 	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
 	//
-	colMMiddle.GLColor4();
+	if(hasButton[1] || hasButton[3])
+		colMMiddle.GLColor4();
+	else
+		disabledBtnColor.GLColor4();
+
 	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
 
-	if(this->middleDown)
+	// Draw the dial/ring for holding the middle mouse button down.
+	if(this->middleDown && hasButton[3])
 	{
 		glDisable(GL_TEXTURE_2D);
 
@@ -407,17 +425,23 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	}
 
 	// Draw the left mouse button.
-	colMLeft.GLColor4();
+	if(hasButton[0])
+		colMLeft.GLColor4();
+	else
+		disabledBtnColor.GLColor4();
+
 	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
 
 	// Draw the right mouse button.
-	colMRight.GLColor4();
-	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
+	if(hasButton[2])
+		colMRight.GLColor4();
+	else
+		disabledBtnColor.GLColor4();
 
+	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
 	
-	auto ss = this->substateMachine.GetCurSubtate();
 	// Draw the button annotations.
-	if(ss != nullptr) // Sanity check
+	if(subTyped != nullptr)
 	{
 		glColor3f(0.5f, 0.5f, 0.5f);
 
@@ -447,11 +471,14 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 		// There's some violation of type saftey here. Ideally we would find a way
 		// to have substateMachine to hold items of type HMDOpSub_Base instead of 
 		// it's parent class, Substate<StateHMDOp>.
-		HMDOpSub_Base* subTyped = (HMDOpSub_Base*)ss.get();
+		
 		for(int i = 0; i < (int)HMDOpSub_Base::ButtonID::Totalnum; ++i)
 		{
+			if(!hasButton[i])
+				continue;
+
 			HMDOpSub_Base::ButtonID bid = (HMDOpSub_Base::ButtonID)i;
-			TexObj::SPtr btnIco = this->GetBAnnoIco(subTyped->GetIconPath(bid));
+			TexObj::SPtr btnIco = this->GetBAnnoIco(subTyped->GetIconPath(bid, *this));
 
 			if(btnIco.get() != nullptr)
 			{
@@ -464,7 +491,7 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 			}
 
 			//this->fontInsBAnno
-			std::string bannoStr = subTyped->GetActionName(bid);
+			std::string bannoStr = subTyped->GetActionName(bid, *this);
 			if(!bannoStr.empty())
 			{
 				// Get position of text from location and offset

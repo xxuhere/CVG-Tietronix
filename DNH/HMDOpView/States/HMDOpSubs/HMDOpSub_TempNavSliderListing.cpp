@@ -59,16 +59,25 @@ void HMDOpSub_TempNavSliderListing::OnMiddleUpHold(StateHMDOp& targ, SubstateMac
 	ssm.PopSubstate();
 }
 
-void HMDOpSub_TempNavSliderListing::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
+UIBase* HMDOpSub_TempNavSliderListing::SelectedButtonHasSliders(StateHMDOp& targ)
 {
 	UIBase* uiSel = targ.uiSys.GetSelected();
 	if(uiSel == nullptr)
-		return;
+		return nullptr;
 
 	if(targ.camButtonGrouping.find((UIButton*)uiSel) == targ.camButtonGrouping.end())
-		return;
+		return nullptr;
 
 	if(targ.camButtonGrouping[(UIButton*)uiSel].size() == 0)
+		return nullptr;
+
+	return uiSel;
+}
+
+void HMDOpSub_TempNavSliderListing::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
+{
+	UIBase* uiSel = SelectedButtonHasSliders(targ);
+	if(uiSel == nullptr)
 		return;
 
 	this->entered = true;
@@ -114,7 +123,7 @@ std::string HMDOpSub_TempNavSliderListing::GetStateName() const
 	return "SliderListing";
 }
 
-std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid)
+std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -134,7 +143,7 @@ std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid)
+std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -152,4 +161,24 @@ std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_TempNavSliderListing::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return true;
+
+	case ButtonID::Middle:
+		return true;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		return this->SelectedButtonHasSliders(targ);
+
+	}
+	return false;
 }

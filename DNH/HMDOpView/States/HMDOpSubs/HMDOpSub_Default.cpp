@@ -51,7 +51,7 @@ std::string HMDOpSub_Default::GetStateName() const
 	return "Default";
 }
 
-std::string HMDOpSub_Default::GetIconPath(ButtonID bid)
+std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -71,7 +71,7 @@ std::string HMDOpSub_Default::GetIconPath(ButtonID bid)
 	return "";
 }
 
-std::string HMDOpSub_Default::GetActionName(ButtonID bid)
+std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
@@ -89,4 +89,24 @@ std::string HMDOpSub_Default::GetActionName(ButtonID bid)
 
 	}
 	return "";
+}
+
+bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return true;
+
+	case ButtonID::Middle:
+		return true;
+
+	case ButtonID::HoldMiddle:
+		return true;
+
+	case ButtonID::Right:
+		return true;
+
+	}
+	return false;
 }

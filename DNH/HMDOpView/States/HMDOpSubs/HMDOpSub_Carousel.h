@@ -19,6 +19,10 @@ public:
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
 
-	std::string GetIconPath(ButtonID bid) override;
-	std::string GetActionName(ButtonID bid) override;
+	bool HasMoreLeftCarousel(Carousel& car);
+	bool HasMoreRightCarousel(Carousel& car);
+
+	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
+	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
 };

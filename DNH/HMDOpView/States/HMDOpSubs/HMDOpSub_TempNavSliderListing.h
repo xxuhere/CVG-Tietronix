@@ -61,6 +61,13 @@ public:
 	/// </param>
 	void MoveFocus(StateHMDOp& targ);
 
-	std::string GetIconPath(ButtonID bid) override;
-	std::string GetActionName(ButtonID bid) override;
+	/// <summary>
+	/// Checks if the selected button has sliders.
+	/// </summary>
+	/// <returns>If false, nullptr. If true, the selected button.</returns>
+	UIBase* SelectedButtonHasSliders(StateHMDOp& targ);
+
+	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
+	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
 };

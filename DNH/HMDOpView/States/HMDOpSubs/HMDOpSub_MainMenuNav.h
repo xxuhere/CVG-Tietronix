@@ -39,6 +39,7 @@ public:
 	/// </param>
 	void EnforceTabOrder(StateHMDOp& targ);
 
-	std::string GetIconPath(ButtonID bid) override;
-	std::string GetActionName(ButtonID bid) override;
+	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
+	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
 };

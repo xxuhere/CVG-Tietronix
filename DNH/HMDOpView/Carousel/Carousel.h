@@ -337,5 +337,8 @@ public:
 
 	int GetCurrentIndex() const;
 
+	inline int GetIndexCount()
+	{ return this->entries.size(); }
+
 	CarouselData GetCurrentData() const;
 };
