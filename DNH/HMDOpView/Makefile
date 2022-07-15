@@ -70,7 +70,7 @@ SUBOBJ_STATES = \
 	BaseState StateHMDOp StateInitCameras StateIntro
 
 SUBOBJ_SUBSTATES_HMDOP = \
-	HMDOpSub_Carousel HMDOpSub_Default HMDOpSub_InspNavForm HMDOpSub_MainMenuNav HMDOpSub_TempNavSliderListing HMDOpSub_WidgetCtrl
+	HMDOpSub_Base HMDOpSub_Carousel HMDOpSub_Default HMDOpSub_InspNavForm HMDOpSub_MainMenuNav HMDOpSub_TempNavSliderListing HMDOpSub_WidgetCtrl
 
 SUBOBJ_LODEPNG = \
 	lodepng

@@ -176,6 +176,7 @@
     <ClInclude Include="OpSession.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="States\BaseState.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Base.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_Carousel.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_Default.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_InspNavForm.h" />
@@ -250,6 +251,7 @@
     <ClCompile Include="MainWin.cpp" />
     <ClCompile Include="OpSession.cpp" />
     <ClCompile Include="States\BaseState.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Base.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_Carousel.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_Default.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_InspNavForm.cpp" />

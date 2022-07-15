@@ -50,3 +50,43 @@ std::string HMDOpSub_Default::GetStateName() const
 {
 	return "Default";
 }
+
+std::string HMDOpSub_Default::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_Photo.png";
+
+	case ButtonID::Middle:
+		return "Assets/ButtonAnno/BAnno_Menu.png";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Phase.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_StartVideo.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_Default::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Snap Photo";
+
+	case ButtonID::Middle:
+		return "Main Menu";
+
+	case ButtonID::HoldMiddle:
+		return "Surgery Phase";
+
+	case ButtonID::Right:
+		return "Record Video";
+
+	}
+	return "";
+}

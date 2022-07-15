@@ -91,3 +91,43 @@ std::string HMDOpSub_WidgetCtrl::GetStateName() const
 {
 	return "WidgetCtrl";
 }
+
+std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_Left.png";
+
+	case ButtonID::Middle:
+		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_Right.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Slide Left";
+
+	case ButtonID::Middle:
+		return "Next Slider";
+
+	case ButtonID::HoldMiddle:
+		return "Go Back";
+
+	case ButtonID::Right:
+		return "Slide Right";
+
+	}
+	return "";
+}

@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include "../Substate.h"
-#include "../StateHMDOp.h"
+#include "HMDOpSub_Base.h"
 
 class StateHMDOp;
 
@@ -11,7 +10,7 @@ class StateHMDOp;
 /// UI Substate to manage input in the context of when
 /// the StateHMDOp is showing the main menu.
 /// </summary>
-class HMDOpSub_MainMenuNav : public Substate<StateHMDOp>
+class HMDOpSub_MainMenuNav : public HMDOpSub_Base
 {
 public:
 	/// <summary>
@@ -39,4 +38,7 @@ public:
 	/// The StateHMDOp for access to the UI elements and UISys.
 	/// </param>
 	void EnforceTabOrder(StateHMDOp& targ);
+
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
 };

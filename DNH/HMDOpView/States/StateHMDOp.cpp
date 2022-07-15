@@ -370,7 +370,9 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	{
 		glDisable(GL_TEXTURE_2D);
 
-		// TODO:
+		// If the middle mouse button is pressed down, draw a ring
+		// whos angle represents the amount of the time the button
+		// has been pressed.
 		const float PI = 3.14159f;
 		const int circleParts = 32;
 		float secondsMidDown = this->middleDownTimer.Milliseconds(false) / 1000.0f;
@@ -404,12 +406,81 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 		glEnable(GL_TEXTURE_2D);
 	}
 
-	//
+	// Draw the left mouse button.
 	colMLeft.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
-	//
+
+	// Draw the right mouse button.
 	colMRight.GLColor4();
 	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
+
+	
+	auto ss = this->substateMachine.GetCurSubtate();
+	// Draw the button annotations.
+	if(ss != nullptr) // Sanity check
+	{
+		glColor3f(0.5f, 0.5f, 0.5f);
+
+		struct IcoDrawData
+		{
+			// Offset location of the center of the icon.
+			UIVec2 icoOffs;
+			// Offset of pivot location of the text
+			UIVec2 texOffs;
+			// Pivot location of text, using vector components [0, 1],
+			// where 0 is top left, and 1 is bottom right
+			UIVec2 texPivot;
+		};
+		static const IcoDrawData rdata[4] =
+		{
+			// These indices will map to HMDOpSub_Base::ButtonID,
+			// [0] -> ButtonID::Left
+			{UIVec2(-175.0f,	-175.0f),	UIVec2(-250.0f, -175.0f),	UIVec2(1.0f, 0.5f)},	
+			// [1] -> ButtonID::Middle
+			{UIVec2(0.0f,		0.0f),		UIVec2(70.0f, 20.0f),		UIVec2(0.0f, 0.5f)},	
+			// [2] -> ButtonID::Right
+			{UIVec2(175.0f,		-175.0f),	UIVec2(250.0f, -175.0f),	UIVec2(0.0f, 0.5f)},	
+			// [3] -> ButtonID::HoldMiddle
+			{UIVec2(275.0f,		-25.0f),	UIVec2(310, -25.0f),		UIVec2(0.0f, 0.25f)},	
+		};
+
+		// There's some violation of type saftey here. Ideally we would find a way
+		// to have substateMachine to hold items of type HMDOpSub_Base instead of 
+		// it's parent class, Substate<StateHMDOp>.
+		HMDOpSub_Base* subTyped = (HMDOpSub_Base*)ss.get();
+		for(int i = 0; i < (int)HMDOpSub_Base::ButtonID::Totalnum; ++i)
+		{
+			HMDOpSub_Base::ButtonID bid = (HMDOpSub_Base::ButtonID)i;
+			TexObj::SPtr btnIco = this->GetBAnnoIco(subTyped->GetIconPath(bid));
+
+			if(btnIco.get() != nullptr)
+			{
+				DrawOffsetVertices(
+					x + rdata[i].icoOffs.x * scale, 
+					y + rdata[i].icoOffs.y * scale, 
+					*btnIco.get(), 
+					0.5f, 0.5f, 
+					scale);
+			}
+
+			//this->fontInsBAnno
+			std::string bannoStr = subTyped->GetActionName(bid);
+			if(!bannoStr.empty())
+			{
+				// Get position of text from location and offset
+				float baTxtX = x + rdata[i].texOffs.x * scale;
+				float baTxtY = y + rdata[i].texOffs.y * scale;
+				// Apply pivot offset.
+				float extHoriz = this->fontInsBAnno.GetAdvance(bannoStr.c_str());
+				float extVert = this->fontInsBAnno.LineHeight();
+				baTxtX -= extHoriz * rdata[i].texPivot.x;
+				baTxtY += extVert * rdata[i].texPivot.y;
+
+				this->fontInsBAnno.RenderFont(bannoStr.c_str(), baTxtX, baTxtY);
+			}
+		}
+
+	}
 }
 
 void StateHMDOp::DrawRecordingDot(float x, float y, float rad)
@@ -767,6 +838,7 @@ void StateHMDOp::ExitedActive()
 void StateHMDOp::Initialize() 
 {
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
+	this->fontInsBAnno = FontMgr::GetInstance().GetFont(12);
 
 	this->carousel.Append(this->GetView()->cachedOptions.carouselEntries);
 	this->carousel.LoadAssets();
@@ -898,6 +970,9 @@ void StateHMDOp::OnMouseMove(const wxPoint& pt)
 
 void StateHMDOp::ClosingApp() 
 {
+	// Get rid of icons while we know the OpenGL context is still
+	// alive.
+	this->cachedBAnnoIcos.clear();
 }
 
 StateHMDOp::~StateHMDOp()
@@ -1196,6 +1271,31 @@ void StateHMDOp::DoThresholdButton(int idxButton, ProcessingType type, bool skip
 				colSetButton);
 		}
 	}
+}
+
+TexObj::SPtr StateHMDOp::GetBAnnoIco(const std::string& path)
+{
+	if(path.empty())
+		return nullptr;
+
+	auto itFind = this->cachedBAnnoIcos.find(path);
+	if(itFind == this->cachedBAnnoIcos.end())
+	{
+		BAnnoIcon bico;
+		bico.path = path;
+		bico.loaded = TexObj::MakeSharedLODE(path);
+
+		if(bico.loaded == nullptr)
+		{
+			std::cerr << "Failed to load button annotation " << path << std::endl;
+		}
+
+		this->cachedBAnnoIcos[path] = bico;
+
+		return bico.loaded;
+	}
+
+	return itFind->second.loaded;
 }
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)

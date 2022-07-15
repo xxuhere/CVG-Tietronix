@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../Substate.h"
+#include "HMDOpSub_Base.h"
+
 #include <vector>
 
 class StateHMDOp;
@@ -12,7 +13,7 @@ class UIButton;
 /// the StateHMDOp is in a view that shows sliders and allows
 /// manipulating them with button presses.
 /// </summary>
-class HMDOpSub_WidgetCtrl : public Substate<StateHMDOp>
+class HMDOpSub_WidgetCtrl : public HMDOpSub_Base
 {
 public:
 	/// <summary>
@@ -38,4 +39,7 @@ public:
 	void OnEnterContext(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
+
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
 };

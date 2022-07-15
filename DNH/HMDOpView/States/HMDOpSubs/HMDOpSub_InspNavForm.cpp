@@ -129,3 +129,43 @@ std::string HMDOpSub_InspNavForm::GetStateName() const
 {
 	return "FormNav";
 }
+
+std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+
+	case ButtonID::Middle:
+		return "Assets/ButtonAnno/BAnno_CycleGroup.png";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_Toggle.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Next Item";
+
+	case ButtonID::Middle:
+		return "Next Group";
+
+	case ButtonID::HoldMiddle:
+		return "Go Back";
+
+	case ButtonID::Right:
+		return "Select";
+
+	}
+	return "";
+}

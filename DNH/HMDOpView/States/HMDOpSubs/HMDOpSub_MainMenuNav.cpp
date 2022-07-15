@@ -111,3 +111,43 @@ std::string HMDOpSub_MainMenuNav::GetStateName() const
 {
 	return "MenuNav";
 }
+
+std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+
+	case ButtonID::Middle:
+		return "";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_Toggle.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Next Selection";
+
+	case ButtonID::Middle:
+		return "--";
+
+	case ButtonID::HoldMiddle:
+		return "Go Back";
+
+	case ButtonID::Right:
+		return "Select";
+
+	}
+	return "";
+}

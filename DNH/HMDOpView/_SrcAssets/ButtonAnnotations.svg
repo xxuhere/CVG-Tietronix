@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="8.5in"
+   height="11in"
+   viewBox="0 0 215.9 279.4"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2-beta (1b65182ce9, 2022-04-05)"
+   sodipodi:docname="ButtonAnnotations.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="3.1704546"
+     inkscape:cx="577.362"
+     inkscape:cy="384.48745"
+     inkscape:window-width="2560"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="true">
+    <sodipodi:guide
+       position="113.66272,278.69065"
+       orientation="0,1"
+       id="guide13914" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-size:3.52778px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="5.4725962"
+       y="13.473354"
+       id="text1437-6-7"><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="13.473354"
+         id="tspan1439-0-2">All icons have a transparent white</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="17.88308"
+         id="tspan9435">box around them that should also</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="22.292805"
+         id="tspan9437">be exported. </tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="26.70253"
+         id="tspan9441" /><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="31.112255"
+         id="tspan9439">Each icon has the filename of what it </tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="35.52198"
+         id="tspan9447">should be exported as, above its box.</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="39.931705"
+         id="tspan9449" /><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="44.341431"
+         id="tspan9451">For now, all icons should be exported</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.52778px;text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="5.4725962"
+         y="48.751156"
+         id="tspan9453">as 64x64 square images.</tspan></text>
+    <path
+       id="rect8985-4"
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 84.900113,136.28132 -9.130336,9.13156 h -0.01068 l 9.131518,9.1304 v -6.8439 h 4.581348 V 143.1252 H 84.89782 Z"
+       inkscape:export-filename="BAnno_Left.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <g
+       id="g6297"
+       transform="matrix(3.5831808,0,0,3.5831808,-213.41076,-169.18855)"
+       style="stroke-width:0.279081"
+       inkscape:export-filename="BAnno_Return.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006">
+      <path
+         id="rect8985-2-6-16-4"
+         style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0279082;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+         d="m 80.067065,75.245047 v 0.6289 h 2.54817 2.54868 v -0.6289 z m 2.54817,0.6289 -2.54817,2.54817 h 1.91048 v 1.27847 h -1.91048 v 0.6289 h 5.09685 v -0.6289 h -1.90996 v -1.27641 l 1.90996,5.2e-4 -2.54868,-2.54765 z" />
+    </g>
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603"
+       width="20"
+       height="20"
+       x="119.07381"
+       y="63.662266"
+       inkscape:export-filename="BAnno_StartVideo.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-7"
+       width="20"
+       height="20"
+       x="119.07381"
+       y="99.537254"
+       inkscape:export-filename="BAnno_Photo.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-9"
+       width="20"
+       height="20"
+       x="72.615486"
+       y="63.662266"
+       inkscape:export-filename="BAnno_Menu.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-8"
+       width="20"
+       height="20"
+       x="72.615486"
+       y="99.537254" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-0"
+       width="20"
+       height="20"
+       x="72.615486"
+       y="27.787268"
+       inkscape:export-filename="BAnno_CycleNext.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#b6b6b6;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-1"
+       width="20"
+       height="20"
+       x="119.07381"
+       y="27.787268"
+       inkscape:export-filename="BAnno_CycleGroup.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;stroke-opacity:0.5;fill-opacity:0"
+       id="rect603-1-6"
+       width="20"
+       height="20"
+       x="165.5322"
+       y="63.662273"
+       inkscape:export-filename="BAnno_Toggle.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-6"
+       width="20"
+       height="20"
+       x="72.615486"
+       y="135.41228" />
+    <rect
+       style="fill:#d4d4d4;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0"
+       id="rect603-85"
+       width="20"
+       height="20"
+       x="119.07381"
+       y="135.41228"
+       inkscape:export-filename="BAnno_Right.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <path
+       id="path9139-7"
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 126.78824,136.28136 9.13037,9.13153 h 0.012 l -9.13154,9.13032 v -6.84385 h -4.58099 v -4.57415 h 4.57413 z" />
+    <path
+       id="rect9188"
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 76.419727,33.361123 v 1.828812 h 5.819472 v 1.6261 H 80.59435 l 2.559254,2.560135 2.559255,-2.560135 H 84.06801 v -3.454893 z" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect872"
+       width="2.8094871"
+       height="4.5458455"
+       x="76.419716"
+       y="39.922649" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155"
+       width="2.8094871"
+       height="4.5458455"
+       x="81.90612"
+       y="39.922649" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155-1"
+       width="2.8094871"
+       height="4.5458455"
+       x="87.458817"
+       y="39.922649" />
+    <path
+       id="rect9188-3"
+       style="fill:#cccccc;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 122.71295,31.283111 h 1.82882 v 5.819494 h 1.6261 v -1.644848 l 2.56013,2.559253 -2.56013,2.559237 v -1.644849 h -3.4549 z" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect872-5"
+       width="2.8094871"
+       height="4.5458455"
+       x="129.49846"
+       y="29.369434" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155-3"
+       width="2.8094871"
+       height="4.5458455"
+       x="129.49846"
+       y="35.744083" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155-1-3"
+       width="2.8094871"
+       height="4.5458455"
+       x="129.49846"
+       y="42.118732" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect872-5-3"
+       width="2.8094871"
+       height="4.5458455"
+       x="132.30794"
+       y="29.369434" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155-3-2"
+       width="2.8094871"
+       height="4.5458455"
+       x="132.30794"
+       y="35.744083" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stop-color:#000000"
+       id="rect2155-1-3-1"
+       width="2.8094871"
+       height="4.5458455"
+       x="132.30794"
+       y="42.118732" />
+    <path
+       id="rect4580"
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 125.23391,103.04244 -0.96136,1.65703 h -4.14492 v 10.00036 h 17.95691 v -10.00036 h -4.14397 l -0.96137,-1.65703 z m 3.8135,3.16572 a 3.8728064,3.8728064 0 0 1 3.87265,3.87359 3.8728064,3.8728064 0 0 1 -3.87265,3.87266 3.8728064,3.8728064 0 0 1 -3.87265,-3.87266 3.8728064,3.8728064 0 0 1 3.87265,-3.87359 z" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="circle5362"
+       cx="129.04749"
+       cy="110.08131"
+       r="3.0419621" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect5367"
+       width="2.7064991"
+       height="0.96512854"
+       x="134.62759"
+       y="103.28365" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect6192"
+       width="12.650738"
+       height="7.8185854"
+       x="120.36366"
+       y="71.314445"
+       ry="1.380165" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="path6194"
+       cx="129.40392"
+       cy="68.58609"
+       r="1.8732028" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="circle6196"
+       cx="124.23223"
+       cy="69.156197"
+       r="1.3845412" />
+    <path
+       id="circle6196-1"
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 137.42361,72.51555 c -0.19407,-7.7e-5 -0.45645,0.08438 -0.64689,0.203982 l -0.30954,0.172599 -2.3415,1.449976 v 0.849445 0.638332 0.849444 l 2.3415,1.449977 0.30954,0.172599 c 0.19044,0.119605 0.45282,0.204059 0.64689,0.203982 0.39348,-6.8e-5 0.71244,-0.319028 0.71251,-0.712508 v -1.963494 -0.638332 -1.963494 c -7e-5,-0.39348 -0.31903,-0.71244 -0.71251,-0.712508 z" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect8555"
+       width="17.817173"
+       height="3.6778872"
+       x="73.706902"
+       y="64.765556" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect8555-8"
+       width="17.817173"
+       height="3.6778872"
+       x="73.706902"
+       y="71.823318" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect8579"
+       width="17.817173"
+       height="3.6778872"
+       x="73.706902"
+       y="78.881081" />
+    <text
+       xml:space="preserve"
+       style="font-size:33.3708px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1"
+       x="175.87439"
+       y="85.785248"
+       id="text9383"><tspan
+         sodipodi:role="line"
+         id="tspan9381"
+         style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1"
+         x="175.87439"
+         y="85.785248">✓</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="72.400291"
+       y="25.353102"
+       id="text9508"><tspan
+         sodipodi:role="line"
+         id="tspan9506"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="72.400291"
+         y="25.353102">BAnno_CycleNext.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="118.85861"
+       y="25.353104"
+       id="text9508-0"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="118.85861"
+         y="25.353104">BAnno_CycleGroup.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="72.400284"
+       y="61.2281"
+       id="text9508-0-0"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-7"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="72.400284"
+         y="61.2281">BAnno_Menu.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="118.8586"
+       y="61.2281"
+       id="text9508-0-1"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-3"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="118.8586"
+         y="61.2281">BAnno_StartVideo</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="165.317"
+       y="61.228107"
+       id="text9508-0-19"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-9"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="165.317"
+         y="61.228107">BAnno_CycleNext.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="118.85861"
+       y="97.103096"
+       id="text9508-0-07"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-4"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="118.85861"
+         y="97.103096">BAnno_Photo.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="72.400291"
+       y="97.103088"
+       id="text9508-0-5"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-1"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="72.400291"
+         y="97.103088">BAnno_Return.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="72.400291"
+       y="132.9781"
+       id="text9508-0-2"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-70"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="72.400291"
+         y="132.9781">BAnno_Left.png</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="118.85863"
+       y="132.9781"
+       id="text9508-0-8"><tspan
+         sodipodi:role="line"
+         id="tspan9506-1-8"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="118.85863"
+         y="132.9781">BAnno_Right.png</tspan></text>
+    <rect
+       style="fill:#b6b6b6;stroke:none;stroke-width:0.1;stop-color:#000000;fill-opacity:0;stroke-opacity:1"
+       id="rect10428"
+       width="20"
+       height="20"
+       x="165.5322"
+       y="27.787287"
+       inkscape:export-filename="BAnno_StopView.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="rect10430"
+       width="12.650738"
+       height="7.8185854"
+       x="166.82205"
+       y="35.439465"
+       ry="1.380165" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="circle10432"
+       cx="175.8623"
+       cy="32.711109"
+       r="1.8732028" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.0999999;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="circle10434"
+       cx="170.69063"
+       cy="33.281216"
+       r="1.3845412" />
+    <path
+       id="path10436"
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       d="m 183.882,36.640571 c -0.19407,-7.7e-5 -0.45645,0.08438 -0.64689,0.203982 l -0.30954,0.172599 -2.3415,1.449976 v 0.849445 0.638332 0.849444 l 2.3415,1.449977 0.30954,0.172599 c 0.19044,0.119605 0.45282,0.204059 0.64689,0.203982 0.39348,-6.8e-5 0.71244,-0.319028 0.71251,-0.712508 v -1.963494 -0.638332 -1.963494 c -7e-5,-0.39348 -0.31903,-0.71244 -0.71251,-0.712508 z" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="165.31699"
+       y="25.353121"
+       id="text10440"><tspan
+         sodipodi:role="line"
+         id="tspan10438"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="165.31699"
+         y="25.353121">BAnno_StopVideo</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18.039px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;fill:#d4b2b2;fill-opacity:1;stroke:#000000;stroke-width:0.0999997;stroke-dasharray:none;stroke-opacity:1"
+       x="174.51305"
+       y="46.957664"
+       id="text11174"><tspan
+         sodipodi:role="line"
+         id="tspan11172"
+         style="fill:#d4b2b2;fill-opacity:1;stroke:#000000;stroke-width:0.0999997;stroke-dasharray:none;stroke-opacity:1"
+         x="174.51305"
+         y="46.957664">✗</tspan></text>
+    <rect
+       style="fill:#d4d4d4;fill-opacity:0;stroke:none;stroke-width:0.1;stroke-opacity:0.5;stop-color:#000000"
+       id="rect1328"
+       width="20"
+       height="20"
+       x="165.5322"
+       y="99.537262"
+       inkscape:export-filename="BAnno_Phase.png"
+       inkscape:export-xdpi="81.280006"
+       inkscape:export-ydpi="81.280006" />
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:none;text-align:center;text-anchor:middle;stroke-width:0.264583"
+       x="165.317"
+       y="97.103096"
+       id="text1336"><tspan
+         sodipodi:role="line"
+         id="tspan1334"
+         style="text-align:start;text-anchor:start;stroke-width:0.264583"
+         x="165.317"
+         y="97.103096">BAnno_Phase.png</tspan></text>
+    <rect
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:0.5;stop-color:#000000"
+       id="rect1475"
+       width="11.979039"
+       height="11.979039"
+       x="169.54268"
+       y="103.54774" />
+    <circle
+       style="fill:#d4d4d4;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:0.5;stop-color:#000000"
+       id="path1842"
+       cx="175.5322"
+       cy="109.53726"
+       r="4.4552579" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:0.5;stop-color:#000000"
+       id="rect1853"
+       width="3.1275322"
+       height="11.979039"
+       x="182.05087"
+       y="103.54774" />
+    <rect
+       style="fill:#8c8c8c;fill-opacity:1;stroke:#000000;stroke-width:0.1;stroke-opacity:0.5;stop-color:#000000"
+       id="rect1855"
+       width="3.1275322"
+       height="11.979039"
+       x="165.88599"
+       y="103.54774" />
+  </g>
+</svg>

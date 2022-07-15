@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../Substate.h"
-#include "../StateHMDOp.h"
+#include "HMDOpSub_Base.h"
 
 class StateHMDOp;
 
@@ -10,7 +9,7 @@ class StateHMDOp;
 /// the StateHMDOp is showing an array of button selections that
 /// redirect to manipulating sliders.
 /// </summary>
-class HMDOpSub_TempNavSliderListing : public Substate<StateHMDOp>
+class HMDOpSub_TempNavSliderListing : public HMDOpSub_Base
 {
 	/// <summary>
 	/// The UI plate that is the parent to all the UI elements
@@ -61,4 +60,7 @@ public:
 	/// The StateHMDOp, for access to its UI information and UISys.
 	/// </param>
 	void MoveFocus(StateHMDOp& targ);
+
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
 };

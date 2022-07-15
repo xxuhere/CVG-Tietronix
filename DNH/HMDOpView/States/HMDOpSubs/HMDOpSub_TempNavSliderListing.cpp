@@ -113,3 +113,43 @@ std::string HMDOpSub_TempNavSliderListing::GetStateName() const
 {
 	return "SliderListing";
 }
+
+std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+
+	case ButtonID::Middle:
+		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_Toggle.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Next Control";
+
+	case ButtonID::Middle:
+		return "Next Control";
+
+	case ButtonID::HoldMiddle:
+		return "Go Back";
+
+	case ButtonID::Right:
+		return "Select";
+
+	}
+	return "";
+}

@@ -72,6 +72,16 @@ enum class CoreSubState
 	MenuNav
 };
 
+/// <summary>
+/// Data to support caching button annotation data.
+/// </summary>
+struct BAnnoIcon
+{
+public:
+	std::string path;
+	TexObj::SPtr loaded;
+};
+
 class StateHMDOp;
 
 /// <summary>
@@ -230,6 +240,11 @@ public:
 	FontWU fontInsTitle;
 
 	/// <summary>
+	/// The font used for button annotations.
+	/// </summary>
+	FontWU fontInsBAnno;
+
+	/// <summary>
 	/// The lawn known pos/size of camera viewport - which can change if
 	/// the AppOptions.json is reloaded with different positions.
 	/// 
@@ -271,6 +286,11 @@ public:
 	//		MOUSE PAD GRAPHIC VARIABLES
 	//
 	//////////////////////////////////////////////////
+
+	/// <summary>
+	/// Cached button annotation icons.
+	/// </summary>
+	std::map<std::string, BAnnoIcon> cachedBAnnoIcos;
 
 	// Various icons for the mouse pad graphic
 	TexObj ico_MousePadLeft;
@@ -521,6 +541,8 @@ protected:
 	void ApplyFormButtonStyle(UIGraphic* uib);
 
 	void DoThresholdButton(int idxButton, ProcessingType type, bool skipSet = false);
+
+	TexObj::SPtr GetBAnnoIco(const std::string& path);
 
 public:
 

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../Substate.h"
-#include "../StateHMDOp.h"
+#include "HMDOpSub_Base.h"
 
 /// <summary>
 /// UI Substate to manage input in the context of when
 /// the StateHMDOp is showing the surgery stage carousel.
 /// </summary>
-class HMDOpSub_Carousel : public Substate<StateHMDOp>
+class HMDOpSub_Carousel : public HMDOpSub_Base
 {
 public:
 	HMDOpSub_Carousel();
@@ -19,4 +18,7 @@ public:
 	void OnEnterContext(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
+
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
 };

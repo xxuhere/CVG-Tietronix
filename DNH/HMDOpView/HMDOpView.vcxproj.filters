@@ -291,6 +291,9 @@
     <ClInclude Include="CamVideo\ROIRect.h">
       <Filter>Header Files\CamVideo</Filter>
     </ClInclude>
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Base.h">
+      <Filter>Header Files\States\HMDOpSubs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -484,6 +487,9 @@
     </ClCompile>
     <ClCompile Include="CamVideo\ROIRect.cpp">
       <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Base.cpp">
+      <Filter>Source Files\States\HMDOpSubs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

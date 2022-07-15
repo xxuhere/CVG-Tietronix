@@ -42,3 +42,43 @@ std::string HMDOpSub_Carousel::GetStateName() const
 {
 	return "Carousel";
 }
+
+std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Assets/ButtonAnno/BAnno_Left.png";
+
+	case ButtonID::Middle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::HoldMiddle:
+		return "Assets/ButtonAnno/BAnno_Return.png";
+
+	case ButtonID::Right:
+		return "Assets/ButtonAnno/BAnno_Right.png";
+
+	}
+	return "";
+}
+
+std::string HMDOpSub_Carousel::GetActionName(ButtonID bid)
+{
+	switch(bid)
+	{
+	case ButtonID::Left:
+		return "Left";
+
+	case ButtonID::Middle:
+		return "Back";
+
+	case ButtonID::HoldMiddle:
+		return "Back";
+
+	case ButtonID::Right:
+		return "Right";
+
+	}
+	return "";
+}

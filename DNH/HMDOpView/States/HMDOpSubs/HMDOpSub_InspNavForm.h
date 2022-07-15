@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Substate.h"
+#include "HMDOpSub_Base.h"
 #include <vector>
 
 class StateHMDOp;
@@ -11,7 +11,7 @@ class UISys;
 /// UI Substate to manage input in the context of when
 /// the StateHMDOp is showing a submenu that has button groups.
 /// </summary>
-class HMDOpSub_InspNavForm : public Substate<StateHMDOp>
+class HMDOpSub_InspNavForm : public HMDOpSub_Base
 {
 	/// <summary>
 	/// The inspector plate holding the UI Widget contents that this
@@ -92,4 +92,7 @@ public:
 	/// The UISystem that owns the widgets - this is needed because it has the
 	/// selection querying/modification utilities.</param>
 	void MoveSelectionToNextChildInGroup(UISys& uiSys);
+
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
 };
