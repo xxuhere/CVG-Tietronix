@@ -623,8 +623,8 @@ void StateHMDOp::Draw(const wxSize& sz)
 	if(camMgr.IsRecording(SpecialCams::Composite))
 	{
 		const float RecOffX = 125.0f;
-		const float RecOffY = -50;
-		const float RecCircRad = 25.0f;
+		const float RecOffY = -100;
+		const float RecCircRad = 20.0f;
 		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
 	}
 
@@ -1500,7 +1500,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		break;
 
 	}
-	
 }
 
 void StateHMDOp::OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn)
