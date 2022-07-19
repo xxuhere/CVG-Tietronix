@@ -158,10 +158,15 @@ void MainWin::ClearFinishedRecordings()
 	}
 }
 
+std::string MainWin::GetSessionsFolder() const
+{
+	return std::string("Captures/") + this->opSession.GenerateSessionPrefix();
+}
+
 std::string MainWin::EnsureAndGetCapturesFolder() const
 {
-	std::string folderLoc = 
-		std::string("Captures/") + this->opSession.GenerateSessionPrefix();
+	std::string folderLoc = this->GetSessionsFolder();
+		
 
 	// Check if the subfolders exist, if not, make them ahead of time.
 	// NOTE: This is just creating the request. We may want to defer this

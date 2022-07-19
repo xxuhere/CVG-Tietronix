@@ -227,8 +227,9 @@ public:
 
     void OnAccelerator_SaveCurOptions(wxCommandEvent& evt);
 
-protected:
+    std::string GetSessionsFolder() const;
 
+protected:
     std::string EnsureAndGetCapturesFolder() const;
 
 protected:

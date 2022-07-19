@@ -2,6 +2,8 @@
 #include "StateIncludes.h"
 #include <FTGL/ftgl.h>
 #include "../UISys/UIRect.h"
+#include <wx/filename.h>
+#include "../MainWin.h"
 
 StateIntro::StateIntro(HMDOpApp* app, GLWin* view, MainWin* core)
 	: BaseState(BaseState::AppState::Intro, app, view, core)
@@ -63,6 +65,14 @@ void StateIntro::Draw(const wxSize& sz)
 		uihalf.x, 
 		uihalf.y);
 
+	if(this->sessionAlreadyExists)
+	{ 
+		glColor3f(1.0f, 0.0f, 0.0f);
+		this->mainFont.RenderFont(
+			"WARNING: Session folder already exists - is session data correct?",
+			50.0f,
+			sz.y - 10.0f);
+	}
 }
 
 void StateIntro::Update(double dt)
@@ -106,6 +116,9 @@ void StateIntro::EnteredActive()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	this->sessionAlreadyExists = 
+		wxDirExists(this->GetCoreWindow()->GetSessionsFolder());
 }
 
 void StateIntro::ExitedActive() 

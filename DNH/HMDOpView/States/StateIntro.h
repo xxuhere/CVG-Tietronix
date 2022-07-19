@@ -35,6 +35,8 @@ public:
 	/// </summary>
 	std::vector<TexObj::SPtr> logos;
 
+	bool sessionAlreadyExists = false;
+
 
 public:
 	StateIntro(HMDOpApp* app, GLWin* view, MainWin* core);
