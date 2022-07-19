@@ -51,6 +51,12 @@ std::string HMDOpSub_Default::GetStateName() const
 	return "Default";
 }
 
+bool IsRecording()
+{
+	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
+	return camMgr.IsRecording(SpecialCams::Composite);
+}
+
 std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
@@ -65,7 +71,12 @@ std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
 		return "Assets/ButtonAnno/BAnno_Phase.png";
 
 	case ButtonID::Right:
-		return "Assets/ButtonAnno/BAnno_StartVideo.png";
+		{
+			bool rec = IsRecording();
+			return rec ? 
+				"Assets/ButtonAnno/BAnno_StopVideo.png" : 
+				"Assets/ButtonAnno/BAnno_StartVideo.png";
+		}
 
 	}
 	return "";
@@ -85,8 +96,11 @@ std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
 		return "Surgery Phase";
 
 	case ButtonID::Right:
-		return "Record Video";
-
+		{
+			
+			bool isRec = IsRecording();
+			return isRec ? "Stop Recording" : "Record Video";
+		}
 	}
 	return "";
 }
