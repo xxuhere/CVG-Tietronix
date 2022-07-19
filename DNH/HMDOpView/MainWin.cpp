@@ -4,6 +4,7 @@
 #include "HMDOpApp.h"
 #include <vector>
 #include <sstream>
+#include <wx/filename.h>
 #include "Utils/cvgAssert.h"
 
 #include "States/StateIntro.h"
@@ -181,6 +182,35 @@ std::string MainWin::EnsureAndGetCapturesFolder() const
 		wxMkDir(folderLoc, wxS_DIR_DEFAULT);
 		if(!wxDirExists(folderLoc))
 			return "";
+
+		// If we need to create the session folder for the first time, also
+		// drop in the AppOptions.json and Session.json for clerical reasons,
+		// in case that data needs to be revisited after the operation.
+		bool sessionWritten = false;
+		bool appOptsWritten = false;
+	
+		if(wxFileExists("Session.json"))
+			sessionWritten = wxCopyFile("Session.json", folderLoc + "/Session.json", false);
+
+		const std::string& appOptsLoc = wxGetApp().appOptionsLoc;
+		if(wxFileExists(appOptsLoc.c_str()))
+		{
+			// The AppOptions.json location is only "AppOptions.json" by default but
+			// can be reassigned via commandline - and can be an absolute value. So
+			// when taking its filename for the copy destination, we need to make sure
+			// we're appending a filename and not an absolute path.
+			wxFileName appOptsFilename(appOptsLoc);
+			//
+			appOptsWritten = wxCopyFile(appOptsLoc, folderLoc + "/" + appOptsFilename.GetFullName());
+		}
+
+		if(!sessionWritten)
+			std::cerr << "Could not copy clerical version of sessions.json into session folder; invalid folder/file or file already existed." << std::endl;
+
+		if(!appOptsWritten)
+			std::cerr << "Could not copy clerical version of AppOptions.json into session folder; invalid folder/file or file already existed." << std::endl;
+
+
 	}
 
 	return folderLoc;
