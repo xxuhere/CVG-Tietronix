@@ -913,21 +913,12 @@ void StateHMDOp::Initialize()
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
 {
-	// Keyboard shortcut for the pull-out menu
-	if(key == WXK_NUMPAD_ENTER)
-		this->showMainMenu = !this->showMainMenu;
-	else
-	{
-		// If not handled by an element outside the UI system,
-		// delegate to the UI system and see if anything is interested
-		// in handling this.
-		this->uiSys.DelegateKeydown(key);
-	}
+	//this->uiSys.DelegateKeydown(key);
 }
 
 void StateHMDOp::OnKeyup(wxKeyCode key)
 {
-	this->uiSys.DelegateKeyup(key);
+	//this->uiSys.DelegateKeyup(key);
 }
 
 void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
@@ -1003,28 +994,6 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 
 		this->mdsRight.FlagUp();
 	}
-}
-
-/// <summary>
-/// Query if a widget ID used in the StateHMDOp is in the main
-/// right menu bar.
-/// </summary>
-/// <param name="id">The ID of the UI item.</param>
-/// <returns>True if a part of the menu bar.</returns>
-// TODO: Function is marked for deletion
-bool IsRightMenuItem(int id)
-{
-	switch(id)
-	{
-	case StateHMDOp::PullMenu:
-	case StateHMDOp::MBtnLaserTog:
-	case StateHMDOp::MBtnLaserSet:
-	case StateHMDOp::MBtnAlign:
-	case StateHMDOp::MBtnSource:
-	case StateHMDOp::MBtnExit:
-		return true;
-	}
-	return false;
 }
 
 void StateHMDOp::OnMouseMove(const wxPoint& pt)
