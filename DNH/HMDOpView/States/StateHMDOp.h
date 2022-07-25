@@ -386,11 +386,10 @@ public:
 	PlateSliderPair sliderSysThresh;
 	PlateSliderPair sliderSysDispUp;
 
-	//////////////////////////////////////////////////
-
+private:
+	Carousel carousel;
 	bool showCarousel = false;
 	CarouselStyle carouselStyle;
-	Carousel carousel;
 
 	const float MiddleHold = 1.0f;
 	bool middleDown = false;
@@ -520,6 +519,9 @@ public:
 	inline bool IsCarouselShown() const
 	{ return this->showCarousel; }
 
+	bool MoveCarouselLeft();
+	bool MoveCarouselRight();
+
 protected:
 	/// <summary>
 	/// Toggle a main menubar option, highlighting its button, as well
@@ -543,6 +545,12 @@ protected:
 	void DoThresholdButton(int idxButton, ProcessingType type, bool skipSet = false);
 
 	TexObj::SPtr GetBAnnoIco(const std::string& path);
+
+	/// <summary>
+	/// Should be called when the carousel is changed - to sync the rest
+	/// of the application with the changes.
+	/// </summary>
+	void OnCarouselChanged();
 
 public:
 

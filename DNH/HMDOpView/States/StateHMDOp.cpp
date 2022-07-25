@@ -1034,6 +1034,32 @@ bool StateHMDOp::ToggleCarousel()
 	}
 }
 
+bool StateHMDOp::MoveCarouselLeft()
+{
+	bool ret = this->carousel.GotoPrev();
+	if(ret)
+		this->OnCarouselChanged();
+
+	return ret;
+}
+
+bool StateHMDOp::MoveCarouselRight()
+{
+	bool ret = this->carousel.GotoNext();
+	if(ret)
+		this->OnCarouselChanged();
+
+	return ret;
+}
+
+void StateHMDOp::OnCarouselChanged()
+{
+	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
+
+	std::string curCapt = this->carousel.GetCurrentCaption();
+	camMgr.SetAllSnapCaption(curCapt);
+}
+
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 {
 	bool toggleOff = false;

@@ -6,7 +6,7 @@ HMDOpSub_Carousel::HMDOpSub_Carousel()
 
 void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.carousel.GotoPrev();
+	targ.MoveCarouselLeft();
 }
 
 void HMDOpSub_Carousel::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
@@ -24,7 +24,7 @@ void HMDOpSub_Carousel::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<StateHM
 
 void HMDOpSub_Carousel::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.carousel.GotoNext();
+	targ.MoveCarouselRight();
 }
 
 void HMDOpSub_Carousel::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
