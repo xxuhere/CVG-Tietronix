@@ -7,11 +7,8 @@
 HMDOpSub_MainMenuNav::HMDOpSub_MainMenuNav()
 {}
 
-void HMDOpSub_MainMenuNav::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+void HMDOpSub_MainMenuNav::UpdateSelectedSubmenu(StateHMDOp& targ)
 {
-	this->EnforceTabOrder(targ);
-	targ.uiSys.AdvanceTabbingOrder(true);
-
 	UIBase* curSel = targ.uiSys.GetSelected();
 	if(curSel->HasCustomFlags(CustomUIFlag::IsMainOptWithNoContents))
 	{
@@ -21,6 +18,14 @@ void HMDOpSub_MainMenuNav::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMD
 	{
 		targ.SetShownMenuBarUIPanel(curSel->Idx());
 	}
+}
+
+void HMDOpSub_MainMenuNav::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+{
+	this->EnforceTabOrder(targ);
+	targ.uiSys.AdvanceTabbingOrder(true);
+
+	this->UpdateSelectedSubmenu(targ);
 }
 
 void HMDOpSub_MainMenuNav::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -94,6 +99,7 @@ void HMDOpSub_MainMenuNav::OnEnterContext(StateHMDOp& targ, SubstateMachine<Stat
 	}
 
 	this->EnforceTabOrder(targ);
+	this->UpdateSelectedSubmenu(targ);
 }
 
 void HMDOpSub_MainMenuNav::OnExitContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

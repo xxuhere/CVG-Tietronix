@@ -42,4 +42,11 @@ public:
 	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
 	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
 	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
+
+	/// <summary>
+	/// Should be called whenever the main menu select state has changed
+	/// and the shown submenu needs to be updated.
+	/// </summary>
+	/// <param name="targ">The HMDOp with the state and UI data.</param>
+	void UpdateSelectedSubmenu(StateHMDOp& targ);
 };
