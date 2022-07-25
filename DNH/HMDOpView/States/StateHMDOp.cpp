@@ -102,6 +102,10 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	// positions and drawing/behaviour states.
 	// 
 	const int btnTextSz = 14.0f;
+	
+	//		MAIN MENU BUTTONS
+	//
+	//////////////////////////////////////////////////
 
 	// Build elements for the right menu bar
 	//
@@ -121,11 +125,13 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnCamSets	= new UIButton(this->vertMenuPlate, UIID::MBtnSource,	UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Return.png"	);
 	this->btnCamSets->SetPivot(0.0f, 0.5f + menuYPiv * 1.5f);
 	SetButtonStdCols(this->btnCamSets);
-	this->btnBack		= new UIButton(this->vertMenuPlate, UIID::MBtnBack,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Assets/MenubarIcos/Menu_Back.png"	)	;
-	this->btnBack->SetPivot(0.0f, 0.5f + menuYPiv * 3.15f);
-	this->btnBack->customFlags |= CustomUIFlag::IsMainOptWithNoContents;
-	SetButtonStdCols(this->btnBack);
+	this->btnExit		= new UIButton(this->vertMenuPlate, UIID::MBtnExit,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Assets/MenubarIcos/Menu_Icon_Exit.png"	)	;
+	this->btnExit->SetPivot(0.0f, 0.5f + menuYPiv * 3.15f);
+	SetButtonStdCols(this->btnExit);
 
+	//		LASER SETTINGS INSPECTOR
+	//
+	//////////////////////////////////////////////////
 	UIRect defInspPlateDim(800, 200, 400, 600);
 	// Build elements for the inspector
 	//
@@ -206,7 +212,10 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->ApplyFormButtonStyle(this->btnThreshTog_YenSimple);
 	SetButtonStdCols(this->btnThreshTog_YenSimple, false);
 	
+	//		ALIGNMENT SETTINGS INSPECTOR
 	//
+	//////////////////////////////////////////////////
+
 	this->inspAlignPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspAlignPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspAlignPlate->Show(false);
@@ -215,7 +224,14 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	alignTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
 	alignTitle->uiCols.SetAll(menuTitleCol);
 
+	//		CAMERA SETTINGS INSPECTOR
 	//
+	//////////////////////////////////////////////////
+	const float BtnHPad = 10.0f;
+	const float BtnVPad = 10.0f;
+	const float BtnH = 40.0f;
+	const float BtnStride = BtnH + BtnVPad;
+
 	this->inspCamSetsPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
 	this->inspCamSetsPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
 	this->inspCamSetsPlate->Show(false);
@@ -228,10 +244,6 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->camButtonGrid->UseDyn()->AnchorsAll().SetOffsets(0.0f, titleHeight, 0.0f, 0.0f);
 		this->camButtonGrid->Show(true);
 
-		const float BtnHPad = 10.0f;
-		const float BtnVPad = 10.0f;
-		const float BtnH = 40.0f;
-		const float BtnStride = BtnH + BtnVPad;
 		int btnIt = BtnVPad;
 		this->camBtnExposure = new UIButton(this->camButtonGrid, UIID::CamSet_Exposure, UIRect(), "EXPOSURE", btnTextSz);
 		this->ApplyFormButtonStyle(this->camBtnExposure);
@@ -275,11 +287,38 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		//btnIt += BtnStride;
 	}
 	
-	this->ManageCamButtonPressed(-1);
 
+	// ADD DEFAULT Substates
 	this->substateMachine.CacheSubstate((int)CoreSubState::CarouselStage, StateHMDOp::SubPtr(new HMDOpSub_Carousel()));
 	this->substateMachine.CacheSubstate((int)CoreSubState::Default		, StateHMDOp::SubPtr(new HMDOpSub_Default()));
 	this->substateMachine.CacheSubstate((int)CoreSubState::MenuNav		, StateHMDOp::SubPtr(new HMDOpSub_MainMenuNav()));
+
+	//		EXIT INSPECTOR
+	//
+	//////////////////////////////////////////////////
+
+	this->inspExitPlate	= new UIPlate( &this->uiSys, -1, defInspPlateDim, plateGray);
+	this->inspExitPlate->SetMode_Patch(this->patch_roundLeft, this->ninePatchCircle);
+	this->inspExitPlate->Show(false);
+	//
+	UIText* exitTitle = new UIText(this->inspExitPlate, -1, "Exit", 20, UIRect());
+	exitTitle->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, titleHeight);
+	exitTitle->uiCols.SetAll(menuTitleCol);
+	{
+		int btnIt = BtnVPad + titleHeight;
+
+		UIButton* exitBtnConfirm = new UIButton(this->inspExitPlate, UIID::Exit_Confirm, UIRect(), "CONFIRM", btnTextSz);
+		this->ApplyFormButtonStyle(exitBtnConfirm);
+		exitBtnConfirm->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
+		SetButtonStdCols(exitBtnConfirm);
+	}
+
+	//////////////////////////////////////////////////
+	//
+	//		FINALIZATION
+	//
+	//////////////////////////////////////////////////
+	this->ManageCamButtonPressed(-1);
 	
 }
 
@@ -711,6 +750,7 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 		this->inspSettingsPlate->SetRect(inspLoc);
 		this->inspAlignPlate->SetRect(inspLoc);
 		this->inspCamSetsPlate->SetRect(inspLoc);
+		this->inspExitPlate->SetRect(inspLoc);
 
 		const float lerpLeft = 0.1f;
 		const float lerpWidth = 0.6f;
@@ -762,7 +802,7 @@ void StateHMDOp::Update(double dt)
 	this->btnSettings->Show(showRButtons);
 	this->btnAlign->Show(showRButtons);
 	this->btnCamSets->Show(showRButtons);
-	this->btnBack->Show(showRButtons);
+	this->btnExit->Show(showRButtons);
 
 	if(this->showCarousel)
 		this->carousel.Update(this->carouselStyle, dt);
@@ -971,6 +1011,7 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 /// </summary>
 /// <param name="id">The ID of the UI item.</param>
 /// <returns>True if a part of the menu bar.</returns>
+// TODO: Function is marked for deletion
 bool IsRightMenuItem(int id)
 {
 	switch(id)
@@ -980,7 +1021,7 @@ bool IsRightMenuItem(int id)
 	case StateHMDOp::MBtnLaserSet:
 	case StateHMDOp::MBtnAlign:
 	case StateHMDOp::MBtnSource:
-	case StateHMDOp::MBtnBack:
+	case StateHMDOp::MBtnExit:
 		return true;
 	}
 	return false;
@@ -1081,6 +1122,11 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 		if(this->inspCamSetsPlate->IsSelfVisible())
 			toggleOff = true;
 		break;
+
+	case UIID::MBtnExit:
+		if(this->inspExitPlate->IsSelfVisible())
+			toggleOff = true;
+		break;
 	}
 
 	// TODO: when turning off, we eventually need to handle a slide-in 
@@ -1091,6 +1137,7 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 	this->inspSettingsPlate->Hide();
 	this->inspCamSetsPlate->Hide();
 	this->inspAlignPlate->Hide();
+	this->inspExitPlate->Hide();
 
 	if(toggleOff)
 	{
@@ -1098,7 +1145,7 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 
 		UpdateGroupColorSet( 
 			-1,
-			{this->btnSettings, this->btnAlign, this->btnCamSets},
+			{this->btnSettings, this->btnAlign, this->btnCamSets, this->btnExit},
 			colSetButtonTog,
 			colSetButton);
 
@@ -1110,7 +1157,7 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 
 	UpdateGroupColorSet( 
 		idx,
-		{this->btnSettings, this->btnAlign, this->btnCamSets},
+		{this->btnSettings, this->btnAlign, this->btnCamSets, this->btnExit},
 		colSetButtonTog,
 		colSetButton);
 
@@ -1130,6 +1177,10 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 		this->inspCamSetsPlate->Show();
 		this->ManageCamButtonPressed(-1);
 		break;
+
+	case UIID::MBtnExit:
+		this->inspExitPlate->Show();
+		this->ManageCamButtonPressed(-1);
 	}
 }
 
@@ -1388,13 +1439,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 		this->SetShownMenuBarUIPanel(uib->Idx());
 		break;
 
-	case UIID::MBtnBack:
-		this->showMainMenu = false;
-		this->curVertWidth = this->minVertWidth;
-		this->CloseShownMenuBarUIPanel();
-		this->ManageCamButtonPressed(-1);
-		this->uiSys.ClearCustomTabOrder();
-		this->uiSys.Select(nullptr);
+	case UIID::MBtnExit:
+		this->SetShownMenuBarUIPanel(uib->Idx());
 		break;
 
 	case UIID::LaseWat_1:
@@ -1525,6 +1571,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 	case UIID::CamSet_Calibrate_Slider:
 		break;
 
+	case UIID::Exit_Confirm:
+		this->GetCoreWindow()->ChangeState(BaseState::AppState::Exit);
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "States/StateIntro.h"
 #include "States/StateInitCameras.h"
 #include "States/StateHMDOp.h"
+#include "States/StateExit.h"
 
 #if IS_RPI
 #include "Hardware/FauxMouse.h"
@@ -354,7 +355,8 @@ void MainWin::PopulateStates()
 	{
 		new StateIntro(&app, this->innerGLWin, this),
 		new StateInitCameras(&app, this->innerGLWin, this),
-		new StateHMDOp(&app, this->innerGLWin, this)
+		new StateHMDOp(&app, this->innerGLWin, this),
+		new StateExit(&app, this->innerGLWin, this)
 	};
 
 	for(BaseState* bs : statesToAdd)

@@ -294,6 +294,9 @@
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_Base.h">
       <Filter>Header Files\States\HMDOpSubs</Filter>
     </ClInclude>
+    <ClInclude Include="States\StateExit.h">
+      <Filter>Header Files\States</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -490,6 +493,9 @@
     </ClCompile>
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_Base.cpp">
       <Filter>Source Files\States\HMDOpSubs</Filter>
+    </ClCompile>
+    <ClCompile Include="States\StateExit.cpp">
+      <Filter>Source Files\States</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

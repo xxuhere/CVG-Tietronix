@@ -66,9 +66,12 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 					targ.inspCamSetsPlate));
 			break;
 
-		case StateHMDOp::UIID::MBtnBack:
-			// TODO: This is broken if not using whiffs
-			ssm.PopSubstate();
+
+		case StateHMDOp::UIID::MBtnExit:
+			ssm.PushSubstate(
+				new HMDOpSub_InspNavForm(
+					targ.btnExit, 
+					targ.inspExitPlate));
 			break;
 		}
 	}
@@ -86,7 +89,7 @@ void HMDOpSub_MainMenuNav::OnEnterContext(StateHMDOp& targ, SubstateMachine<Stat
 			targ.btnSettings, 
 			targ.btnAlign, 
 			targ.btnCamSets, 
-			targ.btnBack
+			targ.btnExit
 		};
 	}
 

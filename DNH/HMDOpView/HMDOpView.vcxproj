@@ -183,6 +183,7 @@
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.h" />
+    <ClInclude Include="States\StateExit.h" />
     <ClInclude Include="States\StateHMDOp.h" />
     <ClInclude Include="States\StateIncludes.h" />
     <ClInclude Include="States\StateInitCameras.h" />
@@ -258,6 +259,7 @@
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.cpp" />
+    <ClCompile Include="States\StateExit.cpp" />
     <ClCompile Include="States\StateHMDOp.cpp" />
     <ClCompile Include="States\StateInitCameras.cpp" />
     <ClCompile Include="States\StateIntro.cpp" />

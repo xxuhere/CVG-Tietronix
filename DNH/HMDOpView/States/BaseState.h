@@ -42,9 +42,15 @@ public:
 		InitCams,
 
 		/// <summary>
-		/// 
+		/// The main application state where the operation occurs.
 		/// </summary>
-		MainOp
+		MainOp,
+
+		/// <summary>
+		/// The exit screen for when the application is shutting down.
+		/// </summary>
+		Exit
+
 	};
 
 	// NOTE: If we make UISys a dependency of the state system, this

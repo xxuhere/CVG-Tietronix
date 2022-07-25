@@ -122,7 +122,7 @@ public:
 		MBtnLaserSet,
 		MBtnAlign,
 		MBtnSource,
-		MBtnBack,
+		MBtnExit,
 		// Laser Menu
 		LaseWat_1,
 		LaseWat_2,
@@ -149,6 +149,8 @@ public:
 		CamSet_Opacity_Meter,
 		CamSet_Opacity_Back,
 		CamSet_Calibrate_Slider,
+		// Exit Button
+		Exit_Confirm
 	};
 
 public:
@@ -300,7 +302,7 @@ public:
 	UIButton* btnSettings		= nullptr;
 	UIButton* btnAlign			= nullptr;
 	UIButton* btnCamSets		= nullptr;
-	UIButton* btnBack			= nullptr;
+	UIButton* btnExit			= nullptr;
 
 	//////////////////////////////////////////////////
 	//
@@ -371,6 +373,13 @@ public:
 	UIButton* camBtnThresh			= nullptr;
 	PlateSliderPair sliderSysThresh;
 	PlateSliderPair sliderSysDispUp;
+
+	//////////////////////////////////////////////////
+	//
+	//		EXIT SETTINGS MENU
+	//
+	//////////////////////////////////////////////////
+	UIPlate* inspExitPlate		= nullptr;
 
 private:
 	Carousel carousel;
