@@ -22,7 +22,7 @@ void cvgGrabTimer::FlushTime()
 
 	// The rest of this calculation will take up time, but it's going to be
 	// accounted for, on the next TimeLeft.
-	int msPassed = microseconds / 1000;
+	int msPassed = (int)(microseconds / 1000);
 	this->excessMicroseconds += microseconds % 1000;
 
 	// If excess microseconds build up past a second, account for it.

@@ -546,7 +546,7 @@ public:
 	void SubmitValue(float value, int vid);
 
 	inline int ChildCt() const
-	{ return this->children.size(); }
+	{ return (int)this->children.size(); }
 
 	inline UIBase* GetChild(int idx)
 	{ return this->children[idx]; }

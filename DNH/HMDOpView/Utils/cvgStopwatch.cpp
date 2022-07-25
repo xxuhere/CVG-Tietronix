@@ -10,7 +10,9 @@ int cvgStopwatch::Milliseconds(bool restart)
 	std::chrono::high_resolution_clock::time_point now = 
 		std::chrono::high_resolution_clock::now();
 
-	long ret = std::chrono::duration_cast<std::chrono::milliseconds>(now - this->lastTime).count();
+	long ret = 
+		(long)std::chrono::duration_cast<std::chrono::milliseconds>(
+			now - this->lastTime).count();
 
 	if(restart)
 		this->lastTime = now;
