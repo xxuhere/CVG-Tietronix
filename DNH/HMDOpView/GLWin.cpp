@@ -202,17 +202,19 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 		std::stringstream sstrmEll;
 		sstrmEll << std::fixed << std::setprecision(2);
 		sstrmEll << "Seconds: " << this->appEllapsedTimer.Milliseconds(false) / 1000.0f;
-		this->fontMousePos.RenderFont(sstrmEll.str().c_str(), sz.x - 200, sz.y - 75);
+		this->fontMousePos.RenderFont(sstrmEll.str().c_str(), sz.x - 200, sz.y - 100);
 
 		// Show mouse position.
 		std::stringstream sstrmDbgMouse;
 		sstrmDbgMouse << "x: " << this->lastDownDbgMouse.x << " - y: " << this->lastDownDbgMouse.y;
-		this->fontMousePos.RenderFont(sstrmDbgMouse.str().c_str(), sz.x - 200, sz.y - 50);
+		this->fontMousePos.RenderFont(sstrmDbgMouse.str().c_str(), sz.x - 200, sz.y - 75);
 
 		// Show rendered screen resolution.
 		std::stringstream sstrmDbgRes;
 		sstrmDbgRes << "Res W: " << sz.x << " - H: " << sz.y;
-		this->fontMousePos.RenderFont(sstrmDbgRes.str().c_str(), sz.x - 200, sz.y - 25);
+		this->fontMousePos.RenderFont(sstrmDbgRes.str().c_str(), sz.x - 200, sz.y - 50);
+
+		this->fontMousePos.RenderFont(this->lastUIMsg.c_str(), sz.x - 200, sz.y - 25);
 	}
 
 	this->SwapBuffers();
@@ -283,6 +285,8 @@ void GLWin::ReleaseStaticGraphicResources()
 
 void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
+	this->lastUIMsg = "kdown";
+
 	if(evt.GetKeyCode() == WXK_INSERT)
 	{
 		// Reload options during runtime.
@@ -295,100 +299,138 @@ void GLWin::OnKeyDown(wxKeyEvent& evt)
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnKeydown((wxKeyCode)evt.GetKeyCode());
+	evt.Skip();
 }
 
 void GLWin::OnKeyUp(wxKeyEvent& evt)
 {
+	this->lastUIMsg = "kup";
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnKeyup((wxKeyCode)evt.GetKeyCode());
+	evt.Skip();
 }
 
 void GLWin::OnLMouseDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "ldown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(0, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnLMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "ldoubledown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	// States currently don't have a double click, but it still needs
 	// to be handled, so we consider it a normal click.
 	cur->OnMouseDown(0, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnLMouseUp(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "lup";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(0, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnMMouseDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "mdown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(1, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnMMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "mdoubledown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(1, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnMMouseUp(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "mup";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(1, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnRMouseDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "rdown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(2, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnRMouseDoubleDown(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "rdoubledown";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseDown(2, evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnRMouseUp(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "rup";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseUp(2, evt.GetPosition());
+	evt.Skip();
+
 }
 
 void GLWin::OnMouseMotion(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "motion";
+
 	this->lastDownDbgMouse = evt.GetPosition();
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseMove(evt.GetPosition());
+	evt.Skip();
 }
 
 void GLWin::OnMouseWheel(wxMouseEvent& evt)
 {
+	this->lastUIMsg = "wheel";
+
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnMouseWheel(evt.GetWheelRotation(), evt.GetPosition());
+	evt.Skip();
 }
 
 #undef GET_CURR_STATE_OR_RETURN

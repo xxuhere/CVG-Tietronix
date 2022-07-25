@@ -47,6 +47,14 @@ private:
 	FontWU fontMousePos;
 	wxPoint lastDownDbgMouse;
 
+	/// <summary>
+	///	Debug variable used to track what the last input message was 
+	/// detected for GLWin. Used to help track down what appears to
+	/// be dropped messages from the UI system, specfically mouse
+	/// messages.
+	/// </summary>
+	std::string lastUIMsg = "";
+
 public:
 	/// <summary>
 	/// The application preferences. This cache should not be
