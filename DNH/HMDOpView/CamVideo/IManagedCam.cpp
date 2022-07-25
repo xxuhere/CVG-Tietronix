@@ -248,13 +248,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 			saveMat = new cv::Mat();
 			ptr->copyTo(*saveMat);
 
-			cv::putText(
-				*saveMat, 
-				this->snapCaption.c_str(), 
-				cv::Point(20, ptr->rows - 30), 
-				20, 
-				1.0, 
-				0xFF00FF);
+			ApplySnapshotWatermarkText(*saveMat, this->snapCaption);
 		}
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
@@ -340,7 +334,25 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		// error conditions.
 		std::lock_guard<std::mutex> guardVideo(this->videoAccess);
 		if(this->activeVideoReq != nullptr)
+		{
+			// Placing the watermark. This may not be the best location to 
+			// do this, but it should be sufficient for now. Some things to
+			// consider,
+			// - If we're adding padding, we don't want to add in the padding region
+			// - If we're reusing images, we don't want to repeatedly add to the
+			//   same image.
+			// - If we're not saving to video, we don't want to add text to frames
+			//   that aren't doing to be saved to video.
+			//
+			// Also note that this may cause issues, watermark info
+			// directly to the image instead of to a copy, but we'll try to
+			// get away with this if we can, as encoding a video is already
+			// expensive enough as-is without an additional image copy.
+			if(!this->snapCaption.empty())
+				ApplySnapshotWatermarkText(*ptr, this->snapCaption);
+
 			this->_DumpImageToVideofile(*ptr);
+		}
 	}
 
 	return true;
@@ -433,3 +445,16 @@ void IManagedCam::_DeactivateStreamState(bool deactivateShould)
 
 void IManagedCam::_EndShutdown()
 {}
+
+void IManagedCam::ApplySnapshotWatermarkText(
+	cv::Mat& mat, 
+	const std::string& text)
+{
+	cv::putText(
+		mat, 
+		text.c_str(), 
+		cv::Point(20, mat.rows - 30), 
+		20, 
+		1.0, 
+		0xFF00FF);
+}

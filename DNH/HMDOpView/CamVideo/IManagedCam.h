@@ -488,4 +488,13 @@ public:
 	/// video feed is currently applying an image processing chain.
 	/// </summary>
 	virtual bool UsesImageProcessingChain() = 0;
+
+public:
+	/// <summary>
+	/// Unified way for how watermark annotations should be applied
+	/// to images.
+	/// </summary>
+	/// <param name="mat">The image to apply the watermark to.</param>
+	/// <param name="text">The watermark text.</param>
+	void ApplySnapshotWatermarkText(cv::Mat& mat, const std::string& text);
 };
