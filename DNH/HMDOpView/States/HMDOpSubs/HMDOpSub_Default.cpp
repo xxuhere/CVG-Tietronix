@@ -7,7 +7,7 @@ HMDOpSub_Default::HMDOpSub_Default()
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.GetCoreWindow()->RequestSnapAll(targ.carousel.GetCurrentLabel());
+	targ.GetCoreWindow()->RequestSnapAll(targ.GetSurgeryPhaseLabel());
 }
 
 void HMDOpSub_Default::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

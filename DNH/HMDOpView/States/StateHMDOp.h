@@ -21,14 +21,6 @@
 class UIButton;
 class StateHMDOp;
 
-// Forward declaration of substate classes to later have
-// them to reference for friend declarations to StateHMDOp.
-class HMDOpSub_Carousel;
-class HMDOpSub_Empty;
-class HMDOpSub_MainMenuNav;
-class HMDOpSub_WidgetCtrl;
-class HMDOpSub_TempNavSliderListing;
-
 // Data flags for custom behaviour in the UI System.
 enum CustomUIFlag
 {
@@ -91,12 +83,6 @@ class StateHMDOp :
 	public BaseState,
 	public UISink
 {
-	friend class HMDOpSub_Carousel;
-	friend class HMDOpSub_Default;
-	friend class HMDOpSub_MainMenuNav;
-	friend class HMDOpSub_WidgetCtrl;
-	friend class HMDOpSub_TempNavSliderListing;
-
 public:
 
 	/// <summary>
@@ -510,19 +496,6 @@ public:
 
 	~StateHMDOp();
 
-	bool ShowCarousel( bool show = true);
-
-	bool HideCarousel();
-
-	bool ToggleCarousel();
-
-	inline bool IsCarouselShown() const
-	{ return this->showCarousel; }
-
-	bool MoveCarouselLeft();
-	bool MoveCarouselRight();
-
-protected:
 	/// <summary>
 	/// Toggle a main menubar option, highlighting its button, as well
 	/// as showing its submenu.
@@ -536,6 +509,34 @@ protected:
 	inline void CloseShownMenuBarUIPanel()
 	{ this->SetShownMenuBarUIPanel(-1); }
 
+	bool ShowSurgeryPhase( bool show = true);
+
+	bool HideSurgeryPhase();
+
+	bool ToggleSurgeryPhase();
+
+	inline bool IsSurgeryPhaseShown() const
+	{ return this->showCarousel; }
+
+	bool MoveSurgeryPhaseLeft();
+	bool MoveSurgeryPhaseRight();
+
+	bool SurgeryPhaseAtStart() const
+	{ return this->carousel.AtStart(); }
+
+	bool SurgeryPhase_AtEnd() const
+	{ return this->carousel.AtEnd(); }
+
+	bool SurgeryPhase_AnyMoreOnLeft() const
+	{ return this->carousel.AnyMoreOnLeft(); }
+
+	bool SurgeryPhase_AnyMoreOnRight() const
+	{ return this->carousel.AnyMoreOnRight(); }
+
+	std::string GetSurgeryPhaseLabel() const
+	{ return this->carousel.GetCurrentLabel(); }
+
+protected:
 	/// <summary>
 	/// Set a UI element to use the shared style across the entire UI.
 	/// </summary>
@@ -550,7 +551,7 @@ protected:
 	/// Should be called when the carousel is changed - to sync the rest
 	/// of the application with the changes.
 	/// </summary>
-	void OnCarouselChanged();
+	void OnSurgeryPhaseChanged();
 
 public:
 

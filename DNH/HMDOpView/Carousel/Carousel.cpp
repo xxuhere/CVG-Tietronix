@@ -469,3 +469,15 @@ CarouselData Carousel::GetCurrentData() const
 
 	return this->entries[this->currentEntry];
 }
+
+bool Carousel::AtStart() const
+{
+	return this->currentEntry <= 0;
+}
+
+bool Carousel::AtEnd() const
+{
+	return 
+		this->entries.empty() ||
+		this->currentEntry >= this->entries.size() - 1;
+}

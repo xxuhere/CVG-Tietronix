@@ -753,7 +753,7 @@ void StateHMDOp::Update(double dt)
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
 		showRButtons = (curVertWidth == maxVertWidth);
 
-		this->HideCarousel();
+		this->HideSurgeryPhase();
 	}
 	else
 		this->curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
@@ -1006,7 +1006,7 @@ StateHMDOp::~StateHMDOp()
 {
 }
 
-bool StateHMDOp::ShowCarousel( bool show)
+bool StateHMDOp::ShowSurgeryPhase( bool show)
 {
 
 	if(this->showCarousel == show)
@@ -1018,41 +1018,41 @@ bool StateHMDOp::ShowCarousel( bool show)
 	return true;
 }
 
-bool StateHMDOp::HideCarousel()
+bool StateHMDOp::HideSurgeryPhase()
 {
-	return this->ShowCarousel(false);
+	return this->ShowSurgeryPhase(false);
 }
 
-bool StateHMDOp::ToggleCarousel()
+bool StateHMDOp::ToggleSurgeryPhase()
 {
 	if(this->showCarousel)
-		return this->HideCarousel();
+		return this->HideSurgeryPhase();
 	else
 	{ 
 		this->uiSys.ClearCustomTabOrder();
-		return this->ShowCarousel();
+		return this->ShowSurgeryPhase();
 	}
 }
 
-bool StateHMDOp::MoveCarouselLeft()
+bool StateHMDOp::MoveSurgeryPhaseLeft()
 {
 	bool ret = this->carousel.GotoPrev();
 	if(ret)
-		this->OnCarouselChanged();
+		this->OnSurgeryPhaseChanged();
 
 	return ret;
 }
 
-bool StateHMDOp::MoveCarouselRight()
+bool StateHMDOp::MoveSurgeryPhaseRight()
 {
 	bool ret = this->carousel.GotoNext();
 	if(ret)
-		this->OnCarouselChanged();
+		this->OnSurgeryPhaseChanged();
 
 	return ret;
 }
 
-void StateHMDOp::OnCarouselChanged()
+void StateHMDOp::OnSurgeryPhaseChanged()
 {
 	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
 

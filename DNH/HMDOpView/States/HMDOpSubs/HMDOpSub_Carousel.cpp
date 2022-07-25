@@ -6,7 +6,7 @@ HMDOpSub_Carousel::HMDOpSub_Carousel()
 
 void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.MoveCarouselLeft();
+	targ.MoveSurgeryPhaseLeft();
 }
 
 void HMDOpSub_Carousel::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
@@ -24,18 +24,18 @@ void HMDOpSub_Carousel::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<StateHM
 
 void HMDOpSub_Carousel::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.MoveCarouselRight();
+	targ.MoveSurgeryPhaseRight();
 }
 
 void HMDOpSub_Carousel::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	targ.showMainMenu = false;
-	targ.ShowCarousel(true);
+	targ.ShowSurgeryPhase(true);
 }
 
 void HMDOpSub_Carousel::OnExitContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.ShowCarousel(false);
+	targ.ShowSurgeryPhase(false);
 }
 
 std::string HMDOpSub_Carousel::GetStateName() const
@@ -83,22 +83,12 @@ std::string HMDOpSub_Carousel::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_Carousel::HasMoreLeftCarousel(Carousel& car)
-{
-	return car.GetCurrentIndex() > 0;
-}
-
-bool HMDOpSub_Carousel::HasMoreRightCarousel(Carousel& car)
-{
-	return car.GetCurrentIndex() < car.GetIndexCount() - 1;
-}
-
 bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return this->HasMoreLeftCarousel(targ.carousel);
+		return targ.SurgeryPhase_AnyMoreOnLeft();
 
 	case ButtonID::Middle:
 		return true;
@@ -107,7 +97,7 @@ bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 		return true;
 
 	case ButtonID::Right:
-		return this->HasMoreRightCarousel(targ.carousel);
+		return targ.SurgeryPhase_AnyMoreOnRight();
 
 	}
 	return false;

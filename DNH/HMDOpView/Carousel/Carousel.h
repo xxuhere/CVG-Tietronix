@@ -341,4 +341,13 @@ public:
 	{ return this->entries.size(); }
 
 	CarouselData GetCurrentData() const;
+
+	bool AtStart() const;
+	bool AtEnd() const;
+
+	inline bool AnyMoreOnLeft() const
+	{ return !this->AtStart(); }
+
+	inline bool AnyMoreOnRight() const
+	{ return !this->AtEnd(); }
 };
