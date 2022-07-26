@@ -72,6 +72,8 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this),
 		substateMachine(this)
 {
+	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
+
 	//////////////////////////////////////////////////
 	//
 	//		LOAD COMMON ASSETS
@@ -260,7 +262,14 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		this->camBtnOpacity->UseDyn()->AnchorsTop().SetOffsets(BtnHPad, btnIt, -BtnHPad, btnIt + BtnH);
 		SetButtonStdCols(this->camBtnOpacity);
 		{
-			this->sliderSysOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, 0.25f, UIRect(), this->camBtnOpacity);
+			float curOpacity = 1.0f;
+			// TODO: This part will need some"re-adjustment, at this point in the application,
+			// the camera streams aren't available to query from.
+			//int segCamIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+			//if(segCamIdx != -1)
+			//	curOpacity = camMgr.GetFloat(segCamIdx, StreamParams::Alpha);
+
+			this->sliderSysOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, curOpacity, UIRect(), this->camBtnOpacity);
 		}
 		btnIt += BtnStride;
 		this->camBtnRegisterXY = new UIButton(this->camButtonGrid, UIID::CamSet_Register, UIRect(), "REGISTER X/Y", btnTextSz);
@@ -1525,5 +1534,15 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 			cmgr.SetFloat(targIdx, StreamParams::StaticThreshold, value);
 		}
 		break;
+
+	case UIID::CamSet_Opacity_Meter:
+		{
+			int targIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
+			if(targIdx == -1)
+				return;
+
+			CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+			cmgr.SetFloat(targIdx, StreamParams::Alpha, value);
+		}
 	}
 }
