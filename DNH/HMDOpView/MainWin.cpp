@@ -16,6 +16,22 @@
 #include "Hardware/FauxMouse.h"
 #endif
 
+std::string FileDateTimeNow()
+{
+	wxDateTime dt = wxDateTime::Now();
+	std::stringstream retStream;
+
+	retStream << 
+		dt.GetYear() << 
+		std::setfill('0') << std::setw(2) << (dt.GetMonth() + 1) << 
+		std::setfill('0') << std::setw(2) << dt.GetDay() << 
+		std::setfill('0') << std::setw(2) << dt.GetHour() << 
+		std::setfill('0') << std::setw(2) << dt.GetMinute() << 
+		std::setfill('0') << std::setw(2) << dt.GetSecond();
+
+	return retStream.str();
+}
+
 wxBEGIN_EVENT_TABLE(MainWin, wxFrame)
 	EVT_MENU		(wxID_EXIT,  MainWin::OnExit)
 	EVT_MENU		(wxID_SAVE,  MainWin::OnAccelerator_SaveCurOptions)
@@ -238,7 +254,7 @@ SnapRequest::SPtr MainWin::RequestSnap(
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Snap_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr << ".png";
+	sstrmFilepath << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr << ".png";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;
@@ -263,7 +279,8 @@ std::vector<SnapRequest::SPtr> MainWin::RequestSnapAll(const std::string& prefix
 	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
 	// Build snapshot image filename
 	std::stringstream sstrmFilebase;
-	sstrmFilebase << folderLoc << "/Snap_" << this->opSession.sessionName << "_" << prefix << "_" << this->snapCtr;
+	
+	sstrmFilebase << folderLoc << "/Snap_" << FileDateTimeNow() << "_" <<  this->opSession.sessionName << "_" << prefix << "_" << this->snapCtr;
 	std::string filebase = sstrmFilebase.str();
 
 	++this->snapCtr;
@@ -297,7 +314,7 @@ VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Video_" << prefix << this->opSession.sessionName << this->videoCtr << ".mkv";
+	sstrmFilepath << folderLoc << "/Video_" << FileDateTimeNow() << "_" << prefix << this->opSession.sessionName << "_" << this->videoCtr << ".mkv";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->videoCtr;
