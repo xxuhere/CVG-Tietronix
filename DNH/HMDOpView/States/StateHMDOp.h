@@ -572,7 +572,6 @@ public:
 
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
 	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
-	void OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn);
 
 public:
 

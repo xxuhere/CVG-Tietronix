@@ -104,7 +104,6 @@ public:
 	void HandleMouseDrag(const UIVec2& pos, int button) override;
 	void HandleMouseDown(const UIVec2& pos, int button) override;
 	void HandleMouseUp(const UIVec2& pos, int button) override;
-	bool HandleSelectedWhiffDown(int button) override;
 
 	bool Render() override;
 	float GetValue(int vid) override;

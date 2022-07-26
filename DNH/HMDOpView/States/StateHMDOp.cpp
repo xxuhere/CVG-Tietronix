@@ -1545,9 +1545,6 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 	}
 }
 
-void StateHMDOp::OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn)
-{}
-
 void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 {
 	int uiId = uib->Idx();

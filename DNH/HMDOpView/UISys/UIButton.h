@@ -55,7 +55,6 @@ public:
 	void ResetColorsToDefault();
 
 	void HandleClick(int button) override;
-	bool HandleSelectedWhiffDown(int button) override;
 
 	bool Render() override;
 };

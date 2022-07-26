@@ -516,11 +516,6 @@ void UIBase::HandleUnselect()
 {
 }
 
-bool UIBase::HandleSelectedWhiffDown(int button)
-{
-	return false;
-}
-
 float UIBase::GetValue(int vid)
 {
 	// It's arguable what the default/error

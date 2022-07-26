@@ -4,7 +4,6 @@
 void UISink::OnUISink_MouseDown(UIBase* uib, int mouseBtn, const UIVec2& mousePos){}
 void UISink::OnUISink_MouseUp(UIBase* uib, int mouseBtn, const UIVec2& mousePos){}
 void UISink::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos){}
-void UISink::OnUISink_SelMouseDownWhiff(UIBase* uib, int mouseBtn){}
 void UISink::OnUISink_MouseHover(UIBase* uib, const UIVec2& mousePos){}
 void UISink::OnUISink_MouseExit(UIBase* uib){}
 void UISink::OnUISink_MouseDrag(UIBase* uib, int mouseBtn, const UIVec2& mousePos){}

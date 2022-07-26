@@ -46,14 +46,6 @@ void UIButton::HandleClick(int button)
 		this->onClick(button);
 }
 
-bool UIButton::HandleSelectedWhiffDown(int button)
-{
-	// For now we always return true. Whether or not we want to
-	// have it do something like auto-click the button, that
-	// should probably be a setting in a variable/flag.
-	return true;
-}
-
 bool UIButton::Render()
 {
 	if(!this->selfVisible)

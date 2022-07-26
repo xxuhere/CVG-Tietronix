@@ -72,7 +72,7 @@ void UIHSlider::MoveQuantizedAmt(int quantSlices, int movedChunks)
 	float lambda = 
 		(this->curVal - this->minVal)/(this->maxVal - this->minVal);
 
-	// Convert from [0.0, 1.0] space to discrete [0, whiffTicks]
+	// Convert from [0.0, 1.0] space to discrete [0, quantSlices]
 	float quant = std::floor(lambda * quantSlices);
 
 	quant += movedChunks;
@@ -84,30 +84,6 @@ void UIHSlider::MoveQuantizedAmt(int quantSlices, int movedChunks)
 	newValue = std::clamp(newValue, this->minVal, this->maxVal);
 	//
 	this->SetCurValue(newValue);
-}
-
-bool UIHSlider::HandleSelectedWhiffDown(int button)
-{
-	// Middle click isn't handled.
-	if(button != 0 && button != 2)
-		return false;
-
-	if(this->discreteTicks <= 0)
-		return false;
-
-	
-
-	if(button == 0) 
-	{
-		// Left button decreases
-		this->MoveQuantizedAmt(this->discreteTicks, -1);
-	}
-	else if(button == 2)
-	{
-		// Right button increases
-		this->MoveQuantizedAmt(this->discreteTicks, 1);
-	}
-	return true;
 }
 
 bool UIHSlider::Render()
