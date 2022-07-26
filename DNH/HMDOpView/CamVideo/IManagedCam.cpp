@@ -12,13 +12,24 @@
 
 float IManagedCam::GetFloat( StreamParams paramid)
 {
-	// Currently empty for default implementation.
+	switch(paramid)
+	{
+	case StreamParams::Alpha:
+		return this->alpha;
+	}
+
 	return 0.0f;
 }
 
 bool IManagedCam::SetFloat( StreamParams paramid, float value)
 {
-	// Currently do-nothing for default implementation
+	switch(paramid)
+	{
+	case StreamParams::Alpha:
+		this->alpha = value;
+		return true;
+	}
+
 	return false;
 }
 
@@ -278,7 +289,11 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 	// of the frame.
 	if(this->GetCamType() == CamType::VideoFeed)
 	{
-		ManagedComposite::CacheCameraFrame(this->GetID(), ptr);
+		ManagedComposite::CacheCameraFrame(
+			this->GetID(), 
+			ptr,
+			this->UsesImageProcessingChain(),
+			this->GetFloat(StreamParams::Alpha));
 	}
 
 	// SAVE SNAPSHOTS OF IMAGE PROCESSED

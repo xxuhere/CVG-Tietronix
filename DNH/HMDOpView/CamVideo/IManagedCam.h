@@ -23,6 +23,9 @@
 /// </summary>
 enum StreamParams
 {
+	// Alpha blending amount
+	Alpha,
+
 	/// <summary>
 	/// For simple thresholding image processing. The pixel value to threshold.
 	/// </summary>
@@ -257,6 +260,12 @@ public:
 	int streamFrameCt = 0;
 
 	std::string snapCaption;
+
+	/// <summary>
+	/// The amount to blend in compositing - may only apply to 
+	/// thresholded feeds.
+	/// </summary>
+	float alpha = 1.0f;
 
 protected:
 	/// <summary>

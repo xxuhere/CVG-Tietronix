@@ -11,19 +11,40 @@
 
 #include <mutex>
 
+
 bool ManagedComposite::cacheAvailable;
-std::map<int, cv::Ptr<cv::Mat>> ManagedComposite::globalCache;
+std::map<int, CompCacheInfo> ManagedComposite::globalCache;
 std::mutex ManagedComposite::cacheMutex;
 bool ManagedComposite::modSinceLastCache = true;
 
-bool ManagedComposite::CacheCameraFrame(int id, cv::Ptr<cv::Mat> img)
+CompCacheInfo::CompCacheInfo()
+{}
+
+CompCacheInfo::CompCacheInfo(
+	cv::Ptr<cv::Mat> img, 
+	bool thresholded, 
+	float opacity)
 {
+	this->img			= img;
+	this->thresholded	= thresholded;
+	this->opacity		= opacity;
+}
+
+bool ManagedComposite::CacheCameraFrame(
+	int id, 
+	cv::Ptr<cv::Mat> img, 
+	bool thresholded, 
+	float opacity)
+{
+
+	CompCacheInfo cInfo(img, thresholded, opacity);
+
 	std::lock_guard<std::mutex> guard(cacheMutex);
 	if(!cacheAvailable)
 		return false;
 
 	modSinceLastCache = true;
-	globalCache[id] = img;
+	globalCache[id] = cInfo;
 	return true;
 }
 
@@ -91,7 +112,7 @@ void ManagedComposite::ThreadFn(int camIdx)
 			// We make a copy so afterwards, we have free reign on a snapshot of 
 			// the globalCache without keeping it locked for as long as we need
 			// it for however long compositing takes
-			std::map<int, cv::Ptr<cv::Mat>> cacheCpy;
+			std::map<int, CompCacheInfo> cacheCpy;
 			{
 				std::lock_guard<std::mutex> cpyGuard(cacheMutex);
 
@@ -119,29 +140,41 @@ void ManagedComposite::ThreadFn(int camIdx)
 
 			for(auto it : cacheCpy)
 			{
-				auto matCache = it.second;
+				auto matCache = it.second.img;
 
 				float vaspect = (float)matCache->rows / (float)matCache->cols;
 				cvgRect rect = cvgRect::MakeWidthAspect(this->streamWidth, vaspect);
 				cv::Mat cpy;
 				cv::resize(
-					*it.second, 
+					*it.second.img, 
 					cpy, 
 					cv::Size(
 						(int)rect.w, 
 						(int)rect.h));
 
-				// Match the "red-ing" used in StateHMDOp
+				// Single channel image needs to be converted to RGB, need to figure
+				// out if we make it thresholded red, or greyscale.
 				if(cpy.channels() == 1)
 				{
 					// https://stackoverflow.com/questions/26065253/opencv-set-a-channel-to-a-value-c
-					cpy *= 0.5; // Ret
-					std::vector<cv::Mat> chansComp
+					cpy *= it.second.opacity; // Ret
+
+					std::vector<cv::Mat> chansComp;
+					if(it.second.thresholded)
 					{
-						cv::Mat(cpy.rows, cpy.cols, CV_8UC1, cv::Scalar(0)),	// B
-						cv::Mat(cpy.rows, cpy.cols, CV_8UC1, cv::Scalar(0)),	// G
-						cpy // R
-					};
+						// Make red
+						chansComp.push_back(cv::Mat(cpy.rows, cpy.cols, CV_8UC1, cv::Scalar(0)));	// B
+						chansComp.push_back(cv::Mat(cpy.rows, cpy.cols, CV_8UC1, cv::Scalar(0)));	// G
+						chansComp.push_back(cpy); // R
+					}
+					else
+					{
+						// Make greyscale
+						chansComp.push_back(cpy);	// B
+						chansComp.push_back(cpy);	// G
+						chansComp.push_back(cpy);	// R
+					}
+					
 					cv::merge(chansComp, cpy);
 				}
 

@@ -608,6 +608,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive blending
 
+	// DRAW THE CAMERAS ADDITIVELY COMPOSITED ON TOP OF EACH OTHER
 	for(int camIt = 0; camIt < 2; ++camIt)
 	{
 		cv::Ptr<cv::Mat> curImg = camMgr.GetCurrentFrame(camIt);
@@ -635,10 +636,11 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
 
+		float alpha = camMgr.GetFloat(camIt, StreamParams::Alpha);
 		if(camMgr.IsThresholded(camIt))
-			glColor4f(0.5f, 0.0f, 0.0f, 1.0f);
+			glColor4f(1.0f, 0.0f, 0.0f, alpha);
 		else
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
 		glBegin(GL_QUADS);
 			viewRegion.GLVerts_Textured();
