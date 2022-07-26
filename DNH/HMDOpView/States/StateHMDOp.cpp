@@ -1073,30 +1073,6 @@ void StateHMDOp::OnSurgeryPhaseChanged()
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 {
 	bool toggleOff = false;
-	// Check if the thing is already on, if so, it's a complete toggle off...
-
-	switch(idx)
-	{
-	case UIID::MBtnLaserSet:
-		if(this->inspSettingsPlate->IsSelfVisible())
-			toggleOff = true;
-		break;
-
-	case UIID::MBtnAlign:
-		if(this->inspAlignPlate->IsSelfVisible())
-			toggleOff = true;
-		break;
-
-	case UIID::MBtnSource:
-		if(this->inspCamSetsPlate->IsSelfVisible())
-			toggleOff = true;
-		break;
-
-	case UIID::MBtnExit:
-		if(this->inspExitPlate->IsSelfVisible())
-			toggleOff = true;
-		break;
-	}
 
 	// TODO: when turning off, we eventually need to handle a slide-in 
 	// animation for the current active plate being disabled.
@@ -1107,19 +1083,6 @@ void StateHMDOp::SetShownMenuBarUIPanel(int idx)
 	this->inspCamSetsPlate->Hide();
 	this->inspAlignPlate->Hide();
 	this->inspExitPlate->Hide();
-
-	if(toggleOff)
-	{
-		this->ManageCamButtonPressed(-1);
-
-		UpdateGroupColorSet( 
-			-1,
-			{this->btnSettings, this->btnAlign, this->btnCamSets, this->btnExit},
-			colSetButtonTog,
-			colSetButton);
-
-		return;
-	}
 
 	// ... Else, it's a toggle on, so we turn off everything except for the one
 	// thing we've switched our UI context to.

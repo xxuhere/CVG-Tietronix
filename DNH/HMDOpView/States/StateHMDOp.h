@@ -506,8 +506,10 @@ public:
 	~StateHMDOp();
 
 	/// <summary>
-	/// Toggle a main menubar option, highlighting its button, as well
-	/// as showing its submenu.
+	/// Toggle on a main menubar option, highlighting its button, as well
+	/// as showing its submenu. 
+	/// 
+	/// Or Hide all relevant submenus.
 	/// </summary>
 	/// <param name="idx">
 	/// The UIID of a main menubar button to select. Or -1 to
