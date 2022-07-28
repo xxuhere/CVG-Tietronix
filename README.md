@@ -1,3 +1,7 @@
+This project is forked from [this repo](https://github.com/Achilefu-Lab/cancer-goggles). It is currently 
+under maintenence and is scheduled to focus on the HMDOpView application in the near-term future. Certain
+things may be broken until then.
+
 # Cancer-Goggles
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
