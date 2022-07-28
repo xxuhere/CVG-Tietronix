@@ -6,6 +6,20 @@
 #include "../Utils/cvgStopwatch.h"
 #include "../Utils/cvgStopwatchLeft.h"
 
+#include <dcmtk/dcmdata/dcfilefo.h>
+#include <dcmtk/dcmdata/libi2d/i2dimgs.h>
+#include <dcmtk/dcmdata/libi2d/i2dbmps.h>
+#include <dcmtk/dcmdata/libi2d/i2djpgs.h>
+#include <dcmtk/dcmdata/libi2d/i2d.h>
+#include <dcmtk/dcmdata/dcdict.h>
+#include <dcmtk/ofstd/ofcmdln.h>
+#include <dcmtk/dcmdata/libi2d/i2dplsc.h>
+
+
+#include "DicomImg_RawJpg.h"
+
+#include "../DicomUtils/DicomStash.h"
+
 #include <iostream>
 #include "../Utils/cvgAssert.h"
 
@@ -264,6 +278,54 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
 		{
+			//////////////////////////////////////////////////
+			//	TEMPORARY CODE FOR DICOM
+			//
+			// We will eventually need to fix several issues:
+			// - Dicom filenames cannot be longer than 8 characters, including the ".dcm"
+			//	- Or at least by spec they shouldn't be.
+			// - Location of DicomImg_RawJpg needs to be confirmed.
+			// - Whether we do this raw in this location, or delegate to a formal system
+			//	should be thought-out.
+
+
+			Image2Dcm i2d;
+			i2d.setValidityChecking(OFTrue, OFTrue, OFTrue); // using default param values from img2dcm DCMTK sample
+
+			I2DOutputPlug* outPlug = new I2DOutputPlugSC();
+			outPlug->setValidityChecking(OFTrue, OFTrue, OFTrue);
+
+			if (!dcmDataDict.isDictionaryLoaded())
+			{
+				std::cerr << 
+					"no data dictionary loaded, check environment variable: "
+					<< DCM_DICT_ENVIRONMENT_VARIABLE 
+					<< std::endl;
+			}
+
+			I2DImgSource* inputImgSrc = new DicomImg_RawJpg(saveMat.get());
+			inputImgSrc->setImageFile("snapshot"); // TODO: Better name
+			DcmDataset *resultObject = nullptr;
+			E_TransferSyntax writeXfer;
+
+			// !TODO: Error checking
+			OFCondition cond = i2d.convertFirstFrame(inputImgSrc, outPlug, 1, resultObject, writeXfer);
+			//
+			cond = i2d.updateOffsetTable();
+			cond = i2d.updateLossyCompressionInfo(inputImgSrc, 1, resultObject);
+			DcmFileFormat dcmff(resultObject);
+			
+			DicomStash& dicomStash = DicomStash::GetInstance();
+			dicomStash.DumpStashCloneInto(dcmff.getDataset());
+
+			cond = dcmff.saveFile((snreq->filename + ".dcm").c_str(), writeXfer);
+
+			delete inputImgSrc;
+			delete outPlug;
+			delete resultObject;
+			///
+			//////////////////////////////////////////////////
+			
 			if(cv::imwrite(snreq->filename, *saveMat))
 			{
 				snreq->frameID = this->camFeedChanges;

@@ -12,6 +12,12 @@ This project will also require the use of vcpkg to install ftgl and opencv, used
 vcpkg install ftgl:x64-windows opencv:x64-windows
 ```
 
+vcpkg will also be used for installing the Dicom Toolkit (DCMTK) library.
+
+```cmd
+vcpkg install dcmtk:x64-windows
+```
+
 
 
 # Building on Linux
@@ -24,6 +30,10 @@ This project will also require the use of package managers to install the librar
 sudo apt-get install libftgl-dev
 sudo apt-get install libfreetype6-dev
 ```
+
+To install the Dicom Toolkit (DCMTK), a version of DCMTK at/above version 3.6.7 is required. This is higher than what is currently supported on apt-get, so it will need to be built manually.
+
+-- TODO: PLACEHOLDER - THIS WILL BE FILLED WITH MORE INFORMATION AFTER THE REPO MIGRATION IS COMPLETED. THIS DECISION WAS MADE BECAUSE IT MAKES MORE SENSE TO MAKE THE REQUIRED EDIT ONCE THE README IS UNIFIED - VS HOW IT'S SEPERATED OUT INTO MULTIPLE THINGS.
 
 The Makefile in the HMDOpView will make the entire application.
 

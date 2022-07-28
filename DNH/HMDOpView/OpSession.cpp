@@ -49,7 +49,7 @@ json OpSession::RepresentationAsJSON() const
 {
 	json ret = json::object();
 	ret[szKey_Firstname		] = this->patNameFirst;
-	ret[szKey_Middlename	] = this->patNameLast;
+	ret[szKey_Middlename	] = this->patNameMid;
 	ret[szKey_Lastname		] = this->patNameLast;
 	ret[szKey_Sessionname	] = this->sessionName;
 	return ret;

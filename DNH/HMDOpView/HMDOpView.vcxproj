@@ -128,7 +128,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_ROOT)\stage\lib;$(OPENSSL_ROOT)\lib;$(DNH_ROOT)\$(Platform)\$(Configuration);$(VCPKG)\installed\x64-windows\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;opengl32.lib;opencv_highguid.lib;opencv_mld.lib;opencv_objdetectd.lib;opencv_photod.lib;opencv_stitchingd.lib;opencv_videod.lib;opencv_videoiod.lib;opencv_imgcodecsd.lib;opencv_calib3dd.lib;opencv_dnnd.lib;opencv_features2dd.lib;opencv_flannd.lib;opencv_imgprocd.lib;opencv_cored.lib;ftgld.lib;Glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;opengl32.lib;opencv_highguid.lib;opencv_mld.lib;opencv_objdetectd.lib;opencv_photod.lib;opencv_stitchingd.lib;opencv_videod.lib;opencv_videoiod.lib;opencv_imgcodecsd.lib;opencv_calib3dd.lib;opencv_dnnd.lib;opencv_features2dd.lib;opencv_flannd.lib;opencv_imgprocd.lib;opencv_cored.lib;ftgld.lib;Glu32.lib;dcmdatad.lib;ofstdd.lib;oflogd.lib;Ws2_32.lib;Netapi32.lib;iphlpapi.lib;i2dd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -155,6 +155,7 @@
     <ClInclude Include="CamVideo\CamImpl\CamImpl_StaticImg.h" />
     <ClInclude Include="CamVideo\CamImpl\ICamImpl.h" />
     <ClInclude Include="CamVideo\CamStreamMgr.h" />
+    <ClInclude Include="CamVideo\DicomImg_RawJpg.h" />
     <ClInclude Include="CamVideo\IManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedComposite.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="CamVideo\SnapRequest.h" />
     <ClInclude Include="CamVideo\VideoRequest.h" />
     <ClInclude Include="Carousel\Carousel.h" />
+    <ClInclude Include="DicomUtils\DicomStash.h" />
     <ClInclude Include="FontMgr.h" />
     <ClInclude Include="glext.h" />
     <ClInclude Include="GLWin.h" />
@@ -233,6 +235,7 @@
     <ClCompile Include="CamVideo\CamImpl\CamImpl_StaticImg.cpp" />
     <ClCompile Include="CamVideo\CamImpl\ICamImpl.cpp" />
     <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
+    <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp" />
     <ClCompile Include="CamVideo\IManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedComposite.cpp" />
@@ -240,6 +243,7 @@
     <ClCompile Include="CamVideo\SnapRequest.cpp" />
     <ClCompile Include="CamVideo\VideoRequest.cpp" />
     <ClCompile Include="Carousel\Carousel.cpp" />
+    <ClCompile Include="DicomUtils\DicomStash.cpp" />
     <ClCompile Include="FontMgr.cpp" />
     <ClCompile Include="GLWin.cpp" />
     <ClCompile Include="Hardware\FauxMouse.cpp" />

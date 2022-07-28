@@ -52,17 +52,39 @@ ALLHEADERS_ALLVEND = $(ALLHEADERS_WS) $(ALLHEADERS_HTTP) $(ALLHEADERS_JSON)
 #
 ##################################################
 
+SUBDIR_CAMIMPL = CamVideo/CamImpl
+SUBDIR_CAMVIDEO = CamVideo
+SUBDIR_CAROUSEL = Carousel
+SUBDIR_DICOMUTILS = DicomUtils
+SUBDIR_HARDWARE = Hardware
+SUBDIR_LODEPNG = lodePNG
 SUBDIR_MAIN = .
 SUBDIR_STATES = States
 SUBDIR_SUBSTATES_HMDOP = States/HMDOpSubs
-SUBDIR_LODEPNG = lodePNG
-SUBDIR_UTILS = Utils
-SUBDIR_HARDWARE = Hardware
-SUBDIR_CAMVIDEO = CamVideo
-SUBDIR_CAMIMPL = CamVideo/CamImpl
-SUBDIR_UISYS = UISys
-SUBDIR_CAROUSEL = Carousel
 
+
+SUBDIR_UISYS = UISys
+SUBDIR_UTILS = Utils
+
+
+SUBOBJ_CAMIMPL = \
+	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
+	
+SUBOBJ_CAMVIDEO = \
+	CamStreamMgr DicomImg_RawJpg IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest ROIRect	
+	
+SUBOBJ_CAROUSEL = \
+	Carousel
+
+SUBOBJ_DICOMUTILS = \
+	DicomStash
+	
+SUBOBJ_HARDWARE = \
+	FauxMouse HardwareMgr IHardware LaserSys
+	
+SUBOBJ_LODEPNG = \
+	lodepng
+	
 SUBOBJ_MAIN = \
 	FontMgr GLWin HMDOpApp LoadAnim MainWin TexObj OpSession
 	
@@ -71,39 +93,30 @@ SUBOBJ_STATES = \
 
 SUBOBJ_SUBSTATES_HMDOP = \
 	HMDOpSub_Base HMDOpSub_Carousel HMDOpSub_Default HMDOpSub_InspNavForm HMDOpSub_MainMenuNav HMDOpSub_TempNavSliderListing HMDOpSub_WidgetCtrl
-
-SUBOBJ_LODEPNG = \
-	lodepng
 	
 SUBOBJ_UTILS = \
 	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgGrabTimer cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
 	
-SUBOBJ_HARDWARE = \
-	FauxMouse HardwareMgr IHardware LaserSys
-	
-SUBOBJ_CAMVIDEO = \
-	CamStreamMgr IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest ROIRect
-	
-SUBOBJ_CAMIMPL = \
-	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
-	
 SUBOBJ_UISYS = \
 	CacheRecordUtils DynSize NinePatcher UIBase UIButton UIColor4 UIGraphic UIHSlider UIPlate UIRect UISink UISys UIText UIVBulkSlider UIVec2
-	
-SUBOBJ_CAROUSEL = \
-	Carousel
-	
 
+EXPOBJS_CAMIMPL = $(patsubst %,$(SUBDIR_CAMIMPL)/%.o,$(SUBOBJ_CAMIMPL))	
+EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
+EXPOBJS_CAROUSEL = $(patsubst %,$(SUBDIR_CAROUSEL)/%.o,$(SUBOBJ_CAROUSEL))
+EXPOBJS_DICOMUTILS = $(patsubst %,$(SUBDIR_DICOMUTILS)/%.o,$(SUBOBJ_DICOMUTILS))
+EXPOBJS_HARDWARE = $(patsubst %,$(SUBDIR_HARDWARE)/%.o,$(SUBOBJ_HARDWARE))
+EXPOBJS_LODEPNG = $(patsubst %,$(SUBDIR_LODEPNG)/%.o,$(SUBOBJ_LODEPNG))
 EXPOBJS_MAIN = $(patsubst %,$(SUBDIR_MAIN)/%.o,$(SUBOBJ_MAIN))
 EXPOBJS_STATES = $(patsubst %,$(SUBDIR_STATES)/%.o,$(SUBOBJ_STATES))
 EXPOBJS_SUBSTATES_HMDOP = $(patsubst %,$(SUBDIR_SUBSTATES_HMDOP)/%.o,$(SUBOBJ_SUBSTATES_HMDOP))
-EXPOBJS_LODEPNG = $(patsubst %,$(SUBDIR_LODEPNG)/%.o,$(SUBOBJ_LODEPNG))
-EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
-EXPOBJS_HARDWARE = $(patsubst %,$(SUBDIR_HARDWARE)/%.o,$(SUBOBJ_HARDWARE))
-EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
-EXPOBJS_CAMIMPL = $(patsubst %,$(SUBDIR_CAMIMPL)/%.o,$(SUBOBJ_CAMIMPL))
 EXPOBJS_UISYS = $(patsubst %,$(SUBDIR_UISYS)/%.o,$(SUBOBJ_UISYS))
-EXPOBJS_CAROUSEL = $(patsubst %,$(SUBDIR_CAROUSEL)/%.o,$(SUBOBJ_CAROUSEL))
+EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
+
+# --start-group and --end-group are used to solve the order the libraries are included,
+# because after some testing, I have no idea what order these are supposed to go in
+# without invoking linker errors without treating them as cyclic dependencies.
+# (wleu 07/28/2022)
+DCMLIBS = -Wl,--start-group -ldl -ldcmxml -ldcmdata -loficonv -lofstd -li2d -loflog -Wl,--end-group
 
 ##################################################
 #
@@ -122,7 +135,7 @@ all: hmdopview
 	@echo "COMPILING TARGET All"
 	@echo "Building HmdViewOp application"
 	@echo "--------------------------------------------------"
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl `wx-config --libs std,aui --gl-libs` -L/lib -lssl -lcrypto -lboost_system -lboost_filesystem -lstdc++fs -Wall $(OPENCVLIBS) -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host -lftgl -lpthread -ldl -o hmdopapp
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl `wx-config --libs std,aui --gl-libs` -L/lib -lssl -lcrypto -lboost_system -lboost_filesystem -lstdc++fs -Wall $(OPENCVLIBS) -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host -lftgl -lpthread -lxml2 $(DCMLIBS) -o hmdopapp
 	echo "Finished build command."
 	
 hmdopview: objs
@@ -130,7 +143,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking HMDOpView archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_CAROUSEL) $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+	ar -rsc hmdopview.a $(EXPOBJS_CAROUSEL) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -150,7 +163,7 @@ moves:
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I/opt/vc/include/ -I../Vendored -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL) $(VEND_ALLINCLUDES)
 
-objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_MAIN) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_MAIN) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	@echo "TARGET objs"
 
 .PHONY: clean

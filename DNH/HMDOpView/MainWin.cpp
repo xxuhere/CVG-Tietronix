@@ -1,3 +1,7 @@
+// WARNING: Dicom related header files must appear before wxWidgets, to avoid
+// wxWidgets polluting Dicom stuff with UNICODE requirements.
+#include "DicomUtils/DicomStash.h"
+
 #include "MainWin.h"
 #include <wx/wx.h>
 #include <wx/menu.h>
@@ -6,6 +10,7 @@
 #include <sstream>
 #include <wx/filename.h>
 #include "Utils/cvgAssert.h"
+#include <dcmtk/dcmdata/dcdeftag.h>
 
 #include "States/StateIntro.h"
 #include "States/StateInitCameras.h"
@@ -128,11 +133,23 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 bool MainWin::InitializeSession()
 {
+	DicomStash& dicomStash = DicomStash::GetInstance();
+	dicomStash.Clear();
+
 	const std::string& sessionLoc = wxGetApp().sessionLoc;
+
 
 	// Try to load from file
 	if(this->opSession.LoadFromFile(sessionLoc))
+	{
+		dicomStash.SetName(
+			DCM_PatientName,
+			this->opSession.patNameFirst,
+			this->opSession.patNameMid,
+			this->opSession.patNameLast);
+
 		return true;
+	}
 
 	// If we can't load from file, take what we currently
 	// have (probably a default object) and save that for next time.

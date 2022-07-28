@@ -67,6 +67,12 @@
     <Filter Include="Source Files\States\HMDOpSubs">
       <UniqueIdentifier>{d8b05f2d-df70-44bd-881b-b752f23e8a8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DicomUtils">
+      <UniqueIdentifier>{fe5f6d02-50b4-4966-afb1-3f46819bf9a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DicomUtils">
+      <UniqueIdentifier>{fa1bf4b6-d13b-42f1-a427-803e4e412145}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -297,6 +303,12 @@
     <ClInclude Include="States\StateExit.h">
       <Filter>Header Files\States</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\DicomImg_RawJpg.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
+    <ClInclude Include="DicomUtils\DicomStash.h">
+      <Filter>Header Files\DicomUtils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -496,6 +508,12 @@
     </ClCompile>
     <ClCompile Include="States\StateExit.cpp">
       <Filter>Source Files\States</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp">
+      <Filter>Source Files\CamVideo</Filter>
+    </ClCompile>
+    <ClCompile Include="DicomUtils\DicomStash.cpp">
+      <Filter>Source Files\DicomUtils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
