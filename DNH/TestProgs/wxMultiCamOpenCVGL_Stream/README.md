@@ -1,1 +1,0 @@
-A simple demo that shows 2 network RTSP feeds displaying their video streams in a wxWindow through OpenGL textures.

@@ -1,1 +1,0 @@
-A demo showing two networked RTSP feeds drawn overlayed in a single OpenGL context - embedded in a wxWidget application.

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerEnvironment>PATH=%PATH%;$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(OPENSSL_ROOT)\bin;$(VCPKG)\installed\x64-windows\debug\bin;D:\WorkRepos\vcpkg2\installed\x64-windows\debug\bin</LocalDebuggerEnvironment>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
-  </PropertyGroup>
-</Project>

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{debd0a0d-4972-49c1-847c-b1396aff9862}</ProjectGuid>
+    <RootNamespace>HMDOpView</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CoreDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CoreDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="CoreDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\CoreDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_LIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE=1;_CRT_NON_CONFORMING_SWPRINTFS=1;_SCL_SECURE_NO_WARNINGS=1;__WXMSW__;_UNICODE;WXBUILDING;wxUSE_BASE=0;WXUSINGDLL;_WIN32_WINNT=0x0601;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(WXWIDGETS_ROOT)\include\msvc;$(WXWIDGETS_ROOT)\include;$(OPENSSL_ROOT)\include;$(BOOST_DIR);Vendored;$(VCPKG)\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(WXWIDGETS_ROOT)\lib\vc_x64_dll;$(BOOST_DIR)\stage\lib;$(OPENSSL_ROOT)\lib;$(VCPKG)\installed\x64-windows\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>wxbase31ud.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;libssl.lib;libcrypto.lib;opengl32.lib;opencv_highguid.lib;opencv_mld.lib;opencv_objdetectd.lib;opencv_photod.lib;opencv_stitchingd.lib;opencv_videod.lib;opencv_videoiod.lib;opencv_imgcodecsd.lib;opencv_calib3dd.lib;opencv_dnnd.lib;opencv_features2dd.lib;opencv_flannd.lib;opencv_imgprocd.lib;opencv_cored.lib;ftgld.lib;Glu32.lib;dcmdatad.lib;ofstdd.lib;oflogd.lib;Ws2_32.lib;Netapi32.lib;iphlpapi.lib;i2dd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_USB.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_Web.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_OpenCVBase.h" />
+    <ClInclude Include="CamVideo\CamImpl\CamImpl_StaticImg.h" />
+    <ClInclude Include="CamVideo\CamImpl\ICamImpl.h" />
+    <ClInclude Include="CamVideo\CamStreamMgr.h" />
+    <ClInclude Include="CamVideo\DicomImg_RawJpg.h" />
+    <ClInclude Include="CamVideo\IManagedCam.h" />
+    <ClInclude Include="CamVideo\ManagedCam.h" />
+    <ClInclude Include="CamVideo\ManagedComposite.h" />
+    <ClInclude Include="CamVideo\ROIRect.h" />
+    <ClInclude Include="CamVideo\SnapRequest.h" />
+    <ClInclude Include="CamVideo\VideoRequest.h" />
+    <ClInclude Include="Carousel\Carousel.h" />
+    <ClInclude Include="DicomUtils\DicomStash.h" />
+    <ClInclude Include="FontMgr.h" />
+    <ClInclude Include="glext.h" />
+    <ClInclude Include="GLWin.h" />
+    <ClInclude Include="Hardware\FauxMouse.h" />
+    <ClInclude Include="Hardware\HardwareMgr.h" />
+    <ClInclude Include="Hardware\IHardware.h" />
+    <ClInclude Include="Hardware\LaserSys.h" />
+    <ClInclude Include="HMDOpApp.h" />
+    <ClInclude Include="LoadAnim.h" />
+    <ClInclude Include="MainWin.h" />
+    <ClInclude Include="OpSession.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="States\BaseState.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Base.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Carousel.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_Default.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_InspNavForm.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.h" />
+    <ClInclude Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.h" />
+    <ClInclude Include="States\StateExit.h" />
+    <ClInclude Include="States\StateHMDOp.h" />
+    <ClInclude Include="States\StateIncludes.h" />
+    <ClInclude Include="States\StateInitCameras.h" />
+    <ClInclude Include="States\StateIntro.h" />
+    <ClInclude Include="States\Substate.h" />
+    <ClInclude Include="States\Substate.hpp" />
+    <ClInclude Include="States\SubstateMachine.h" />
+    <ClInclude Include="States\SubstateMachine.hpp" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="TexObj.h" />
+    <ClInclude Include="UISys\CacheRecordUtils.h" />
+    <ClInclude Include="UISys\DynSize.h" />
+    <ClInclude Include="UISys\NinePatcher.h" />
+    <ClInclude Include="UISys\UIBase.h" />
+    <ClInclude Include="UISys\UIButton.h" />
+    <ClInclude Include="UISys\UIColor4.h" />
+    <ClInclude Include="UISys\UIDefines.h" />
+    <ClInclude Include="UISys\UIGraphic.h" />
+    <ClInclude Include="UISys\UIHSlider.h" />
+    <ClInclude Include="UISys\UIPlate.h" />
+    <ClInclude Include="UISys\UIRect.h" />
+    <ClInclude Include="UISys\UISink.h" />
+    <ClInclude Include="UISys\UISys.h" />
+    <ClInclude Include="UISys\UIText.h" />
+    <ClInclude Include="UISys\UIVBulkSlider.h" />
+    <ClInclude Include="UISys\UIVec2.h" />
+    <ClInclude Include="Utils\CarouselData.h" />
+    <ClInclude Include="Utils\cvgAssert.h" />
+    <ClInclude Include="Utils\cvgCamFeedSource.h" />
+    <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
+    <ClInclude Include="Utils\cvgGrabTimer.h" />
+    <ClInclude Include="Utils\cvgOptions.h" />
+    <ClInclude Include="Utils\cvgRect.h" />
+    <ClInclude Include="Utils\cvgShapes.h" />
+    <ClInclude Include="Utils\cvgStopwatch.h" />
+    <ClInclude Include="Utils\cvgStopwatchLeft.h" />
+    <ClInclude Include="Utils\multiplatform.h" />
+    <ClInclude Include="Utils\ProcessingType.h" />
+    <ClInclude Include="Utils\VideoPollType.h" />
+    <ClInclude Include="Utils\yen_threshold.h" />
+    <ClInclude Include="Vendored\lodePNG\lodepng.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_USB.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_Web.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_OpenCVBase.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\CamImpl_StaticImg.cpp" />
+    <ClCompile Include="CamVideo\CamImpl\ICamImpl.cpp" />
+    <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
+    <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp" />
+    <ClCompile Include="CamVideo\IManagedCam.cpp" />
+    <ClCompile Include="CamVideo\ManagedCam.cpp" />
+    <ClCompile Include="CamVideo\ManagedComposite.cpp" />
+    <ClCompile Include="CamVideo\ROIRect.cpp" />
+    <ClCompile Include="CamVideo\SnapRequest.cpp" />
+    <ClCompile Include="CamVideo\VideoRequest.cpp" />
+    <ClCompile Include="Carousel\Carousel.cpp" />
+    <ClCompile Include="DicomUtils\DicomStash.cpp" />
+    <ClCompile Include="FontMgr.cpp" />
+    <ClCompile Include="GLWin.cpp" />
+    <ClCompile Include="Hardware\FauxMouse.cpp" />
+    <ClCompile Include="Hardware\HardwareMgr.cpp" />
+    <ClCompile Include="Hardware\IHardware.cpp" />
+    <ClCompile Include="Hardware\LaserSys.cpp" />
+    <ClCompile Include="HMDOpApp.cpp" />
+    <ClCompile Include="LoadAnim.cpp" />
+    <ClCompile Include="MainWin.cpp" />
+    <ClCompile Include="OpSession.cpp" />
+    <ClCompile Include="States\BaseState.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Base.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Carousel.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_Default.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_InspNavForm.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_MainMenuNav.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_TempNavSliderListing.cpp" />
+    <ClCompile Include="States\HMDOpSubs\HMDOpSub_WidgetCtrl.cpp" />
+    <ClCompile Include="States\StateExit.cpp" />
+    <ClCompile Include="States\StateHMDOp.cpp" />
+    <ClCompile Include="States\StateInitCameras.cpp" />
+    <ClCompile Include="States\StateIntro.cpp" />
+    <ClCompile Include="TexObj.cpp" />
+    <ClCompile Include="UISys\CacheRecordUtils.cpp" />
+    <ClCompile Include="UISys\DynSize.cpp" />
+    <ClCompile Include="UISys\NinePatcher.cpp" />
+    <ClCompile Include="UISys\UIBase.cpp" />
+    <ClCompile Include="UISys\UIButton.cpp" />
+    <ClCompile Include="UISys\UIColor4.cpp" />
+    <ClCompile Include="UISys\UIGraphic.cpp" />
+    <ClCompile Include="UISys\UIPlate.cpp" />
+    <ClCompile Include="UISys\UIRect.cpp" />
+    <ClCompile Include="UISys\UISink.cpp" />
+    <ClCompile Include="UISys\UISys.cpp" />
+    <ClCompile Include="UISys\UIText.cpp" />
+    <ClCompile Include="UISys\UIVBulkSlider.cpp" />
+    <ClCompile Include="UISys\UIVec2.cpp" />
+    <ClCompile Include="UISys\UIHSlider.cpp" />
+    <ClCompile Include="Utils\CarouselData.cpp" />
+    <ClCompile Include="Utils\cvgCamFeedSource.cpp" />
+    <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
+    <ClCompile Include="Utils\cvgGrabTimer.cpp" />
+    <ClCompile Include="Utils\cvgOptions.cpp" />
+    <ClCompile Include="Utils\cvgRect.cpp" />
+    <ClCompile Include="Utils\cvgShapes.cpp" />
+    <ClCompile Include="Utils\cvgStopwatch.cpp" />
+    <ClCompile Include="Utils\cvgStopwatchLeft.cpp" />
+    <ClCompile Include="Utils\multiplatform.cpp" />
+    <ClCompile Include="Utils\ProcessingType.cpp" />
+    <ClCompile Include="Utils\VideoPollType.cpp" />
+    <ClCompile Include="Utils\yen_threshold.cpp" />
+    <ClCompile Include="Vendored\lodePNG\lodepng.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HMDOpView.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="HMDOpView.ico" />
+    <Image Include="small.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

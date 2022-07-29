@@ -1,131 +1,332 @@
-This project is forked from [this repo](https://github.com/Achilefu-Lab/cancer-goggles). It is currently 
-under maintenence and is scheduled to focus on the HMDOpView application in the near-term future. Certain
-things may be broken until then.
+The HMD Op View is an application worn by a fluorescent guided surgery operator to guide them through visualization and execution via a head mounted display (HMD).
 
-# Cancer-Goggles
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-## DNH Information
-For information on the Device Network Hub (DNH), see the DNH folder and the README.md contained in that folder.
 
-## Dashboard Information
-For the Dashboard, see the DNH folder and the README_Dashboard.md contained in that folder.
+The application is designed to build for Windows 10 (x64), and Raspbian Buster (AArch32) for RaspberryPi.
 
-## Desktop Setup
-Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), and update conda base environment:
-```shell
-conda update conda
+# Vendored Libraries
+
+Several libraries are vendored and are contained in the `src/Vendored` directory. These are for 3rd party libraries that are embedded directly in the repo. 
+
+Either because: 
+
+* it is more convenient to do so because of their small size - rather than require an extra installation step.
+*  a very specific version is required to be used with the codebase, and it's easier to maintain that version directly.
+
+Libraries such as Boost or OpenSSL are not vendored either because of their complexity to maintain with respect to portability, or because of their filesize.
+
+# Dependencies
+
+There are multiple 3rd party libraries that will need to be installed, usually through a package manager. 
+
+For instructions on which libraries are needed for which platforms, and the suggested way to install them, see the building instructions below (see [Building On Windows](#Building on Windows) and [Building On Linux](#Building on Linux) )
+
+* OpenCV, Open computer vision library.
+  * Image loading, image processing, and image saving.
+* Boost
+  * A collection of miscellaneous popular C++ libraries.
+* OpenSSL
+  * Internet cryptography library
+* OpenGL, Open Graphics Library
+  * A hardware accelerated graphics rendering API. The application is using an old version of the API, 2.0. In the future this may be bumped up to a more modern version of OpenGL ES if the need arises and if it is confirmed that the RPi supports it and it has the feature-set needed.
+* wxWidgets
+  * Desktop GUI wrapper library. The library allows a single GUI API that can be used on multiple platforms. It also provides miscellaneous desktop utility functions.
+* FTGL
+  * Font rendering library for OpenGL 2.0.
+* FreeType
+  * Dependency for FTGL, for parsing font files.
+* DCMTK, Dicom Toolkit
+  * Library for handling Dicom. While the library has support for both Dicom internet transmission and Dicom files, this application is only interested in file support.
+
+# Repo Structure
+
+* In the root of the repo, supporting directories that are not relevant for program exectution or the codebase will start with an underscore ('_').
+* The root directory will contain runtime files, as well as codebase project files (VS solution files, Makefiles, etc.). Other important miscellaneous files will also be in the root.
+* `_DesignAndDocs` will contain reference design files.
+* `_Specifications` will contain application specifications and file format descriptions.
+* `_SrcAssets` will contain the source file for application graphics and media.
+* `_TechDocAssets` will contain technical documentation and diagrams.
+* `Assets` will contain runtime assets.
+* `src` will contain the codebase.
+
+# Building on Windows
+
+The application is supported for Windows operating systems; specifically Windows 10. This is to leave open the possibility of having a version of the application usuable for x86/x64 Windows systems, as well as giving developers the option to work in a Windows development environment (Visual Studio); both for development and debugging.
+
+Some features may not be available on Windows, such as a RasberryPi cameras and GPIO functionality.
+
+Development for Windows builds expects Visual Studio, specifically Visual Studio 2019 (aka version 16). Other versions may work but are not supported.
+
+## Vcpkg Package Manager
+
+For Windows, the package manager Vcpkg is used to download and compile dependent 3rd party libraries.
+
+Information for getting and setting up the package manager can be found on its [getting started](https://vcpkg.io/en/getting-started.html) webpage. Steps 1 and 2 should be followed to download a copy of the application via `git clone`, as well as setting it up by calling its bootstrap script. Note that from time-to-time, the `vcpkg` repo may need a `git pull` call to update it.
+
+```cmd
+> git clone https://github.com/Microsoft/vcpkg.git
+> .\vcpkg\bootstrap-vcpkg.bat
 ```
 
-Create and activate the development environment:
-```shell
-conda env create --file environment.yml --name goggles-dev
-conda activate goggles-dev
+Search for package:
+
+```cmd
+> .\vcpkg search [search term]
 ```
 
-See the official [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
-for how to manage conda environments.
+Install OpenCV x64 and dependencies with:
 
-Build the Python binding for FPGA and install the App
-```shell
-python setup.py build_ext
-python -m pip install -e .
+## 3rd Party Libraries
+
+The list of dependencies to install for Windows. 
+
+* 3rd party depencency repositories should not be cloned into this repository. None of these dependencies are designed to be git submodules, so there should not be any nesting of repositories inside other repositories.
+* Any mention of vcpkg assumes the command is being run from the vcpkg repository.
+
+### OpenCV
+
+Install OpenCV x64 and dependencies with:
+
+```cmd
+> .\vcpkg .\vcpkg install opencv[ffmpeg]:x64-windows-static-md  nlopt:x64-windows-static-md  boost-asio:x64-windows-static-md  ffmpeg[x264]:x64-windows-static-md  opengl-registry[core]:x64-windows-static-md
 ```
 
-## Raspberry Pi Setup
+Note, this may take a while.
 
-In general, Qt's support for Arm devices is not great. The only prebuild Qt library on Arm is available via `apt`.
-This instruction is for [Ubuntu Desktop 20.10 for Raspberry Pi 4](https://ubuntu.com/download/raspberry-pi).
+Note, ffmpeg may not be needed, this is a holdover from a previous iteration, but this will require testing its removal before changing the README to exclude it.
 
-We chose Ubuntu rather than Raspbian because 64-bit system performs better than 32-bit system with enough resource,
-=======
-In general, Qt's support for Arm devices is not great. The only prebuild Qt library on Arm is available via `apt`.
+### wxWidgets
 
-This instruction is for [Ubuntu Desktop 20.10 for Raspberry Pi 4](https://ubuntu.com/download/raspberry-pi).
+The library can be download from https://www.wxwidgets.org/downloads/. Download and build an x64 version.
 
-If an image for Ubuntu Desktop 20 for Raspberry Pi cannot be found, use Ubuntu Server 20 LTS for Raspberry Pi (64 bit). Then after installing Ubuntu server, install the GNOME UI on it. Instructions for installing GNOME can be found [here](https://www.cyberciti.biz/faq/ubuntu-linux-install-gnome-desktop-on-server/).
+Version 3.1.5 is recommended.
 
-We chose Ubuntu rather than Raspbian because 64-bit system performs better than 32-bit system with enough resource,
-and Pi 4 has enough memory take all benefits of a 64-bit OS. Also, the default Python3 version of Ubuntu 20.10
-is 3.8, which is identical to the version used in development. So this OS requires the least setup.
+### OpenSSL
 
-The following might not be the optimal solution. But it works for now.
+The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
+https://wiki.openssl.org/index.php/Binaries
+OpenSSL 1.1.1 is expected.
 
-Update packages and install PyQt5
-```shell
-sudo apt update
-sudo apt upgrade
-sudo apt install python3-pyqt5
+### Boost 1.77
+
+The build expects Boost 1.77. A modern version of the Boost library is required to ensure its build scripts support Visual Studio 2019.
+https://www.boost.org/users/history/version_1_77_0.html
+Download, unzip and follow its instructions (in the index html files -> getting started guide) to build a 64 bit version.
+
+Most of the setup process should be automated with scripts that come included in the repository. At the end of the process, there should be a `{BOOST_DIR}/stage/lib directory` with the built `*.lib` and `*.dll` files.
+
+Note that at least until, release we will be using the debug variant of Boost so make sure to build it and link to it in .props later.
+
+### FTGL
+
+```cmd
+vcpkg install ftgl:x64-windows opencv:x64-windows
 ```
 
-Create and activate a virtualenv. See [venv](https://docs.python.org/3/library/venv.html) for details.
+### DCMTK
 
-install venv:
-```shell
-sudo apt install python3.8-venv
+```cmd
+vcpkg install dcmtk:x64-windows
 ```
 
-Since we installed pyqt5 at the system level, we need the `--system-site-packages` flag to give venv the access.
-```shell
-python3 -m venv ~/virtualenvs/goggles-dev --system-site-packages
-. ~/virtualenvs/goggles-dev/bin/activate
+## Setting Up Visual Studio
+
+The project for VisualStudio uses project property sheets. This allows each user to specify their own unique locations for Boost and OpenSSL, as well as any other dependencies that may occur in the future.
+
+When assigning values in the XML file, note that there are sample paths that can be referenced.
+
+1. In the `src` directory, rename the file `CoreDependencies._props` to `CoreDependencies.props`
+2. Open `CoreDependencies.props` in a text editor.
+3. Change the entry inside the XML tag `OPENSSL` to the correct location.
+4. Change the entry inside the XML tag `BOOST_DIR` to the correct location.
+5. Change the entry inside the XML tag `VCPKG` to the correct location.
+6. Save the `CoreDependencies.props` file.
+7. Open the `HMDOpView.sln` solution file (in the folder DNH) in Visual Studio.
+
+Notes on the path values being set:
+
+* The OpenSSL folder should have a `.lib` files in it, and an `include` directory.
+* The Boost directory should have a child `boost` directory in it, and a `libs/stage` directory filled with link objects files (dlls and libs).
+* The VCPKG directory will be the vcpkg repo.
+
+Note that `*.prop` files are in the `.gitignore`. the `*_props` file is a template, and all machine specific properties should not be in the repo.
+
+# Building on Linux
+
+The application supports builds on Linux. Specifically for Rasberry Pi4, running Raspbian Buster.
+
+## Apt Package Manager
+
+The Apt package manager is used to obtain required tools and 3rd party libraries.
+
+## Tools
+
+There are some tools that will need to be installed via `apt-get`.
+
+**g++**
+
+If needed, install g++ (the GNU C++ compiler) on the RaspberryPi. To check if g++ is installed, open a terminal and type `whereis g++`. If found, it will show an actual path to a g++ program. Or simply enter `g++` to see if anything runs.
+
+To install g++, enter
+
+```bash
+sudo apt-get install g++
 ```
 
-Inside the `goggles-dev` environment, install dependencies
-```shell
-pip install cython numpy opencv-python pytest
+**make**
+
+If not installed, install make.
+
+```bash
+sudo apt-get install make
 ```
 
-Then build the FPGA binding and install the App using the commend from the previous section.
+make is used to detect compile dependencies and automate the compile and linking process.
 
-## Test the FPGA
-The `--runfpga` flag activates FPGA tests. Those tests would fail if the FPGA is not plugged in.
-```shell
-pytest --runfpga
+## 3rd Party Libraries
+
+The list of 3rd party libraries to install for RaspberryPi.
+
+* Cloned repositories should not be cloned into this repository.
+
+### OpenCV
+
+```bash
+sudo apt-get install libopencv-dev
 ```
 
-#### Note: All DLLs are taken from https://github.com/open-ephys/plugin-GUI
+### wxWidgets
 
-## Start the GUI
-Within `goggles-dev` environment,
-```shell
-python -m src
+wxWidgets is built from source to get a specific version to match with the Windows version.
+Download and unpack the wxWidgets on the Linux machine or a location network accessible to the Linux machine.
+
+The instructions below are originally from https://www.binarytides.com/install-wxwidgets-ubuntu/, but have been modified.
+
+1. Download wxWidgets 3.1.5 and unpack it. (Do NOT put it in the CVG repo.)
+2. Open a terminal and cd into the wxWidgets directory.
+3. `sudo apt-get install libgtk-3-dev build-essential`
+4. `mkdir gtk-build`
+5. `cd gtk-build/`
+6. `../configure --with-opengl --disable-shared --enable-unicode`
+7. `make`
+8. `sudo make install`
+
+To test that wxWidgets has been installed, type `wx-config`, which should run an installed script.
+
+### OpenSSL
+
+The expected version is 1.1.1.
+
+````cmd
+sudo apt-get install libssl-dev
+````
+
+### Boost 1.67
+
+Make sure to get Boost 1.67. More recent versions are ideal, but may not be available in the package manager for supported Linux systems.
+
+````bash
+sudo apt-get install libboost1.67-all
+````
+
+### OpenGL Development Libraries
+
 ```
-Or simply,
-```shell
-goggles
+sudo apt-get install mesa-common-dev freeglut3-dev
 ```
 
-## QT Python Bindings
-There are two popular Python Qt bindings: PyQT and PySide. We are currently using PyQt5 5.15.0, which is the latest
-version available via `apt` on Ubuntu.
+### FTGL and FreeType
 
-## Alternatives of Qt
-[DearPyGui](https://github.com/hoffstadt/DearPyGui) is a new Python Gui framework. It's currently under our evaluation.
-There is a demo GUI implemented using this framework. You can check it out with
-
-```shell
-python [path to]dearpygui_testy.py
+``` bash
+sudo apt-get install libftgl-dev
+sudo apt-get install libfreetype6-dev
 ```
 
-## Streaming
+### DCMTK
 
-### v4l2rtspserver
+To install the Dicom Toolkit (DCMTK), a version of DCMTK at/above version 3.6.7 is required. This is higher than what is currently supported on apt-get, so it will need to be built manually.
 
-Setup v4l2rtspserver on Pi following the [instruction](https://github.com/mpromonet/v4l2rtspserver/wiki/Setup-on-Pi).
-Then start the server by (for usb camera)
-```shell
-v4l2rtspserver -F 25 -H 480 -W 640 -P 8555 /dev/video0
+1. Clone the repo from https://github.com/DCMTK/dcmtk.git
+   1. At least 3.6.7 is required.
+2. In the repository, follow the instructions in `INSTALL` file under `Unix with CMake`
+   1. For the current version as of writing this (07/28/2022), see instructions starting at line 686.
+3. For the install instruction, instead run `sudo make install` to install into the standard directories.
+
+### Userland
+
+For access to MMAL libraries, the userland repo must be built.
+
+1. Download the userland repo to the RaspberryPi.
+2. On the RaspberryPi, `./buildme` as specified in the userland repo instructions.
+   https://github.com/raspberrypi/userland
+3. Then execute the `moves`  target in the DNH/HMDOpView makefile
+   `make moves`
+   This will move the built userland shared objects to a location the build process can access.
+
+## Building
+
+The best way to ensure the build will run on the RaspberryPi is to actually build it on the RaspberryPi.
+
+ This will mean the repository (or maybe just the codebase without Git history) will either need to be on the RaspberryPi storage, or available to the RPi via network drive.
+
+In a terminal, cd to the repo directory. There should be a `Makefile` contained in it.
+
+```
+make clean
 ```
 
-Then using a machine on the same network, view the camera streaming using this script:
-```python
-import cv2
+To clean the current project of any precompiled data.
 
-vcap = cv2.VideoCapture("rtsp://[ip]:8555/unicast")
-while True:
-    ret, frame = vcap.read()
-    cv2.imshow('VIDEO', frame)
-    cv2.waitKey(1)
 ```
+make
+```
+
+To compile the project.
+
+If successful, no errors will be shown and it will create a `hmdopapp` executable in the directory.
+
+### Running The Application
+
+Note: This is a graphical application and will fail to execute if it is run headless (i.e., without a display). It is suggested to run the application with a monitor attached; but if running remotely, executing through VNC has also been observed to work.
+
+# C++
+
+The DNH codebase uses C++17. The general rule being applied is that the C++ standard being used should be the most recent one that's at least 5 years  old. While this is somewhat arbitrary, this is done to make sure the project uses a version of C++ that's available on all supported platforms, as well as helping to make sure the C++ compilers have a certain level of maturity.
+
+# Installation
+
+Currently the deployment target is RaspberryPi. To quickly set up to repo, both for development and deployment, see the `RAWINSTALL.sh` script in the repository root. See the top of the script for extra details.
+
+## Codebase
+
+This section will contain a brief overview of the various subsystems in the codebase (./src).
+
+* CamVideo
+  * Various systems related to camera streaming and saving content from the streams.
+* Carousel
+  * Carousel GUI library. This is the UI system used to display the surgery phase.
+* DicomUtils
+  * Dicom related utilities written for the application.
+* Hardware
+  * The hardware system, as well as various hardware implementations.
+* States
+  * The application state machine, as well as sub-state machines (for states that have there own state machines).
+* UISys
+  * OpenGL UI system. This UI system is a general UI library, but written specifically for this application.
+* Utils
+  * Miscellaneous utilities.
+* Vendored
+  * Miscellaneous vendored libraries.
+
+
+
+# Coding
+
+* Camel case variable names and functions.
+* Variables start with lowercase letters.
+* Functions start with uppercase letters.
+* XML docstrings are used when possible.
+
+# License
+
+TDB
