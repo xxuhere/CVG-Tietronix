@@ -325,7 +325,12 @@ This section will contain a brief overview of the various subsystems in the code
 * Camel case variable names and functions.
 * Variables start with lowercase letters.
 * Functions start with uppercase letters.
-* XML docstrings are used when possible.
+* Be explicit with namespaces.
+* Don't use auto except for exceptionally long names.
+* Vertically align curly braces.
+* Favor vertical code over excessively-horizontal code.
+* XML docstrings are used when possible on class, member and method declarations.
+* Don't apply duplicate docstrings to overloaded functions.
 
 # License
 
