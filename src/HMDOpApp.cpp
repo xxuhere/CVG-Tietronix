@@ -4,6 +4,7 @@
 #include "CamVideo/CamStreamMgr.h"
 #include "FontMgr.h"
 #include <iostream>
+#include <fstream>
 #include "Utils/cvgOptions.h"
 #include "OpSession.h"
 
@@ -52,8 +53,8 @@ bool HMDOpApp::OnInit()
 
         if(createSessionFile)
         {
-            OpSession os;
-            os.SaveToFile("Session.json");
+            std::ofstream outSessionToml(wxGetApp().sessionLoc);
+            outSessionToml << OpSession::GenerateBlankTOMLTemplate();
         }
 
         this->Exit();

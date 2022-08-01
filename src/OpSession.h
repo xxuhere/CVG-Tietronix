@@ -13,6 +13,28 @@ using json = nlohmann::json;
 struct OpSession : public DicomInjector
 {
 public:
+	/// <summary>
+	/// Return values for loading a sessions file.
+	/// See LoadFromFile() for more info.
+	/// </summary>
+	enum LoadRet
+	{
+		/// <summary>
+		/// File was successfully loaded.
+		/// </summary>
+		Success,
+
+		/// <summary>
+		/// There was an error while parsing the file.
+		/// </summary>
+		ParseError,
+
+		/// <summary>
+		/// There was an error while opening the file.
+		/// </summary>
+		OpenError
+	};
+
 	// https://dicom.innolitics.com/ciods/general-ecg/patient/00100040
 	enum Gender
 	{
@@ -64,21 +86,16 @@ public:
 	/// </returns>
 	std::string GenerateSessionPrefix() const;
 
-	json RepresentationAsJSON() const;
-	
-	void Apply(json& data);
-
-	bool LoadFromFile(const std::string& filepath);
-
-	bool SaveToFile(const std::string& filepath) const;
+	LoadRet LoadFromFile(const std::string& filepath, bool throwOnParseErr);
 
 	void Clear();
 
 	void Default();
 
-	bool SaveIntoToml(toml::table& inToml);
-
 	bool LoadFromToml(toml::table& inToml);
+
+public:
+	static std::string GenerateBlankTOMLTemplate();
 
 public:
 	//////////////////////////////////////////////////

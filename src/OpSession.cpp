@@ -7,11 +7,6 @@
 #include <dcmtk/dcmdata/libi2d/i2d.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
 
-static const char* szKey_Firstname			= "firstname";
-static const char* szKey_Middlename			= "middlename";
-static const char* szKey_Lastname			= "lastname";
-static const char* szKey_Sessionname		= "session";
-
 static const char* szToml_Header_Patient	= "patient";
 static const char* szToml_Header_Physician	= "physician";
 static const char* szToml_Header_Name		= "name";
@@ -57,68 +52,31 @@ std::string OpSession::GenerateSessionPrefix() const
 	return "_invalid_";
 }
 
-json OpSession::RepresentationAsJSON() const
-{
-	json ret = json::object();
-	ret[szKey_Firstname		] = this->patientName.firstName;
-	ret[szKey_Middlename	] = this->patientName.middleName;
-	ret[szKey_Lastname		] = this->patientName.lastName;
-	ret[szKey_Sessionname	] = this->sessionName;
-	return ret;
-}
-
-void OpSession::Apply(json& data)
-{
-	if(data.contains(szKey_Firstname) && data[szKey_Firstname].is_string())
-		this->patientName.firstName = data[szKey_Firstname];
-
-	if(data.contains(szKey_Middlename) && data[szKey_Middlename].is_string())
-		this->patientName.middleName = data[szKey_Middlename];
-
-	if(data.contains(szKey_Lastname) && data[szKey_Lastname].is_string())
-		this->patientName.lastName = data[szKey_Lastname];
-
-	if(data.contains(szKey_Sessionname) && data[szKey_Sessionname].is_string())
-		this->sessionName = data[szKey_Sessionname];
-}
-
-bool OpSession::LoadFromFile(const std::string& filepath)
+OpSession::LoadRet OpSession::LoadFromFile(const std::string& filepath, bool throwOnParseErr)
 {
 	std::ifstream ifs(filepath);
 	if(!ifs.is_open())
-		return false;
+	{ 
+		std::cerr << "Could not find session file " << filepath << std::endl;
+		return LoadRet::OpenError;
+	}
 
 	try
 	{ 
 		toml::table parsedToml = toml::parse(ifs);
 		this->Clear();
 		this->LoadFromToml(parsedToml);
-		//this->Default();
-		//this->Apply(loaded);
 	}
 	catch(std::exception& ex)
 	{
 		std::cerr << "Failed to load session from " << filepath << " : " << ex.what() << std::endl;
-		return false;
+
+		if(throwOnParseErr)
+			throw ex;
+
+		return LoadRet::ParseError;
 	}
-	return true;
-}
-
-bool OpSession::SaveToFile(const std::string& filepath) const
-{
-	std::ofstream ofs(filepath);
-	if(!ofs.is_open())
-		return false;
-
-	json jsRepr = this->RepresentationAsJSON();
-
-	// Printing a beautified json output with nhloman
-	// https://stackoverflow.com/q/47834320/2680066
-	//
-	// I don't think the std::endl is required for its newline, 
-	// but to finalize flushing the buffer.
-	ofs << std::setw(4) << jsRepr << std::endl;
-	return true;
+	return LoadRet::Success;
 }
 
 void OpSession::Clear()
@@ -142,11 +100,6 @@ void OpSession::Default()
 	*this = OpSession();
 }
 
-bool OpSession::SaveIntoToml(toml::table& inToml)
-{
-	return true;
-}
-
 const toml::v3::table* EnsureSingleTable(const toml::v3::table* parent, const std::string& key)
 {
 	const toml::v3::node* tomlFind = parent->get(key);
@@ -156,20 +109,17 @@ const toml::v3::table* EnsureSingleTable(const toml::v3::table* parent, const st
 	if(tomlFind->is_table())
 		return tomlFind->as_table();
 
-	if(!tomlFind->is_array())
-		return nullptr;
+	return nullptr;
+}
 
-	// This function requires there to be EXACTLY one instance, that's where
-	// the "Single" comes from in this function's name.
-	const toml::v3::array* tomlArray = tomlFind->as_array();
-	if(tomlArray->size() != 1)
-		return nullptr;
+template <typename ty>
+bool TransferOptional(std::optional<ty>& optVal, ty& dstVal)
+{
+	if(!optVal.has_value())
+		return false;
 
-	const toml::v3::node* singleFindEle = tomlArray->get(0);
-	if(!singleFindEle)
-		return nullptr;
-
-	return singleFindEle->as_table();
+	dstVal = optVal.value();
+	return true;
 }
 
 bool LoadTOMLIntoName(const toml::v3::table* tomlName, DVRPersonName& dstname)
@@ -183,36 +133,12 @@ bool LoadTOMLIntoName(const toml::v3::table* tomlName, DVRPersonName& dstname)
 	std::optional<std::string> firstName	= (*tomlName)[szToml_Key_NameFirst].value<std::string>();
 	std::optional<std::string> prefixName	= (*tomlName)[szToml_Key_NamePrefix].value<std::string>();
 	std::optional<std::string> suffixName	= (*tomlName)[szToml_Key_NameSuffix].value<std::string>();
-	
-	if(lastName.has_value() && !lastName.value().empty())
-	{
-		dstname.lastName = lastName.value();
-		anySet = true;
-	}
 
-	if(middleName.has_value() && !middleName.value().empty())
-	{
-		dstname.middleName = middleName.value();
-		anySet = true;
-	}
-
-	if(firstName.has_value() && !firstName.value().empty())
-	{
-		dstname.firstName = firstName.value();
-		anySet = true;
-	}
-
-	if(prefixName.has_value() && !prefixName.value().empty())
-	{
-		dstname.prefix = prefixName.value();
-		anySet = true;
-	}
-
-	if(suffixName.has_value() && !suffixName.value().empty())
-	{
-		dstname.suffix = suffixName.value();
-		anySet = true;
-	}
+	anySet = TransferOptional(lastName,		dstname.lastName	) || anySet;
+	anySet = TransferOptional(middleName,	dstname.middleName	) || anySet;
+	anySet = TransferOptional(firstName,	dstname.firstName	) || anySet;
+	anySet = TransferOptional(prefixName,	dstname.prefix		) || anySet;
+	anySet = TransferOptional(suffixName,	dstname.suffix		) || anySet;
 
 	return anySet;
 }
@@ -324,6 +250,42 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 	}
 
 	return true;
+}
+
+std::string OpSession::GenerateBlankTOMLTemplate()
+{
+	return 
+	"[patient]\n"
+	"\n"
+	"# Set the patient name, first and last should be filled out.\n"
+	"# If other parts of the name are not relevant, comment them out.\n"
+	"[patient.name]\n"
+	"first 	= \"_unset_first_name_\"\n"
+	"#middle = \"_unset_middle_name_\"\n"
+	"last 	= \"_unset_last_name_\"\n"
+	"#prefix = \"_Sr_\"\n"
+	"#suffix = \"_Phd_\"\n"
+	"\n"
+	"[patient.info]\n"
+	"age = 50\n"
+	"height = 1.6\n"
+	"weight = 150\n"
+	"gender = \"M\"\n"
+	"\n"
+	"[physician]\n"
+	"[physician.name]\n"
+	"first 	= \"P_unset_first_name_\"\n"
+	"middle = \"P_unset_middle_name_\"\n"
+	"last 	= \"P_unset_last_name_\"\n"
+	"prefix = \"P_Sr_\"\n"
+	"suffix = \"P_Phd_\"\n"
+	"\n"
+	"[session]\n"
+	"study = \"_empty_\"\n"
+	"\n"
+	"[institution]\n"
+	"name = \"_institution_\"\n"
+	"addr = \"_addr_\"\n";
 }
 
 void OpSession::InjectIntoDicom(DcmDataset* dicomData)

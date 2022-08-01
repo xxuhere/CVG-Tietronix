@@ -18,6 +18,7 @@
 
 #include <wx/menu.h>
 #include <wx/filename.h>
+#include <exception>
 
 #include "MainWin.h"
 #include "HMDOpApp.h"
@@ -159,14 +160,58 @@ bool MainWin::InitializeSession()
 {
 	const std::string& sessionLoc = wxGetApp().sessionLoc;
 
+	try
+	{ 
+		// Try to load from file
+		OpSession::LoadRet lr = this->opSession.LoadFromFile(sessionLoc, true);
 
-	// Try to load from file
-	if(this->opSession.LoadFromFile(sessionLoc))
-		return true;
+		switch(lr)
+		{
+		case OpSession::LoadRet::Success:
+			return true;
 
-	// If we can't load from file, take what we currently
-	// have (probably a default object) and save that for next time.
-	return this->opSession.SaveToFile(sessionLoc);
+		case OpSession::LoadRet::OpenError:
+			{
+				// If we can't load from file, take what we currently
+				// have (probably a default object) and save that for next time.
+				std::ofstream outSessionToml(wxGetApp().sessionLoc);
+				if(!outSessionToml.is_open())
+				{
+					wxMessageBox(
+						wxString("Could not create default sessions TOML."),
+						"Session file missing.",
+						wxOK);
+
+					exit(1);
+				}
+
+				outSessionToml << OpSession::GenerateBlankTOMLTemplate();
+				outSessionToml.close();
+
+				wxMessageBox(
+					wxString("The session file was missing. One has been created, please edit ") + wxGetApp().sessionLoc + " and restart the program.",
+					"Session file missing.",
+					wxOK);
+
+				exit(1);
+			}
+			return false;
+
+		case OpSession::LoadRet::ParseError:
+			break;
+		}
+	}
+	catch(std::exception& ex)
+	{
+		wxMessageBox(
+			wxString("There was a parse issue when loading the session file:\n\n") + ex.what(),
+			"Session toml error.",
+			wxOK);
+
+		exit(1);
+	}
+
+	return false;
 }
 
 void MainWin::ClearWaitingSnaps()
@@ -241,8 +286,8 @@ std::string MainWin::EnsureAndGetCapturesFolder() const
 		bool sessionWritten = false;
 		bool appOptsWritten = false;
 	
-		if(wxFileExists("Session.json"))
-			sessionWritten = wxCopyFile("Session.json", folderLoc + "/Session.json", false);
+		if(wxFileExists(wxGetApp().sessionLoc))
+			sessionWritten = wxCopyFile(wxGetApp().sessionLoc, folderLoc + "/Session.toml", false);
 
 		const std::string& appOptsLoc = wxGetApp().appOptionsLoc;
 		if(wxFileExists(appOptsLoc.c_str()))
@@ -257,7 +302,7 @@ std::string MainWin::EnsureAndGetCapturesFolder() const
 		}
 
 		if(!sessionWritten)
-			std::cerr << "Could not copy clerical version of sessions.json into session folder; invalid folder/file or file already existed." << std::endl;
+			std::cerr << "Could not copy clerical version of " << wxGetApp().sessionLoc << " into session folder; invalid folder/file or file already existed." << std::endl;
 
 		if(!appOptsWritten)
 			std::cerr << "Could not copy clerical version of AppOptions.json into session folder; invalid folder/file or file already existed." << std::endl;
