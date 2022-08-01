@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+class DicomInjector;
+
 /// <summary>
 /// Abstraction of various hardware
 /// </summary>
@@ -42,6 +44,8 @@ public:
 	/// purpose.
 	/// </returns>
 	virtual bool Shutdown() = 0;
+
+	virtual DicomInjector* GetInjector();
 
 	// Virtual destructor
 	virtual ~IHardware();

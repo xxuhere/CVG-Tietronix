@@ -79,6 +79,9 @@
     <Filter Include="Source Files\Vendored\lodePNG">
       <UniqueIdentifier>{1618174d-2707-4f40-b3ec-ab82c92920ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Vendored\tomlplusplus">
+      <UniqueIdentifier>{238db996-b08b-47f6-8dd3-effc2eb76394}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -309,11 +312,23 @@
     <ClInclude Include="CamVideo\DicomImg_RawJpg.h">
       <Filter>Header Files\CamVideo</Filter>
     </ClInclude>
-    <ClInclude Include="DicomUtils\DicomStash.h">
-      <Filter>Header Files\DicomUtils</Filter>
-    </ClInclude>
     <ClInclude Include="Vendored\lodePNG\lodepng.h">
       <Filter>Header Files\Vendored\lodePNG</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendored\tomlplusplus\toml.hpp">
+      <Filter>Header Files\Vendored\tomlplusplus</Filter>
+    </ClInclude>
+    <ClInclude Include="DicomUtils\DVRPersonName.h">
+      <Filter>Header Files\DicomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="DicomUtils\DicomInjector.h">
+      <Filter>Header Files\DicomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="DicomUtils\DicomInjectorSet.h">
+      <Filter>Header Files\DicomUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="DicomUtils\DicomMiscUtils.h">
+      <Filter>Header Files\DicomUtils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -515,11 +530,20 @@
     <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp">
       <Filter>Source Files\CamVideo</Filter>
     </ClCompile>
-    <ClCompile Include="DicomUtils\DicomStash.cpp">
-      <Filter>Source Files\DicomUtils</Filter>
-    </ClCompile>
     <ClCompile Include="Vendored\lodePNG\lodepng.cpp">
       <Filter>Source Files\Vendored\lodePNG</Filter>
+    </ClCompile>
+    <ClCompile Include="DicomUtils\DVRPersonName.cpp">
+      <Filter>Source Files\DicomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="DicomUtils\DicomInjector.cpp">
+      <Filter>Source Files\DicomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="DicomUtils\DicomInjectorSet.cpp">
+      <Filter>Source Files\DicomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="DicomUtils\DicomMiscUtils.cpp">
+      <Filter>Source Files\DicomUtils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

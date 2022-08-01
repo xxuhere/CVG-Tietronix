@@ -58,3 +58,11 @@ bool CamImpl_StaticImg::PullOptions(const cvgCamFeedLocs& opts)
 	this->imgPath = opts.staticImagePath;
 	return true;
 }
+
+void CamImpl_StaticImg::DelegatedInjectIntoDicom(DcmDataset* dicomData)
+{
+	// This is just test logic.
+	// Just as StaticImg is for development/testing and not 
+	// expected to be used in practice, so are these values.
+	dicomData->putAndInsertString(DCM_SensorName, "TestImage");
+}

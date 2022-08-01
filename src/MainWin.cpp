@@ -8,11 +8,11 @@
 	// WARNING: wx.h must appear before DCMTK stuff or else the typedef for
 	// ssize_t creates a compile error.
 	#include <wx/wx.h>
-	#include "DicomUtils/DicomStash.h"
+	#include "DicomUtils/DicomInjectorSet.h"
 #else
 	// WARNING: Dicom related header files must appear before wxWidgets, to avoid
 	// wxWidgets polluting Dicom stuff with UNICODE requirements.
-	#include "DicomUtils/DicomStash.h"
+	#include "DicomUtils/DicomInjectorSet.h"
 	#include <wx/wx.h>
 #endif
 
@@ -142,28 +142,27 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 #endif
 	}
 
+	// Register Dicom Injectors
+	//
+	//////////////////////////////////////////////////
+	DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
+	dicomInjSet.AddInjectorRef(&this->opSession);
+
+	// Final construction things
+	//
+	//////////////////////////////////////////////////
+
 	this->Show();
 }
 
 bool MainWin::InitializeSession()
 {
-	DicomStash& dicomStash = DicomStash::GetInstance();
-	dicomStash.Clear();
-
 	const std::string& sessionLoc = wxGetApp().sessionLoc;
 
 
 	// Try to load from file
 	if(this->opSession.LoadFromFile(sessionLoc))
-	{
-		dicomStash.SetName(
-			DCM_PatientName,
-			this->opSession.patNameFirst,
-			this->opSession.patNameMid,
-			this->opSession.patNameLast);
-
 		return true;
-	}
 
 	// If we can't load from file, take what we currently
 	// have (probably a default object) and save that for next time.

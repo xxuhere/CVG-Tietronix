@@ -1,0 +1,29 @@
+[patient]
+
+[patient.name]
+first 	= "_unset_first_name_"
+middle 	= "_unset_middle_name_"
+last 	= "_unset_last_name_"
+prefix 	= "_Sr_"
+suffix 	= "_Phd_"
+
+[patient.info]
+age = 50
+height = 1.6
+weight = 150
+gender = "M"
+
+[physician]
+[physician.name]
+first 	= "P_unset_first_name_"
+middle 	= "P_unset_middle_name_"
+last 	= "P_unset_last_name_"
+prefix 	= "P_Sr_"
+suffix 	= "P_Phd_"
+
+[session]
+study = "_empty_"
+
+[institution]
+name = "_institution_"
+addr = "_addr_"

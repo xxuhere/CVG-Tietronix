@@ -1,6 +1,7 @@
 #pragma once
 #include "IHardware.h"
 #include "../Utils/multiplatform.h"
+#include "../DicomUtils/DicomInjector.h"
 
 #if IS_RPI
 	#include <wiringPi.h>
@@ -9,7 +10,9 @@
 /// <summary>
 /// The laser/lamp system.
 /// </summary>
-class LaserSys : public IHardware
+class LaserSys : 
+	public IHardware,
+	public DicomInjector
 {
 public:
 	/// <summary>
@@ -86,4 +89,14 @@ public:
 	bool Initialize() override;
 	bool Validate() override;
 	bool Shutdown() override;
+
+public:
+	DicomInjector* GetInjector() override;
+
+	//////////////////////////////////////////////////
+	//
+	//	DicomInjector FUNCTIONS
+	//
+	//////////////////////////////////////////////////
+	void InjectIntoDicom(DcmDataset* dicomData) override;
 };

@@ -58,7 +58,7 @@ SUBOBJ_CAROUSEL = \
 	Carousel
 
 SUBOBJ_DICOMUTILS = \
-	DicomStash
+	DicomInjector DicomInjectorSet DicomMiscUtils DVRPersonName
 	
 SUBOBJ_HARDWARE = \
 	FauxMouse HardwareMgr IHardware LaserSys
@@ -131,7 +131,6 @@ hmdopview: objs
 	@echo "Copying a copy of dash to parent directory."
 	
 	@echo "Call 'Make all' on HMDOpView directory to finish application build."
-	cp hmdopview.a ../hmdopview.a
 	
 moves:
 	cp /opt/vc/lib/libmmal_core.so /lib/libmmal_core.so

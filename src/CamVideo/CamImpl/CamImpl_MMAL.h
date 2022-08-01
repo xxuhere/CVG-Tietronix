@@ -89,4 +89,5 @@ public:
 	VideoPollType PollType() override;
 	bool IsValid() override;
 	bool PullOptions(const cvgCamFeedLocs& opts) override;
+	void DelegatedInjectIntoDicom(DcmDataset* dicomData) override;
 };

@@ -473,6 +473,8 @@ void default_signal_handler(int signal_number)
  */
 void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
+	CamImpl_MMAL* camImpl = (CamImpl_MMAL*)port->userdata;
+
 	if (buffer->cmd == MMAL_EVENT_PARAMETER_CHANGED)
 	{
 		MMAL_EVENT_PARAMETER_CHANGED_T *param = (MMAL_EVENT_PARAMETER_CHANGED_T *)buffer->data;
@@ -491,6 +493,10 @@ void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 				//
 				//std::cerr << "AWB R=" << settings->awb_red_gain.num  << settings->awb_red_gain.den << 
 				//			 ", B= "  << settings->awb_blue_gain.num << settings->awb_blue_gain.den << std::endl;
+
+				// How much of the settings values we want to cache is 
+				// dependent on what's useful. For now we're just doing
+				// these 3 for example's sake.
 			}
 			break;
 		}
@@ -959,4 +965,10 @@ bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
 	this->ICamImpl::PullOptions(opts);
 	this->devCamID = opts.camMMALIdx;
 	return true;
+}
+
+void CamImpl_MMAL::DelegatedInjectIntoDicom(DcmDataset* dicomData)
+{
+	// TODO: Poll camera name and insert
+	dicomData->putAndInsertString(DCM_SensorName, "MMAL(TODO)");
 }

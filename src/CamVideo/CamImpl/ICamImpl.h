@@ -1,8 +1,10 @@
 #pragma once
 
+#include "../DicomUtils/DicomInjector.h"
 #include "../../Utils/VideoPollType.h"
 #include "../../Utils/cvgOptions.h"
 #include <opencv2/core.hpp>
+#include <dcmtk/dcmdata/dcdeftag.h>
 
 /// <summary>
 /// Base class for an implementation of polling video frames from
@@ -147,6 +149,15 @@ public:
 	/// </param>
 	/// <returns>The success of reading options.</returns>
 	virtual bool PullOptions(const cvgCamFeedLocs& opts);
+
+	/// <summary>
+	/// This will be called from an IManagedCam - used to 
+	/// 
+	/// 
+	/// NOTE THIS WILL NOT BE (currently) USED FOR COMPOSITES.
+	/// </summary>
+	/// <param name="dicomData"></param>
+	virtual void DelegatedInjectIntoDicom(DcmDataset* dicomData);
 
 	virtual ~ICamImpl();
 };

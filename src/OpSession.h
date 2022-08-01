@@ -1,32 +1,57 @@
 #pragma once
 #include <string>
+#include "DicomUtils/DVRPersonName.h"
+#include "DicomUtils/DicomInjector.h"
 #include "nlohmann/json.hpp"
+#include "tomlplusplus/toml.hpp"
 
 using json = nlohmann::json;
 
 /// <summary>
 /// Operation session data.
-/// 
-/// NOTE: currently UNUSED.
 /// </summary>
-struct OpSession
+struct OpSession : public DicomInjector
 {
-	// Patient's first name
-	std::string patNameFirst = "__unset_firstname";
+public:
+	// https://dicom.innolitics.com/ciods/general-ecg/patient/00100040
+	enum Gender
+	{
+		Male,
+		Female,
+		Other,
 
-	// Patient's middle name
-	std::string patNameMid = "__unset_middlename";
+		// Error code on our end, not a real Dicom standard value.
+		Unset 
+	};
 
-	// Patient's last name
-	std::string patNameLast = "__unset_lastname";
+public:
+	DVRPersonName patientName;
 
 	// Session name metadata
 	std::string sessionName = "__unset_sessionname";
 
-	void SetName(
-		const std::string& first, 
-		const std::string& mid, 
-		const std::string& last);
+	// Patient gender
+	Gender gender = Gender::Unset;
+
+	// https://dicom.innolitics.com/ciods/rt-plan/rt-series/00081072/00080080
+	std::string institution = "";
+
+	// https://dicom.innolitics.com/ciods/rt-plan/rt-series/00081072/00080081
+	std::string institutionAddr = "";
+
+	// https://dicom.innolitics.com/ciods/cr-image/general-series/00081050
+	DVRPersonName physicianName;
+
+	std::string studyDescription = "";
+
+	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101020
+	float patientSize = 0.0f;
+
+	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101030
+	float patientWeight = 0.0f;
+
+	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101010
+	int patientAge = 0;
 
 	void SetSession(const std::string& session);
 
@@ -50,4 +75,16 @@ struct OpSession
 	void Clear();
 
 	void Default();
+
+	bool SaveIntoToml(toml::table& inToml);
+
+	bool LoadFromToml(toml::table& inToml);
+
+public:
+	//////////////////////////////////////////////////
+	//
+	//	DicomInjector FUNCTIONS
+	//
+	//////////////////////////////////////////////////
+	void InjectIntoDicom(DcmDataset* dicomData) override;
 };

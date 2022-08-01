@@ -34,4 +34,6 @@ public:
 	CamImpl_StaticImg(const std::string& imgPath);
 	VideoPollType PollType() override;
 	bool IsValid() override;
+
+	void DelegatedInjectIntoDicom(DcmDataset* dicomData) override;
 };

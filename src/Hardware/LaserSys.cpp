@@ -1,9 +1,16 @@
+
 #include "LaserSys.h"
+#include <dcmtk/dcmdata/dcdeftag.h>
 #include <algorithm>
 #include <iostream>
 
 #define PIN_NIR_BCM_PIN 25
 #define PIN_WHITE_BCM_PIN 6
+
+// Something is defining macros for min and max, 
+// which we'll need to undo.
+#undef min
+#undef max
 
 // The current version of C++ we're using doesn't
 // have std::clamp().
@@ -112,3 +119,15 @@ bool LaserSys::Validate()
 
 bool LaserSys::Shutdown()
 { return true; }
+
+DicomInjector* LaserSys::GetInjector()
+{
+	return this;
+}
+
+void LaserSys::InjectIntoDicom(DcmDataset* dicomData)
+{
+	// TODO: Sample dicom injection
+	dicomData->putAndInsertFloat32(
+		DCM_ExcitationFrequency, 720.0f);
+}

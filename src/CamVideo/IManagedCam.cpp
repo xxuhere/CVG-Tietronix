@@ -7,6 +7,7 @@
 #include "../Utils/cvgStopwatchLeft.h"
 
 #include <dcmtk/dcmdata/dcfilefo.h>
+#include <dcmtk/dcmdata/dcdeftag.h>
 #include <dcmtk/dcmdata/libi2d/i2dimgs.h>
 #include <dcmtk/dcmdata/libi2d/i2dbmps.h>
 #include <dcmtk/dcmdata/libi2d/i2djpgs.h>
@@ -18,7 +19,8 @@
 
 #include "DicomImg_RawJpg.h"
 
-#include "../DicomUtils/DicomStash.h"
+#include "../DicomUtils/DicomInjectorSet.h"
+#include "../DicomUtils/DicomMiscUtils.h"
 
 #include <iostream>
 #include "../Utils/cvgAssert.h"
@@ -263,6 +265,8 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		sptrSwap.erase(sptrSwap.begin() + i);
 	}
 
+	DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
+
 	// SAVE SNAPSHOTS OF PREPROCESSED
 	//
 	if(!rawSnaps.empty())
@@ -314,9 +318,20 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 			cond = i2d.updateOffsetTable();
 			cond = i2d.updateLossyCompressionInfo(inputImgSrc, 1, resultObject);
 			DcmFileFormat dcmff(resultObject);
-			
-			DicomStash& dicomStash = DicomStash::GetInstance();
-			dicomStash.DumpStashCloneInto(dcmff.getDataset());
+
+			DcmDataset* dicomData = dcmff.getDataset();
+			//
+			// ADD DICOM TIMESTAMPS
+			// https://dicom.innolitics.com/ciods/cr-image/general-study/00080020
+			dicomData->putAndInsertString(DCM_StudyDate, DicomMiscUtils::GetCurrentDateString().c_str());
+			// https://dicom.innolitics.com/ciods/cr-image/general-study/00080030
+			dicomData->putAndInsertString(DCM_StudyTime, DicomMiscUtils::GetCurrentTime().c_str());
+			//
+			// ADD DICOM INJECTION SET DATA
+			dicomInjSet.InjectDataInto(dicomData);
+			//
+			// ADD DICOM CAMERA DATA
+			this->InjectIntoDicom(dicomData);
 
 			cond = dcmff.saveFile((snreq->filename + ".dcm").c_str(), writeXfer);
 
@@ -534,4 +549,9 @@ void IManagedCam::ApplySnapshotWatermarkText(
 		20, 
 		1.0, 
 		0xFF00FF);
+}
+
+void IManagedCam::InjectIntoDicom(DcmDataset* dicomData)
+{
+	// Do-nothing, see declaration for more details.
 }

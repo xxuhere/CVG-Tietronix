@@ -17,6 +17,8 @@
 #include <memory>
 #include <vector>
 
+#include "../DicomUtils/DicomInjector.h"
+
 /// <summary>
 /// Parameter ID values for ALL items that can be used for 
 /// GetFloat() or SetFloat(), for ALL IManagedCam subclasses.
@@ -105,7 +107,7 @@ enum SpecialCams
 /// code. Instead, access should be limited by using the public member
 /// functions provided by the public functions of CamStreamMgr.
 /// </summary>
-class IManagedCam
+class IManagedCam : public DicomInjector
 {
 	friend class CamStreamMgr;
 
@@ -121,7 +123,7 @@ public:
 		Unknown,
 
 		/// <summary>
-		/// The manager's thread is running, but not idling.
+		/// The manager's thread is running, but idling.
 		/// </summary>
 		Idling,
 
@@ -506,4 +508,18 @@ public:
 	/// <param name="mat">The image to apply the watermark to.</param>
 	/// <param name="text">The watermark text.</param>
 	void ApplySnapshotWatermarkText(cv::Mat& mat, const std::string& text);
+
+public:
+	//////////////////////////////////////////////////
+	//
+	//	DicomInjector FUNCTIONS
+	//
+	//////////////////////////////////////////////////
+
+	// Set to do-nothing, but open for subclasses implement on-top.
+	//
+	// This will NOT be added to the singleton DicomInjectorSet. It
+	// will inject in the polling loop, only for assets that its 
+	// directly saving.
+	virtual void InjectIntoDicom(DcmDataset* dicomData);
 };

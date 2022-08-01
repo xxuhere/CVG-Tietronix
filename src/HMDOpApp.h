@@ -17,7 +17,7 @@ public:
     /// </summary>
     std::string appOptionsLoc = "AppOptions.json";
 
-    std::string sessionLoc = "Session.json";
+    std::string sessionLoc = "Session.toml";
 
 public:
     bool OnInit() override;

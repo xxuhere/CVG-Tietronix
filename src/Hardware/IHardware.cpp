@@ -2,3 +2,8 @@
 
 IHardware::~IHardware()
 {}
+
+DicomInjector* IHardware::GetInjector()
+{
+	return nullptr;
+}

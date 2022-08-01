@@ -1,4 +1,13 @@
-#include "ManagedComposite.h"
+
+// Issue with wxWidgets and DCMTK requiring different
+// include orders of different platforms.
+#if WIN32
+	#include "../Utils/cvgRect.h"
+	#include "ManagedComposite.h"
+#else
+	#include "ManagedComposite.h"
+	#include "../Utils/cvgRect.h"
+#endif
 
 #include "../Utils/cvgAssert.h"
 #include "../Utils/cvgStopwatch.h"
@@ -6,7 +15,6 @@
 #include "../Utils/multiplatform.h"
 
 // Imitating how compositing happens in OpenGL for StateHMDOp
-#include "../Utils/cvgRect.h"
 #include "ROIRect.h"
 
 #include <mutex>

@@ -1,5 +1,6 @@
 #include "HardwareMgr.h"
 #include "IHardware.h"
+#include "../DicomUtils/DicomInjectorSet.h"
 
 void HardwareMgr::ClearHardware(bool del)
 {
@@ -69,6 +70,15 @@ bool HardwareMgr::Initialize(std::ostream& errStream)
 		{
 			ret = false;
 			errStream << "Initialization of " << ihw->HWName() << " returned in error!" << std::endl;
+		}
+
+		// If it implements an injector, auto-register it with the 
+		// singleton injector set.
+		DicomInjector* dji = ihw->GetInjector();
+		if(dji)
+		{
+			DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
+			dicomInjSet.AddInjectorRef(dji);
 		}
 	}
 	// _initialize is somewhat a misnomer, because validation

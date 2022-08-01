@@ -478,3 +478,9 @@ void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 
 	this->IManagedCam::_DeactivateStreamState(deactivateShould);
 }
+
+void ManagedCam::InjectIntoDicom(DcmDataset* dicomData)
+{
+	if(currentImpl != nullptr && currentImpl->IsValid())
+		currentImpl->DelegatedInjectIntoDicom(dicomData);
+}

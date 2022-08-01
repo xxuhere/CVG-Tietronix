@@ -46,3 +46,8 @@ bool ICamImpl::PullOptions(const cvgCamFeedLocs& opts)
 	this->prefHeight	= opts.streamHeight;
 	return true;
 }
+
+void ICamImpl::DelegatedInjectIntoDicom(DcmDataset* dicomData)
+{
+	// Does nothing, subclasses are expected to implement this.
+}

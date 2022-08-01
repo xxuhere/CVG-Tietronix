@@ -88,3 +88,9 @@ bool CamImpl_OpenCVBase::IsValid()
 		this->IsStreamAllocated() && 
 		this->ocvStream->isOpened();
 }
+
+void CamImpl_OpenCVBase::DelegatedInjectIntoDicom(DcmDataset* dicomData)
+{
+	// TODO: Placeholder, this should be more specific.
+	dicomData->putAndInsertString(DCM_SensorName, "OpenCV Stream");
+}

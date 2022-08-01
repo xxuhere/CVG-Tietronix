@@ -110,6 +110,8 @@ public:
 
 	std::string GetStreamName() const override;
 
+	void InjectIntoDicom(DcmDataset* dicomData) override;
+
 	//////////////////////////////////////////////////
 	//
 	//		IMAGE PROCESSING METHODS

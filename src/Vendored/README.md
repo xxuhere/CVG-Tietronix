@@ -25,6 +25,16 @@ A vector math library designed for use with OpenGL.
 Currently unused. It is currently being kept in case 3D math is required
 for future features.
 
+## lodePNG
+
+https://github.com/lvandeve/lodepng
+**Name:** LodePNG
+**Version** 
+**License:** zLib
+**Justification:** 
+A PNG library. While OpenCV also supports PNGs, LodePNG tends to be more
+robust. LodePNG is preferred when loading PNG for GUI assets.
+
 ## json
 
 https://github.com/nlohmann/json
@@ -38,15 +48,18 @@ needed to effectively perform these jobs.
 Only relevant files are taken. The repo also contains demo code
 and supporting files that were not vendored.
 
-## lodePNG
+# tomlplusplus
 
-https://github.com/lvandeve/lodepng
-**Name:** LodePNG
-**Version** 
-**License:** zLib
+https://github.com/marzer/tomlplusplus
+**Name:** tomlplusplus
+**Version: ** v3.1.0 (Single header)
+**License:** MIT License
 **Justification:** 
-A PNG library. While OpenCV also supports PNGs, LodePNG tends to be more
-robust. LodePNG is preferred when loading PNG for GUI assets.
+Support for TOML option files, to support configuration files that can have 
+comments and are more human readable than JSON.
+
+The single header version is used, and only the single header and license
+files are vendored.
 
 # Dependencies
 

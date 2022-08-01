@@ -66,4 +66,6 @@ public:
 	//
 	//VideoPollType PollType() override;
 	bool IsValid() override;
+
+	void DelegatedInjectIntoDicom(DcmDataset* dicomData) override;
 };
