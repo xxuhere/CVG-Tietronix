@@ -12,20 +12,27 @@ bool HMDOpApp::OnInit()
 {
     bool createOptionsFile = false;
     bool createSessionFile = false;
+    bool showHelp = false;
 
     // Custom AppOptions.json load location
     wxArrayString cmdArgs = this->argv.GetArguments();
     for (int i = 1; i < cmdArgs.size(); ++i)
     {
-        if(cmdArgs[i].Lower() == "--create-options")
+        if(cmdArgs[i] == "--create-options")
         {
             createOptionsFile = true;
             continue;
         }
 
-        if(cmdArgs[i].Lower() == "--create-session")
+        if(cmdArgs[i] == "--create-session")
         {
             createSessionFile = true;
+            continue;
+        }
+
+        if(cmdArgs[i] == "--help")
+        {
+            showHelp = true;
             continue;
         }
 
@@ -39,6 +46,27 @@ bool HMDOpApp::OnInit()
 
         this->appOptionsLoc = cmdArgs[i];
         break;
+    }
+
+    if(showHelp == true)
+    {
+        std::cout << "Usage:" << std::endl;
+        std::cout << "    hmdopapp --help" << std::endl;
+        std::cout << "        Show CLI help." << std::endl;
+        std::cout << "    hmdopapp --create-options [optsfile]" << std::endl;
+        std::cout << "        Create a new default AppOptions JSON file." << std::endl;
+        std::cout << "    hmdopapp --create-session [sessfile]" << std::endl;
+        std::cout << "        Create a new default TOML file." << std::endl;
+        std::cout << "    hmdopapp [optsfile]" << std::endl;
+        std::cout << "        Open the GUI with a specific AppOptions file." << std::endl;
+        std::cout << std::endl << std::endl;
+        std::cout << "Params:" << std::endl;
+        std::cout << "    optsfile" << std::endl;
+        std::cout << "        The AppOptions json file. Defaulted to AppOptions.json." << std::endl;
+        std::cout << "    sessfile" << std::endl;
+        std::cout << "        The sessions toml file. Defaulted to Session.toml." << std::endl;
+
+        exit(1);
     }
 
     // If a create document param was found, the don't run the UI at all,

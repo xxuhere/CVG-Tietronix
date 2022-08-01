@@ -202,7 +202,7 @@ bool MainWin::InitializeSession()
 		}
 	}
 	catch(std::exception& ex)
-	{
+	{ 
 		wxMessageBox(
 			wxString("There was a parse issue when loading the session file:\n\n") + ex.what(),
 			"Session toml error.",
