@@ -18,6 +18,7 @@ hmdopapp
 
 AppOptions.json
 Session.json
+*.toml
 *.mkv
 Snap*.png
 Captures
