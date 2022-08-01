@@ -141,7 +141,7 @@ moves:
 	cp /opt/vc/lib/libbcm_host.so /lib/libbcm_host.so
 	
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags --libs --gl-libs std,aui` -c $< -o $@ -I/opt/vc/include/ -I$(VEND) -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL)
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` -c $< -o $@ -I/opt/vc/include/ -I$(VEND) -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL)
 
 objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_MAIN) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	@echo "TARGET objs"
