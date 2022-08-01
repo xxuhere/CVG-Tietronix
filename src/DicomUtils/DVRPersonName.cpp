@@ -53,7 +53,6 @@ void DVRPersonName::Set(
 //	component delimiters, i.e., none after the last 
 //	component if all components are present. Delimiters 
 //	are required for interior null components."
-
 bool DVRPersonName::LoadFromDicomForm(const std::string& str)
 {
 	std::vector<std::string> splitRes;
