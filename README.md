@@ -322,15 +322,16 @@ This section will contain a brief overview of the various subsystems in the code
 
 # Coding
 
-* Camel case variable names and functions.
+* [Camel case](https://en.wikipedia.org/wiki/Camel_case) variable names and function names.
 * Variables start with lowercase letters.
 * Functions start with uppercase letters.
-* Be explicit with namespaces.
-* Don't use auto except for exceptionally long names.
+* Be explicit with the `std` namespaces.
+* Don't use `auto` except for exceptionally long type names.
 * Vertically align curly braces.
 * Favor vertical code over excessively-horizontal code.
 * XML docstrings are used when possible on class, member and method declarations.
 * Don't apply duplicate docstrings to overloaded functions.
+* Favor [return early](https://medium.com/swlh/return-early-pattern-3d18a41bba8) coding.
 
 # License
 
