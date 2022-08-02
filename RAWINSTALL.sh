@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+
+# To download this file via wget, use 
+# wget https://raw.githubusercontent.com/Achilefu-Lab/CVG-Tietronix/main/RAWINSTALL.sh
+#
+# This can be used to get the latest file from the repository without cloning
+# the repository. You should not manually clone the repository when using
+# this script, because the script will do that for you at the right time.
+
 ##################################################
 #
 #	RAW INSTALLER
@@ -7,7 +16,11 @@
 # human intervention as possible.
 #
 # The entire process is expected to take a few hours, with
-# the compilation of wxWidgets taking the longest part.
+# the compilation of wxWidgets taking the longest part. The 
+# compilation of DCMTK is also expected to take some time.
+#
+# Note that wherever you run this is where the application repo,
+# as well as the dependency repos, will be installed.
 #
 # THIS SCRIPT IS ONLY OCCASIONALLY UPDATED, AS TESTING IT
 # REQUIRES RECREATING A BLANK RPI IMAGE AND LETTING IT
@@ -15,8 +28,14 @@
 #
 ##################################################
 
+# The Repo project
+PROJECT_REPO=https://github.com/Achilefu-Lab/CVG-Tietronix.git
+
 # The commit that was last tested to successfully rebuild from.
-SUPPORTED_COMMIT=84b79af9900a94d9dd8a706faeeae24b8424e3f2
+SUPPORTED_COMMIT=58499d5ac9e338a7704455c6c0bc49adbc20ea75
+
+# The version of DCMTK to pull
+DCMTK_TAG=DCMTK-3.6.7 
 
 sudo apt update
 
@@ -47,6 +66,49 @@ sudo apt-get -y install cmake
 
 ##################################################
 #
+#	DCMTK
+#
+##################################################
+
+sudo apt-get -y install libxml2-dev
+
+if [ ! -d "dcmtk"]
+then
+	git clone https://github.com/DCMTK/dcmtk.git
+	pushd dcmtk
+	git checkout tags/$DCMTK_TAG
+	
+	# For this repo that's created and managed by the automation script, 
+	# we're just going to build directly in the repo.
+	mkdir build
+	cd build
+	cmake ..
+	make -j8
+	sudo make install
+	
+	popd
+fi
+
+##################################################
+#
+#	PULL AND BUILD MMAL
+#
+##################################################
+
+if [ ! -f /opt/vc/lib/libmmal.so ]
+then
+	if [ ! -d userland ]
+	then 
+		git clone https://github.com/raspberrypi/userland.git
+	fi
+
+	pushd userland
+	sudo ./buildme
+	popd # Pop userland
+fi
+
+##################################################
+#
 #	WXWIDGETS
 #
 ##################################################
@@ -55,6 +117,9 @@ sudo apt-get -y install cmake
 sudo apt-get -y install p7zip-full
 sudo apt-get -y install libgtk-3-dev build-essential 
 
+# wx-config only exists if wxWidgets is already installed - 
+# Note that this doesn't currently guard against an
+# incorrect version of wxWidgets.
 if [ -z $(command -v wx-config) ]
 then
 
@@ -89,23 +154,6 @@ then
 
 	popd # Pop wxWidgets-3.1.5.7
 fi
-##################################################
-#
-#	PULL AND BUILD MMAL
-#
-##################################################
-
-if [ ! -f/opt/vc/lib/libmmal.so ]
-then
-	if [ ! -d userland ]
-	then 
-		git clone https://github.com/raspberrypi/userland.git
-	fi
-
-	pushd userland
-	sudo ./buildme
-	popd # Pop userland
-fi
 
 ##################################################
 #
@@ -114,19 +162,19 @@ fi
 ##################################################
 if [ ! -d cancer-goggles ]
 then
-	git clone https://github.com/Achilefu-Lab/cancer-goggles.git
+	git clone $PROJECT_REPO
 fi
 
-pushd cancer-goggles
+pushd CVG-Tietronix
 git fetch
 git checkout $SUPPORTED_COMMIT
 
-cd DNH/HMDOpView
-if [ ! -f /lib/libmmal.so ]
-then
-	sudo make moves
-fi
+# Move installed MMAL into /usr regions
+sudo make moves
+
+# Sanity clean
 make clean
+# Make the actual application
 make all
 
 popd
