@@ -32,7 +32,7 @@
 PROJECT_REPO=https://github.com/Achilefu-Lab/CVG-Tietronix.git
 
 # The commit that was last tested to successfully rebuild from.
-SUPPORTED_COMMIT=58499d5ac9e338a7704455c6c0bc49adbc20ea75
+SUPPORTED_COMMIT=1ddf8102f8aef3b23fc00adbbe3026a592a83bf2
 
 # The version of DCMTK to pull
 DCMTK_TAG=DCMTK-3.6.7 
@@ -45,7 +45,7 @@ sudo apt update
 
 # OPTIONAL, ENABLE SSH
 sudo apt-get -y install openssh-server
-sudo systemctl status ssh
+# sudo systemctl status ssh
 sudo apt-get -y install ufw
 sudo ufw allow ssh
 
@@ -72,7 +72,7 @@ sudo apt-get -y install cmake
 
 sudo apt-get -y install libxml2-dev
 
-if [ ! -d "dcmtk"]
+if [ ! -d "dcmtk" ]
 then
 	git clone https://github.com/DCMTK/dcmtk.git
 	pushd dcmtk
