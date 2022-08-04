@@ -97,7 +97,7 @@ EXPOBJS_UTILS = $(patsubst %,$(SUBDIR_UTILS)/%.o,$(SUBOBJ_UTILS))
 # because after some testing, I have no idea what order these are supposed to go in
 # without invoking linker errors without treating them as cyclic dependencies.
 # (wleu 07/28/2022)
-DCMLIBS = -Wl,--start-group -ldl -ldcmxml -ldcmdata -loficonv -lofstd -li2d -loflog -Wl,--end-group
+DCMLIBS = -Wl,--start-group -ldl -ldcmdata -lofstd -li2d -loflog -ldcmxml -licuuc -Wl,--end-group
 
 ##################################################
 #

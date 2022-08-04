@@ -246,11 +246,24 @@ sudo apt-get install libfreetype6-dev
 
 To install the Dicom Toolkit (DCMTK), a version of DCMTK at/above version 3.6.7 is required. This is higher than what is currently supported on apt-get, so it will need to be built manually.
 
-1. Clone the repo from https://github.com/DCMTK/dcmtk.git
-   1. At least 3.6.7 is required.
+1. Clone the repo from https://github.com/DCMTK/dcmtk.git 
+   1. Release 3.6.7 is required.  This is because that's what we're targeting, and different versions may require changes to the application makefile.
 2. In the repository, follow the instructions in `INSTALL` file under `Unix with CMake`
-   1. For the current version as of writing this (07/28/2022), see instructions starting at line 686.
+   1. For the target release, see instructions in the INSTALL starting at line 686.
 3. For the install instruction, instead run `sudo make install` to install into the standard directories.
+
+To follow the instructions above, you can use the commands below.
+
+```bash
+git clone https://github.com/DCMTK/dcmtk.git 
+cd dcmtk
+git checkout tags/DCMTK-3.6.7
+mkdir build
+cd build
+cmake ..
+make -j8
+sudo make install
+```
 
 ### Userland
 
@@ -262,6 +275,18 @@ For access to MMAL libraries, the userland repo must be built.
 3. Then execute the `moves`  target in the DNH/HMDOpView makefile
    `make moves`
    This will move the built userland shared objects to a location the build process can access.
+
+```bash
+git clone https://github.com/raspberrypi/userland.git
+cd userland
+sudo ./buildme
+
+# Afterwards, use the target `moves` in the makefile to copy the built MMAL library files into the expected location for g++
+cd <this_repo>
+sudo make moves
+```
+
+
 
 ## Building
 
