@@ -230,12 +230,40 @@ public:
 	/// <param name="pt">The camera's new processing type.</param>
 	bool SetProcessingType(int idx, ProcessingType pt);
 
+	/// <summary>
+	/// Get a float property value.
+	/// See IManagedCam::GetFloat() for more details.
+	/// </summary>
+	/// <param name="id">The id of the camera.</param>
+	/// <param name="paramid">The parameter to retrieve the value of.</param>
+	/// <returns>The retrieved value.</returns>
 	float GetFloat(int id, StreamParams paramid);
 
+	/// <summary>
+	/// Set a float property value.
+	/// See IManagedCam::SetFloat() for more details.
+	/// </summary>
+	/// <param name="id">The id of the camera.</param>
+	/// <param name="paramid">The parameter to set the value of.</param>
+	/// <param name="value">The value to set.</param>
+	/// <returns>
+	/// true if successful. false if the paramid was unknown, or 
+	/// if an error occured.
+	/// </returns>
 	bool SetFloat(int id, StreamParams paramid, float value);
 
+	/// <summary>
+	/// Set the watermark caption for a specific camera stream.
+	/// </summary>
+	/// <param name="id">The camera stream id.</param>
+	/// <param name="caption">The new caption.</param>
 	void SetSnapCaption(int id, const std::string& caption);
 
+	/// <summary>
+	/// For evert camera stream being managed, set their 
+	/// watermark caption to a specified value.
+	/// </summary>
+	/// <param name="caption">The new caption.</param>
 	void SetAllSnapCaption(const std::string& caption);
 
 private:

@@ -4,9 +4,16 @@
 // See i2djpgs.cc from the DMCTK library for the template of how
 // jpegs are saved to dicoms.
 
+/// <summary>
+/// Implementation of I2DImgSource to save an OpenCV image as a
+/// jpeg, embedded in a Dicom file.
+/// </summary>
 class DicomImg_RawJpg : public I2DImgSource
 {
 public:
+	/// <summary>
+	/// The image to jpeg encode into a Dicom.
+	/// </summary>
 	cv::Mat* matImg;
 
 public:

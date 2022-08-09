@@ -331,15 +331,32 @@ public:
 		const std::string& label,
 		const std::string& caption);
 
+	/// <summary>
+	/// Get the shorthand label of the currently selected item.
+	/// </summary>
+	/// <returns></returns>
 	std::string GetCurrentLabel() const;
 
+	/// <summary>
+	/// Get the caption of the currently selected item.
+	/// </summary>
 	std::string GetCurrentCaption() const;
 
+	/// <summary>
+	/// Get the index of the currectly selected item.
+	/// </summary>
 	int GetCurrentIndex() const;
 
 	inline int GetIndexCount()
 	{ return this->entries.size(); }
 
+	/// <summary>
+	/// Get the data for what the carousel currently has selected.
+	/// </summary>
+	/// <returns>
+	/// The CarouselData of the currently selected item. Or, blank
+	/// dummy-data if the carousel is empty.
+	/// </returns>
 	CarouselData GetCurrentData() const;
 
 	bool AtStart() const;
