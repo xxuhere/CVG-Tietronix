@@ -151,14 +151,29 @@ public:
 	/// Queue a snapshot request for the new camera frame.
 	/// </summary>
 	/// <param name="idx">The video index to queue.</param>
-	/// <param name="filename">The filename to save the snapshot as.</param>
+	/// <param name="filename">
+	/// The filename to save the snapshot as.
+	/// Do not include a file extension, (for now) it is assumed to be a Dicom file.
+	/// </param>
 	/// <param name="procType">The processing type to save.</param>
-	/// <returns>The return value</returns>
+	/// <returns>A handle to the generated snapshot request.</returns>
 	SnapRequest::SPtr RequestSnapshot(
 		int idx, 
 		const std::string& filename, 
 		SnapRequest::ProcessType procType);
 
+	/// <summary>
+	/// Queue a snapshot request for all camera streams.
+	/// </summary>
+	/// <param name="filenameBase">
+	/// The base filename to save the snapshot as. More will be added to the
+	/// filename to identify the camera stream. 
+	/// Do not include a file extention, (for now) it is assumed to be a Dicom file.
+	/// </param>
+	/// <returns>
+	/// Handles to the generated snapshot requests. There should be one for every
+	/// known camera stream.
+	/// </returns>
 	std::vector<SnapRequest::SPtr> RequestSnapshotAll(const std::string& filenameBase);
 
 	/// <summary>

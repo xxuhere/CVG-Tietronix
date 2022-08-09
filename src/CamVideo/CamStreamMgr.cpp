@@ -186,7 +186,7 @@ std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::strin
 	for(IManagedCam* mc : allCams)
 	{
 		std::string strIdx = mc->GetStreamName();
-		std::string fullFilename = filenameBase + "_" + strIdx + "RAW.png";
+		std::string fullFilename = filenameBase + "_" + strIdx + "RAW";
 		SnapRequest::SPtr camSnapRaw = mc->RequestSnapshot(fullFilename, SnapRequest::ProcessType::Cannot);
 
 		if(camSnapRaw)
@@ -194,7 +194,7 @@ std::vector<SnapRequest::SPtr> CamStreamMgr::RequestSnapshotAll(const std::strin
 
 		if(mc->UsesImageProcessingChain())
 		{
-			std::string fullFilename = filenameBase + "_" + strIdx + "IMPROC.png";
+			std::string fullFilename = filenameBase + "_" + strIdx + "IMPROC";
 			SnapRequest::SPtr camSnapIProc = mc->RequestSnapshot(fullFilename, SnapRequest::ProcessType::HasTo);
 			if(camSnapIProc)
 				ret.push_back(camSnapIProc);

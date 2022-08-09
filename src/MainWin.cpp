@@ -329,7 +329,7 @@ SnapRequest::SPtr MainWin::RequestSnap(
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr << ".png";
+	sstrmFilepath << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr;
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;

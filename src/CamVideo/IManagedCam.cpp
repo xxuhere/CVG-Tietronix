@@ -229,6 +229,76 @@ std::string IManagedCam::VideoFilepath()
 	return this->activeVideoReq->filename;
 }
 
+/// <summary>
+/// Save an OpenCV mat as a jpeg in a Dicom file.
+/// </summary>
+/// <param name="imgMat">The image to save.</param>
+/// <param name="cam">The camera containing extra camera Dicom data.</param>
+/// <param name="baseFilename">The filename to save the Dicom file as.</param>
+/// <returns>true if successful, else false.</returns>
+bool SaveMatAsDicomJpeg(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::string& baseFilename)
+{
+	//////////////////////////////////////////////////
+	//	TEMPORARY CODE FOR DICOM
+	//
+	// We will eventually need to fix several issues:
+	// - Dicom filenames cannot be longer than 8 characters, including the ".dcm"
+	//	- Or at least by spec they shouldn't be.
+	// - Location of DicomImg_RawJpg needs to be confirmed.
+	// - Whether we do this raw in this location, or delegate to a formal system
+	//	should be thought-out.
+
+	DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
+
+	Image2Dcm i2d;
+	i2d.setValidityChecking(OFTrue, OFTrue, OFTrue); // using default param values from img2dcm DCMTK sample
+
+	I2DOutputPlug* outPlug = new I2DOutputPlugSC();
+	outPlug->setValidityChecking(OFTrue, OFTrue, OFTrue);
+
+	if (!dcmDataDict.isDictionaryLoaded())
+	{
+		std::cerr << 
+			"no data dictionary loaded, check environment variable: "
+			<< DCM_DICT_ENVIRONMENT_VARIABLE 
+			<< std::endl;
+	}
+
+	I2DImgSource* inputImgSrc = new DicomImg_RawJpg(imgMat.get());
+	inputImgSrc->setImageFile("snapshot"); // TODO: Better name
+	DcmDataset *resultObject = nullptr;
+	E_TransferSyntax writeXfer;
+
+	// !TODO: Error checking
+	OFCondition cond = i2d.convertFirstFrame(inputImgSrc, outPlug, 1, resultObject, writeXfer);
+	//
+	cond = i2d.updateOffsetTable();
+	cond = i2d.updateLossyCompressionInfo(inputImgSrc, 1, resultObject);
+	DcmFileFormat dcmff(resultObject);
+
+	DcmDataset* dicomData = dcmff.getDataset();
+	//
+	// ADD DICOM TIMESTAMPS
+	// https://dicom.innolitics.com/ciods/cr-image/general-study/00080020
+	dicomData->putAndInsertString(DCM_StudyDate, DicomMiscUtils::GetCurrentDateString().c_str());
+	// https://dicom.innolitics.com/ciods/cr-image/general-study/00080030
+	dicomData->putAndInsertString(DCM_StudyTime, DicomMiscUtils::GetCurrentTime().c_str());
+	//
+	// ADD DICOM INJECTION SET DATA
+	dicomInjSet.InjectDataInto(dicomData);
+	//
+	// ADD DICOM CAMERA DATA
+	cam->InjectIntoDicom(dicomData);
+
+	cond = dcmff.saveFile((baseFilename + ".dcm").c_str(), writeXfer);
+
+	delete inputImgSrc;
+	delete outPlug;
+	delete resultObject;
+
+	return true;
+}
+
 bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 {
 	if(ptr == nullptr)
@@ -265,8 +335,6 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		sptrSwap.erase(sptrSwap.begin() + i);
 	}
 
-	DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
-
 	// SAVE SNAPSHOTS OF PREPROCESSED
 	//
 	if(!rawSnaps.empty())
@@ -281,67 +349,8 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		}
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
-		{
-			//////////////////////////////////////////////////
-			//	TEMPORARY CODE FOR DICOM
-			//
-			// We will eventually need to fix several issues:
-			// - Dicom filenames cannot be longer than 8 characters, including the ".dcm"
-			//	- Or at least by spec they shouldn't be.
-			// - Location of DicomImg_RawJpg needs to be confirmed.
-			// - Whether we do this raw in this location, or delegate to a formal system
-			//	should be thought-out.
-
-
-			Image2Dcm i2d;
-			i2d.setValidityChecking(OFTrue, OFTrue, OFTrue); // using default param values from img2dcm DCMTK sample
-
-			I2DOutputPlug* outPlug = new I2DOutputPlugSC();
-			outPlug->setValidityChecking(OFTrue, OFTrue, OFTrue);
-
-			if (!dcmDataDict.isDictionaryLoaded())
-			{
-				std::cerr << 
-					"no data dictionary loaded, check environment variable: "
-					<< DCM_DICT_ENVIRONMENT_VARIABLE 
-					<< std::endl;
-			}
-
-			I2DImgSource* inputImgSrc = new DicomImg_RawJpg(saveMat.get());
-			inputImgSrc->setImageFile("snapshot"); // TODO: Better name
-			DcmDataset *resultObject = nullptr;
-			E_TransferSyntax writeXfer;
-
-			// !TODO: Error checking
-			OFCondition cond = i2d.convertFirstFrame(inputImgSrc, outPlug, 1, resultObject, writeXfer);
-			//
-			cond = i2d.updateOffsetTable();
-			cond = i2d.updateLossyCompressionInfo(inputImgSrc, 1, resultObject);
-			DcmFileFormat dcmff(resultObject);
-
-			DcmDataset* dicomData = dcmff.getDataset();
-			//
-			// ADD DICOM TIMESTAMPS
-			// https://dicom.innolitics.com/ciods/cr-image/general-study/00080020
-			dicomData->putAndInsertString(DCM_StudyDate, DicomMiscUtils::GetCurrentDateString().c_str());
-			// https://dicom.innolitics.com/ciods/cr-image/general-study/00080030
-			dicomData->putAndInsertString(DCM_StudyTime, DicomMiscUtils::GetCurrentTime().c_str());
-			//
-			// ADD DICOM INJECTION SET DATA
-			dicomInjSet.InjectDataInto(dicomData);
-			//
-			// ADD DICOM CAMERA DATA
-			this->InjectIntoDicom(dicomData);
-
-			cond = dcmff.saveFile((snreq->filename + ".dcm").c_str(), writeXfer);
-
-			delete inputImgSrc;
-			delete outPlug;
-			delete resultObject;
-			///
-			//////////////////////////////////////////////////
-			
-			if(cv::imwrite(snreq->filename, *saveMat))
+		{	
+			if(SaveMatAsDicomJpeg(saveMat, this, snreq->filename))
 			{
 				snreq->frameID = this->camFeedChanges;
 				snreq->status = SnapRequest::Status::Filled;
@@ -402,7 +411,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		// the shared pointer.
 		for(SnapRequest::SPtr snreq : sptrSwap)
 		{
-			if(cv::imwrite(snreq->filename, *saveMat))
+			if(SaveMatAsDicomJpeg(saveMat, this, snreq->filename))
 			{
 				snreq->frameID = this->camFeedChanges;
 				snreq->status = SnapRequest::Status::Filled;
