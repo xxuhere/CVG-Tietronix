@@ -9,6 +9,13 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+
+// Branching statement for if the keys 'a', 'b' and 'c' should be turned into
+// left, middle, and right mouse key presses. This should be turned on for
+// using the PC USB Tripple Action Foot Switch.
+// https://www.newegg.com/p/0GA-01JJ-00BX9?Item=9SIAEG2JG72076
+#define ABC_PEDAL_EMULATION 1
+
 class MainWin;
 class BaseState;
 

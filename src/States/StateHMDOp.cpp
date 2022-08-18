@@ -950,7 +950,24 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 	{
 		this->mdsMiddle.FlagDown();
 
-		this->middleDownTimer.Restart();
+		// It might seem odds to check if the middle button was already down
+		// before doing middle-down press stuff, but this is the timer for if
+		// the middle mouse button is being held down, and there could be other
+		// things that emulate middle mouse button clicks such as foot pedals
+		// that emulate keyboard presses - and keyboard presses can repeat themselves
+		// when held down (such as in notepad, when press 'a', you'll immediately
+		// get "a", but after a while you'll get "aaaaaaaaaaaaaaaaaaaaaaaaaa" 
+		// being spammed from the input.)
+		//
+		// If this is the case, we don't want t keep restarting the timer - but
+		// recognize it as one continuous (simulated) mouse-down press.
+		//
+		// Note that this only affects the middle mouse button, and only for not
+		// restarting the timer for holding down the button. A more robust and 
+		// general solution may be required for additional/future features.
+		if(!this->middleDown)
+			this->middleDownTimer.Restart();
+
 		this->middleDown = true;
 
 		if(curSub != nullptr)

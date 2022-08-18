@@ -287,6 +287,36 @@ void GLWin::OnKeyDown(wxKeyEvent& evt)
 {
 	this->lastUIMsg = "kdown";
 
+#if ABC_PEDAL_EMULATION
+	// When emulating a/b/c keypresses to mouse clicks.
+	// There may be a way to more elegantly refactor these.
+	//
+	// While the actual keys will be lowerscase, the keycode will
+	// be the captial versions of letters (and capitals will be
+	// the letters with a shift down).
+	if(evt.GetKeyCode() == 'A')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseDown(0, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+	else if(evt.GetKeyCode() == 'B')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseDown(1, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+	else if(evt.GetKeyCode() == 'C')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseDown(2, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+#endif
+
 	if(evt.GetKeyCode() == WXK_INSERT)
 	{
 		// Reload options during runtime.
@@ -305,6 +335,37 @@ void GLWin::OnKeyDown(wxKeyEvent& evt)
 void GLWin::OnKeyUp(wxKeyEvent& evt)
 {
 	this->lastUIMsg = "kup";
+
+#if ABC_PEDAL_EMULATION
+	// When emulating a/b/c keypresses to mouse clicks.
+	// There may be a way to more elegantly refactor these.
+	//
+	// While the actual keys will be lowerscase, the keycode will
+	// be the captial versions of letters (and capitals will be
+	// the letters with a shift down).
+	if(evt.GetKeyCode() == 'A')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseUp(0, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+	else if(evt.GetKeyCode() == 'B')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseUp(1, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+	else if(evt.GetKeyCode() == 'C')
+	{
+		GET_CURR_STATE_OR_RETURN(cur);
+		cur->OnMouseUp(2, evt.GetPosition());
+		evt.Skip();
+		return;
+	}
+
+#endif
 
 	GET_CURR_STATE_OR_RETURN(cur);
 	cur->OnKeyup((wxKeyCode)evt.GetKeyCode());
