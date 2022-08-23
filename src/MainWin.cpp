@@ -22,6 +22,7 @@
 
 #include "MainWin.h"
 #include "HMDOpApp.h"
+#include "AppVersionDicom.h"
 #include <vector>
 #include <sstream>
 #include "Utils/cvgAssert.h"
@@ -148,6 +149,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//////////////////////////////////////////////////
 	DicomInjectorSet& dicomInjSet = DicomInjectorSet::GetSingleton();
 	dicomInjSet.AddInjectorRef(&this->opSession);
+	dicomInjSet.AddInjectorRef(&AppVersionDicom::GetInstance());
 
 	// Final construction things
 	//

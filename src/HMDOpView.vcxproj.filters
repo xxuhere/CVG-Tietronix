@@ -330,6 +330,9 @@
     <ClInclude Include="DicomUtils\DicomMiscUtils.h">
       <Filter>Header Files\DicomUtils</Filter>
     </ClInclude>
+    <ClInclude Include="AppVersionDicom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -544,6 +547,9 @@
     </ClCompile>
     <ClCompile Include="DicomUtils\DicomMiscUtils.cpp">
       <Filter>Source Files\DicomUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="AppVersionDicom.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

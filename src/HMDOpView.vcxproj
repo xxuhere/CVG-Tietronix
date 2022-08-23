@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AppVersionDicom.h" />
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h" />
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_USB.h" />
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_Web.h" />
@@ -231,6 +232,7 @@
     <ClInclude Include="Vendored\tomlplusplus\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppVersionDicom.cpp" />
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp" />
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_USB.cpp" />
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_Web.cpp" />

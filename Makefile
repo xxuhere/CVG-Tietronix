@@ -67,7 +67,7 @@ SUBOBJ_LODEPNG = \
 	lodepng
 	
 SUBOBJ_MAIN = \
-	FontMgr GLWin HMDOpApp LoadAnim MainWin TexObj OpSession
+	AppVersionDicom FontMgr GLWin HMDOpApp LoadAnim MainWin TexObj OpSession
 	
 SUBOBJ_STATES = \
 	BaseState StateExit StateHMDOp StateInitCameras StateIntro
