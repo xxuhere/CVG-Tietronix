@@ -13,6 +13,7 @@ static const char* szToml_Header_Name		= "name";
 static const char* szToml_Header_Info		= "info";
 static const char* szToml_Header_Session	= "session";
 static const char* szToml_Header_Institution= "institution";
+static const char* szToml_Header_Contrast	= "contrast";
 static const char* szToml_Key_NameLast		= "last";
 static const char* szToml_Key_NameMiddle	= "middle";
 static const char* szToml_Key_NameFirst		= "first";
@@ -25,6 +26,11 @@ static const char* szToml_Key_Gender		= "gender";
 static const char* szToml_Key_SessStudy		= "study";
 static const char* szToml_Key_InstName		= "name";
 static const char* szToml_Key_InstAddr		= "addr";
+static const char* szToml_Key_PatientId		= "id";
+static const char* szToml_Key_EthnicityGroup= "ethnicity";
+static const char* szToml_Key_ContrastAgent	= "agent";
+static const char* szToml_Key_ContrastVol	= "milliliters";
+static const char* szToml_Key_ContrastTime	= "time";
 
 void OpSession::SetSession(const std::string& session)
 {
@@ -202,6 +208,14 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 			else
 				this->gender = Gender::Other;
 		}
+
+		std::optional<std::string> id = (*patientInfo)[szToml_Key_PatientId].value<std::string>();
+		if(id.has_value())
+			this->patientid = id.value();
+
+		std::optional<std::string> ethnicity = (*patientInfo)[szToml_Key_EthnicityGroup].value<std::string>();
+		if(ethnicity.has_value())
+			this->ethnicGroup = ethnicity.value();
 	}
 	else
 		std::cout << "Warning: Missing patient info in session" << std::endl;
@@ -249,6 +263,27 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 			this->institutionAddr = instAddr.value();
 	}
 
+	////////////////////////////////////////////////////////////
+	//
+	//		LOAD CONTRAST DYE INFO
+	//
+	////////////////////////////////////////////////////////////
+	const toml::v3::table* contrast = EnsureSingleTable(&inToml, szToml_Header_Contrast);
+	if(contrast)
+	{
+		std::optional<std::string> conAgent = (*contrast)[szToml_Key_ContrastAgent].value<std::string>();
+		if(conAgent.has_value())
+			this->contrastAgent = conAgent.value();
+
+		std::optional<float> conVol = (*contrast)[szToml_Key_ContrastVol].value<float>();
+		if(conVol.has_value())
+			this->contrastMilliliters = conVol.value();
+
+		std::optional<std::string> conTime = (*contrast)[szToml_Key_ContrastTime].value<std::string>();
+		if(conTime.has_value())
+			this->contrastInjectionTime = conTime.value();
+	}
+
 	return true;
 }
 
@@ -271,6 +306,8 @@ std::string OpSession::GenerateBlankTOMLTemplate()
 	"height = 1.6\n"
 	"weight = 150\n"
 	"gender = \"M\"\n"
+	"id = \"__ID__\"\n"
+	"ethnicity = \"__ETHNICITY__\"\n"
 	"\n"
 	"[physician]\n"
 	"[physician.name]\n"
@@ -285,7 +322,12 @@ std::string OpSession::GenerateBlankTOMLTemplate()
 	"\n"
 	"[institution]\n"
 	"name = \"_institution_\"\n"
-	"addr = \"_addr_\"\n";
+	"addr = \"_addr_\"\n"
+	"[contrast]\n"
+	"agent = \"LS301\"\n"
+	"milliliters = 20.0\n"
+	"time = \"120000\"\n";
+
 }
 
 void OpSession::InjectIntoDicom(DcmDataset* dicomData)
@@ -322,6 +364,20 @@ void OpSession::InjectIntoDicom(DcmDataset* dicomData)
 		DCM_PatientAge,
 		this->patientAge);
 
+	if(!this->patientid.empty())
+	{
+		dicomData->putAndInsertString(
+			DCM_PatientID,
+			this->patientid.c_str());
+	}
+
+	if(!this->ethnicGroup.empty())
+	{
+		dicomData->putAndInsertString(
+			DCM_EthnicGroup,
+			this->ethnicGroup.c_str());
+	}
+
 	switch(this->gender)
 	{
 	case Gender::Female:
@@ -334,5 +390,32 @@ void OpSession::InjectIntoDicom(DcmDataset* dicomData)
 
 	default:
 		dicomData->putAndInsertString(DCM_PatientSex, "O");
+	}
+
+	if(!this->contrastAgent.empty())
+	{
+		dicomData->putAndInsertString(
+			DCM_ContrastBolusAgent,
+			this->contrastAgent.c_str());
+
+		dicomData->putAndInsertString(
+			DCM_ContrastBolusVolume,
+			std::to_string(this->contrastMilliliters).c_str());
+	}
+
+	if(!this->contrastInjectionTime.empty())
+	{
+		// Hopefully the ContrastBolus times are being interpreted correctly,
+		// It's assuming the injection is on the previous day (there's no Dicom
+		// tag for the date either way) and if we're referencing a shot, it's
+		// short enough to be considered instantaneous - so we're going to
+		// set both the start and end with the same value.
+		dicomData->putAndInsertString(
+			DCM_ContrastBolusStartTime,
+			this->contrastInjectionTime.c_str());
+
+		dicomData->putAndInsertString(
+			DCM_ContrastBolusStopTime,
+			this->contrastInjectionTime.c_str());
 	}
 }

@@ -75,6 +75,23 @@ public:
 	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101010
 	int patientAge = 0;
 
+	// https://dicom.innolitics.com/ciods/procedure-log/patient/00102160
+	std::string ethnicGroup = "";
+
+	// https://dicom.innolitics.com/ciods/us-image/patient/00100020
+	std::string patientid = "";
+
+	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00180010
+	std::string contrastAgent = "";
+
+	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181041
+	float contrastMilliliters = 0.0f;
+
+	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181042
+	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181043
+	std::string contrastInjectionTime;
+
+
 	void SetSession(const std::string& session);
 
 	/// <summary>
