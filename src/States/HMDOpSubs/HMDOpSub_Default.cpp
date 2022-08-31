@@ -1,13 +1,18 @@
 #include "HMDOpSub_Default.h"
 #include "../StateHMDOp.h"
 #include "../../MainWin.h"
+#include "../AppCoroutines/CoroutineSnapWithLasers.h"
 
 HMDOpSub_Default::HMDOpSub_Default()
 {}
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.GetCoreWindow()->RequestSnapAll(targ.GetSurgeryPhaseLabel());
+	targ.GetView()->ResetSnapCoroutine(
+		new CoroutineSnapWithLasers(
+			targ.GetCoreWindow(),
+			targ.GetView(),
+			targ.GetSurgeryPhaseLabel()));
 }
 
 void HMDOpSub_Default::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

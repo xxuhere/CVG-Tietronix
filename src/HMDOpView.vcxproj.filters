@@ -82,6 +82,12 @@
     <Filter Include="Header Files\Vendored\tomlplusplus">
       <UniqueIdentifier>{238db996-b08b-47f6-8dd3-effc2eb76394}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AppCoroutines">
+      <UniqueIdentifier>{c34e8c23-5122-4810-a10c-08f5f1142aae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AppCoroutines">
+      <UniqueIdentifier>{86e85680-534d-4de5-ba98-525d640e955f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -333,6 +339,15 @@
     <ClInclude Include="AppVersionDicom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\cvgCoroutine.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="AppCoroutines\CoroutineSnapWithLasers.h">
+      <Filter>Header Files\AppCoroutines</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\TimeUtils.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -550,6 +565,15 @@
     </ClCompile>
     <ClCompile Include="AppVersionDicom.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\cvgCoroutine.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="AppCoroutines\CoroutineSnapWithLasers.cpp">
+      <Filter>Source Files\AppCoroutines</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\TimeUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,16 @@
 SnapRequest::SnapRequest()
 {}
 
+bool SnapRequest::Cancel()
+{
+	if(this->status != Status::Requested)
+		return false;
+
+	this->status = Status::Error;
+	this->err = "There was a request to cancel.";
+	return true;
+}
+
 SnapRequest::SPtr SnapRequest::MakeRequest(const std::string& filename, ProcessType processType)
 {
 	SnapRequest* newReq = new SnapRequest();

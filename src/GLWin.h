@@ -4,9 +4,9 @@
 #include <wx/glcanvas.h>
 #include <wx/timer.h>
 #include "Utils/cvgOptions.h"
+#include "Utils/cvgCoroutine.h"
 #include "FontMgr.h"
 #include "Utils/cvgStopwatch.h"
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 
@@ -95,6 +95,7 @@ public:
 	/// be the Carousel used in StateHMDOp.
 	/// </summary>
 	std::vector<CarouselData> lastLoadedCarousel;
+	cvgCoroutineHandle coroutineSnapPhoto;
 
 protected:
 	void _SetupGLDimensions();
@@ -132,6 +133,9 @@ public:
 	/// </summary>
 	void ReleaseStaticGraphicResources();
 
+	void ResetSnapCoroutine(cvgCoroutine* coroutine)
+	{ this->coroutineSnapPhoto = cvgCoroutineHandle(coroutine); }
+
 public:
 
 	//		WX EVENT CALLBACKS
@@ -141,6 +145,19 @@ public:
 	void OnResize(wxSizeEvent& evt);
 	void OnPaint(wxPaintEvent& evt);
 	void OnClose(wxCloseEvent& evt);
+
+	/// <summary>
+	/// The application loop. 
+	/// 
+	/// For the sake of redrawing, we should aim to keep the application 
+	/// running at 30-60 frames a second.
+	/// 
+	/// Several things happen on a regular basis here:
+	/// - Application redraws the display (known as a frame redraw)
+	/// - Regular maintainence and update code is run.
+	/// - Valid coroutines are advanced a single step.
+	/// </summary>
+	/// <param name="evt">wxWidget event parameter.</param>
 	void OnRedrawTimer(wxTimerEvent& evt);
 
 	// Event handlers

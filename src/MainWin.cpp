@@ -26,6 +26,7 @@
 #include <vector>
 #include <sstream>
 #include "Utils/cvgAssert.h"
+#include "../Utils/TimeUtils.h"
 #include <dcmtk/dcmdata/dcdeftag.h>
 
 #include "States/StateIntro.h"
@@ -36,22 +37,6 @@
 #if IS_RPI
 #include "Hardware/FauxMouse.h"
 #endif
-
-std::string FileDateTimeNow()
-{
-	wxDateTime dt = wxDateTime::Now();
-	std::stringstream retStream;
-
-	retStream << 
-		dt.GetYear() << 
-		std::setfill('0') << std::setw(2) << (dt.GetMonth() + 1) << 
-		std::setfill('0') << std::setw(2) << dt.GetDay() << 
-		std::setfill('0') << std::setw(2) << dt.GetHour() << 
-		std::setfill('0') << std::setw(2) << dt.GetMinute() << 
-		std::setfill('0') << std::setw(2) << dt.GetSecond();
-
-	return retStream.str();
-}
 
 wxBEGIN_EVENT_TABLE(MainWin, wxFrame)
 	EVT_MENU		(wxID_EXIT,  MainWin::OnExit)
@@ -227,6 +212,11 @@ void MainWin::PerformMaintenenceCycle()
 	this->ClearFinishedRecordings();
 }
 
+void MainWin::PlayAudio_CameraSnap()
+{
+	this->cameraSnap.Play();
+}
+
 void MainWin::ClearFinishedSnaps()
 {
 	for(int i = this->waitingSnaps.size() - 1; i >= 0; --i)
@@ -342,42 +332,6 @@ SnapRequest::SPtr MainWin::RequestSnap(
 	return snreq;
 }
 
-std::vector<SnapRequest::SPtr> MainWin::RequestSnapAll(const std::string& prefix)
-{
-	std::vector<SnapRequest::SPtr> ret;
-
-	std::string folderLoc = this->EnsureAndGetCapturesFolder();
-	if(folderLoc.empty())
-	{ 
-		ret.push_back( SnapRequest::MakeError("Could not allocate capture session folder", "") );
-		return ret;
-	}
-
-	CamStreamMgr & camMgr = CamStreamMgr::GetInstance();
-	// Build snapshot image filename
-	std::stringstream sstrmFilebase;
-	
-	sstrmFilebase << folderLoc << "/Snap_" << FileDateTimeNow() << "_" <<  this->opSession.sessionName << "_" << prefix << "_" << this->snapCtr;
-	std::string filebase = sstrmFilebase.str();
-
-	++this->snapCtr;
-
-	std::vector<SnapRequest::SPtr> mgrRet = camMgr.RequestSnapshotAll(filebase);
-	bool any = false;
-	for(int i = 0; i < mgrRet.size(); ++i)
-	{ 
-		if(!mgrRet[i])
-			continue;
-
-		any = true;
-		this->waitingSnaps.push_back(mgrRet[i]);
-	}
-	if(any)
-		this->cameraSnap.Play();
-
-	return ret;
-
-}
 
 VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)
 {

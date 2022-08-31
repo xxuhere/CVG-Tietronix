@@ -97,6 +97,19 @@ public:
     /// </summary>
     void PerformMaintenenceCycle();
 
+    void PlayAudio_CameraSnap();
+
+    inline int GetSnapCounter() const
+    { return this->snapCtr;}
+
+    inline int IncrSnapCounter()
+    {
+        ++this->snapCtr;
+        return this->snapCtr;
+    }
+
+    std::string EnsureAndGetCapturesFolder() const;
+
     //////////////////////////////////////////////////
     //
     //      MEDIA CAPTURE UTILITIES
@@ -136,8 +149,6 @@ public:
     /// <param name="procType">The processing type to capture a snapshot of.</param>
     /// <returns>The SnapRequest from CamStreamMgr.</returns>
     SnapRequest::SPtr RequestSnap(int idx, const std::string& prefix, SnapRequest::ProcessType procType);
-
-    std::vector<SnapRequest::SPtr> RequestSnapAll(const std::string& prefix);
 
     /// <summary>
     /// Set a camera to start saving to a video file.
@@ -229,8 +240,6 @@ public:
 
     std::string GetSessionsFolder() const;
 
-protected:
-    std::string EnsureAndGetCapturesFolder() const;
 
 protected:
     wxDECLARE_EVENT_TABLE();

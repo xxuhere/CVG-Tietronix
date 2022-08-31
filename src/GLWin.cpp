@@ -243,6 +243,9 @@ void GLWin::OnRedrawTimer(wxTimerEvent& evt)
 	double deltaTimeSecs = (double)diff.total_microseconds() / 1000000.0;
 	this->lastStopwatch = now;
 
+	if(this->coroutineSnapPhoto.IsValid())
+		this->coroutineSnapPhoto.MoveNext();
+
 	BaseState* cur = this->Parent()->CurrState();
 	if(cur != nullptr)
 		cur->Update(deltaTimeSecs);

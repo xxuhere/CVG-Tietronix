@@ -34,7 +34,7 @@ OPENCVLIBS		:= -lopencv_core -lopencv_video -lopencv_imgproc -lopencv_videoio -l
 #		PROGRAM OBJECTS
 #
 ##################################################
-
+SUBDIR_APPCOROUTINES = src/AppCoroutines
 SUBDIR_CAMIMPL = src/CamVideo/CamImpl
 SUBDIR_CAMVIDEO = src/CamVideo
 SUBDIR_CAROUSEL = src/Carousel
@@ -47,6 +47,8 @@ SUBDIR_SUBSTATES_HMDOP = src/States/HMDOpSubs
 SUBDIR_UISYS = src/UISys
 SUBDIR_UTILS = src/Utils
 
+SUBOBJ_APPCOROUTINES = \
+	CoroutineSnapWithLasers
 
 SUBOBJ_CAMIMPL = \
 	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
@@ -76,11 +78,12 @@ SUBOBJ_SUBSTATES_HMDOP = \
 	HMDOpSub_Base HMDOpSub_Carousel HMDOpSub_Default HMDOpSub_InspNavForm HMDOpSub_MainMenuNav HMDOpSub_TempNavSliderListing HMDOpSub_WidgetCtrl
 	
 SUBOBJ_UTILS = \
-	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgGrabTimer cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType yen_threshold 
+	CarouselData cvgCamFeedSource cvgCamTextureRegistry cvgCoroutine cvgGrabTimer cvgOptions cvgRect cvgShapes cvgStopwatch cvgStopwatchLeft multiplatform VideoPollType ProcessingType TimeUtils yen_threshold 
 	
 SUBOBJ_UISYS = \
 	CacheRecordUtils DynSize NinePatcher UIBase UIButton UIColor4 UIGraphic UIHSlider UIPlate UIRect UISink UISys UIText UIVBulkSlider UIVec2
 
+EXPOBJS_APPCOROUTINES = $(patsubst %,$(SUBDIR_APPCOROUTINES)/%.o,$(SUBOBJ_APPCOROUTINES))	
 EXPOBJS_CAMIMPL = $(patsubst %,$(SUBDIR_CAMIMPL)/%.o,$(SUBOBJ_CAMIMPL))	
 EXPOBJS_CAMVIDEO = $(patsubst %,$(SUBDIR_CAMVIDEO)/%.o,$(SUBOBJ_CAMVIDEO))
 EXPOBJS_CAROUSEL = $(patsubst %,$(SUBDIR_CAROUSEL)/%.o,$(SUBOBJ_CAROUSEL))
@@ -124,7 +127,7 @@ hmdopview: objs
 
 	@echo "\n\n\nMaking HMDOpView archive"
 	@echo "--------------------------------------------------"
-	ar -rsc hmdopview.a $(EXPOBJS_CAROUSEL) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+	ar -rsc hmdopview.a $(EXPOBJS_APPCOROUTINES) $(EXPOBJS_CAROUSEL) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_MAIN) $(EXPOBJS_STATES) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	
 	@echo "\n\n\nFinished archiving"
 	@echo "--------------------------------------------------"
@@ -143,7 +146,7 @@ moves:
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` -c $< -o $@ -I/opt/vc/include/ -I$(VEND) -I../CVGData/Src -I/usr/include/freetype2 -lGL $(OPENCVINCL)
 
-objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_MAIN) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
+objs: ${EXPOBJS_CAROUSEL} $(EXPOBJS_APPCOROUTINES) $(EXPOBJS_MAIN) $(EXPOBJS_DICOMUTILS) $(EXPOBJS_SUBSTATES_HMDOP) $(EXPOBJS_STATES) $(EXPOBJS_LODEPNG) $(EXPOBJS_UTILS) $(EXPOBJS_HARDWARE) $(EXPOBJS_CAMVIDEO) $(EXPOBJS_CAMIMPL) $(EXPOBJS_UISYS)
 	@echo "TARGET objs"
 
 .PHONY: clean

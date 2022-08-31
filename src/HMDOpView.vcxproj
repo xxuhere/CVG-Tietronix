@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AppCoroutines\CoroutineSnapWithLasers.h" />
     <ClInclude Include="AppVersionDicom.h" />
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.h" />
     <ClInclude Include="CamVideo\CamImpl\CamImpl_OCV_USB.h" />
@@ -218,6 +219,7 @@
     <ClInclude Include="Utils\cvgAssert.h" />
     <ClInclude Include="Utils\cvgCamFeedSource.h" />
     <ClInclude Include="Utils\cvgCamTextureRegistry.h" />
+    <ClInclude Include="Utils\cvgCoroutine.h" />
     <ClInclude Include="Utils\cvgGrabTimer.h" />
     <ClInclude Include="Utils\cvgOptions.h" />
     <ClInclude Include="Utils\cvgRect.h" />
@@ -226,12 +228,14 @@
     <ClInclude Include="Utils\cvgStopwatchLeft.h" />
     <ClInclude Include="Utils\multiplatform.h" />
     <ClInclude Include="Utils\ProcessingType.h" />
+    <ClInclude Include="Utils\TimeUtils.h" />
     <ClInclude Include="Utils\VideoPollType.h" />
     <ClInclude Include="Utils\yen_threshold.h" />
     <ClInclude Include="Vendored\lodePNG\lodepng.h" />
     <ClInclude Include="Vendored\tomlplusplus\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppCoroutines\CoroutineSnapWithLasers.cpp" />
     <ClCompile Include="AppVersionDicom.cpp" />
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_HWPath.cpp" />
     <ClCompile Include="CamVideo\CamImpl\CamImpl_OCV_USB.cpp" />
@@ -293,6 +297,7 @@
     <ClCompile Include="Utils\CarouselData.cpp" />
     <ClCompile Include="Utils\cvgCamFeedSource.cpp" />
     <ClCompile Include="Utils\cvgCamTextureRegistry.cpp" />
+    <ClCompile Include="Utils\cvgCoroutine.cpp" />
     <ClCompile Include="Utils\cvgGrabTimer.cpp" />
     <ClCompile Include="Utils\cvgOptions.cpp" />
     <ClCompile Include="Utils\cvgRect.cpp" />
@@ -301,6 +306,7 @@
     <ClCompile Include="Utils\cvgStopwatchLeft.cpp" />
     <ClCompile Include="Utils\multiplatform.cpp" />
     <ClCompile Include="Utils\ProcessingType.cpp" />
+    <ClCompile Include="Utils\TimeUtils.cpp" />
     <ClCompile Include="Utils\VideoPollType.cpp" />
     <ClCompile Include="Utils\yen_threshold.cpp" />
     <ClCompile Include="Vendored\lodePNG\lodepng.cpp" />

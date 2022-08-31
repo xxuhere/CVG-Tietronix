@@ -108,6 +108,9 @@ public:
 
 	typedef std::shared_ptr<SnapRequest> SPtr;
 
+public:
+	bool Cancel();
+
 	/// <summary>
 	/// Utility function to create a shared pointer to a SnapRequest.
 	/// </summary>

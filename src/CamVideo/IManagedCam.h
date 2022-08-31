@@ -522,4 +522,29 @@ public:
 	// will inject in the polling loop, only for assets that its 
 	// directly saving.
 	virtual void InjectIntoDicom(DcmDataset* dicomData);
+
+public:
+	//////////////////////////////////////////////////
+	//
+	//	Misc Utilities
+	//
+	//////////////////////////////////////////////////
+
+	/// <summary>
+	/// Utility function to perform Dicom saving of a request, as well
+	/// as managing updating the status properly and rejecting cancelled
+	/// requests.
+	/// </summary>
+	/// <param name="imgMat">The image to save.</param>
+	/// <param name="cam">The camera that the image came from.</param>
+	/// <param name="snreq">The snapshot request being processed.</param>
+	/// <param name="camFeedChanges">
+	/// The counter for the number of pictures taken during the
+	/// session application.</param>
+	/// <returns>True if successful, else false.</returns>
+	static bool SaveMatAsDicomJpeg_HandleReq(
+		cv::Ptr<cv::Mat> imgMat, 
+		IManagedCam* cam, 
+		SnapRequest::SPtr snreq,
+		int camFeedChanges);
 };

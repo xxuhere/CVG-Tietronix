@@ -119,6 +119,7 @@ void IManagedCam::ClearSnapshotRequests()
 		// Technically not an error, but a cancellation. But, this
 		// will do.
 		s->status = SnapRequest::Status::Error;
+		s->err = "Requested snapshots were cleared.";
 	}
 }
 
@@ -299,6 +300,33 @@ bool SaveMatAsDicomJpeg(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::st
 	return true;
 }
 
+bool IManagedCam::SaveMatAsDicomJpeg_HandleReq(
+	cv::Ptr<cv::Mat> imgMat, 
+	IManagedCam* cam, 
+	SnapRequest::SPtr snreq,
+	int camFeedChanges)
+{
+	// Snapshots can be cancelled from outside.
+	if(snreq->status == SnapRequest::Status::Error)
+		return false;
+
+	// Save and notify success.
+	if(SaveMatAsDicomJpeg(imgMat, cam, snreq->filename))
+	{
+		snreq->frameID = camFeedChanges;
+		snreq->status = SnapRequest::Status::Filled;
+		return true;
+	}
+	
+	// Else, set error state
+	//
+	// Not the most in-depth error message, but using OpenCV
+	// this way doesn't give us too much grainularity.
+	snreq->err = "Error attempting to save file.";
+	snreq->status = SnapRequest::Status::Error;
+	return false;
+}
+
 bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 {
 	if(ptr == nullptr)
@@ -324,6 +352,14 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 	for(int i = 0; i < sptrSwap.size(); )
 	{
 		SnapRequest::SPtr snreq = sptrSwap[i];
+
+		// Snapshots can be cancelled from outside.
+		if(snreq->status == SnapRequest::Status::Error)
+		{ 
+			++i;
+			continue;
+		}
+
 		if(
 			snreq->processType == SnapRequest::ProcessType::HasTo  || 
 			(snreq->processType == SnapRequest::ProcessType::Indifferent && processing))
@@ -350,18 +386,11 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
 		{	
-			if(SaveMatAsDicomJpeg(saveMat, this, snreq->filename))
-			{
-				snreq->frameID = this->camFeedChanges;
-				snreq->status = SnapRequest::Status::Filled;
-			}
-			else
-			{
-				// Not the most in-depth error message, but using OpenCV
-				// this way doesn't give us too much grainularity.
-				snreq->err = "Error attempting to save file.";
-				snreq->status = SnapRequest::Status::Error;
-			}
+			SaveMatAsDicomJpeg_HandleReq(
+				saveMat, 
+				this, 
+				snreq, 
+				camFeedChanges);
 		}
 	}
 
@@ -411,18 +440,13 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		// the shared pointer.
 		for(SnapRequest::SPtr snreq : sptrSwap)
 		{
-			if(SaveMatAsDicomJpeg(saveMat, this, snreq->filename))
-			{
-				snreq->frameID = this->camFeedChanges;
-				snreq->status = SnapRequest::Status::Filled;
-			}
-			else
-			{
-				// Not the most in-depth error message, but using OpenCV
-				// this way doesn't give us too much grainularity.
-				snreq->err = "Error attempting to save file.";
-				snreq->status = SnapRequest::Status::Error;
-			}
+			
+
+			SaveMatAsDicomJpeg_HandleReq(
+				saveMat, 
+				this, 
+				snreq,
+				this->camFeedChanges);
 		}
 	}
 
