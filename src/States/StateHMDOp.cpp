@@ -412,7 +412,8 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	
 	// Setup the substate, and collect what buttons are allowed to be shown.
 	HMDOpSub_Base* subTyped = nullptr;
-	int hasButton[4] = {true, true, true, true};
+	int hasButton[4] = 
+	{true, true, true, true};
 	auto ss = this->substateMachine.GetCurSubtate();
 	if(ss)
 	{
@@ -432,24 +433,45 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
 
 	// Draw the dial/ring for holding the middle mouse button down.
-	if(this->middleDown && hasButton[3])
+	if(
+		(this->middleDown && hasButton[3]) || 
+		this->leftDown ||
+		this->rightDown)
 	{
 		glDisable(GL_TEXTURE_2D);
 
-		// If the middle mouse button is pressed down, draw a ring
+		// If a mouse button is pressed down, draw a ring
 		// whos angle represents the amount of the time the button
 		// has been pressed.
+		//
+		// Since all mouse buttons can be pressed, and technically
+		// can be pressed simultaneously, we use the largest timer
+		// for the value to draw the ring for.
 		const float PI = 3.14159f;
 		const int circleParts = 32;
-		float secondsMidDown = this->middleDownTimer.Milliseconds(false) / 1000.0f;
-		float arcLen = std::min(1.0f, secondsMidDown / MiddleHold) * 2.0f * PI;
 
-		if(secondsMidDown < MiddleHold)
+		// The 
+		float secondsLeftDown	= 0.0f;
+		float secondsMidDown	= 0.0f;
+		float secondsRightDown	= 0.0f;
+		//
+		if(this->leftDown)
+			secondsLeftDown	= this->leftDownTimer.Milliseconds(false) / 1000.0f;
+		if(this->middleDown && hasButton[3])
+			secondsMidDown	= this->middleDownTimer.Milliseconds(false) / 1000.0f;
+		if(this->rightDown)
+			secondsRightDown = this->rightDownTimer.Milliseconds(false) / 1000.0f;
+		//
+		float maxBtnDownTime = std::max({secondsLeftDown, secondsMidDown, secondsRightDown});
+
+		float arcLen = std::min(1.0f, maxBtnDownTime / ButtonHoldTime) * 2.0f * PI;
+
+		if(secondsMidDown < ButtonHoldTime)
 			glColor3f(0.0f, 1.0f, 0.0f);
 		else
 			glColor3f(1.0f, 0.5f, 0.0f);
 
-		float radOut = 50.0f * scale;
+		float radOut = 80.0f * scale;
 		float radIn = radOut - 10.0f;
 		glBegin(GL_QUADS);
 			for(int i = 0; i < circleParts; ++i)
@@ -836,7 +858,13 @@ void StateHMDOp::EnteredActive()
 	this->mdsMiddle.Reset();
 	this->mdsRight.Reset();
 
+	this->leftDownTimer.Restart();
+	this->rightDownTimer.Restart();
+	this->middleDownTimer.Restart();
+
+	this->leftDown = false;
 	this->middleDown = false;
+	this->rightDown = false;
 
 	this->_SyncImageProcessingSetUI();
 	this->_SyncThresholdSlider();
@@ -939,9 +967,16 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 	// manage this interaction.
 	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
 
+	// NOTE: There's a lot of similar code for the various button handlers,
+	// we should probably look for an elegant way to unify the logic.
 	if(button == 0)
 	{ 
 		this->mdsLeft.FlagDown();
+
+		if(!this->leftDown)		
+			this->leftDownTimer.Restart();
+
+		this->leftDown = true;
 
 		if(curSub != nullptr)
 			curSub->OnLeftDown(*this, this->substateMachine);
@@ -965,8 +1000,10 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 		// Note that this only affects the middle mouse button, and only for not
 		// restarting the timer for holding down the button. A more robust and 
 		// general solution may be required for additional/future features.
-		if(!this->middleDown)
+		
+		if(!this->middleDown)	
 			this->middleDownTimer.Restart();
+		
 
 		this->middleDown = true;
 
@@ -976,6 +1013,11 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 	else if(button == 2)
 	{
 		this->mdsRight.FlagDown();
+
+		if(!this->rightDown)	
+			this->rightDownTimer.Restart();
+
+		this->rightDown = true;
 
 		if(curSub != nullptr)
 			curSub->OnRightDown(*this, this->substateMachine);
@@ -989,18 +1031,31 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 	// manage this interaction.
 	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
 
+	// NOTE: There's a lot of similar code, we may want to look into
+	// a way to unify the code for the various similar key up handlers.
 	if(button == 0)
 	{ 
-		if( curSub != nullptr)
-			curSub->OnLeftUp(*this, this->substateMachine);
+		int msLeftDown = this->leftDownTimer.Milliseconds();
+		float secDown = (float)msLeftDown/1000.0f;
+		if(secDown >= ButtonHoldTime)
+		{
+			if( curSub != nullptr)
+				curSub->OnLeftUpHold(*this, this->substateMachine);
+		}
+		else
+		{ 
+			if( curSub != nullptr)
+				curSub->OnLeftUp(*this, this->substateMachine);
+		}
 
 		this->mdsLeft.FlagUp();
+		this->leftDown = false;
 	}
 	else if(button == 1)
 	{
 		int msMidDown = this->middleDownTimer.Milliseconds();
 		float secDown = (float)msMidDown/1000.0f;
-		if( secDown >= MiddleHold)
+		if( secDown >= ButtonHoldTime)
 		{
 			if(curSub != nullptr)
 				curSub->OnMiddleUpHold(*this, this->substateMachine);
@@ -1017,10 +1072,21 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 	}
 	else if (button == 2)
 	{
-		if(curSub != nullptr)
-			curSub->OnRightUp(*this, this->substateMachine);
+		int msRightDown = this->rightDownTimer.Milliseconds();
+		float secDown = (float)msRightDown/1000.0f;
+		if(secDown >= ButtonHoldTime)
+		{ 
+			if(curSub != nullptr)
+				curSub->OnRightUpHold(*this, this->substateMachine);
+		}
+		else
+		{
+			if(curSub != nullptr)
+				curSub->OnRightUp(*this, this->substateMachine);
+		}
 
 		this->mdsRight.FlagUp();
+		this->rightDown = false;
 	}
 }
 

@@ -43,6 +43,14 @@ public:
 	virtual void OnLeftUp( ty& targ, SubstateMachine<ty>& ssm);
 
 	/// <summary>
+	/// Callback when the left button is held down past the
+	/// release time, and then released.
+	/// </summary>
+	/// <param name="targ">The custom user data</param>
+	/// <param name="ssm">The parent state machine.</param>
+	virtual void OnLeftUpHold( ty& targ, SubstateMachine<ty>& ssm);
+
+	/// <summary>
 	/// Callback when the middle button is pressed.
 	/// </summary>
 	/// <param name="targ">The custom user data</param>
@@ -77,6 +85,14 @@ public:
 	/// <param name="targ">The custom user data</param>
 	/// <param name="ssm">The parent state machine.</param>
 	virtual void OnRightUp(	ty& targ, SubstateMachine<ty>& ssm);
+
+	/// <summary>
+	/// Callback when the right button is held down past the
+	/// release time, and then released.
+	/// </summary>
+	/// <param name="targ">The custom user data</param>
+	/// <param name="ssm">The parent state machine.</param>
+	virtual void OnRightUpHold(	ty& targ, SubstateMachine<ty>& ssm);
 
 	/// <summary>
 	/// Callback for when the substate is activated.

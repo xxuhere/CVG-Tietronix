@@ -2,6 +2,7 @@
 
 #include "HMDOpSub_Base.h"
 
+
 class StateHMDOp;
 
 /// <summary>

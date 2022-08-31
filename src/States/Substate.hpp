@@ -14,6 +14,10 @@ void Substate<ty>::OnLeftUp( ty& targ, SubstateMachine<ty>& ssm)
 {}
 
 template <typename ty>
+void Substate<ty>::OnLeftUpHold( ty& targ, SubstateMachine<ty>& ssm)
+{}
+
+template <typename ty>
 void Substate<ty>::OnMiddleDown( ty& targ, SubstateMachine<ty>& ssm)
 {}
 
@@ -31,6 +35,10 @@ void Substate<ty>::OnRightDown( ty& targ, SubstateMachine<ty>& ssm)
 
 template <typename ty>
 void Substate<ty>::OnRightUp( ty& targ, SubstateMachine<ty>& ssm)
+{}
+
+template <typename ty>
+void Substate<ty>::OnRightUpHold(	ty& targ, SubstateMachine<ty>& ssm)
 {}
 
 template <typename ty>

@@ -50,4 +50,9 @@ public:
 	/// <param name="">The parent StateHMDOp.</param>
 	/// <returns>If true, button is usable, else the button does nothing.</returns>
 	virtual bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) = 0;
+
+	void OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
+	void OnRightUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
+
+
 };

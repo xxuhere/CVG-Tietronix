@@ -1,19 +1,12 @@
 #include "HMDOpSub_Default.h"
 #include "../StateHMDOp.h"
 #include "../../MainWin.h"
-#include "../AppCoroutines/CoroutineSnapWithLasers.h"
 
 HMDOpSub_Default::HMDOpSub_Default()
 {}
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
-{
-	targ.GetView()->ResetSnapCoroutine(
-		new CoroutineSnapWithLasers(
-			targ.GetCoreWindow(),
-			targ.GetView(),
-			targ.GetSurgeryPhaseLabel()));
-}
+{}
 
 void HMDOpSub_Default::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
@@ -30,14 +23,7 @@ void HMDOpSub_Default::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<StateHMD
 }
 
 void HMDOpSub_Default::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
-{
-	// If nothing is shown an the right pedal is pressed, start video recording
-	// of the composite stream
-	if(targ.GetCoreWindow()->IsRecording(SpecialCams::Composite))
-		targ.GetCoreWindow()->StopRecording(SpecialCams::Composite);
-	else
-		targ.GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
-}
+{}
 
 void HMDOpSub_Default::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {}
@@ -92,7 +78,7 @@ std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Snap Photo";
+		return "";
 
 	case ButtonID::Middle:
 		return "Main Menu";
@@ -101,11 +87,7 @@ std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
 		return "Surgery Phase";
 
 	case ButtonID::Right:
-		{
-			
-			bool isRec = IsRecording();
-			return isRec ? "Stop Recording" : "Record Video";
-		}
+		return "";
 	}
 	return "";
 }
@@ -115,7 +97,7 @@ bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return true;
+		return false;
 
 	case ButtonID::Middle:
 		return true;
@@ -124,7 +106,7 @@ bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 		return true;
 
 	case ButtonID::Right:
-		return true;
+		return false;
 
 	}
 	return false;

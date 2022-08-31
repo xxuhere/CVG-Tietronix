@@ -5,12 +5,12 @@ HMDOpSub_Carousel::HMDOpSub_Carousel()
 {}
 
 void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+{}
+
+void HMDOpSub_Carousel::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
 {
 	targ.MoveSurgeryPhaseLeft();
 }
-
-void HMDOpSub_Carousel::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
-{}
 
 void HMDOpSub_Carousel::OnMiddleUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
@@ -23,6 +23,9 @@ void HMDOpSub_Carousel::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<StateHM
 }
 
 void HMDOpSub_Carousel::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+{}
+
+void HMDOpSub_Carousel::OnRightUp( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	targ.MoveSurgeryPhaseRight();
 }

@@ -10,6 +10,9 @@ HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(UIButton* btn)
 }
 
 void HMDOpSub_WidgetCtrl::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
+{}
+
+void HMDOpSub_WidgetCtrl::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	UIBase* uiSel = targ.uiSys.GetSelected();
 	// Validate and typecast.
@@ -18,10 +21,6 @@ void HMDOpSub_WidgetCtrl::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDO
 		return;
 
 	(*it)->MoveQuantizedAmt(10, -1);
-}
-
-void HMDOpSub_WidgetCtrl::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
-{
 }
 
 void HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl::OnMiddleUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -54,6 +53,9 @@ void HMDOpSub_WidgetCtrl::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<State
 }
 
 void HMDOpSub_WidgetCtrl::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+{}
+
+void HMDOpSub_WidgetCtrl::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	UIBase* uiSel = targ.uiSys.GetSelected();
 	// Validate and typecast.
@@ -62,10 +64,6 @@ void HMDOpSub_WidgetCtrl::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMD
 		return;
 
 	(*it)->MoveQuantizedAmt(10, 1);
-}
-
-void HMDOpSub_WidgetCtrl::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
-{
 }
 
 void HMDOpSub_WidgetCtrl::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

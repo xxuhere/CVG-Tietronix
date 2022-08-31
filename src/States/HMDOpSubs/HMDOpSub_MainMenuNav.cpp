@@ -21,15 +21,15 @@ void HMDOpSub_MainMenuNav::UpdateSelectedSubmenu(StateHMDOp& targ)
 }
 
 void HMDOpSub_MainMenuNav::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
+{}
+
+void HMDOpSub_MainMenuNav::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	this->EnforceTabOrder(targ);
 	targ.uiSys.AdvanceTabbingOrder(true);
 
 	this->UpdateSelectedSubmenu(targ);
 }
-
-void HMDOpSub_MainMenuNav::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
-{}
 
 void HMDOpSub_MainMenuNav::OnMiddleUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {}

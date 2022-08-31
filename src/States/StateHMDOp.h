@@ -386,9 +386,19 @@ private:
 	bool showCarousel = false;
 	CarouselStyle carouselStyle;
 
-	const float MiddleHold = 1.0f;
+	/// <summary>
+	/// The amount of time to hold a button to do a hold operation
+	/// instead of a press operation.
+	/// </summary>
+	const float ButtonHoldTime = 1.0f;
+
+	bool leftDown = false;
 	bool middleDown = false;
+	bool rightDown = false;
+
+	cvgStopwatch leftDownTimer;
 	cvgStopwatch middleDownTimer;
+	cvgStopwatch rightDownTimer;
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
