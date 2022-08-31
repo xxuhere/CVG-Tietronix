@@ -103,7 +103,7 @@ Version 3.1.5 is recommended.
 
 ### OpenSSL
 
-The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be build from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
+The process for building OpenSSL can be complex because it involves other dependency libraries. While it can be built from source, it is suggested that pre-built binaries (for Visual Studio 2019) be downloaded.
 https://wiki.openssl.org/index.php/Binaries
 OpenSSL 1.1.1 is expected.
 
