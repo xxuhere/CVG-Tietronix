@@ -284,4 +284,7 @@ public:
 private:
 	// Only the singleton systems should be in charge of its construction.
 	CamStreamMgr();
+
+public:
+	static void ValidateSourcePlatforms(const std::vector<cvgCamFeedSource>& sources);
 };

@@ -5,6 +5,7 @@
 #include "ManagedComposite.h"
 #include "../Utils/multiplatform.h"
 #include <iostream>
+#include "../Utils/multiplatform.h"
 
 CamStreamMgr CamStreamMgr::_inst;
 
@@ -86,10 +87,67 @@ bool CamStreamMgr::BootConnectionToCamera(
 	return this->BootConnectionToCamera(delegVec);
 }
 
+void CamStreamMgr::ValidateSourcePlatforms(const std::vector<cvgCamFeedSource>& sources)
+{
+	// Validate all poll types before using, split out an error if the
+	// poll type being used is invalid for the platform the program
+	// is currently running on.
+	// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/4
+	//
+	bool anyPlatformIssues = false;
+	for(int i = 0; i < sources.size(); ++i)
+	{
+		VideoPollType usedPollTy = sources[i].GetUsedPoll();
+		// For each type, detect if on the wrong platform - any 
+		switch(usedPollTy)
+		{
+		case VideoPollType::MMAL:
+		case VideoPollType::OpenCVUSB_Named:
+#ifdef WIN32
+			std::cerr << "ERROR: For video feed " << i << ": Cannot use " << to_string(usedPollTy) << " on Windows." << std::endl;
+			anyPlatformIssues = true;
+#endif
+			break;
+
+		case VideoPollType::OpenCVUSB_Idx:
+#if IS_RPI
+			std::cerr << "ERROR: For video feed " << i << ": Cannot use " << to_string(usedPollTy) << " on RPi/Linux." << std::endl;
+			anyPlatformIssues = true;
+#endif
+			break;
+
+		}
+	}
+	if(anyPlatformIssues)
+	{
+		std::stringstream sstrm;
+
+		sstrm << "ERROR: Invalid polling type used for";
+#if IS_RPI
+		sstrm << "RaspberryPi/Linux";
+#elif WIN32
+		sstrm << "Windows";
+#else
+		sstrm << "UNKNOWN_PLATFORM";
+#endif
+		sstrm << ". Fix by changing AppOptions.json and then restart. Shutting down application." << std::endl;
+
+		std::string err = sstrm.str();
+
+		// We may need to find something specific for WindowsOS to let the users
+		// see the error. MessageBox was tried, but was not modal.
+		std::cerr << err.c_str();
+
+		exit(1);
+	}
+}
+
 bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& sources)
 {
 	if(sources.size() == 0)
 		return false;
+
+	ValidateSourcePlatforms(sources);
 
 	std::lock_guard<std::mutex> guard(this->camAccess);
 
@@ -104,6 +162,9 @@ bool CamStreamMgr::BootConnectionToCamera(const std::vector<cvgCamFeedSource>& s
 	// running.
 	if(!this->cams.empty())
 		return false;
+
+	//////////////////////////////////////////////////
+	
 
 	for(int i = 0; i < sources.size(); ++i)
 	{

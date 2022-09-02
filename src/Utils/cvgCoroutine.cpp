@@ -32,6 +32,7 @@ bool cvgCoroutine::Finish()
 
 	this->finished = true;
 	this->ImplEnd();
+	return true;
 }
 
 bool cvgCoroutine::Initialize()
@@ -44,6 +45,7 @@ bool cvgCoroutine::Initialize()
 
 	this->ImplStart();
 	this->initialized = true;
+	return true;
 }
 
 bool cvgCoroutine::Reset()
