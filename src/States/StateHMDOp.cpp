@@ -72,6 +72,9 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this),
 		substateMachine(this)
 {
+	this->carouselStyle.SetOrientation(CarouselStyle::Orientation::Vertical);
+	this->carouselStyle.center = true;
+
 	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
 
 	//////////////////////////////////////////////////
@@ -720,7 +723,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->uiSys.Render();
 
 	if(this->showCarousel)
-		this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
+		this->caroStudy.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
 
 	if(UISys::IsDebugView())
 	{ 
@@ -838,7 +841,7 @@ void StateHMDOp::Update(double dt)
 	this->btnExit->Show(showRButtons);
 
 	if(this->showCarousel)
-		this->carousel.Update(this->carouselStyle, dt);
+		this->caroStudy.Update(this->carouselStyle, dt);
 }
 
 void StateHMDOp::EnteredActive()
@@ -872,7 +875,7 @@ void StateHMDOp::EnteredActive()
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
 
 	// Initialize the selected carousel name
-	std::string curCapt = this->carousel.GetCurrentCaption();
+	std::string curCapt = this->caroStudy.GetCurrentCaption();
 	cmgr.SetAllSnapCaption(curCapt);
 
 	// Sync the composite saving resolution
@@ -946,8 +949,8 @@ void StateHMDOp::Initialize()
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
 	this->fontInsBAnno = FontMgr::GetInstance().GetFont(12);
 
-	this->carousel.Append(this->GetView()->cachedOptions.carouselEntries);
-	this->carousel.LoadAssets();
+	this->caroStudy.Append(this->GetView()->cachedOptions.carouselEntries);
+	this->caroStudy.LoadAssets();
 }
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
@@ -1117,7 +1120,7 @@ bool StateHMDOp::ShowSurgeryPhase( bool show)
 		return false;
 
 	this->showCarousel = show;
-	this->carousel.EndAnimation(this->carouselStyle, true);
+	this->caroStudy.EndAnimation(this->carouselStyle, true);
 
 	return true;
 }
@@ -1140,7 +1143,7 @@ bool StateHMDOp::ToggleSurgeryPhase()
 
 bool StateHMDOp::MoveSurgeryPhaseLeft()
 {
-	bool ret = this->carousel.GotoPrev();
+	bool ret = this->caroStudy.GotoPrev();
 	if(ret)
 		this->OnSurgeryPhaseChanged();
 
@@ -1149,18 +1152,19 @@ bool StateHMDOp::MoveSurgeryPhaseLeft()
 
 bool StateHMDOp::MoveSurgeryPhaseRight()
 {
-	bool ret = this->carousel.GotoNext();
+	bool ret = this->caroStudy.GotoNext();
 	if(ret)
 		this->OnSurgeryPhaseChanged();
 
 	return ret;
 }
 
+// !TODO: Remove this, and set data to dicom (via injector)
 void StateHMDOp::OnSurgeryPhaseChanged()
 {
 	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
 
-	std::string curCapt = this->carousel.GetCurrentCaption();
+	std::string curCapt = this->caroStudy.GetCurrentCaption();
 	camMgr.SetAllSnapCaption(curCapt);
 }
 

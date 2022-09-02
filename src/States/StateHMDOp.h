@@ -382,7 +382,10 @@ public:
 	UIPlate* inspExitPlate		= nullptr;
 
 private:
-	Carousel carousel;
+	Carousel caroStudy;
+	Carousel caroSeries;
+	Carousel caroOrient;
+
 	bool showCarousel = false;
 	CarouselStyle carouselStyle;
 
@@ -543,19 +546,19 @@ public:
 	bool MoveSurgeryPhaseRight();
 
 	bool SurgeryPhaseAtStart() const
-	{ return this->carousel.AtStart(); }
+	{ return this->caroStudy.AtStart(); }
 
 	bool SurgeryPhase_AtEnd() const
-	{ return this->carousel.AtEnd(); }
+	{ return this->caroStudy.AtEnd(); }
 
 	bool SurgeryPhase_AnyMoreOnLeft() const
-	{ return this->carousel.AnyMoreOnLeft(); }
+	{ return this->caroStudy.AnyMoreOnLeft(); }
 
 	bool SurgeryPhase_AnyMoreOnRight() const
-	{ return this->carousel.AnyMoreOnRight(); }
+	{ return this->caroStudy.AnyMoreOnRight(); }
 
 	std::string GetSurgeryPhaseLabel() const
-	{ return this->carousel.GetCurrentLabel(); }
+	{ return this->caroStudy.GetCurrentLabel(); }
 
 protected:
 	/// <summary>
