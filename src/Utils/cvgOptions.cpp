@@ -34,8 +34,14 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 {
 	for(int i = 0; i < defSources; ++i)
 	{
+		// DEFAULT AppOptions.json VALUES:
+		//
+		// The default two values. These can be removed or overridden, but we 
+		// populate it with these default values so that if we save the default
+		// cvgOptions into the AppOptions.json, it has the correct expected values.
 		cvgCamFeedSource src;
 		src.defPoll = VideoPollType::OpenCVUSB_Idx;
+		src.linuxOverRidePoll = VideoPollType::MMAL;
 		src.camIndex = i;
 		src.camMMALIdx = i;
 		this->feedOpts.push_back(src);
