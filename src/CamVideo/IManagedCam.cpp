@@ -376,13 +376,6 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 	if(!rawSnaps.empty())
 	{
 		cv::Ptr<cv::Mat> saveMat = ptr;
-		if(!this->snapCaption.empty())
-		{
-			saveMat = new cv::Mat();
-			ptr->copyTo(*saveMat);
-
-			ApplySnapshotWatermarkText(*saveMat, this->snapCaption);
-		}
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
 		{	
@@ -417,33 +410,12 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 	// processed, or indifferents, if we're processing.
 	if(!sptrSwap.empty())
 	{ 
-		// If we're saving with text, we need a seperate image with the text,
-		// without polluting the original. Note that this will incur the cost
-		// of a deep copy.
-		cv::Ptr<cv::Mat> saveMat = ptr;
-		if(!this->snapCaption.empty())
-		{
-			saveMat = new cv::Mat();
-			ptr->copyTo(*saveMat);
-
-			cv::putText(
-				*saveMat, 
-				this->snapCaption.c_str(), 
-				cv::Point(20, ptr->rows - 30), 
-				20, 
-				1.0, 
-				0xFF00FF);
-		}
-
-
 		// Attempt to save file and report the success status back to 
 		// the shared pointer.
 		for(SnapRequest::SPtr snreq : sptrSwap)
 		{
-			
-
 			SaveMatAsDicomJpeg_HandleReq(
-				saveMat, 
+				ptr, 
 				this, 
 				snreq,
 				this->camFeedChanges);
@@ -459,25 +431,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		// error conditions.
 		std::lock_guard<std::mutex> guardVideo(this->videoAccess);
 		if(this->activeVideoReq != nullptr)
-		{
-			// Placing the watermark. This may not be the best location to 
-			// do this, but it should be sufficient for now. Some things to
-			// consider,
-			// - If we're adding padding, we don't want to add in the padding region
-			// - If we're reusing images, we don't want to repeatedly add to the
-			//   same image.
-			// - If we're not saving to video, we don't want to add text to frames
-			//   that aren't doing to be saved to video.
-			//
-			// Also note that this may cause issues, watermark info
-			// directly to the image instead of to a copy, but we'll try to
-			// get away with this if we can, as encoding a video is already
-			// expensive enough as-is without an additional image copy.
-			if(!this->snapCaption.empty())
-				ApplySnapshotWatermarkText(*ptr, this->snapCaption);
-
 			this->_DumpImageToVideofile(*ptr);
-		}
 	}
 
 	return true;
@@ -510,11 +464,6 @@ bool IManagedCam::BootupPollingThread(int camIdx)
 			});
 
 	return true;
-}
-
-void IManagedCam::SetSnapCaption(const std::string& caption)
-{
-	this->snapCaption = caption;
 }
 
 VideoRequest::SPtr IManagedCam::OpenVideo(const std::string& filename)

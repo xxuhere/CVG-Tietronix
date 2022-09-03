@@ -399,11 +399,15 @@ void MainWin::PopulateStates()
 	// - Each state should have a different AppState enum value.
 	// - Beyond the intro state, other states will only be visited
 	// if transitioned to in the app - usually from another state.
+
+	StateHMDOp* opState = new StateHMDOp(&app, this->innerGLWin, this);
+	DicomInjectorSet::GetSingleton().AddInjectorRef(opState);
+
 	std::vector<BaseState*> statesToAdd =
 	{
 		new StateIntro(&app, this->innerGLWin, this),
 		new StateInitCameras(&app, this->innerGLWin, this),
-		new StateHMDOp(&app, this->innerGLWin, this),
+		opState,
 		new StateExit(&app, this->innerGLWin, this)
 	};
 

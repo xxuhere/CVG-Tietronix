@@ -15,8 +15,10 @@
 #include "../UISys/UIVBulkSlider.h"
 #include "../UISys/UIHSlider.h"
 #include "../Carousel/Carousel.h"
+#include "../DicomUtils/DicomInjector.h"
 #include <map>
 #include <memory>
+#include <mutex>
 
 class UIButton;
 class StateHMDOp;
@@ -89,7 +91,8 @@ class StateHMDOp;
 /// </summary>
 class StateHMDOp : 
 	public BaseState,
-	public UISink
+	public UISink,
+	public DicomInjector
 {
 public:
 
@@ -160,6 +163,8 @@ public:
 		// Exit Button
 		Exit_Confirm
 	};
+private:
+	std::mutex dicomMutex;
 
 public:
 
@@ -588,7 +593,8 @@ protected:
 
 
 public:
-
+	//////////////////////////////////////////////////
+	//
 	//		UISink overrides
 	//
 	//////////////////////////////////////////////////
@@ -598,6 +604,13 @@ public:
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
 	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
 
+
+	//////////////////////////////////////////////////
+	//
+	//		DicomInjector overrides
+	//
+	//////////////////////////////////////////////////
+	void InjectIntoDicom(DcmDataset* dicomData) override;
 public:
 
 	typedef typename Substate<StateHMDOp>::Ptr SubPtr;

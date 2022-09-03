@@ -7,6 +7,7 @@
 #include "../UISys/UIButton.h"
 #include "../UISys/UIVBulkSlider.h"
 #include <cmath>
+#include <dcmtk/dcmdata/dcdeftag.h>
 
 #include "HMDOpSubs/HMDOpSub_Carousel.h"
 #include "HMDOpSubs/HMDOpSub_Default.h"
@@ -905,10 +906,6 @@ void StateHMDOp::EnteredActive()
 
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
 
-	// Initialize the selected carousel name
-	std::string curCapt = this->caroStudy.GetCurrentCaption();
-	cmgr.SetAllSnapCaption(curCapt);
-
 	// Sync the composite saving resolution
 	cmgr.SetFloat(
 		SpecialCams::Composite, 
@@ -1246,6 +1243,10 @@ bool StateHMDOp::IsSelectedCarouselAtEnd() const
 
 bool StateHMDOp::MoveSelectedCarouselLeft()
 {
+	// This will change carousels, which is how we get the study/series/orientation
+	// info the dicom - which needs thread saftey.
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
 	Carousel* selectedCarousel = this->GetSelectedCarousel();
 	if(!selectedCarousel)
 		return false;
@@ -1259,6 +1260,10 @@ bool StateHMDOp::MoveSelectedCarouselLeft()
 
 bool StateHMDOp::MoveSelectedCarouselRight(bool wrap)
 {
+	// This will change carousels, which is how we get the study/series/orientation
+	// info the dicom - which needs thread saftey.
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
 	Carousel* selectedCarousel = this->GetSelectedCarousel();
 	if(!selectedCarousel)
 		return false;
@@ -1273,18 +1278,13 @@ bool StateHMDOp::MoveSelectedCarouselRight(bool wrap)
 	return ret;
 }
 
-// !TODO: Remove this, and set data to dicom (via injector)
 void StateHMDOp::OnCarouselChanged(CarouselType caroTy)
 {
+	// Currently nothing needs to be done. Everythign is handled on image
+	// save with the dicom injector.
 	switch(caroTy)
 	{
 	case CarouselType::Study:
-		{
-			CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
-
-			std::string curCapt = this->caroStudy.GetCurrentCaption();
-			camMgr.SetAllSnapCaption(curCapt);
-		}
 		break;
 
 	case CarouselType::Series:
@@ -1776,4 +1776,19 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 			cmgr.SetFloat(targIdx, StreamParams::Alpha, value);
 		}
 	}
+}
+
+void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
+{
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
+	// TODO: Needs a bit more clarification on what carousel maps to what tag.
+	std::string studyCaption = this->caroStudy.GetCurrentCaption();
+	dicomData->putAndInsertString(DCM_StudyID, studyCaption.c_str());
+
+	std::string seriesCaption = this->caroSeries.GetCurrentCaption();
+	dicomData->putAndInsertString(DCM_SeriesDescription, seriesCaption.c_str());
+
+	//std::string orientCaption = this->caroOrient.GetCurrentCaption();
+	//dicomData->putAndInsertString(DCM_)
 }

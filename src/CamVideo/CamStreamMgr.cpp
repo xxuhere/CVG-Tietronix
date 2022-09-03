@@ -440,24 +440,3 @@ bool CamStreamMgr::SetFloat(int id, StreamParams paramid, float value)
 
 	return imc->SetFloat(paramid, value);
 }
-
-void CamStreamMgr::SetSnapCaption(int id, const std::string& caption)
-{
-	std::lock_guard<std::mutex> guard(this->camAccess);
-	IManagedCam* imc = this->_GetIManaged(id);
-	if(imc == nullptr)
-		return;
-
-	imc->SetSnapCaption(caption);
-}
-
-void CamStreamMgr::SetAllSnapCaption(const std::string& caption)
-{
-	std::lock_guard<std::mutex> guard(this->camAccess);
-
-	for(int i = 0; i < this->cams.size(); ++i)
-		this->cams[i]->SetSnapCaption(caption);
-
-	if(this->composite != nullptr)
-		this->composite->SetSnapCaption(caption);
-}

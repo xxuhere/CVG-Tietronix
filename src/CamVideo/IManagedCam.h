@@ -261,8 +261,6 @@ public:
 	/// </summary>
 	int streamFrameCt = 0;
 
-	std::string snapCaption;
-
 	/// <summary>
 	/// The amount to blend in compositing - may only apply to 
 	/// thresholded feeds.
@@ -378,13 +376,6 @@ public:
 	/// the value, OR the parameter is unsupported.
 	/// </returns>
 	virtual bool SetFloat( StreamParams paramid, float value);
-
-	/// <summary>
-	/// Set the caption that will be watermarked for saved snapshots
-	/// from this feed.
-	/// </summary>
-	/// <param name="value">caption</param>
-	void SetSnapCaption(const std::string& caption);
 
 	/// <summary>
 	/// Get access to the shared pointer of the last polled image.
