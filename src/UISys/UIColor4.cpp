@@ -4,6 +4,19 @@
 // across platforms.
 #include <wx/glcanvas.h> 
 
+static UIColor4 _Black;
+static UIColor4 _White;
+static UIColor4 _Red;
+static UIColor4 _Green;
+static UIColor4 _Blue;
+
+
+const UIColor4& UIColor4::Black = _Black;
+const UIColor4& UIColor4::White = _White;
+const UIColor4& UIColor4::Red	= _Red;
+const UIColor4& UIColor4::Green = _Green;
+const UIColor4& UIColor4::Blue	= _Blue;
+
 UIColor4::UIColor4()
 {
 	this->r = 1.0f;
@@ -52,6 +65,23 @@ void UIColor4::GLColor3()
 void UIColor4::GLColor4()
 {
 	glColor4fv(this->ar);
+}
+
+void UIColor4::ModulateSelf(const UIColor4& other)
+{
+	this->r *= other.r; 
+	this->g *= other.g;
+	this->b *= other.b;
+	this->a *= other.a;
+}
+
+UIColor4 UIColor4::Modulate(const UIColor4& other) const
+{
+	return UIColor4(
+		this->r * other.r,
+		this->g * other.g,
+		this->b * other.b,
+		this->a * other.a);
 }
 
 bool UIColor4::operator== (const UIColor4& o) const

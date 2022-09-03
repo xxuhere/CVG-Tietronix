@@ -64,6 +64,14 @@ enum class CoreSubState
 	MenuNav
 };
 
+enum class CarouselType
+{
+	Study,
+	Series,
+	Orient,
+	Totalnum
+};
+
 /// <summary>
 /// Data to support caching button annotation data.
 /// </summary>
@@ -196,6 +204,8 @@ public:
 	/// In the units of pixels per second.
 	/// </summary>
 	const float vertTransSpeed = 400.0f;
+
+	CarouselType selectedCarousel = CarouselType::Study;
 
 
 	/// <summary>
@@ -533,32 +543,31 @@ public:
 	inline void CloseShownMenuBarUIPanel()
 	{ this->SetShownMenuBarUIPanel(-1); }
 
-	bool ShowSurgeryPhase( bool show = true);
+	bool ShowCarousels( bool show = true);
 
-	bool HideSurgeryPhase();
+	bool HideCarousels();
 
-	bool ToggleSurgeryPhase();
+	bool ToggleCarousels();
+
+	Carousel* GetSelectedCarousel();
+	const Carousel* GetSelectedCarousel() const;
 
 	inline bool IsSurgeryPhaseShown() const
 	{ return this->showCarousel; }
 
-	bool MoveSurgeryPhaseLeft();
-	bool MoveSurgeryPhaseRight();
+	bool MoveSelectedCarouselLeft();
+	bool MoveSelectedCarouselRight(bool wrap);
 
-	bool SurgeryPhaseAtStart() const
-	{ return this->caroStudy.AtStart(); }
+	bool IsSelectedCarouselAtStart() const;
+	bool IsSelectedCarouselAtEnd() const;
 
-	bool SurgeryPhase_AtEnd() const
-	{ return this->caroStudy.AtEnd(); }
-
-	bool SurgeryPhase_AnyMoreOnLeft() const
-	{ return this->caroStudy.AnyMoreOnLeft(); }
-
-	bool SurgeryPhase_AnyMoreOnRight() const
-	{ return this->caroStudy.AnyMoreOnRight(); }
+	bool DoesCarouselHaveMoreOnLeft() const;
+	bool DoesCarouselHaveMoreOnRight() const;
 
 	std::string GetSurgeryPhaseLabel() const
 	{ return this->caroStudy.GetCurrentLabel(); }
+
+	void SelectNextCarousel(bool next);
 
 protected:
 	/// <summary>
@@ -572,10 +581,11 @@ protected:
 	TexObj::SPtr GetBAnnoIco(const std::string& path);
 
 	/// <summary>
-	/// Should be called when the carousel is changed - to sync the rest
+	/// Should be called when a carousel is changed - to sync the rest
 	/// of the application with the changes.
 	/// </summary>
-	void OnSurgeryPhaseChanged();
+	void OnCarouselChanged(CarouselType caroTy);
+
 
 public:
 

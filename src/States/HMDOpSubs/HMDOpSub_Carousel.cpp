@@ -9,12 +9,12 @@ void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>
 
 void HMDOpSub_Carousel::OnLeftUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
 {
-	targ.MoveSurgeryPhaseLeft();
+	targ.SelectNextCarousel(false);
 }
 
 void HMDOpSub_Carousel::OnMiddleUp(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	ssm.PopSubstate();
+	targ.MoveSelectedCarouselRight(true);
 }
 
 void HMDOpSub_Carousel::OnMiddleUpHold(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -27,18 +27,18 @@ void HMDOpSub_Carousel::OnRightDown(StateHMDOp& targ, SubstateMachine<StateHMDOp
 
 void HMDOpSub_Carousel::OnRightUp( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.MoveSurgeryPhaseRight();
+	targ.SelectNextCarousel(true);
 }
 
 void HMDOpSub_Carousel::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	targ.showMainMenu = false;
-	targ.ShowSurgeryPhase(true);
+	targ.ShowCarousels(true);
 }
 
 void HMDOpSub_Carousel::OnExitContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
-	targ.ShowSurgeryPhase(false);
+	targ.ShowCarousels(false);
 }
 
 std::string HMDOpSub_Carousel::GetStateName() const
@@ -71,16 +71,16 @@ std::string HMDOpSub_Carousel::GetActionName(ButtonID bid, StateHMDOp& targ)
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Left";
+		return "Prev Carousel";
 
 	case ButtonID::Middle:
-		return "Back";
+		return "Next Entry";
 
 	case ButtonID::HoldMiddle:
 		return "Back";
 
 	case ButtonID::Right:
-		return "Right";
+		return "Next Carousel";
 
 	}
 	return "";
@@ -91,7 +91,8 @@ bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return targ.SurgeryPhase_AnyMoreOnLeft();
+		return true;
+		//return targ.DoesCarouselHaveMoreOnLeft();
 
 	case ButtonID::Middle:
 		return true;
@@ -100,7 +101,8 @@ bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 		return true;
 
 	case ButtonID::Right:
-		return targ.SurgeryPhase_AnyMoreOnRight();
+		return true;
+		//return targ.DoesCarouselHaveMoreOnRight();
 
 	}
 	return false;

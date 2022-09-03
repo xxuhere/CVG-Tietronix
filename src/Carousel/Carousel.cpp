@@ -417,7 +417,8 @@ void Carousel::Render(
 	float x, 
 	float y, 
 	const CarouselStyle& style, 
-	float scale)
+	float scale,
+	const UIColor4& modColor)
 {
 
 	// There are 4 different layers that need to be handled, depending
@@ -444,7 +445,8 @@ void Carousel::Render(
 		float dst = e->cachedIndex - this->currentShown;
 		float udst = abs(dst);
 
-		glColor4fv(e->drawDetails.bgColor.ar);
+		UIColor4 bgCol = modColor.Modulate(e->drawDetails.bgColor);
+		glColor4fv(bgCol.ar);
 		e->plateRect.GLQuad(UIVec2(x, y));
 
 		// RENDER THE ICON
@@ -452,7 +454,8 @@ void Carousel::Render(
 		if(e->IsImageLoaded())
 		{ 
 			glEnable(GL_TEXTURE_2D);
-			glColor4fv(e->drawDetails.iconColor.ar);
+			UIColor4 icoCol = modColor.Modulate(e->drawDetails.iconColor);
+			glColor4fv(icoCol.ar);
 			e->icon->GLBind();
 
 			UIRect rectIco(
@@ -574,7 +577,12 @@ bool Carousel::Goto(const std::string& id, bool anim)
 	return false;
 }
 
-bool Carousel::Append(std::vector<CarouselData>& vec)
+bool Carousel::Append(const CarouselSystemData& csd)
+{
+	return this->Append(csd.entries);
+}
+
+bool Carousel::Append(const std::vector<CarouselData>& vec)
 {
 	if(this->hasLoaded)
 		return false;

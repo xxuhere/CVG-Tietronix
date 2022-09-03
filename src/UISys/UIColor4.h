@@ -38,6 +38,9 @@ public:
 	/// </summary>
 	void GLColor4();
 
+	void ModulateSelf(const UIColor4& other);
+	UIColor4 Modulate(const UIColor4& other) const;
+
 	// Preset color setting utilities.
 	inline void SetColor_Black()	{ this->Set(0.0f, 0.0f, 0.0f); }
 	inline void SetColor_White()	{ this->Set(1.0f, 1.0f, 1.0f); }
@@ -57,6 +60,13 @@ public:
 			::Lerp(a.b, b.b, t),
 			::Lerp(a.a, b.a, t));
 	}
+
+public:
+	static const UIColor4& Black;
+	static const UIColor4& White;
+	static const UIColor4& Red;
+	static const UIColor4& Green;
+	static const UIColor4& Blue;
 };
 
 /// <summary>

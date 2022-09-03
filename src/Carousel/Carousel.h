@@ -361,7 +361,7 @@ public:
 	/// Render the carousel to the screen.
 	/// </summary>
 	// NOTE: The scale is currently ignored.
-	void Render(float x, float y, const CarouselStyle& style, float scale);
+	void Render(float x, float y, const CarouselStyle& style, float scale, const UIColor4& modColor);
 
 	/// <summary>
 	/// Move the carousel selection to the right of the current selection.
@@ -409,7 +409,13 @@ public:
 	/// Add a range of carousel entries. Note that the carousel must not
 	/// be loaded or else the request will be ignored.
 	/// </summary>
-	bool Append(std::vector<CarouselData>& vec);
+	bool Append(const CarouselSystemData& csd);
+
+	/// <summary>
+	/// Add a range of carousel entries. Note that the carousel must not
+	/// be loaded or else the request will be ignored.
+	/// </summary>
+	bool Append(const std::vector<CarouselData>& vec);
 
 	/// <summary>
 	/// Add an additiona carousel entry. Note that the carousel must not

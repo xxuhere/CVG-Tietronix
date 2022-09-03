@@ -105,7 +105,9 @@ public:
 	/// </summary>
 	std::vector<cvgCamFeedSource> feedOpts;
 
-	std::vector<CarouselData> carouselEntries;
+	CarouselSystemData caroSysStudy;
+	CarouselSystemData caroSysSeries;
+	CarouselSystemData caroSysOrient;
 
 public:
 	cvgOptions(int defSources, bool sampleCarousels = true);
