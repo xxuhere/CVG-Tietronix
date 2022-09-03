@@ -25,6 +25,7 @@ public:
 		Totalnum
 	};
 
+
 public:
 	/// <summary>
 	/// Get the path of the icon to load and use for the

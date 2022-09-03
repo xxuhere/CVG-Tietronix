@@ -86,6 +86,20 @@ public:
 
 class StateHMDOp;
 
+struct ButtonTexSet
+{
+public:
+	TexObj normal;
+	TexObj pressed;
+	TexObj hold;
+
+public:
+	bool Initialize(
+		const std::string& normImgPath,
+		const std::string& pressedImgPath,
+		const std::string& holdimgPath);
+};
+
 /// <summary>
 /// The application state for the main operator loop.
 /// </summary>
@@ -296,16 +310,19 @@ public:
 	std::map<std::string, BAnnoIcon> cachedBAnnoIcos;
 
 	// Various icons for the mouse pad graphic
-	TexObj ico_MousePadLeft;
-	TexObj ico_MousePadRight;
+	ButtonTexSet ico_MousePadLeft;
+	ButtonTexSet ico_MousePadRight;
+	ButtonTexSet ico_MousePadBall;
 	TexObj ico_MousePadCrevice;
-	TexObj ico_MousePadBall;
 
 	// Animation state information for the mouse
 	// pad graphic buttons.
 	MouseDownState mdsLeft;
 	MouseDownState mdsRight;
 	MouseDownState mdsMiddle;
+
+	// NOTE: We may want to group everything similar in buttons,
+	// such as combining ico_MousePad* with mds*.
 
 	//////////////////////////////////////////////////
 	//
@@ -440,10 +457,7 @@ public:
 	/// <param name="x">The x position (screen pixel) of the center of the graphic.</param>
 	/// <param name="y">The y position (screen pixel) of the center of the graphic.</param>
 	/// <param name="scale">The scale of the graphic.</param>
-	/// <param name="ldown">UNUSED: Consider removal</param>
-	/// <param name="rdown">UNUSED: Consider removal</param>
-	/// <param name="mdown">UNUSED: Consider removal</param>
-	void DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown);
+	void DrawMousePad(float x, float y, float scale);
 
 
 	void DrawRecordingDot(float x, float y, float rad);

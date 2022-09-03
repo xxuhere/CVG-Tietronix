@@ -35,6 +35,19 @@ void SetButtonStdCols(UIBase* uib, bool toggled = false)
 		uib->uiCols = colSetButtonTog;
 }
 
+bool ButtonTexSet::Initialize(
+	const std::string& normImgPath,
+	const std::string& pressedImgPath,
+	const std::string& holdimgPath)
+{
+	bool ret = true;
+	ret = this->normal.LODEIfEmpty(normImgPath) && ret;
+	ret = this->pressed.LODEIfEmpty(pressedImgPath) && ret;
+	ret = this->hold.LODEIfEmpty(holdimgPath) && ret;
+
+	return ret;
+}
+
 void StateHMDOp::MouseDownState::Reset()
 {
 	this->clickRecent = 0.0f;
@@ -382,6 +395,37 @@ void DrawOffsetVertices(float x, float y, TexObj& to, float px, float py, float 
 	DrawOffsetVertices(x, y, to.width, to.height, px, py, scale);
 }
 
+/// <summary>
+/// Create a ButtonTexSet with the correct state.
+/// 
+/// See DrawOffsetVertices for other parameters.
+/// </summary>
+/// <param name="isDown">Is the mouse button down?</param>
+/// <param name="downTime">
+/// Hold long has the button been pressed down? Ignored if idDown is false.</param>
+/// <param name="holdingThreshold">
+/// How long does a button need to be held down before it's considered holding?
+/// </param>
+void DrawOffsetVerticesForButtonSet(
+	float x, 
+	float y, 
+	ButtonTexSet& bs, 
+	float px, 
+	float py, 
+	float scale,
+	bool isDown,
+	float downTime,
+	float holdingThreshold)
+{
+	if(isDown == false)
+		DrawOffsetVertices(x, y, bs.normal, px, py, scale);
+	else if(downTime < holdingThreshold)
+		DrawOffsetVertices(x, y, bs.pressed, px, py, scale);
+	else
+		DrawOffsetVertices(x, y, bs.hold, px, py, scale);
+	
+}
+
 UIColor4 GetMousepadColor(bool isDown, float timeSinceClick)
 {
 	// Pressed down
@@ -398,7 +442,7 @@ UIColor4 GetMousepadColor(float timeSinceClick)
 	return GetMousepadColor((1.0f - timeSinceClick) == 0.0f, timeSinceClick);
 }
 
-void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rdown, bool mdown)
+void StateHMDOp::DrawMousePad(float x, float y, float scale)
 {
 	static UIColor4 disabledBtnColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -434,7 +478,16 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	else
 		disabledBtnColor.GLColor4();
 
-	DrawOffsetVertices(x, y, this->ico_MousePadBall,	0.5f, 0.5f, scale);
+	DrawOffsetVerticesForButtonSet(
+		x, 
+		y,
+		this->ico_MousePadBall,
+		0.5f, 
+		0.5f,
+		scale,
+		this->middleDown,
+		this->middleDownTimer.Milliseconds(false) / 1000.0f,
+		this->ButtonHoldTime);
 
 	// Draw the dial/ring for holding the middle mouse button down.
 	if(
@@ -504,7 +557,16 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	else
 		disabledBtnColor.GLColor4();
 
-	DrawOffsetVertices(x, y, this->ico_MousePadLeft,	1.0f, 1.0f, scale);
+	DrawOffsetVerticesForButtonSet(
+		x, 
+		y, 
+		this->ico_MousePadLeft,	
+		1.0f, 
+		1.0f, 
+		scale,
+		this->leftDown,
+		this->leftDownTimer.Milliseconds(false) / 1000.0f,
+		this->ButtonHoldTime);
 
 	// Draw the right mouse button.
 	if(hasButton[2])
@@ -512,7 +574,16 @@ void StateHMDOp::DrawMousePad(float x, float y, float scale, bool ldown, bool rd
 	else
 		disabledBtnColor.GLColor4();
 
-	DrawOffsetVertices(x, y, this->ico_MousePadRight,	0.0f, 1.0f, scale);
+	DrawOffsetVerticesForButtonSet(
+		x, 
+		y, 
+		this->ico_MousePadRight,	
+		0.0f, 
+		1.0f, 
+		scale,
+		this->rightDown,
+		this->rightDownTimer.Milliseconds(false) / 1000.0f,
+		this->ButtonHoldTime);
 	
 	// Draw the button annotations.
 	if(subTyped != nullptr)
@@ -740,10 +811,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->DrawMousePad(
 		mousepadX,
 		mousepadY,
-		(float)this->GetView()->mousepadScale, 
-		false, 
-		false, 
-		false);
+		(float)this->GetView()->mousepadScale);
 
 	if(camMgr.IsRecording(SpecialCams::Composite))
 	{
@@ -884,10 +952,22 @@ void StateHMDOp::EnteredActive()
 	//
 	// most likely because the OpenGL context doesn't get initialized
 	// as fast as on Windows.
-	this->ico_MousePadLeft.LODEIfEmpty(		"Assets/Mousepad/Mousepad_Left.png");
-	this->ico_MousePadRight.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Right.png");
+	this->ico_MousePadLeft.Initialize(
+		"Assets/Mousepad/Mousepad_Left_Norm.png",
+		"Assets/Mousepad/Mousepad_Left_Pressed.png",
+		"Assets/Mousepad/Mousepad_Left_Hold.png");
+
+	this->ico_MousePadRight.Initialize(
+		"Assets/Mousepad/Mousepad_Right_Norm.png",
+		"Assets/Mousepad/Mousepad_Right_Pressed.png",
+		"Assets/Mousepad/Mousepad_Right_Hold.png");
+
+	this->ico_MousePadBall.Initialize(
+		"Assets/Mousepad/Mousepad_MiddleBall_Norm.png",
+		"Assets/Mousepad/Mousepad_MiddleBall_Pressed.png",
+		"Assets/Mousepad/Mousepad_MiddleBall_Hold.png");
+
 	this->ico_MousePadCrevice.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Crevice.png");
-	this->ico_MousePadBall.LODEIfEmpty(		"Assets/Mousepad/Mousepad_MiddleBall.png");
 
 	this->mdsLeft.Reset();
 	this->mdsMiddle.Reset();
