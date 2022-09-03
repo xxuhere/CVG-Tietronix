@@ -16,7 +16,8 @@
 /// <summary>
 /// The main application top-level window.
 /// </summary>
-class MainWin: public wxFrame
+class MainWin: 
+    public wxFrame
 {
 private:
 

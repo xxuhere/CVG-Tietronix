@@ -61,3 +61,40 @@ public:
 	/// </returns>
 	bool ApplyJSON(const json& js);
 };
+
+/// <summary>
+/// Represents the loaded data for an entire Carousel. Besides holding
+/// the serialized data, it also has the methods for loading.
+/// </summary>
+class CarouselSystemData
+{
+public:
+	std::vector<CarouselData> entries;
+
+public:
+	void Clear();
+
+	/// <summary>
+	/// Load a JSON's content into carouselEntries.
+	/// 
+	/// This handles two types of data, an array of entries, or a string
+	/// reference to another file that has an array. This allows defining
+	/// carousel entries externally in a form that's reusable.
+	/// </summary>
+	/// <param name="js">
+	/// The json object to load. This should be either an array or
+	/// (filename) string.</param>
+	/// <returns></returns>
+	bool ApplyJSON(const json& js);
+
+	/// <summary>
+	/// Copy the entries of another CarouselSystemData.
+	/// </summary>
+	/// <param name="csdSrc">The data to copy</param>
+	void AddCopyCatEntries(CarouselSystemData& csdSrc);
+
+	/// <summary>
+	/// Get a JSON representation of the object.
+	/// </summary>
+	json AsJSON() const;
+};

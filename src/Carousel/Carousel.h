@@ -13,37 +13,6 @@
 
 
 /// <summary>
-/// The style of how to draw a Carousel
-/// </summary>
-class CarouselStyle
-{
-public:
-	/// <summary>
-	/// The speed of transitioning, where 1.0 is to perform
-	/// 1 entry transition in one second, and 2 would be twice
-	/// as fast (half a second).
-	/// </summary>
-	float transitionSpeed	= 10.0f;
-
-	/// <summary>
-	/// The width of an entry box that isn't the selected entry.
-	/// ie., the width of a compressed entry box.
-	/// </summary>
-	float boxComprDimX		= 20.0f;
-
-	/// <summary>
-	/// The width of an entry box that is the selected entry.
-	/// ie., the width of an expanded-width entry box.
-	/// </summary>
-	float boxExpandDimX		= 100.0f;
-
-	/// <summary>
-	/// The height of entry boxes.
-	/// </summary>
-	float boxHeightY		= 110.0f;
-};
-
-/// <summary>
 /// A representation of how a carousel can look at a given 
 /// moment.
 /// 
@@ -93,6 +62,11 @@ public:
 	float labelSize;
 
 	/// <summary>
+	/// The location to draw the label font.
+	/// </summary>
+	UIVec2 labelRelPos;
+
+	/// <summary>
 	/// The rotation of the label font.
 	/// </summary>
 	float labelRot;
@@ -104,16 +78,18 @@ public:
 	float indentIn;
 
 	/// <summary>
-	/// The amount to push the plate upwards. Note that this
-	/// is needed in order to properly illustrate the effect
+	/// The amount to push the plate upwards/over. to emphasize
+	/// what's selected. Note that this is needed in order to properly illustrate the effect
 	/// with indentIn.
 	/// </summary>
-	float pushVert;
+	float pushEmphasis;
 
 	/// <summary>
-	/// The location to draw the label font.
+	/// The amount to shorten the entry.
+	/// - For horizontals this shortens the height.
+	/// - For verticals this shortens the width.
 	/// </summary>
-	UIVec2 labelRelPos;
+	float trim;
 
 public:
 	CarouselMoment();
@@ -129,6 +105,7 @@ public:
 		float labelRot,
 		float indentIn,
 		float pushVert,
+		float trim,
 		const UIVec2& labelRelPos);
 
 	/// <summary>
@@ -138,6 +115,112 @@ public:
 		const CarouselMoment& a, 
 		const CarouselMoment& b, 
 		float t);
+};
+
+/// <summary>
+/// The style of how to draw a Carousel
+/// </summary>
+class CarouselStyle
+{
+public:
+	enum class Orientation
+	{
+		/// <summary>
+		/// Layout carousel entries horizontally
+		/// </summary>
+		Horizontal,
+
+		/// <summary>
+		/// Layout carousel entries vertically
+		/// </summary>
+		Vertical
+	};
+
+private:
+	Orientation orientation = Orientation::Horizontal;
+
+public:
+
+	/// <summary>
+	/// If true, do an extra calculation to ensure the center
+	/// of the seleted item is perfectly drawn in the specified
+	/// center.
+	/// 
+	/// If false, the carousel will be in a "stable" mode, where the entire
+	/// bounds of the carousel will be in (roughly) the same place, but
+	/// the selected entry will move around.
+	/// </summary>
+	bool center = true;
+
+	/// <summary>
+	/// The speed of transitioning, where 1.0 is to perform
+	/// 1 entry transition in one second, and 2 would be twice
+	/// as fast (half a second).
+	/// </summary>
+	float transitionSpeed	= 10.0f;
+
+	/// <summary>
+	/// The dimension for compressed entries.
+	/// 
+	/// The width/height of an entry box that isn't the selected entry.
+	/// ie., the width of a compressed entry box.
+	/// 
+	/// Whether it's the width or the height depends on the orientation
+	/// of the style:
+	/// - If horizontal, this would be the width.
+	/// - If vertical, this would be the height.
+	/// </summary>
+	float boxComprDim		= 20.0f;
+
+	/// <summary>
+	/// The width of an expanded entry box.
+	/// - For horizontal, this is the width of the seleted entry.
+	/// - For vertical, this is the width of ALL entries.
+	/// </summary>
+	float boxExpandedWidth		= 100.0f;
+
+	/// <summary>
+	/// The height of an expanded entry box.
+	/// - For horizontal orientation, this is the width of ALL entries.
+	/// - For vertical, this is the height of the selected entry.
+	/// </summary>
+	float boxExpandedHeight		= 110.0f;
+
+	/// <summary>
+	/// How the carousel entries will be styled when they are the
+	/// selected entry.
+	/// </summary>
+	CarouselMoment drawMoment_Active;
+
+	/// <summary>
+	/// How the carousel entries will be styled when they are the
+	/// direct neighbor of the selected entry.
+	/// </summary>
+	CarouselMoment drawMoment_Nbr0;
+
+	/// <summary>
+	/// How the carousel entries will be styled when they are the
+	/// next-next neighbor of the selected entry 
+	/// (i.e., the selection's neighbor's neighbor).
+	/// </summary>
+	CarouselMoment drawMoment_Nbr1;
+
+	/// <summary>
+	/// How the carousel entries will be styled for entries beyond
+	/// 2 neighbor distances from the selected entry.
+	/// </summary>
+	CarouselMoment drawMoment_Rest;
+
+public:
+	CarouselStyle();
+
+	inline Orientation GetOrientation() const
+	{ return this->orientation;}
+
+	void SetOrientation(Orientation o);
+
+	void SetDefaultMomentsHorizontal();
+	void SetDefaultMomentsVertical();
 };
 
 /// <summary>
@@ -229,6 +312,19 @@ public:
 	// It's arguable if this is the best location for this variable.
 	FontWU labelFont;
 
+protected:
+
+	void ProcessUpdateAndDrawOrder(
+		float x, 
+		float y, 
+		const CarouselStyle& style, 
+		float scale,
+		std::vector<Entry*>& drawOrder);
+
+	void _UpdateAndRecacheScene_Horiz(const CarouselStyle& style);
+
+	void _UpdateAndRecacheScene_Vert(const CarouselStyle& style);
+
 public:
 
 	/// <summary>
@@ -265,7 +361,7 @@ public:
 	/// Render the carousel to the screen.
 	/// </summary>
 	// NOTE: The scale is currently ignored.
-	void Render(float x, float y, const CarouselStyle& style, float scale);
+	void Render(float x, float y, const CarouselStyle& style, float scale, const UIColor4& modColor);
 
 	/// <summary>
 	/// Move the carousel selection to the right of the current selection.
@@ -313,7 +409,13 @@ public:
 	/// Add a range of carousel entries. Note that the carousel must not
 	/// be loaded or else the request will be ignored.
 	/// </summary>
-	bool Append(std::vector<CarouselData>& vec);
+	bool Append(const CarouselSystemData& csd);
+
+	/// <summary>
+	/// Add a range of carousel entries. Note that the carousel must not
+	/// be loaded or else the request will be ignored.
+	/// </summary>
+	bool Append(const std::vector<CarouselData>& vec);
 
 	/// <summary>
 	/// Add an additiona carousel entry. Note that the carousel must not

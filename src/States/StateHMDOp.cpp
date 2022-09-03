@@ -7,6 +7,7 @@
 #include "../UISys/UIButton.h"
 #include "../UISys/UIVBulkSlider.h"
 #include <cmath>
+#include <dcmtk/dcmdata/dcdeftag.h>
 
 #include "HMDOpSubs/HMDOpSub_Carousel.h"
 #include "HMDOpSubs/HMDOpSub_Default.h"
@@ -72,6 +73,9 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 		uiSys(-1, UIRect(0, 0, 1920, 1080), this),
 		substateMachine(this)
 {
+	this->carouselStyle.SetOrientation(CarouselStyle::Orientation::Vertical);
+	this->carouselStyle.center = true;
+
 	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
 
 	//////////////////////////////////////////////////
@@ -682,24 +686,6 @@ void StateHMDOp::Draw(const wxSize& sz)
 	
 	this->DrawMenuSystemAroundRect(cameraWindowRgn);
 
-	float mousepadX = sz.x /2 + (float)this->GetView()->mousepadOffsX;		// Horizontally at the center
-	float mousepadY = sz.y / 2 + (float)this->GetView()->mousepadOffsY;		// Near the bottom
-	this->DrawMousePad(
-		mousepadX,
-		mousepadY,
-		(float)this->GetView()->mousepadScale, 
-		false, 
-		false, 
-		false);
-
-	if(camMgr.IsRecording(SpecialCams::Composite))
-	{
-		const float RecOffX = 125.0f;
-		const float RecOffY = -100;
-		const float RecCircRad = 20.0f;
-		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
-	}
-
 	// Draw debug timings
 	if(UISys::IsDebugView())
 	{ 
@@ -720,7 +706,52 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->uiSys.Render();
 
 	if(this->showCarousel)
-		this->carousel.Render(sz.x * 0.5f, 850.0f, this->carouselStyle, 1.0f);
+	{ 
+		Carousel* sel = this->GetSelectedCarousel();
+		const static UIColor4 selCaroColor(1.0f, 1.0f, 1.0f);
+		const static UIColor4 unselCaroColor(0.5f, 0.5f, 0.5f);
+
+		this->caroOrient.Render(	
+			sz.x * 0.5f,		
+			850.0f, 
+			this->carouselStyle, 
+			1.0f,
+			(&this->caroOrient == sel) ? selCaroColor : unselCaroColor);
+
+		this->caroStudy.Render(
+			sz.x * 0.5f + 200,	
+			850.0f, 
+			this->carouselStyle, 
+			1.0f,
+			(&this->caroStudy == sel) ? selCaroColor : unselCaroColor);
+
+		this->caroSeries.Render(
+			sz.x * 0.5f - 200,	
+			850.0f, 
+			this->carouselStyle, 
+			1.0f,
+			(&this->caroSeries == sel) ? selCaroColor : unselCaroColor);
+
+		
+	}
+
+	float mousepadX = sz.x /2 + (float)this->GetView()->mousepadOffsX;		// Horizontally at the center
+	float mousepadY = sz.y / 2 + (float)this->GetView()->mousepadOffsY;		// Near the bottom
+	this->DrawMousePad(
+		mousepadX,
+		mousepadY,
+		(float)this->GetView()->mousepadScale, 
+		false, 
+		false, 
+		false);
+
+	if(camMgr.IsRecording(SpecialCams::Composite))
+	{
+		const float RecOffX = 125.0f;
+		const float RecOffY = -100;
+		const float RecCircRad = 20.0f;
+		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
+	}
 
 	if(UISys::IsDebugView())
 	{ 
@@ -826,7 +857,7 @@ void StateHMDOp::Update(double dt)
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
 		showRButtons = (curVertWidth == maxVertWidth);
 
-		this->HideSurgeryPhase();
+		this->HideCarousels();
 	}
 	else
 		this->curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
@@ -838,7 +869,11 @@ void StateHMDOp::Update(double dt)
 	this->btnExit->Show(showRButtons);
 
 	if(this->showCarousel)
-		this->carousel.Update(this->carouselStyle, dt);
+	{ 
+		this->caroStudy.Update(this->carouselStyle, dt);
+		this->caroSeries.Update(this->carouselStyle, dt);
+		this->caroOrient.Update(this->carouselStyle, dt);
+	}
 }
 
 void StateHMDOp::EnteredActive()
@@ -870,10 +905,6 @@ void StateHMDOp::EnteredActive()
 	this->_SyncThresholdSlider();
 
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
-
-	// Initialize the selected carousel name
-	std::string curCapt = this->carousel.GetCurrentCaption();
-	cmgr.SetAllSnapCaption(curCapt);
 
 	// Sync the composite saving resolution
 	cmgr.SetFloat(
@@ -946,8 +977,12 @@ void StateHMDOp::Initialize()
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
 	this->fontInsBAnno = FontMgr::GetInstance().GetFont(12);
 
-	this->carousel.Append(this->GetView()->cachedOptions.carouselEntries);
-	this->carousel.LoadAssets();
+	this->caroStudy.Append(this->GetView()->cachedOptions.caroSysStudy);
+	this->caroStudy.LoadAssets();
+	this->caroSeries.Append(this->GetView()->cachedOptions.caroSysSeries);
+	this->caroSeries.LoadAssets();
+	this->caroOrient.Append(this->GetView()->cachedOptions.caroSysOrient);
+	this->caroOrient.LoadAssets();
 }
 
 void StateHMDOp::OnKeydown(wxKeyCode key)
@@ -1110,58 +1145,171 @@ StateHMDOp::~StateHMDOp()
 {
 }
 
-bool StateHMDOp::ShowSurgeryPhase( bool show)
+bool StateHMDOp::ShowCarousels( bool show)
 {
 
 	if(this->showCarousel == show)
 		return false;
 
 	this->showCarousel = show;
-	this->carousel.EndAnimation(this->carouselStyle, true);
+	this->caroStudy.EndAnimation(this->carouselStyle, true);
+	this->caroSeries.EndAnimation(this->carouselStyle, true);
+	this->caroOrient.EndAnimation(this->carouselStyle, true);
 
 	return true;
 }
 
-bool StateHMDOp::HideSurgeryPhase()
+bool StateHMDOp::HideCarousels()
 {
-	return this->ShowSurgeryPhase(false);
+	return this->ShowCarousels(false);
 }
 
-bool StateHMDOp::ToggleSurgeryPhase()
+bool StateHMDOp::ToggleCarousels()
 {
 	if(this->showCarousel)
-		return this->HideSurgeryPhase();
+		return this->HideCarousels();
 	else
 	{ 
 		this->uiSys.ClearCustomTabOrder();
-		return this->ShowSurgeryPhase();
+		return this->ShowCarousels();
 	}
 }
 
-bool StateHMDOp::MoveSurgeryPhaseLeft()
+Carousel* StateHMDOp::GetSelectedCarousel()
 {
-	bool ret = this->carousel.GotoPrev();
+	switch(this->selectedCarousel)
+	{
+	case CarouselType::Study:
+		return &this->caroStudy;
+	case CarouselType::Series:
+		return &this->caroSeries;
+	case CarouselType::Orient:
+		return &this->caroOrient;
+	}
+
+	return nullptr;
+}
+
+const Carousel* StateHMDOp::GetSelectedCarousel() const
+{
+	switch(this->selectedCarousel)
+	{
+	case CarouselType::Study:
+		return &this->caroStudy;
+	case CarouselType::Series:
+		return &this->caroSeries;
+	case CarouselType::Orient:
+		return &this->caroOrient;
+	}
+
+	return nullptr;
+}
+
+bool StateHMDOp::DoesCarouselHaveMoreOnLeft() const
+{ 
+	const Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return false;
+
+	return selectedCarousel->AnyMoreOnLeft(); 
+}
+
+bool StateHMDOp::DoesCarouselHaveMoreOnRight() const
+{ 
+	const Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return true;
+
+	return selectedCarousel->AnyMoreOnRight(); 
+}
+
+bool StateHMDOp::IsSelectedCarouselAtStart() const
+{ 
+	const Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return true;
+
+	return selectedCarousel->AtStart();
+}
+
+bool StateHMDOp::IsSelectedCarouselAtEnd() const
+{ 
+	const Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return true;
+
+	return selectedCarousel->AtEnd();
+}
+
+bool StateHMDOp::MoveSelectedCarouselLeft()
+{
+	// This will change carousels, which is how we get the study/series/orientation
+	// info the dicom - which needs thread saftey.
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
+	Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return false;
+
+	bool ret = selectedCarousel->GotoPrev();
 	if(ret)
-		this->OnSurgeryPhaseChanged();
+		this->OnCarouselChanged(this->selectedCarousel);
 
 	return ret;
 }
 
-bool StateHMDOp::MoveSurgeryPhaseRight()
+bool StateHMDOp::MoveSelectedCarouselRight(bool wrap)
 {
-	bool ret = this->carousel.GotoNext();
+	// This will change carousels, which is how we get the study/series/orientation
+	// info the dicom - which needs thread saftey.
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
+	Carousel* selectedCarousel = this->GetSelectedCarousel();
+	if(!selectedCarousel)
+		return false;
+
+	bool ret = selectedCarousel->GotoNext();
+	if(!ret)
+		ret = selectedCarousel->Goto(0, false);
+
 	if(ret)
-		this->OnSurgeryPhaseChanged();
+		this->OnCarouselChanged(this->selectedCarousel);
 
 	return ret;
 }
 
-void StateHMDOp::OnSurgeryPhaseChanged()
+void StateHMDOp::OnCarouselChanged(CarouselType caroTy)
 {
-	CamStreamMgr& camMgr = CamStreamMgr::GetInstance();
+	// Currently nothing needs to be done. Everythign is handled on image
+	// save with the dicom injector.
+	switch(caroTy)
+	{
+	case CarouselType::Study:
+		break;
 
-	std::string curCapt = this->carousel.GetCurrentCaption();
-	camMgr.SetAllSnapCaption(curCapt);
+	case CarouselType::Series:
+		break;
+
+	case CarouselType::Orient:
+		break;
+	}
+}
+
+void StateHMDOp::SelectNextCarousel(bool next)
+{
+	if(!next)
+	{
+		// Move to the previous instead of next
+		// The extra addition is to handle if it goes to -1, to let it wrap
+		// to the end.
+		this->selectedCarousel = 
+			(CarouselType)(((int)this->selectedCarousel - 1 + (int)CarouselType::Totalnum) % (int)CarouselType::Totalnum);
+	}
+	else
+	{ 
+		this->selectedCarousel = 
+			(CarouselType)(((int)this->selectedCarousel + 1) % (int)CarouselType::Totalnum);
+	}
 }
 
 void StateHMDOp::SetShownMenuBarUIPanel(int idx)
@@ -1628,4 +1776,19 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 			cmgr.SetFloat(targIdx, StreamParams::Alpha, value);
 		}
 	}
+}
+
+void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
+{
+	std::lock_guard<std::mutex> guard(this->dicomMutex);
+
+	// TODO: Needs a bit more clarification on what carousel maps to what tag.
+	std::string studyCaption = this->caroStudy.GetCurrentCaption();
+	dicomData->putAndInsertString(DCM_StudyID, studyCaption.c_str());
+
+	std::string seriesCaption = this->caroSeries.GetCurrentCaption();
+	dicomData->putAndInsertString(DCM_SeriesDescription, seriesCaption.c_str());
+
+	//std::string orientCaption = this->caroOrient.GetCurrentCaption();
+	//dicomData->putAndInsertString(DCM_)
 }

@@ -15,7 +15,8 @@ CarouselMoment::CarouselMoment(
 	float labelSize,
 	float labelRot,
 	float indentIn,
-	float pushVert,
+	float pushEmphasis,
+	float trim,
 	const UIVec2& labelRelPos)
 {
 	this->relIcon			= relIcon;
@@ -27,7 +28,8 @@ CarouselMoment::CarouselMoment(
 	this->labelSize			= labelSize;
 	this->labelRot			= labelRot;
 	this->indentIn			= indentIn;
-	this->pushVert			= pushVert;
+	this->pushEmphasis		= pushEmphasis;
+	this->trim				= trim;
 	this->labelRelPos		= labelRelPos;
 }
 
@@ -46,9 +48,120 @@ CarouselMoment CarouselMoment::Lerp(
 		::Lerp(			a.labelSize,		b.labelSize,			t),
 		::Lerp(			a.labelRot,			b.labelRot,				t),
 		::Lerp(			a.indentIn,			b.indentIn,				t),
-		::Lerp(			a.pushVert,			b.pushVert,				t),
+		::Lerp(			a.pushEmphasis,		b.pushEmphasis,			t),
+		::Lerp(			a.trim,				b.trim,					t),
 		UIVec2::Lerp(	a.labelRelPos,		b.labelRelPos,			t));
 
+}
+
+CarouselStyle::CarouselStyle()
+{
+	this->SetOrientation(this->orientation);
+}
+
+void CarouselStyle::SetOrientation(Orientation o)
+{
+	this->orientation = o;
+
+	if(o == Orientation::Vertical)
+		this->SetDefaultMomentsVertical();
+	else
+		this->SetDefaultMomentsHorizontal();
+}
+
+void CarouselStyle::SetDefaultMomentsHorizontal()
+{
+
+	// Offset of where labels are placed,
+	// for compressed entries.
+	UIVec2 horizLabelOffs(15.0f, 80.0f);
+
+	this->drawMoment_Active = 
+		CarouselMoment( 
+			UIRect(10.0f, 10.0f, 80.0f, 80.0f), // Interior icon
+			UIColor4(1.0f, 1.0f, 1.0f, 1.5f),	// Background color
+			UIColor4(1.0f, 1.0f, 1.0f, 1.0),	// Icon color
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Text color
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Outline color
+			3.0f, 14, 0.0f, 0.0f, 10.0f, 0.0f,	// Thickness / LabelSz / LabelRot / PlateInd / PushEmphasis / Trim
+			UIVec2(40, 105.0f));
+
+	this->drawMoment_Nbr0 =
+		CarouselMoment(
+			UIRect(2.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.5f, 0.5f, 0.5f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.5f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			1.0f, 8.0f, 90.0f, 5.0f, 5.0f, 0.0f,
+			horizLabelOffs);
+
+	this->drawMoment_Nbr1 =
+		CarouselMoment(
+			UIRect(2.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.35f, 0.35f, 0.35f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.25f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			0.0f, 8.0f, 90.0f, 2.0f, 2.0f, 0.0f,
+			horizLabelOffs);
+
+	this->drawMoment_Rest =
+		CarouselMoment(
+			UIRect(2.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.2f, 0.2f, 0.2f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.2f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			0.0f, 9.0f, 90.0f, 0.0f, 0.0f, 0.0f,
+			horizLabelOffs);
+}
+
+void CarouselStyle::SetDefaultMomentsVertical()
+{
+	// Offset of where labels are placed,
+	// for compressed entries.
+	UIVec2 vertLabelOffs(25, 15);
+
+	this->drawMoment_Active = 
+		CarouselMoment( 
+			UIRect(10.0f, 10.0f, 80.0f, 80.0f), // Interior icon
+			UIColor4(1.0f, 1.0f, 1.0f, 1.5f),	// Background color
+			UIColor4(1.0f, 1.0f, 1.0f, 1.0),	// Icon color
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Text color
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Outline color
+			3.0f, 14, 0.0f, 0.0f, 0.0f, 0.0f,	// Thickness / LabelSz / LabelRot / PlateInd / PushEmphasis / Trim
+			UIVec2(40, 105.0f));
+
+	this->drawMoment_Nbr0 =
+		CarouselMoment(
+			UIRect(5.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.5f, 0.5f, 0.5f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.5f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			1.0f, 8.0f, 0.0f, 5.0f, 0.0f, 2.0f,
+			vertLabelOffs);
+
+	this->drawMoment_Nbr1 =
+		CarouselMoment(
+			UIRect(7.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.35f, 0.35f, 0.35f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.25f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			0.0f, 8.0f, 0.0f, 2.0f, 0.0f, 4.0f,
+			vertLabelOffs);
+
+	this->drawMoment_Rest =
+		CarouselMoment(
+			UIRect(8.0f, 2.0f, 16.0f, 16.0f),
+			UIColor4(0.2f, 0.2f, 0.2f, 1.0f),
+			UIColor4(1.0f, 1.0f, 1.0f, 0.2f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
+			0.0f, 9.0f, 0.0f, 0.0f, 0.0f, 5.0f,
+			vertLabelOffs);
 }
 
 void Carousel::Clear()
@@ -97,6 +210,14 @@ void Carousel::EndAnimation(const CarouselStyle& style, bool updateCache)
 
 void Carousel::UpdateAndRecacheScene(const CarouselStyle& style)
 {
+	if(style.GetOrientation() == CarouselStyle::Orientation::Vertical)
+		this->_UpdateAndRecacheScene_Vert(style);
+	else
+		this->_UpdateAndRecacheScene_Horiz(style);
+}
+
+void Carousel::_UpdateAndRecacheScene_Horiz(const CarouselStyle& style)
+{
 	if(this->entries.empty())
 		return;
 
@@ -106,42 +227,9 @@ void Carousel::UpdateAndRecacheScene(const CarouselStyle& style)
 	// The drawing properties of various distances from being the active state.
 	// TODO: Generate these interpolation targets programatically 
 	// base off the style or some other data.
-	const static UIVec2 comprLabelOffs(15.0f, 80.0f);
-	const static CarouselMoment drawMoment_Active( 
-		UIRect(10.0f, 10.0f, 80.0f, 80.0f), // Interior icon
-		UIColor4(1.0f, 1.0f, 1.0f, 1.5f),	// Background color
-		UIColor4(1.0f, 1.0f, 1.0f, 1.0),	// Icon color
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Text color
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),	// Outline color
-		3.0f, 14, 0.0f, 0.0f, 10.0f,		// Thickness / LabelSz / LabelRot / PlateInd / PlatePushVert
-		UIVec2(40, 105.0f));				// Label pos
-	const static CarouselMoment drawMoment_Nbr0(
-		UIRect(2.0f, 2.0f, 16.0f, 16.0f),
-		UIColor4(0.5f, 0.5f, 0.5f, 1.0f),
-		UIColor4(1.0f, 1.0f, 1.0f, 0.5f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		1.0f, 8.0f, 90.0f, 5.0f, 5.0f,
-		comprLabelOffs);
-	const static CarouselMoment drawMoment_Nbr1(
-		UIRect(2.0f, 2.0f, 16.0f, 16.0f),
-		UIColor4(0.35f, 0.35f, 0.35f, 1.0f),
-		UIColor4(1.0f, 1.0f, 1.0f, 0.25f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		0.0f, 8.0f, 90.0f, 2.0f, 2.0f, 
-		comprLabelOffs);
-	const static CarouselMoment drawMoment_Rest(
-		UIRect(2.0f, 2.0f, 16.0f, 16.0f),
-		UIColor4(0.2f, 0.2f, 0.2f, 1.0f),
-		UIColor4(1.0f, 1.0f, 1.0f, 0.2f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		UIColor4(0.0f, 0.0f, 0.0f, 1.0f),
-		0.0f, 9.0f, 90.0f, 0.0f, 0.0f,
-		comprLabelOffs);
 
-	float totWidth = style.boxExpandDimX + (this->entries.size() - 1) * style.boxComprDimX;	
-	float fy = -style.boxHeightY * 0.5f;
+	float totWidth = style.boxExpandedWidth + (this->entries.size() - 1) * style.boxComprDim;	
+	float fy = -style.boxExpandedHeight * 0.5f;
 	float fx = -totWidth * 0.5f;
 
 	for(int i = 0; i < this->entries.size(); ++i)
@@ -152,19 +240,19 @@ void Carousel::UpdateAndRecacheScene(const CarouselStyle& style)
 
 		// Peicewise interpolation of all the draw details
 		if(uDst < 1.0f)
-			e.drawDetails = CarouselMoment::Lerp(drawMoment_Active, drawMoment_Nbr0, fmod(uDst, 1.0f));
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Active, style.drawMoment_Nbr0, fmod(uDst, 1.0f));
 		else if(uDst < 2.0f)
-			e.drawDetails = CarouselMoment::Lerp(drawMoment_Nbr0, drawMoment_Nbr1, fmod(uDst, 1.0f));
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Nbr0, style.drawMoment_Nbr1, fmod(uDst, 1.0f));
 		else if(uDst < 3.0f)
-			e.drawDetails = CarouselMoment::Lerp(drawMoment_Nbr1, drawMoment_Rest, fmod(uDst, 1.0f));
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Nbr1, style.drawMoment_Rest, fmod(uDst, 1.0f));
 		else
-			e.drawDetails = drawMoment_Rest;
+			e.drawDetails = style.drawMoment_Rest;
 
-		float eWidth = style.boxComprDimX;
+		float eWidth = style.boxComprDim;
 		if(uDst < 1.0f)
-			eWidth = ::Lerp(style.boxExpandDimX, style.boxComprDimX, uDst);
+			eWidth = ::Lerp(style.boxExpandedWidth, style.boxComprDim, uDst);
 
-		e.clientRect.Set(fx, fy - e.drawDetails.pushVert, eWidth, style.boxHeightY);
+		e.clientRect.Set(fx, fy - e.drawDetails.pushEmphasis, eWidth, style.boxExpandedHeight);
 
 		if(sDst == 0.0f)
 			e.plateRect = e.clientRect;
@@ -172,20 +260,110 @@ void Carousel::UpdateAndRecacheScene(const CarouselStyle& style)
 		{ 
 			e.plateRect.Set(
 				e.clientRect.pos.x, 
-				e.clientRect.pos.y, 
+				e.clientRect.pos.y + e.drawDetails.trim, 
 				e.clientRect.dim.x + e.drawDetails.indentIn, 
-				e.clientRect.dim.y);
+				e.clientRect.dim.y - e.drawDetails.trim * 2.0f);
 		}
 		else // else if right, shift left
 		{
 			e.plateRect.Set(
 				e.clientRect.pos.x - e.drawDetails.indentIn, 
-				e.clientRect.pos.y, 
+				e.clientRect.pos.y + e.drawDetails.trim, 
 				e.clientRect.dim.x + e.drawDetails.indentIn, 
-				e.clientRect.dim.y);
+				e.clientRect.dim.y - e.drawDetails.trim * 2.0f);
 		}
 
 		fx += eWidth;
+	}
+}
+
+void Carousel::_UpdateAndRecacheScene_Vert(const CarouselStyle& style)
+{
+	if(this->entries.empty())
+		return;
+
+	// TODO: These moments should probably be defined and
+	// referenced from the CarouselStyle class.
+	//
+	// The drawing properties of various distances from being the active state.
+	// TODO: Generate these interpolation targets programatically 
+	// base off the style or some other data.
+
+	float totHeight = style.boxExpandedHeight + (this->entries.size() - 1) * style.boxComprDim;	
+	float fx = -style.boxExpandedWidth * 0.5f;
+	float fy = -totHeight * 0.5f;
+
+	for(int i = 0; i < this->entries.size(); ++i)
+	{
+		Entry& e = this->entries[i];
+		float sDst = e.cachedIndex  - this->currentShown;	// Signed
+		float uDst = abs(sDst);								// Unsigned
+
+															// Peicewise interpolation of all the draw details
+		if(uDst < 1.0f)
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Active, style.drawMoment_Nbr0, fmod(uDst, 1.0f));
+		else if(uDst < 2.0f)
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Nbr0, style.drawMoment_Nbr1, fmod(uDst, 1.0f));
+		else if(uDst < 3.0f)
+			e.drawDetails = CarouselMoment::Lerp(style.drawMoment_Nbr1, style.drawMoment_Rest, fmod(uDst, 1.0f));
+		else
+			e.drawDetails = style.drawMoment_Rest;
+
+		float eHeight = style.boxComprDim;
+		if(uDst < 1.0f)
+			eHeight = ::Lerp(style.boxExpandedHeight, style.boxComprDim, uDst);
+
+		e.clientRect.Set(fx - e.drawDetails.pushEmphasis, fy, style.boxExpandedWidth, eHeight);
+
+		if(sDst == 0.0f)
+			e.plateRect = e.clientRect;
+		else if(sDst < 0.0f)
+		{ 
+			e.plateRect.Set(
+				e.clientRect.pos.x + e.drawDetails.trim, 
+				e.clientRect.pos.y, 
+				e.clientRect.dim.x - e.drawDetails.trim * 2.0f, 
+				e.clientRect.dim.y + e.drawDetails.indentIn);
+		}
+		else // else if right, shift left
+		{
+			e.plateRect.Set(
+				e.clientRect.pos.x + e.drawDetails.trim, 
+				e.clientRect.pos.y - e.drawDetails.indentIn, 
+				e.clientRect.dim.x - e.drawDetails.trim * 2.0f, 
+				e.clientRect.dim.y + e.drawDetails.indentIn);
+		}
+
+		fy += eHeight;
+	}
+
+	// If we're centered instead of stable, Calculate where our
+	// center item is, and move EVERYTHING so that everything is
+	// still placed relatively the same, but the seleted is now
+	// at the origin.
+	if(style.center && this->entries.size() > 1)
+	{
+		// Calculate center, respecting that fact that the "selection" may
+		// actually be between entries, that themselves are moving (animating)
+		// if this is happening during a transition animation.
+		int idxA = (int)std::floor(this->currentShown);
+		int idxB = std::min((int)this->entries.size() - 1, (int)std::ceil(this->currentShown));
+
+		Entry& entA = this->entries[idxA];
+		Entry& entB = this->entries[idxB];
+		float mod = (float)fmod(this->currentShown, 1.0);
+
+		float yOffs = 
+			::Lerp(
+				entA.clientRect.Center().y, 
+				entB.clientRect.Center().y, 
+				mod);
+
+		for(Entry& e : this->entries)
+		{ 
+			e.plateRect.pos.y -= yOffs;
+			e.clientRect.pos.y -= yOffs;
+		}
 	}
 }
 
@@ -212,13 +390,37 @@ void Carousel::Update(const CarouselStyle& style, float dx)
 	}
 }
 
+void Carousel::ProcessUpdateAndDrawOrder(
+	float x, 
+	float y, 
+	const CarouselStyle& style, 
+	float scale,
+	std::vector<Entry*>& drawOrder)
+{
+	for(int i = 0; i < this->entries.size(); ++i)
+		drawOrder.push_back(&this->entries[i]);
+
+	if(CheckCache(this->currentShown, this->lastShown))
+		this->UpdateAndRecacheScene(style);
+
+	std::sort(
+		drawOrder.begin(), 
+		drawOrder.end(), 
+		[this](Entry* ea, Entry* eb)
+		{
+			return abs(ea->cachedIndex - this->currentShown) > abs(eb->cachedIndex - this->currentShown);
+		});
+}
+
+
 void Carousel::Render(
 	float x, 
 	float y, 
 	const CarouselStyle& style, 
-	float scale)
+	float scale,
+	const UIColor4& modColor)
 {
-	
+
 	// There are 4 different layers that need to be handled, depending
 	// on their distance from the active animation point.
 	//
@@ -232,22 +434,9 @@ void Carousel::Render(
 	// to its neighboring entries.
 
 	std::vector<Entry*> order;
-	for(int i = 0; i < this->entries.size(); ++i)
-		order.push_back(&this->entries[i]);
-
-	if(CheckCache(this->currentShown, this->lastShown))
-		this->UpdateAndRecacheScene(style);
+	this->ProcessUpdateAndDrawOrder( x, y, style, scale, order);
 
 
-	std::sort(
-		order.begin(), 
-		order.end(), 
-		[this](Entry* ea, Entry* eb)
-		{
-			return abs(ea->cachedIndex - this->currentShown) > abs(eb->cachedIndex - this->currentShown);
-		});
-
-	
 	for(Entry* e : order)
 	{
 		glDisable(GL_TEXTURE_2D);
@@ -256,15 +445,17 @@ void Carousel::Render(
 		float dst = e->cachedIndex - this->currentShown;
 		float udst = abs(dst);
 
-		glColor4fv(e->drawDetails.bgColor.ar);
+		UIColor4 bgCol = modColor.Modulate(e->drawDetails.bgColor);
+		glColor4fv(bgCol.ar);
 		e->plateRect.GLQuad(UIVec2(x, y));
-		
+
 		// RENDER THE ICON
 		//////////////////////////////////////////////////
 		if(e->IsImageLoaded())
 		{ 
 			glEnable(GL_TEXTURE_2D);
-			glColor4fv(e->drawDetails.iconColor.ar);
+			UIColor4 icoCol = modColor.Modulate(e->drawDetails.iconColor);
+			glColor4fv(icoCol.ar);
 			e->icon->GLBind();
 
 			UIRect rectIco(
@@ -280,13 +471,13 @@ void Carousel::Render(
 		//////////////////////////////////////////////////
 		glColor3fv(e->drawDetails.textColor.ar);
 		glPushMatrix();
-			glTranslatef(
-				x + e->clientRect.pos.x + e->drawDetails.labelRelPos.x, 
-				y + e->clientRect.pos.y + e->drawDetails.labelRelPos.y,
-				0.0f);
-			glScalef(1.0f, -1.0f, 1.0f);
-			glRotatef(e->drawDetails.labelRot, 0.0f, 0.0f, 1.0f);
-			this->labelFont._RenderFontRaw(e->label.c_str());
+		glTranslatef(
+			x + e->clientRect.pos.x + e->drawDetails.labelRelPos.x, 
+			y + e->clientRect.pos.y + e->drawDetails.labelRelPos.y,
+			0.0f);
+		glScalef(1.0f, -1.0f, 1.0f);
+		glRotatef(e->drawDetails.labelRot, 0.0f, 0.0f, 1.0f);
+		this->labelFont._RenderFontRaw(e->label.c_str());
 		glPopMatrix();
 
 		// RENDER THE OUTLINE
@@ -302,29 +493,28 @@ void Carousel::Render(
 			glColor4fv(e->drawDetails.outlineColor.ar);
 			glDisable(GL_TEXTURE_2D);
 			glBegin(GL_QUADS);
-				glVertex2f( plTL.x,		plTL.y	);	
-				glVertex2f( outlTL.x,	outlTL.y);	
-				glVertex2f( outlBR.x,	outlTL.y); 
-				glVertex2f( plBR.x,		plTL.y	);
-				//
-				glVertex2f( plBR.x,		plTL.y	);	
-				glVertex2f( outlBR.x,	outlTL.y);	
-				glVertex2f( outlBR.x,	outlBR.y); 
-				glVertex2f( plBR.x,		plBR.y	);
-				//
-				glVertex2f( plBR.x,		plBR.y	);	
-				glVertex2f( outlBR.x,	outlBR.y);	
-				glVertex2f( outlTL.x,	outlBR.y); 
-				glVertex2f( plTL.x,		plBR.y	);
-				//
-				glVertex2f( plTL.x,		plBR.y	);	
-				glVertex2f( outlTL.x,	outlBR.y);	
-				glVertex2f( outlTL.x,	outlTL.y); 
-				glVertex2f( plTL.x,		plTL.y  );
+			glVertex2f( plTL.x,		plTL.y	);	
+			glVertex2f( outlTL.x,	outlTL.y);	
+			glVertex2f( outlBR.x,	outlTL.y); 
+			glVertex2f( plBR.x,		plTL.y	);
+			//
+			glVertex2f( plBR.x,		plTL.y	);	
+			glVertex2f( outlBR.x,	outlTL.y);	
+			glVertex2f( outlBR.x,	outlBR.y); 
+			glVertex2f( plBR.x,		plBR.y	);
+			//
+			glVertex2f( plBR.x,		plBR.y	);	
+			glVertex2f( outlBR.x,	outlBR.y);	
+			glVertex2f( outlTL.x,	outlBR.y); 
+			glVertex2f( plTL.x,		plBR.y	);
+			//
+			glVertex2f( plTL.x,		plBR.y	);	
+			glVertex2f( outlTL.x,	outlBR.y);	
+			glVertex2f( outlTL.x,	outlTL.y); 
+			glVertex2f( plTL.x,		plTL.y  );
 			glEnd();
 		}
 	}
-
 }
 
 bool Carousel::Goto(int idx, bool anim)
@@ -387,7 +577,12 @@ bool Carousel::Goto(const std::string& id, bool anim)
 	return false;
 }
 
-bool Carousel::Append(std::vector<CarouselData>& vec)
+bool Carousel::Append(const CarouselSystemData& csd)
+{
+	return this->Append(csd.entries);
+}
+
+bool Carousel::Append(const std::vector<CarouselData>& vec)
 {
 	if(this->hasLoaded)
 		return false;

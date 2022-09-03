@@ -267,20 +267,6 @@ public:
 	/// </returns>
 	bool SetFloat(int id, StreamParams paramid, float value);
 
-	/// <summary>
-	/// Set the watermark caption for a specific camera stream.
-	/// </summary>
-	/// <param name="id">The camera stream id.</param>
-	/// <param name="caption">The new caption.</param>
-	void SetSnapCaption(int id, const std::string& caption);
-
-	/// <summary>
-	/// For evert camera stream being managed, set their 
-	/// watermark caption to a specified value.
-	/// </summary>
-	/// <param name="caption">The new caption.</param>
-	void SetAllSnapCaption(const std::string& caption);
-
 private:
 	// Only the singleton systems should be in charge of its construction.
 	CamStreamMgr();

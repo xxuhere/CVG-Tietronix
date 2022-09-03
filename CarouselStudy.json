@@ -1,0 +1,40 @@
+{"entries":
+	[
+        {
+            "caption": "Cavity",
+            "icon_filepath": "Assets/CarIcons/Cavity.png",
+            "id": "CAV",
+            "label": "CAV"
+        },
+        {
+            "caption": "ExVivo",
+            "icon_filepath": "Assets/CarIcons/ExVivo.png",
+            "id": "XV",
+            "label": "XVVO"
+        },
+        {
+            "caption": "ExVivo Lymph",
+            "icon_filepath": "Assets/CarIcons/ExVivoLymph.png",
+            "id": "XVL",
+            "label": "XVVOLYM"
+        },
+		{
+            "caption": "InVivo",
+            "icon_filepath": "Assets/CarIcons/InVivo.png",
+            "id": "IV",
+            "label": "IVVO"
+        },
+		{
+            "caption": "Lymph",
+            "icon_filepath": "Assets/CarIcons/Lymph.png",
+            "id": "Ly",
+            "label": "LYM"
+        },
+		{
+            "caption": "Slices",
+            "icon_filepath": "Assets/CarIcons/Slices.png",
+            "id": "SL",
+            "label": "SLC"
+        }
+    ]
+}

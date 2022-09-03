@@ -15,8 +15,10 @@
 #include "../UISys/UIVBulkSlider.h"
 #include "../UISys/UIHSlider.h"
 #include "../Carousel/Carousel.h"
+#include "../DicomUtils/DicomInjector.h"
 #include <map>
 #include <memory>
+#include <mutex>
 
 class UIButton;
 class StateHMDOp;
@@ -64,6 +66,14 @@ enum class CoreSubState
 	MenuNav
 };
 
+enum class CarouselType
+{
+	Study,
+	Series,
+	Orient,
+	Totalnum
+};
+
 /// <summary>
 /// Data to support caching button annotation data.
 /// </summary>
@@ -81,7 +91,8 @@ class StateHMDOp;
 /// </summary>
 class StateHMDOp : 
 	public BaseState,
-	public UISink
+	public UISink,
+	public DicomInjector
 {
 public:
 
@@ -152,6 +163,8 @@ public:
 		// Exit Button
 		Exit_Confirm
 	};
+private:
+	std::mutex dicomMutex;
 
 public:
 
@@ -196,6 +209,8 @@ public:
 	/// In the units of pixels per second.
 	/// </summary>
 	const float vertTransSpeed = 400.0f;
+
+	CarouselType selectedCarousel = CarouselType::Study;
 
 
 	/// <summary>
@@ -382,7 +397,10 @@ public:
 	UIPlate* inspExitPlate		= nullptr;
 
 private:
-	Carousel carousel;
+	Carousel caroStudy;
+	Carousel caroSeries;
+	Carousel caroOrient;
+
 	bool showCarousel = false;
 	CarouselStyle carouselStyle;
 
@@ -530,32 +548,31 @@ public:
 	inline void CloseShownMenuBarUIPanel()
 	{ this->SetShownMenuBarUIPanel(-1); }
 
-	bool ShowSurgeryPhase( bool show = true);
+	bool ShowCarousels( bool show = true);
 
-	bool HideSurgeryPhase();
+	bool HideCarousels();
 
-	bool ToggleSurgeryPhase();
+	bool ToggleCarousels();
+
+	Carousel* GetSelectedCarousel();
+	const Carousel* GetSelectedCarousel() const;
 
 	inline bool IsSurgeryPhaseShown() const
 	{ return this->showCarousel; }
 
-	bool MoveSurgeryPhaseLeft();
-	bool MoveSurgeryPhaseRight();
+	bool MoveSelectedCarouselLeft();
+	bool MoveSelectedCarouselRight(bool wrap);
 
-	bool SurgeryPhaseAtStart() const
-	{ return this->carousel.AtStart(); }
+	bool IsSelectedCarouselAtStart() const;
+	bool IsSelectedCarouselAtEnd() const;
 
-	bool SurgeryPhase_AtEnd() const
-	{ return this->carousel.AtEnd(); }
-
-	bool SurgeryPhase_AnyMoreOnLeft() const
-	{ return this->carousel.AnyMoreOnLeft(); }
-
-	bool SurgeryPhase_AnyMoreOnRight() const
-	{ return this->carousel.AnyMoreOnRight(); }
+	bool DoesCarouselHaveMoreOnLeft() const;
+	bool DoesCarouselHaveMoreOnRight() const;
 
 	std::string GetSurgeryPhaseLabel() const
-	{ return this->carousel.GetCurrentLabel(); }
+	{ return this->caroStudy.GetCurrentLabel(); }
+
+	void SelectNextCarousel(bool next);
 
 protected:
 	/// <summary>
@@ -569,13 +586,15 @@ protected:
 	TexObj::SPtr GetBAnnoIco(const std::string& path);
 
 	/// <summary>
-	/// Should be called when the carousel is changed - to sync the rest
+	/// Should be called when a carousel is changed - to sync the rest
 	/// of the application with the changes.
 	/// </summary>
-	void OnSurgeryPhaseChanged();
+	void OnCarouselChanged(CarouselType caroTy);
+
 
 public:
-
+	//////////////////////////////////////////////////
+	//
 	//		UISink overrides
 	//
 	//////////////////////////////////////////////////
@@ -585,6 +604,13 @@ public:
 	void OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos) override;
 	void OnUISink_ChangeValue(UIBase* uib, float value, int vid) override;
 
+
+	//////////////////////////////////////////////////
+	//
+	//		DicomInjector overrides
+	//
+	//////////////////////////////////////////////////
+	void InjectIntoDicom(DcmDataset* dicomData) override;
 public:
 
 	typedef typename Substate<StateHMDOp>::Ptr SubPtr;
