@@ -28,14 +28,72 @@
 #
 ##################################################
 
-# The Repo project
+##################################################
+#
+#	VARIABLES
+#
+##################################################
+
+# The Repo project to pull from
 PROJECT_REPO=https://github.com/Achilefu-Lab/CVG-Tietronix.git
+# The directory created when cloning the repo. Should be the Git 
+# path destination without the .git.
+PROJECT_DIR=CVG-Tietronix
 
 # The commit that was last tested to successfully rebuild from.
-SUPPORTED_COMMIT=1ddf8102f8aef3b23fc00adbbe3026a592a83bf2
+SUPPORTED_COMMIT=a4686d17b0ef804e0a0f6cf3b10802d4fb5bbacc
 
 # The version of DCMTK to pull
 DCMTK_TAG=DCMTK-3.6.7 
+# The text expected inside of the dcmtk's VERSION file. Should be
+# the semantic version contain in the tag.
+DCMTK_VER="3.6.7"
+
+##################################################
+#
+#	UTILITY FUNCTIONS
+#
+##################################################
+
+render_separator () {
+	echo "##################################################"
+	echo "##"
+	echo "##     $1"
+	echo "##"
+	echo "##################################################"
+}
+
+##################################################
+#
+#	PULL AND BUILD CVG REPO AND HMDOpView
+#
+##################################################
+
+# We do this first because if the repo is private, it may require 
+# logging in, which may require the user to type something at the 
+# keyboard.
+#
+# Afterwards, they should be able to leave the script alone and
+# walk away for ~2 hours for the script to complete.
+
+render_separator "Pulling repo"
+
+if [ ! -d "${PROJECT_DIR}" ]
+then
+	git clone $PROJECT_REPO
+fi
+
+pushd "${PROJECT_DIR}"
+git fetch
+git checkout $SUPPORTED_COMMIT
+popd
+
+##################################################
+#
+#	INITIALIZATION
+#
+##################################################
+render_separator "Initializing"
 
 sudo apt update
 
@@ -54,6 +112,8 @@ sudo ufw allow ssh
 #	PULL DEPENDENCIES FROM APT
 #
 ##################################################
+render_separator "Getting Package Dependencies"
+
 sudo apt-get -y install libssl-dev
 sudo apt-get -y install libopencv-dev
 sudo apt-get -y install mesa-common-dev freeglut3-dev
@@ -69,6 +129,9 @@ sudo apt-get -y install cmake
 #	DCMTK
 #
 ##################################################
+render_separator "Installing DCMTK"
+echo "With target tag $DCMTK_TAG"
+echo "With target version $DCMTK_VER"
 
 sudo apt-get -y install libxml2-dev
 
@@ -87,6 +150,31 @@ then
 	sudo make install
 	
 	popd
+else
+	# If the dcmtk folder already exists, check to make sure some of the
+	# expected files from above are installed. If not, then chances
+	# are dcmtk exists, but not in a proper way we can continue with.
+	
+	# Get installed location of libdcmxml, and ensure it's installed
+	dcmxml_loc=$(whereis libdcmdata | cut -d: -f 2 | sed 's/^ *//g')
+	if [ -z "$dcmxml_loc"]
+	then
+		echo "ISSUE: Detected a dcmtk folder, but dcmtk was not detected to be installed. Install DCMTK from commit tag $DCMTK_TAG manually."
+		return
+	fi
+	
+	# Check version file exists, and that version matches
+	if [-r "dcmtk/VERSION"]
+	then
+		echo "ISSUE: Folder dcmtk is missing expected VERSION file. Please set the folder to a DCMTK repo of version $DCMTK_VER."
+		return
+	fi
+	
+	if [ "$dcm_ver" != $(cat dcmtk/VERSION)]
+	then
+		echo "ISSUE: Detected the wrong version of DCMTK in folder dcmtk. Make sure it is $DCMTK_VER."
+		return
+	fi
 fi
 
 ##################################################
@@ -94,6 +182,7 @@ fi
 #	PULL AND BUILD MMAL
 #
 ##################################################
+render_separator "Installing MMAL"
 
 if [ ! -f /opt/vc/lib/libmmal.so ]
 then
@@ -112,6 +201,7 @@ fi
 #	WXWIDGETS
 #
 ##################################################
+render_separator "Installing wxWidgets"
 
 # Install 7-zip to extract downloaded snapshot
 sudo apt-get -y install p7zip-full
@@ -160,22 +250,21 @@ fi
 #	PULL AND BUILD CVG REPO AND HMDOpView
 #
 ##################################################
-if [ ! -d cancer-goggles ]
-then
-	git clone $PROJECT_REPO
-fi
+render_separator "Finishing install"
 
-pushd CVG-Tietronix
-git fetch
-git checkout $SUPPORTED_COMMIT
+pushd "${PROJECT_DIR}"
 
 # Move installed MMAL into /usr regions
+render_separator "Installing MMAL"
 sudo make moves
 
+render_separator "Making Project"
 # Sanity clean
 make clean
 # Make the actual application
 make all
 
 popd
+
+render_separator "FINISHED"
 
