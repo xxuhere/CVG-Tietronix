@@ -414,8 +414,8 @@ public:
 	UIPlate* inspExitPlate		= nullptr;
 
 private:
-	Carousel caroStudy;
 	Carousel caroSeries;
+	Carousel caroBody;
 	Carousel caroOrient;
 
 	bool showCarousel = false;
@@ -583,8 +583,10 @@ public:
 	bool DoesCarouselHaveMoreOnLeft() const;
 	bool DoesCarouselHaveMoreOnRight() const;
 
-	std::string GetSurgeryPhaseLabel() const
-	{ return this->caroStudy.GetCurrentLabel(); }
+	// This is used to allow camera snapping to get the label
+	// for filenames.
+	std::string GetSurgerySeriesLabel() const
+	{ return this->caroSeries.GetCurrentLabel(); }
 
 	void SelectNextCarousel(bool next);
 

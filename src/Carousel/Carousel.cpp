@@ -657,6 +657,15 @@ int Carousel::GetCurrentIndex() const
 	return this->currentEntry;
 }
 
+std::string Carousel::GetCurrentID() const
+{
+	if(this->entries.empty())
+		return "";
+
+	return this->entries[this->currentEntry].id;
+
+}
+
 CarouselData Carousel::GetCurrentData() const
 {
 	if(this->entries.empty())

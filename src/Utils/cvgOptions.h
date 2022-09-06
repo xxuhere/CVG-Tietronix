@@ -105,7 +105,7 @@ public:
 	/// </summary>
 	std::vector<cvgCamFeedSource> feedOpts;
 
-	CarouselSystemData caroSysStudy;
+	CarouselSystemData caroBody;
 	CarouselSystemData caroSysSeries;
 	CarouselSystemData caroSysOrient;
 

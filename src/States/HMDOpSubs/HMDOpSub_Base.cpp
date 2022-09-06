@@ -7,7 +7,7 @@ void HMDOpSub_Base::OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>&
 		new CoroutineSnapWithLasers(
 			targ.GetCoreWindow(),
 			targ.GetView(),
-			targ.GetSurgeryPhaseLabel()));
+			targ.GetSurgerySeriesLabel()));
 }
 
 void HMDOpSub_Base::OnRightUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

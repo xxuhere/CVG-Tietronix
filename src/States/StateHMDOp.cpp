@@ -789,12 +789,12 @@ void StateHMDOp::Draw(const wxSize& sz)
 			1.0f,
 			(&this->caroOrient == sel) ? selCaroColor : unselCaroColor);
 
-		this->caroStudy.Render(
+		this->caroBody.Render(
 			sz.x * 0.5f + 200,	
 			850.0f, 
 			this->carouselStyle, 
 			1.0f,
-			(&this->caroStudy == sel) ? selCaroColor : unselCaroColor);
+			(&this->caroBody == sel) ? selCaroColor : unselCaroColor);
 
 		this->caroSeries.Render(
 			sz.x * 0.5f - 200,	
@@ -938,7 +938,7 @@ void StateHMDOp::Update(double dt)
 
 	if(this->showCarousel)
 	{ 
-		this->caroStudy.Update(this->carouselStyle, dt);
+		this->caroBody.Update(this->carouselStyle, dt);
 		this->caroSeries.Update(this->carouselStyle, dt);
 		this->caroOrient.Update(this->carouselStyle, dt);
 	}
@@ -1057,8 +1057,8 @@ void StateHMDOp::Initialize()
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
 	this->fontInsBAnno = FontMgr::GetInstance().GetFont(12);
 
-	this->caroStudy.Append(this->GetView()->cachedOptions.caroSysStudy);
-	this->caroStudy.LoadAssets();
+	this->caroBody.Append(this->GetView()->cachedOptions.caroBody);
+	this->caroBody.LoadAssets();
 	this->caroSeries.Append(this->GetView()->cachedOptions.caroSysSeries);
 	this->caroSeries.LoadAssets();
 	this->caroOrient.Append(this->GetView()->cachedOptions.caroSysOrient);
@@ -1232,7 +1232,7 @@ bool StateHMDOp::ShowCarousels( bool show)
 		return false;
 
 	this->showCarousel = show;
-	this->caroStudy.EndAnimation(this->carouselStyle, true);
+	this->caroBody.EndAnimation(this->carouselStyle, true);
 	this->caroSeries.EndAnimation(this->carouselStyle, true);
 	this->caroOrient.EndAnimation(this->carouselStyle, true);
 
@@ -1260,7 +1260,7 @@ Carousel* StateHMDOp::GetSelectedCarousel()
 	switch(this->selectedCarousel)
 	{
 	case CarouselType::Study:
-		return &this->caroStudy;
+		return &this->caroBody;
 	case CarouselType::Series:
 		return &this->caroSeries;
 	case CarouselType::Orient:
@@ -1275,7 +1275,7 @@ const Carousel* StateHMDOp::GetSelectedCarousel() const
 	switch(this->selectedCarousel)
 	{
 	case CarouselType::Study:
-		return &this->caroStudy;
+		return &this->caroBody;
 	case CarouselType::Series:
 		return &this->caroSeries;
 	case CarouselType::Orient:
@@ -1863,12 +1863,42 @@ void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
 	std::lock_guard<std::mutex> guard(this->dicomMutex);
 
 	// TODO: Needs a bit more clarification on what carousel maps to what tag.
-	std::string studyCaption = this->caroStudy.GetCurrentCaption();
-	dicomData->putAndInsertString(DCM_StudyID, studyCaption.c_str());
-
 	std::string seriesCaption = this->caroSeries.GetCurrentCaption();
 	dicomData->putAndInsertString(DCM_SeriesDescription, seriesCaption.c_str());
 
-	//std::string orientCaption = this->caroOrient.GetCurrentCaption();
-	//dicomData->putAndInsertString(DCM_)
+	std::string bodyCaption = this->caroBody.GetCurrentCaption();
+	dicomData->putAndInsertString(DCM_BodyPartExamined, seriesCaption.c_str());
+
+	// The Orientation/Aspect involved a bit more elbow grease, because Dicom
+	// has specific names, which are a little different than the terms we're
+	// supporting.
+	//
+	// These values are hard coded to the IDs of the default caroOrient values.
+	//
+	// See https://dicom.innolitics.com/ciods/mr-image/general-image/00200020
+	// For the expected Dicom values.
+	std::string orientID = this->caroOrient.GetCurrentID();
+	std::string dicomOrient;
+	if(orientID == "AN")
+		dicomOrient = "A";
+	else if(orientID == "SU")
+		dicomOrient = "H";		// NOTE: Not correct - currently set to head - ask
+	else if(orientID == "PO")
+		dicomOrient = "P";
+	else if(orientID == "IN")
+		dicomOrient = "F";		// NOTE: Not correct - currently set to foot - ask
+	else if(orientID == "LA")
+		dicomOrient = "L";
+	else if(orientID == "ME")
+		dicomOrient = "M";
+	
+	if(dicomOrient.empty())
+	{
+		std::cerr << "Attempting to inject into Dicom an unknown aspect/orientation id " << orientID << ".";
+	}
+	else
+	{
+		dicomData->putAndInsertString(DCM_PatientOrientation, dicomOrient.c_str());
+	}
+
 }

@@ -29,7 +29,7 @@ static const char* szKey_compositeHeight	= "composite_height";
 
 static const char* szkey_FeedOpts			= "feed_options";
 static const char* szKey_CarouselSeries		= "carousel_series";
-static const char* szKey_CarouselStudy		= "carousel_study";
+static const char* szKey_CarouselBody		= "carousel_body";
 static const char* szKey_CarouselOrient		= "carousel_orientation";
 
 cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
@@ -56,17 +56,27 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		// Note that this does mean these sample files, even if we never intend
 		// for them to be used during operation, MUST ALWAYS EXIST in case the
 		// default carousel items are used.
-		this->caroSysSeries.entries.push_back(CarouselData( "E1", "Assets/CarIcons/CarIco_Sample1.png", "SAM1", "Sample 1"));
-		this->caroSysSeries.entries.push_back(CarouselData( "E2", "Assets/CarIcons/CarIco_Sample2.png", "SAM2", "Sample 2"));
-		this->caroSysSeries.entries.push_back(CarouselData( "E3", "Assets/CarIcons/CarIco_Sample3.png", "SAM3", "Sample 3"));
+		this->caroSysSeries.entries.push_back(CarouselData( "CAV",	"Assets/CarIcons/Cavity.png",			"CAV",		"Cavity"));
+		this->caroSysSeries.entries.push_back(CarouselData( "XV",	"Assets/CarIcons/ExVivo.png",			"XVVO",		"ExVivo"));
+		this->caroSysSeries.entries.push_back(CarouselData( "XVL",	"Assets/CarIcons/ExVivoLymph.png",		"XVLYM",	"ExVivo Lymph"));
+		this->caroSysSeries.entries.push_back(CarouselData( "IV",	"Assets/CarIcons/InVivo.png",			"IVVO",		"InVivo"));
+		this->caroSysSeries.entries.push_back(CarouselData( "LY",	"Assets/CarIcons/Lymph.png",			"LYM",		"Lymph"));
+		this->caroSysSeries.entries.push_back(CarouselData( "SLC",	"Assets/CarIcons/Slices.png",			"SL",		"Slices"));
+		this->caroSysSeries.entries.push_back(CarouselData( "SM",	"Assets/CarIcons/ShavedMargin.png",		"SHVM",		"Shaved Margin"));
 
-		this->caroSysStudy.entries.push_back(CarouselData( "E1", "Assets/CarIcons/CarIco_Sample1.png", "SAM1", "Sample 1"));
-		this->caroSysStudy.entries.push_back(CarouselData( "E2", "Assets/CarIcons/CarIco_Sample2.png", "SAM2", "Sample 2"));
-		this->caroSysStudy.entries.push_back(CarouselData( "E3", "Assets/CarIcons/CarIco_Sample3.png", "SAM3", "Sample 3"));
+		this->caroBody.entries.push_back(CarouselData(		"LB",	"Assets/CarIcons/LeftBreast.png",		"LB",		"Left Breast"));
+		this->caroBody.entries.push_back(CarouselData(		"RB",	"Assets/CarIcons/RightBreast.png",		"RB",		"Right Breast"));
+		this->caroBody.entries.push_back(CarouselData(		"LBR",	"Assets/CarIcons/LeftBreastCav.png",	"LBC",		"Left Breast Cavity"));
+		this->caroBody.entries.push_back(CarouselData(		"RBC",	"Assets/CarIcons/RightBreastCav.png",	"RBC",		"Right Breast Cavity"));
+		this->caroBody.entries.push_back(CarouselData(		"LN",	"Assets/CarIcons/LymphNode.png",		"LN",		"Lymph Node"));
+		this->caroBody.entries.push_back(CarouselData(		"TS",	"Assets/CarIcons/TumorSlice.png",		"TS",		"Tumor Slice"));
 
-		this->caroSysOrient.entries.push_back(CarouselData( "E1", "Assets/CarIcons/CarIco_Sample1.png", "SAM1", "Sample 1"));
-		this->caroSysOrient.entries.push_back(CarouselData( "E2", "Assets/CarIcons/CarIco_Sample2.png", "SAM2", "Sample 2"));
-		this->caroSysOrient.entries.push_back(CarouselData( "E3", "Assets/CarIcons/CarIco_Sample3.png", "SAM3", "Sample 3"));
+		this->caroSysOrient.entries.push_back(CarouselData( "AN",	"Assets/CarIcons/Anterior.png",			"ANTR",		"Anterior"));
+		this->caroSysOrient.entries.push_back(CarouselData( "SU",	"Assets/CarIcons/Superior.png",			"SUPR",		"Superior"));
+		this->caroSysOrient.entries.push_back(CarouselData( "PO",	"Assets/CarIcons/Posterior.png",		"PSTR",		"Posterior"));
+		this->caroSysOrient.entries.push_back(CarouselData( "IN",	"Assets/CarIcons/Inferior.png",			"INFR",		"Inferior"));
+		this->caroSysOrient.entries.push_back(CarouselData( "LA",	"Assets/CarIcons/Lateral.png",			"LATR",		"Lateral"));
+		this->caroSysOrient.entries.push_back(CarouselData( "ME",	"Assets/CarIcons/Medial.png",			"MEDI",		"Medial"));
 	}
 }
 
@@ -157,8 +167,8 @@ void cvgOptions::Apply(json& data)
 		}
 	}
 
-	if(data.contains(szKey_CarouselStudy))
-		this->caroSysStudy.ApplyJSON(data[szKey_CarouselStudy]);
+	if(data.contains(szKey_CarouselBody))
+		this->caroBody.ApplyJSON(data[szKey_CarouselBody]);
 	
 	if(data.contains(szKey_CarouselSeries))
 		this->caroSysSeries.ApplyJSON(data[szKey_CarouselSeries]);
@@ -221,7 +231,7 @@ json cvgOptions::RepresentAsJSON() const
 
 	//		CAROUSEL ENTRIES
 	//////////////////////////////////////////////////
-	ret[szKey_CarouselStudy] = this->caroSysStudy.AsJSON();
+	ret[szKey_CarouselBody] = this->caroBody.AsJSON();
 	ret[szKey_CarouselSeries] = this->caroSysSeries.AsJSON();
 	ret[szKey_CarouselOrient] = this->caroSysOrient.AsJSON();
 

@@ -449,6 +449,12 @@ public:
 	/// </summary>
 	int GetCurrentIndex() const;
 
+	/// <summary>
+	/// Get the ID of the currently selected item.
+	/// </summary>
+	/// <returns></returns>
+	std::string GetCurrentID() const;
+
 	inline int GetIndexCount()
 	{ return this->entries.size(); }
 
