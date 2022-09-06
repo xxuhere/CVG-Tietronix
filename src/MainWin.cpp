@@ -26,7 +26,7 @@
 #include <vector>
 #include <sstream>
 #include "Utils/cvgAssert.h"
-#include "../Utils/TimeUtils.h"
+#include "Utils/TimeUtils.h"
 #include <dcmtk/dcmdata/dcdeftag.h>
 
 #include "States/StateIntro.h"
@@ -41,6 +41,8 @@
 wxBEGIN_EVENT_TABLE(MainWin, wxFrame)
 	EVT_MENU		(wxID_EXIT,  MainWin::OnExit)
 	EVT_MENU		(wxID_SAVE,  MainWin::OnAccelerator_SaveCurOptions)
+	EVT_MENU		((int)CommandID::Fullscreen,  MainWin::OnAccelerator_ToggleFullscreen)
+	
 	EVT_SET_FOCUS	(MainWin::OnFocus			)
 	EVT_SIZE		(MainWin::OnResize			)	
 wxEND_EVENT_TABLE()
@@ -104,6 +106,7 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	std::vector<wxAcceleratorEntry> entries;
 	entries.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_F4, wxID_EXIT));
 	entries.push_back(wxAcceleratorEntry(wxACCEL_CTRL, 'S', wxID_SAVE));
+	entries.push_back(wxAcceleratorEntry(wxACCEL_ALT, WXK_RETURN, (int)CommandID::Fullscreen));
 
 	// Setup Alt+F4 to exit the app (we lost that when we stripped the app
 	// to be bare-bone since that keyboard accelerator was originally handled
@@ -119,15 +122,8 @@ MainWin::MainWin(const wxString& title, const wxPoint& pos, const wxSize& size)
 	// along the outside edges may show.
 	// - For Linux, if we change the window style of 0, it behaves
 	// weird and won't fullscreen or draw correctly.
-	if (this->innerGLWin->fullscreen)
-	{
-#if _WIN32
-		this->SetWindowStyle(0);
-		this->Maximize();
-#else
-		this->ShowFullScreen(true, wxFULLSCREEN_ALL);
-#endif
-	}
+	this->originalWindowFlags = this->GetWindowStyleFlag();
+	this->SetWindowFullscreen(this->innerGLWin->fullscreen);
 
 	// Register Dicom Injectors
 	//
@@ -491,8 +487,41 @@ void MainWin::OnExit(wxCommandEvent& event)
 	this->Close( true );
 }
 
+
 void MainWin::OnAccelerator_SaveCurOptions(wxCommandEvent& evt)
 {
 	std::cout << "Pressed shortcut key to overwrite AppOptions." << std::endl;
 	this->innerGLWin->SaveOptions();
+}
+
+void MainWin::OnAccelerator_ToggleFullscreen(wxCommandEvent& evt)
+{
+	bool isFull = this->IsMaximized() || this->IsFullScreen();
+	this->SetWindowFullscreen(!isFull);
+}
+
+void MainWin::SetWindowFullscreen(bool fullscreen)
+{
+	if (fullscreen)
+	{
+#if _WIN32
+		this->SetWindowStyle(0);
+		this->Maximize();
+#else
+		std::cout <<"Setting window fullscreen" << std::endl;
+		this->ShowFullScreen(true, wxFULLSCREEN_ALL);
+		this->Maximize();
+#endif
+	}
+	else
+	{
+#if _WIN32
+		this->SetWindowStyle(this->originalWindowFlags);
+		this->Restore();
+#else
+		std::cout << "Restoring window" << std::endl;
+		this->ShowFullScreen(false, wxFULLSCREEN_ALL);
+		this->Maximize(false);
+#endif
+	}
 }

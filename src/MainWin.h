@@ -3,6 +3,7 @@
 #include <wx/wx.h>
 #include <wx/sound.h>
 #include <wx/glcanvas.h>
+#include <wx/event.h>
 #include "GLWin.h"
 #include <map>
 #include "States/BaseState.h"
@@ -19,6 +20,11 @@
 class MainWin: 
     public wxFrame
 {
+public:
+    enum class CommandID
+    {
+        Fullscreen = 0
+    };
 private:
 
     /// <summary>
@@ -44,6 +50,12 @@ private:
     /// Video recording counter.
     /// </summary>
     int videoCtr = 0;
+
+    /// <summary>
+    /// The window flags for when the application started. Used for when
+    /// restoring from fullscreen.
+    /// </summary>
+    int originalWindowFlags = 0;
 
 public:
     inline BaseState* CurrState()
@@ -110,6 +122,8 @@ public:
     }
 
     std::string EnsureAndGetCapturesFolder() const;
+
+    void SetWindowFullscreen(bool fullscreen);
 
     //////////////////////////////////////////////////
     //
@@ -238,6 +252,7 @@ public:
     void OnExit(wxCommandEvent& evt);
 
     void OnAccelerator_SaveCurOptions(wxCommandEvent& evt);
+    void OnAccelerator_ToggleFullscreen(wxCommandEvent& evt);
 
     std::string GetSessionsFolder() const;
 
