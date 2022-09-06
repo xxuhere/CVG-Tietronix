@@ -27,6 +27,7 @@ static const char* szToml_Key_SessStudy		= "study";
 static const char* szToml_Key_InstName		= "name";
 static const char* szToml_Key_InstAddr		= "addr";
 static const char* szToml_Key_PatientId		= "id";
+static const char* szToml_Key_PatientCom	= "comments";
 static const char* szToml_Key_EthnicityGroup= "ethnicity";
 static const char* szToml_Key_ContrastAgent	= "agent";
 static const char* szToml_Key_ContrastVol	= "milliliters";
@@ -97,6 +98,7 @@ void OpSession::Clear()
 	this->patientSize = 0.0f;
 	this->patientWeight = 0.0f;
 	this->patientAge = 0;
+	this->patientComments.clear();
 }
 
 void OpSession::Default()
@@ -179,22 +181,26 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 		return false;
 	}
 
-	// PATIENT AGE
+	// PATIENT INFO
 	const toml::v3::table* patientInfo = EnsureSingleTable(patient, szToml_Header_Info);
 	if(patientInfo)
 	{
+		// PATIENT AGE
 		std::optional<int> age = (*patientInfo)[szToml_Key_Age].value<int>();
 		if(age.has_value())
 			this->patientAge = age.value();
 
+		// PATIENT HEIGHT
 		std::optional<float> height = (*patientInfo)[szToml_Key_Height].value<float>();
 		if(height.has_value())
 			this->patientSize = height.value();
 
+		// PATIENT WEIGHT
 		std::optional<float> weight = (*patientInfo)[szToml_Key_Weight].value<float>();
 		if(weight.has_value())
 			this->patientWeight = weight.value();
 
+		// PATIENT GENDER
 		std::optional<std::string> gender = (*patientInfo)[szToml_Key_Gender].value<std::string>();
 		if(gender.has_value())
 		{
@@ -209,13 +215,20 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 				this->gender = Gender::Other;
 		}
 
+		// PATIENT ID
 		std::optional<std::string> id = (*patientInfo)[szToml_Key_PatientId].value<std::string>();
 		if(id.has_value())
 			this->patientid = id.value();
 
+		// PATIENT ETHNIC GROUP
 		std::optional<std::string> ethnicity = (*patientInfo)[szToml_Key_EthnicityGroup].value<std::string>();
 		if(ethnicity.has_value())
 			this->ethnicGroup = ethnicity.value();
+
+		// PATIENT COMMENTS
+		std::optional<std::string> com = (*patientInfo)[szToml_Key_PatientCom].value<std::string>();
+		if(id.has_value())
+			this->patientComments = com.value();
 	}
 	else
 		std::cout << "Warning: Missing patient info in session" << std::endl;
@@ -308,6 +321,7 @@ std::string OpSession::GenerateBlankTOMLTemplate()
 	"gender = \"M\"\n"
 	"id = \"__ID__\"\n"
 	"ethnicity = \"__ETHNICITY__\"\n"
+	"comments = \"\"\n"
 	"\n"
 	"[physician]\n"
 	"[physician.name]\n"
@@ -339,6 +353,13 @@ void OpSession::InjectIntoDicom(DcmDataset* dicomData)
 	dicomData->putAndInsertString(
 		DCM_InstitutionName,
 		this->institution.c_str());
+
+	if(!this->patientComments.empty())
+	{
+		dicomData->putAndInsertString(
+			DCM_PatientComments,
+			this->patientComments.c_str());
+	}
 
 	dicomData->putAndInsertString(
 		DCM_InstitutionAddress,

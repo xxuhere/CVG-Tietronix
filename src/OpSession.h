@@ -36,7 +36,7 @@ public:
 	};
 
 	// https://dicom.innolitics.com/ciods/general-ecg/patient/00100040
-	enum Gender
+	enum class Gender
 	{
 		Male,
 		Female,
@@ -48,6 +48,8 @@ public:
 
 public:
 	DVRPersonName patientName;
+
+	std::string patientComments = "";
 
 	// Session name metadata
 	std::string sessionName = "__unset_sessionname";
