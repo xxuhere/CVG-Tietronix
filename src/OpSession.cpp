@@ -6,56 +6,68 @@
 #include <iomanip>
 #include <dcmtk/dcmdata/libi2d/i2d.h>
 #include <dcmtk/dcmdata/dcdeftag.h>
+#include "../DicomUtils/DicomMiscUtils.h"
 
-static const char* szToml_Header_Patient	= "patient";
-static const char* szToml_Header_Physician	= "physician";
-static const char* szToml_Header_Name		= "name";
-static const char* szToml_Header_Info		= "info";
-static const char* szToml_Header_Session	= "session";
-static const char* szToml_Header_Institution= "institution";
-static const char* szToml_Header_Contrast	= "contrast";
-static const char* szToml_Key_NameLast		= "last";
-static const char* szToml_Key_NameMiddle	= "middle";
-static const char* szToml_Key_NameFirst		= "first";
-static const char* szToml_Key_NamePrefix	= "prefix";
-static const char* szToml_Key_NameSuffix	= "suffix";
-static const char* szToml_Key_Age			= "age";
-static const char* szToml_Key_Height		= "height";
-static const char* szToml_Key_Weight		= "weight";
-static const char* szToml_Key_Gender		= "gender";
-static const char* szToml_Key_SessStudy		= "study";
-static const char* szToml_Key_InstName		= "name";
-static const char* szToml_Key_InstAddr		= "addr";
-static const char* szToml_Key_PatientId		= "id";
-static const char* szToml_Key_PatientCom	= "comments";
-static const char* szToml_Key_EthnicityGroup= "ethnicity";
-static const char* szToml_Key_ContrastAgent	= "agent";
-static const char* szToml_Key_ContrastVol	= "milliliters";
-static const char* szToml_Key_ContrastTime	= "time";
+static const char* szToml_Key_Session		= "session";
+
+// Patient info
+static const char* szToml_Header_Patient		= "patient";
+static const char* szToml_Key_PatientId			=	"id";
+static const char* szToml_Key_PatientCom		=	"comments";
+
+// Injection info
+static const char* szToml_Header_Contrast		= "contrast";
+static const char* szToml_Key_ContrastAgent		=	"agent";
+static const char* szToml_Key_ContrastVol		=	"milliliters";
+static const char* szToml_Key_ContrastTime		=	"time";
+
+// UNUSED:
+// Parts of a name
+static const char* szToml_Key_NameLast			= "last";
+static const char* szToml_Key_NameMiddle		= "middle";
+static const char* szToml_Key_NameFirst			= "first";
+static const char* szToml_Key_NamePrefix		= "prefix";
+static const char* szToml_Key_NameSuffix		= "suffix";
+
+static const char* szToml_Header_Surgery		= "surgery";
+static const char* szToml_Key_SurgeryDate		=	"date";
+static const char* szToml_Key_SurgeryTime		=	"time";
+static const char* szToml_Key_SurgeryLocation	=	"location";
+static const char* szToml_Key_SurgeryStudyID	=	"study_id";
+static const char* szToml_Key_SurgeryDescr		=	"study_descr";
 
 void OpSession::SetSession(const std::string& session)
 {
 	this->sessionName = session;
 }
 
+/// <summary>
+/// A function to convert arbitrary strings to valid prefixes
+/// for file/folder paths.
+/// 
+/// Currently this function is a simple placeholder.
+/// </summary>
+/// <param name="str">The string to sanitize.</param>
+/// <returns>The sanitized version of the input.</returns>
 static std::string _SanitizePrefix(const std::string& str)
 {
 	return str;
 }
 
+/// <summary>
+/// Given the known data of the session, generate a valid folder
+/// name for where generated artifacts of the operation would
+/// be placed.
+/// </summary>
+/// <returns>The directory path where surgery files would go.</returns>
 std::string OpSession::GenerateSessionPrefix() const
 {
 	if(!this->sessionName.empty())
 		return _SanitizePrefix(this->sessionName);
 
-	if(!this->patientName.lastName.empty())
-	{
-		if(!this->patientName.firstName.empty())
-		{
-			return _SanitizePrefix(this->patientName.lastName + "_" + this->patientName.firstName);
-		}
-		return _SanitizePrefix(this->patientName.lastName);
-	}
+	if(!this->studyID.empty())
+		return _SanitizePrefix(this->studyID);
+
 	return "_invalid_";
 }
 
@@ -71,7 +83,7 @@ OpSession::LoadRet OpSession::LoadFromFile(const std::string& filepath, bool thr
 	try
 	{ 
 		toml::table parsedToml = toml::parse(ifs);
-		this->Clear();
+		this->SetToDefault();
 		this->LoadFromToml(parsedToml);
 	}
 	catch(std::exception& ex)
@@ -86,22 +98,8 @@ OpSession::LoadRet OpSession::LoadFromFile(const std::string& filepath, bool thr
 	return LoadRet::Success;
 }
 
-void OpSession::Clear()
-{
-	this->patientName.Clear();
-	this->sessionName.clear();
-	this->gender = Gender::Unset;
-	this->institution.clear();
-	this->institutionAddr.clear();
-	this->physicianName.Clear();
-	this->studyDescription.clear();
-	this->patientSize = 0.0f;
-	this->patientWeight = 0.0f;
-	this->patientAge = 0;
-	this->patientComments.clear();
-}
 
-void OpSession::Default()
+void OpSession::SetToDefault()
 {
 	// Use the default constructor and transfer those default
 	// member values to ourself.
@@ -155,6 +153,23 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 {
 	////////////////////////////////////////////////////////////
 	//
+	//		LOAD SESSION DATA
+	//
+	////////////////////////////////////////////////////////////
+	std::optional<std::string> session = inToml[szToml_Key_Session].value<std::string>();
+	if(session)
+	{
+		if(session.has_value())
+			this->sessionName = session.value();
+	}
+	else
+	{
+		std::cerr << "Did not detect expected session name in TOML file" << std::endl;
+		return false;
+	}
+
+	////////////////////////////////////////////////////////////
+	//
 	//		LOAD PATIENT DATA
 	//
 	////////////////////////////////////////////////////////////
@@ -167,114 +182,48 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 		return false;
 	}
 
-	// PATIENT NAME
-	//
-	// Patient name must exist.
-	bool hasName = false;
-	const toml::v3::table* patientName = EnsureSingleTable(patient, szToml_Header_Name);
-	if(patientName)
-		hasName = LoadTOMLIntoName(patientName, this->patientName);
+	// PATIENT ID
+	std::optional<std::string> id = (*patient)[szToml_Key_PatientId].value<std::string>();
+	if(id.has_value())
+		this->patientid = id.value();
 
-	if(!hasName)
+	// PATIENT COMMENTS
+	std::optional<std::string> com = (*patient)[szToml_Key_PatientCom].value<std::string>();
+	if(com.has_value())
+		this->patientComments = com.value();
+
+	////////////////////////////////////////////////////////////
+	//
+	//		LOAD SURGERY INFO
+	//
+	////////////////////////////////////////////////////////////
+
+	const toml::v3::table* surgery = EnsureSingleTable(&inToml, szToml_Header_Surgery);
+	if(surgery == nullptr)
 	{
-		std::cerr << "Error, TOML missing patient name" << std::endl;
+		std::cerr << "Error, TOML missing surgery data" << std::endl;
 		return false;
 	}
 
-	// PATIENT INFO
-	const toml::v3::table* patientInfo = EnsureSingleTable(patient, szToml_Header_Info);
-	if(patientInfo)
-	{
-		// PATIENT AGE
-		std::optional<int> age = (*patientInfo)[szToml_Key_Age].value<int>();
-		if(age.has_value())
-			this->patientAge = age.value();
+	std::optional<std::string> surgeryDate = (*surgery)[szToml_Key_SurgeryDate].value<std::string>();
+	if(surgeryDate.has_value())
+		this->surgeryDate = surgeryDate.value();
 
-		// PATIENT HEIGHT
-		std::optional<float> height = (*patientInfo)[szToml_Key_Height].value<float>();
-		if(height.has_value())
-			this->patientSize = height.value();
+	std::optional<std::string> surgeryTime = (*surgery)[szToml_Key_SurgeryTime].value<std::string>();
+	if(surgeryTime.has_value())
+		this->surgeryStartTime = surgeryTime.value();
 
-		// PATIENT WEIGHT
-		std::optional<float> weight = (*patientInfo)[szToml_Key_Weight].value<float>();
-		if(weight.has_value())
-			this->patientWeight = weight.value();
+	std::optional<std::string> surgeryLoc = (*surgery)[szToml_Key_SurgeryLocation].value<std::string>();
+	if(surgeryLoc.has_value())
+		this->surgeryLocation = surgeryLoc.value();
 
-		// PATIENT GENDER
-		std::optional<std::string> gender = (*patientInfo)[szToml_Key_Gender].value<std::string>();
-		if(gender.has_value())
-		{
-			std::string genderVal = gender.value();
-			// Make all lowercase for case insensitivity comparison
-			std::transform(genderVal.begin(), genderVal.end(), genderVal.begin(), tolower);
-			if(genderVal == "m")
-				this->gender = Gender::Male;
-			else if(genderVal == "f")
-				this->gender = Gender::Female;
-			else
-				this->gender = Gender::Other;
-		}
+	std::optional<std::string> studyID = (*surgery)[szToml_Key_SurgeryStudyID].value<std::string>();
+	if(studyID.has_value())
+		this->studyID = studyID.value();
 
-		// PATIENT ID
-		std::optional<std::string> id = (*patientInfo)[szToml_Key_PatientId].value<std::string>();
-		if(id.has_value())
-			this->patientid = id.value();
-
-		// PATIENT ETHNIC GROUP
-		std::optional<std::string> ethnicity = (*patientInfo)[szToml_Key_EthnicityGroup].value<std::string>();
-		if(ethnicity.has_value())
-			this->ethnicGroup = ethnicity.value();
-
-		// PATIENT COMMENTS
-		std::optional<std::string> com = (*patientInfo)[szToml_Key_PatientCom].value<std::string>();
-		if(id.has_value())
-			this->patientComments = com.value();
-	}
-	else
-		std::cout << "Warning: Missing patient info in session" << std::endl;
-
-	////////////////////////////////////////////////////////////
-	//
-	//		LOAD PHYSICIAN DATA
-	//
-	////////////////////////////////////////////////////////////
-	const toml::v3::table* physician = EnsureSingleTable(&inToml, szToml_Header_Physician);
-	if(physician)
-	{
-		const toml::v3::table* physicianName = EnsureSingleTable(physician, szToml_Header_Name);
-		if(physicianName)
-			LoadTOMLIntoName(physicianName, this->physicianName);
-	}
-
-	////////////////////////////////////////////////////////////
-	//
-	//		LOAD SESSION DATA
-	//
-	////////////////////////////////////////////////////////////
-	const toml::v3::table* session = EnsureSingleTable(&inToml, szToml_Header_Session);
-	if(session)
-	{
-		std::optional<std::string> studyDescr = (*session)[szToml_Key_SessStudy].value<std::string>();
-		if(studyDescr.has_value())
-			this->studyDescription = studyDescr.value();
-	}
-
-	////////////////////////////////////////////////////////////
-	//
-	//		LOAD INSTITUTION DATA
-	//
-	////////////////////////////////////////////////////////////
-	const toml::v3::table* institution = EnsureSingleTable(&inToml, szToml_Header_Institution);
-	if(institution)
-	{
-		std::optional<std::string> instName = (*institution)[szToml_Key_InstName].value<std::string>();
-		if(instName.has_value())
-			this->institution = instName.value();
-
-		std::optional<std::string> instAddr = (*institution)[szToml_Key_InstAddr].value<std::string>();
-		if(instAddr.has_value())
-			this->institutionAddr = instAddr.value();
-	}
+	std::optional<std::string> studyDescr = (*surgery)[szToml_Key_SurgeryDescr].value<std::string>();
+	if(studyDescr.has_value())
+		this->studyDescription = studyDescr.value();
 
 	////////////////////////////////////////////////////////////
 	//
@@ -300,143 +249,42 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 	return true;
 }
 
-std::string OpSession::GenerateBlankTOMLTemplate()
-{
-	return 
-	"[patient]\n"
-	"\n"
-	"# Set the patient name, first and last should be filled out.\n"
-	"# If other parts of the name are not relevant, comment them out.\n"
-	"[patient.name]\n"
-	"first 	= \"_unset_first_name_\"\n"
-	"#middle = \"_unset_middle_name_\"\n"
-	"last 	= \"_unset_last_name_\"\n"
-	"#prefix = \"_Sr_\"\n"
-	"#suffix = \"_Phd_\"\n"
-	"\n"
-	"[patient.info]\n"
-	"age = 50\n"
-	"height = 1.6\n"
-	"weight = 150\n"
-	"gender = \"M\"\n"
-	"id = \"__ID__\"\n"
-	"ethnicity = \"__ETHNICITY__\"\n"
-	"comments = \"\"\n"
-	"\n"
-	"[physician]\n"
-	"[physician.name]\n"
-	"first 	= \"P_unset_first_name_\"\n"
-	"middle = \"P_unset_middle_name_\"\n"
-	"last 	= \"P_unset_last_name_\"\n"
-	"prefix = \"P_Sr_\"\n"
-	"suffix = \"P_Phd_\"\n"
-	"\n"
-	"[session]\n"
-	"study = \"_empty_\"\n"
-	"\n"
-	"[institution]\n"
-	"name = \"_institution_\"\n"
-	"addr = \"_addr_\"\n"
-	"[contrast]\n"
-	"agent = \"LS301\"\n"
-	"milliliters = 20.0\n"
-	"time = \"120000\"\n";
-
-}
-
 void OpSession::InjectIntoDicom(DcmDataset* dicomData)
 {
-	dicomData->putAndInsertString(
-		DCM_PatientName, 
-		this->patientName.ToDicomForm().c_str());
 
-	dicomData->putAndInsertString(
-		DCM_InstitutionName,
-		this->institution.c_str());
+	//////////////////////////////////////////////////
+	// A few macros automate the code a bit and make it 
+	// simpler to read.
+	//////////////////////////////////////////////////
+	//
+	//
+	#define INSERT_DCM_STRING(_tag, _str, _addIfEmpty) \
+		DicomMiscUtils::InsertDicomString(dicomData, _tag, _str, _addIfEmpty);
+	//
+	#define INSERT_DCM_INT2STR(_tag, _int) \
+		DicomMiscUtils::InsertDicomString(dicomData, _tag, std::to_string(_int), true);
+	//
+	//
+	//////////////////////////////////////////////////
 
-	if(!this->patientComments.empty())
-	{
-		dicomData->putAndInsertString(
-			DCM_PatientComments,
-			this->patientComments.c_str());
-	}
-
-	dicomData->putAndInsertString(
-		DCM_InstitutionAddress,
-		this->institutionAddr.c_str());
-
-	dicomData->putAndInsertString(
-		DCM_PerformingPhysicianName, 
-		this->physicianName.ToDicomForm().c_str());
-
-	dicomData->putAndInsertString(
-		DCM_StudyDescription,
-		this->studyDescription.c_str());
-
-	dicomData->putAndInsertFloat32(
-		DCM_PatientSize,
-		this->patientSize);
-
-	dicomData->putAndInsertFloat32(
-		DCM_PatientWeight,
-		this->patientWeight);
-
-	dicomData->putAndInsertSint32(
-		DCM_PatientAge,
-		this->patientAge);
-
-	if(!this->patientid.empty())
-	{
-		dicomData->putAndInsertString(
-			DCM_PatientID,
-			this->patientid.c_str());
-	}
-
-	if(!this->ethnicGroup.empty())
-	{
-		dicomData->putAndInsertString(
-			DCM_EthnicGroup,
-			this->ethnicGroup.c_str());
-	}
-
-	switch(this->gender)
-	{
-	case Gender::Female:
-		dicomData->putAndInsertString(DCM_PatientSex, "F");
-		break;
-
-	case Gender::Male:
-		dicomData->putAndInsertString(DCM_PatientSex, "M");
-		break;
-
-	default:
-		dicomData->putAndInsertString(DCM_PatientSex, "O");
-	}
+	INSERT_DCM_STRING(DCM_PatientID,				this->patientid,			true);
+	INSERT_DCM_STRING(DCM_StudyID,					this->studyID,				true);
+	INSERT_DCM_STRING(DCM_StudyDescription,			this->studyDescription,		true);
+	INSERT_DCM_STRING(DCM_StudyDate,				this->surgeryDate,			true);
+	INSERT_DCM_STRING(DCM_SeriesDate,				this->surgeryDate,			true);
 
 	if(!this->contrastAgent.empty())
 	{
-		dicomData->putAndInsertString(
-			DCM_ContrastBolusAgent,
-			this->contrastAgent.c_str());
-
-		dicomData->putAndInsertString(
-			DCM_ContrastBolusVolume,
-			std::to_string(this->contrastMilliliters).c_str());
+		INSERT_DCM_STRING(DCM_ContrastBolusAgent,	this->contrastAgent,		true);
+		INSERT_DCM_INT2STR(DCM_ContrastBolusVolume,	this->contrastMilliliters);
 	}
-
 	if(!this->contrastInjectionTime.empty())
 	{
-		// Hopefully the ContrastBolus times are being interpreted correctly,
-		// It's assuming the injection is on the previous day (there's no Dicom
-		// tag for the date either way) and if we're referencing a shot, it's
-		// short enough to be considered instantaneous - so we're going to
-		// set both the start and end with the same value.
-		dicomData->putAndInsertString(
-			DCM_ContrastBolusStartTime,
-			this->contrastInjectionTime.c_str());
-
-		dicomData->putAndInsertString(
-			DCM_ContrastBolusStopTime,
-			this->contrastInjectionTime.c_str());
+		INSERT_DCM_STRING(DCM_ContrastBolusStartTime,this->contrastInjectionTime, true);
+		INSERT_DCM_STRING(DCM_ContrastBolusStopTime, this->contrastInjectionTime, true);
 	}
+
+	INSERT_DCM_STRING(DCM_PatientComments,			this->patientComments,		true);
+	INSERT_DCM_STRING(DCM_BodyPartExamined,			this->surgeryLocation,		true);
+	INSERT_DCM_STRING(DCM_SeriesTime,				this->surgeryStartTime,		true);
 }

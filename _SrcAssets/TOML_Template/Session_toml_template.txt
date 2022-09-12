@@ -1,0 +1,66 @@
+###################################################
+##
+##	Session.toml file
+##
+## This contains per-session data that should be modified
+## for each patient and operation instance.
+##
+###################################################
+
+# General name of the session, as well as the name of the folder to put captured
+# media assets into.
+#
+# You will be able to find the folder in $(App_Folder)/Captures/$(session)
+session = "__session_name__"
+
+[patient]
+	# https://dicom.innolitics.com/ciods/us-image/patient/00100020
+	id = "Enter patient id"
+
+	# The patient comments is expected to have the surgeon name and more information
+	# about the operation being performed.
+	# https://dicom.innolitics.com/ciods/mr-image/patient/00104000
+	comments = ""
+
+# Information about the FGS contrast agent
+#
+# If any of these items are unknown, they can be commented out to omit them.
+[contrast]
+	# https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00180010
+	agent = ""
+	
+	# https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181041
+	milliliters = 0
+	
+	# This will be treated as a generalized time, and be used for both 
+	# the start and end time of the injection process.
+	# https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181042
+	# https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181043
+	time = ""
+
+# Clerical information about the surgery
+[surgery]
+
+	# This will be used for both study and series timestamps,
+	# https://dicom.innolitics.com/ciods/segmentation/general-series/00080021
+	# https://dicom.innolitics.com/ciods/segmentation/general-study/00080020
+	date = ""
+	
+	# https://dicom.innolitics.com/ciods/segmentation/general-series/00080031
+	time = ""
+	
+	# https://dicom.innolitics.com/ciods/mr-image/general-series/00180015
+	#
+	#	Example Values	
+	#		MR BREAS, UNIT
+	#		NEURO^HEAD
+	#		MR BREASTUNI UE
+	#
+	# For a comprehensive listing of Dicom supported values, 
+	# see https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html#chapter_L
+	location = ""
+	
+	# https://dicom.innolitics.com/ciods/segmentation/general-study/00200010
+	study_id = ""
+	
+	study_descr = ""

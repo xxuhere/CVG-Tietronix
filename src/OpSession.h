@@ -35,65 +35,64 @@ public:
 		OpenError
 	};
 
-	// https://dicom.innolitics.com/ciods/general-ecg/patient/00100040
-	enum class Gender
-	{
-		Male,
-		Female,
-		Other,
-
-		// Error code on our end, not a real Dicom standard value.
-		Unset 
-	};
 
 public:
-	DVRPersonName patientName;
-
-	std::string patientComments = "";
 
 	// Session name metadata
 	std::string sessionName = "__unset_sessionname";
 
-	// Patient gender
-	Gender gender = Gender::Unset;
+	//////////////////////////////////////////////////
+	//
+	//	PREOP DATA
+	//
+	//	https://app.box.com/file/1000185405920
+	//	See page 4
+	//
+	//////////////////////////////////////////////////
 
-	// https://dicom.innolitics.com/ciods/rt-plan/rt-series/00081072/00080080
-	std::string institution = "";
-
-	// https://dicom.innolitics.com/ciods/rt-plan/rt-series/00081072/00080081
-	std::string institutionAddr = "";
-
-	// https://dicom.innolitics.com/ciods/cr-image/general-series/00081050
-	DVRPersonName physicianName;
-
-	std::string studyDescription = "";
-
-	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101020
-	float patientSize = 0.0f;
-
-	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101030
-	float patientWeight = 0.0f;
-
-	// https://dicom.innolitics.com/ciods/rt-plan/patient-study/00101010
-	int patientAge = 0;
-
-	// https://dicom.innolitics.com/ciods/procedure-log/patient/00102160
-	std::string ethnicGroup = "";
-
+	// UPN
 	// https://dicom.innolitics.com/ciods/us-image/patient/00100020
 	std::string patientid = "";
 
+	// StudyID
+	// https://dicom.innolitics.com/ciods/segmentation/general-study/00200010
+	std::string studyID = "";
+	//
+	// Study Description
+	// https://dicom.innolitics.com/ciods/segmentation/general-study/00081030
+	std::string studyDescription = "";
+
+	// Date of surgery
+	// https://dicom.innolitics.com/ciods/segmentation/general-series/00080021	(Series)
+	// https://dicom.innolitics.com/ciods/segmentation/general-study/00080020	(Study)
+	std::string surgeryDate;
+
+	// Contrast agent, dose, time of administration
 	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00180010
 	std::string contrastAgent = "";
-
+	//
 	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181041
 	float contrastMilliliters = 0.0f;
-
+	//
 	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181042
 	// https://dicom.innolitics.com/ciods/mr-image/contrast-bolus/00181043
 	std::string contrastInjectionTime;
 
+	// Surgeon, CVG operator
+	// NOTE: There may be a better dicom tag for this
+	// https://dicom.innolitics.com/ciods/mr-image/patient/00104000
+	std::string patientComments = "";
 
+	// Surgery location
+	// https://dicom.innolitics.com/ciods/mr-image/general-series/00180015
+	// https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html#chapter_L
+	std::string surgeryLocation;
+
+	// https://dicom.innolitics.com/ciods/segmentation/general-series/00080031
+	std::string surgeryStartTime;
+	
+
+public:
 	void SetSession(const std::string& session);
 
 	/// <summary>
@@ -107,14 +106,9 @@ public:
 
 	LoadRet LoadFromFile(const std::string& filepath, bool throwOnParseErr);
 
-	void Clear();
-
-	void Default();
+	void SetToDefault();
 
 	bool LoadFromToml(toml::table& inToml);
-
-public:
-	static std::string GenerateBlankTOMLTemplate();
 
 public:
 	//////////////////////////////////////////////////

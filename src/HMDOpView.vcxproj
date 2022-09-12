@@ -180,6 +180,7 @@
     <ClInclude Include="MainWin.h" />
     <ClInclude Include="OpSession.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Session_Toml.h" />
     <ClInclude Include="States\BaseState.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_Base.h" />
     <ClInclude Include="States\HMDOpSubs\HMDOpSub_Carousel.h" />
@@ -266,6 +267,7 @@
     <ClCompile Include="LoadAnim.cpp" />
     <ClCompile Include="MainWin.cpp" />
     <ClCompile Include="OpSession.cpp" />
+    <ClCompile Include="Session_Toml.cpp" />
     <ClCompile Include="States\BaseState.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_Base.cpp" />
     <ClCompile Include="States\HMDOpSubs\HMDOpSub_Carousel.cpp" />

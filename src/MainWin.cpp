@@ -34,6 +34,8 @@
 #include "States/StateHMDOp.h"
 #include "States/StateExit.h"
 
+#include "Session_Toml.h"
+
 #if IS_RPI
 #include "Hardware/FauxMouse.h"
 #endif
@@ -168,7 +170,7 @@ bool MainWin::InitializeSession()
 					exit(1);
 				}
 
-				outSessionToml << OpSession::GenerateBlankTOMLTemplate();
+				outSessionToml << GetSessionTOMLString();
 				outSessionToml.close();
 
 				wxMessageBox(

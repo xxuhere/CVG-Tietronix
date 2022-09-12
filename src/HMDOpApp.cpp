@@ -7,6 +7,7 @@
 #include <fstream>
 #include "Utils/cvgOptions.h"
 #include "OpSession.h"
+#include "Session_Toml.h"
 
 bool HMDOpApp::OnInit()
 {
@@ -82,7 +83,7 @@ bool HMDOpApp::OnInit()
         if(createSessionFile)
         {
             std::ofstream outSessionToml(wxGetApp().sessionLoc);
-            outSessionToml << OpSession::GenerateBlankTOMLTemplate();
+            outSessionToml << GetSessionTOMLString();
         }
 
         this->Exit();

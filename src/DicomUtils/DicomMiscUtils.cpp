@@ -1,10 +1,12 @@
 #include "DicomMiscUtils.h"
+#include <dcmtk/dcmdata/dcdatset.h>
 
 #if WIN32
 	#include <windows.h>
 	#include <sysinfoapi.h>
 #endif
 
+#include <dcmtk/dcmdata/libi2d/i2d.h>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <ctime>
@@ -39,5 +41,13 @@ namespace DicomMiscUtils
 
 		return sstrm.str();
 
+	}
+
+	bool InsertDicomString(DcmDataset* dset, const DcmTag& tag, const std::string& value, bool insertIfEmpty)
+	{
+		if(insertIfEmpty == false && value.empty())
+			return false;
+
+		return dset->putAndInsertString(tag, value.c_str()).good();
 	}
 }
