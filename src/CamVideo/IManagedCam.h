@@ -539,3 +539,18 @@ public:
 		SnapRequest::SPtr snreq,
 		int camFeedChanges);
 };
+
+
+/// <summary>
+/// Utility function to insert an arbitrary string attribute into the 
+/// DCM_AcquisitionContextSequence, which is used for storing arbitrary 
+/// camera properties.
+/// </summary>
+/// <param name="dicomData">The dicom data to save to.</param>
+/// <param name="key">The attribute key.</param>
+/// <param name="value">The attribute value.</param>
+/// <returns>True if added, else an error occured.</returns>
+bool InsertAquisitionContextInfo(
+	DcmDataset* dicomData,
+	const std::string& key, 
+	const std::string& value);

@@ -130,4 +130,13 @@ void LaserSys::InjectIntoDicom(DcmDataset* dicomData)
 	// TODO: Sample dicom injection
 	dicomData->putAndInsertFloat32(
 		DCM_ExcitationFrequency, 720.0f);
+
+	DcmItem* deviceInfo;
+	if(!dicomData->findOrCreateSequenceItem(DCM_DeviceSequence, deviceInfo, -2).good())
+		return;
+
+	deviceInfo->putAndInsertString(DCM_CodeMeaning, "Laser System for IR viewing of contrast dye.");
+	deviceInfo->putAndInsertString(DCM_DeviceDescription, "Laser System");
+	deviceInfo->putAndInsertString(DCM_Manufacturer, "__Manufacturer_TBD__");
+	deviceInfo->putAndInsertString(DCM_DeviceID, "__DeviceID_TBD__");
 }

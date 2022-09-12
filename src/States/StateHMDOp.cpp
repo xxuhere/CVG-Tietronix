@@ -1901,5 +1901,4 @@ void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
 	{
 		dicomData->putAndInsertString(DCM_PatientOrientation, dicomOrient.c_str());
 	}
-
 }

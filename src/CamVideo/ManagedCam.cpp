@@ -479,8 +479,70 @@ void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 	this->IManagedCam::_DeactivateStreamState(deactivateShould);
 }
 
+bool InsertAquisitionContextInfo(
+	DcmDataset* dicomData,
+	const std::string& key, 
+	const std::string& value)
+{
+	DcmItem* seqItemAquis;
+	if(!dicomData->findOrCreateSequenceItem(DCM_AcquisitionContextSequence, seqItemAquis, -2).good())
+		return false;
+
+	// https://dicom.nema.org/medical/dicom/2018b/output/chtml/part03/sect_C.7.6.14.html
+	// Each Item of the Acquisition Context Sequence (0040,0555) contains one Item of the 
+	// Concept Name Code Sequence (0040,A043) and one of the mutually-exclusive 
+	// Observation-value Attributes: 
+	//	- Concept Code Sequence (0040,A168), the pair of Numeric Value 
+	//	- (0040,A30A) and Measurement Units Code Sequence (0040,08EA), 
+	//	- Date (0040,A121), 
+	//	- Time (0040,A122), 
+	//	- Person Name (0040,A123) or 
+	//	- Text Value (0040,A160).
+	DcmItem* seqNamedCode;
+	if(!seqItemAquis->findOrCreateSequenceItem(DCM_ConceptNameCodeSequence, seqNamedCode, 0).good())
+		return false;
+
+	if(!seqNamedCode->putAndInsertString(DCM_ValueType, key.c_str()).good())
+		return false;
+
+	if(!seqItemAquis->putAndInsertString(DCM_TextValue, value.c_str()).good())
+		return false;
+
+	return true;
+}
+
 void ManagedCam::InjectIntoDicom(DcmDataset* dicomData)
 {
 	if(currentImpl != nullptr && currentImpl->IsValid())
 		currentImpl->DelegatedInjectIntoDicom(dicomData);
+
+	DcmItem* seqItemAquis;
+	if(!dicomData->findOrCreateSequenceItem(DCM_AcquisitionContextSequence, seqItemAquis).good())
+		return;
+
+	// Arbitrary camera data listed in Aquisition context
+	InsertAquisitionContextInfo(dicomData, "threshold_method",	to_string(this->GetProcessingType()));
+	InsertAquisitionContextInfo(dicomData, "stream_type",		to_string(this->camOptions.GetUsedPoll()));
+
+	// And then thresholding specific stuff, if any.
+	switch(GetProcessingType())
+	{
+	case ProcessingType::None:
+		break;
+
+	case ProcessingType::yen_threshold:
+		break;
+
+	case ProcessingType::yen_threshold_compressed:
+		break;
+
+	case ProcessingType::static_threshold:
+		dicomData->putAndInsertString(
+			DCM_AcquisitionContextDescription, 
+			(std::string("Threshold: ") + std::to_string(this->camOptions.thresholdExplicit)).c_str());
+		break;
+
+	case ProcessingType::two_stdev_from_mean:
+		break;
+	}
 }
