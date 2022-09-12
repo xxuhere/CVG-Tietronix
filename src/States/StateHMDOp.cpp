@@ -1865,9 +1865,10 @@ void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
 	// TODO: Needs a bit more clarification on what carousel maps to what tag.
 	std::string seriesCaption = this->caroSeries.GetCurrentCaption();
 	dicomData->putAndInsertString(DCM_SeriesDescription, seriesCaption.c_str());
+	dicomData->putAndInsertString(DCM_SeriesNumber, std::to_string(this->caroSeries.GetCurrentIndex()).c_str());
 
 	std::string bodyCaption = this->caroBody.GetCurrentCaption();
-	dicomData->putAndInsertString(DCM_BodyPartExamined, seriesCaption.c_str());
+	dicomData->putAndInsertString(DCM_BodyPartExamined, bodyCaption.c_str());
 
 	// The Orientation/Aspect involved a bit more elbow grease, because Dicom
 	// has specific names, which are a little different than the terms we're

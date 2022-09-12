@@ -83,11 +83,6 @@ public:
 	// https://dicom.innolitics.com/ciods/mr-image/patient/00104000
 	std::string patientComments = "";
 
-	// Surgery location
-	// https://dicom.innolitics.com/ciods/mr-image/general-series/00180015
-	// https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html#chapter_L
-	std::string surgeryLocation;
-
 	// https://dicom.innolitics.com/ciods/segmentation/general-series/00080031
 	std::string surgeryStartTime;
 	

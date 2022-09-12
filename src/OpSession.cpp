@@ -32,7 +32,6 @@ static const char* szToml_Key_NameSuffix		= "suffix";
 static const char* szToml_Header_Surgery		= "surgery";
 static const char* szToml_Key_SurgeryDate		=	"date";
 static const char* szToml_Key_SurgeryTime		=	"time";
-static const char* szToml_Key_SurgeryLocation	=	"location";
 static const char* szToml_Key_SurgeryStudyID	=	"study_id";
 static const char* szToml_Key_SurgeryDescr		=	"study_descr";
 
@@ -213,9 +212,6 @@ bool OpSession::LoadFromToml(toml::table& inToml)
 	if(surgeryTime.has_value())
 		this->surgeryStartTime = surgeryTime.value();
 
-	std::optional<std::string> surgeryLoc = (*surgery)[szToml_Key_SurgeryLocation].value<std::string>();
-	if(surgeryLoc.has_value())
-		this->surgeryLocation = surgeryLoc.value();
 
 	std::optional<std::string> studyID = (*surgery)[szToml_Key_SurgeryStudyID].value<std::string>();
 	if(studyID.has_value())
@@ -285,6 +281,5 @@ void OpSession::InjectIntoDicom(DcmDataset* dicomData)
 	}
 
 	INSERT_DCM_STRING(DCM_PatientComments,			this->patientComments,		true);
-	INSERT_DCM_STRING(DCM_BodyPartExamined,			this->surgeryLocation,		true);
 	INSERT_DCM_STRING(DCM_SeriesTime,				this->surgeryStartTime,		true);
 }

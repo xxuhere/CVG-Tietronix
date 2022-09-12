@@ -49,17 +49,6 @@ session = "__session_name__"
 	# https://dicom.innolitics.com/ciods/segmentation/general-series/00080031
 	time = ""
 	
-	# https://dicom.innolitics.com/ciods/mr-image/general-series/00180015
-	#
-	#	Example Values	
-	#		MR BREAS, UNIT
-	#		NEURO^HEAD
-	#		MR BREASTUNI UE
-	#
-	# For a comprehensive listing of Dicom supported values, 
-	# see https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_L.html#chapter_L
-	location = ""
-	
 	# https://dicom.innolitics.com/ciods/segmentation/general-study/00200010
 	study_id = ""
 	
