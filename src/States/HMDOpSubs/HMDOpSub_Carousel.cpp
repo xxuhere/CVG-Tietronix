@@ -2,9 +2,9 @@
 #include "../StateHMDOp.h"
 
 HMDOpSub_Carousel::HMDOpSub_Carousel(
-	StateHMDOp* owner, 
+	StateHMDOp* targ, 
 	SubstateMachine<StateHMDOp>* substateMachine)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {}
 
 void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

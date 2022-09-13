@@ -19,7 +19,7 @@ public:
 	std::vector<UIBase*> menuButtons;
 
 public:
-	HMDOpSub_MainMenuNav(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
+	HMDOpSub_MainMenuNav(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

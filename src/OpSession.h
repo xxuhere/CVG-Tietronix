@@ -99,10 +99,30 @@ public:
 	/// </returns>
 	std::string GenerateSessionPrefix() const;
 
+	/// <summary>
+	/// Load information from a specified TOML file.
+	/// </summary>
+	/// <param name="filepath">The filepath to load from.</param>
+	/// <param name="throwOnParseErr">
+	/// If true, throw an exception on error.
+	/// Else, return an error code on error.
+	/// </param>
+	/// <returns>The return result.</returns>
 	LoadRet LoadFromFile(const std::string& filepath, bool throwOnParseErr);
 
+	/// <summary>
+	/// Set the object's values to the default constructor's value.
+	/// </summary>
 	void SetToDefault();
 
+	/// <summary>
+	/// Load information from a TOML datastructure.
+	/// </summary>
+	/// <param name="inToml">The TOML datastructure to load from.</param>
+	/// <returns>
+	/// True if required values were loaded successfuly. 
+	/// False if there was an error parsing the TOML, or if required values were not found.
+	/// </returns>
 	bool LoadFromToml(toml::table& inToml);
 
 public:

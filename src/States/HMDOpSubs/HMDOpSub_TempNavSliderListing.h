@@ -42,7 +42,7 @@ class HMDOpSub_TempNavSliderListing : public HMDOpSub_Base
 
 public:
 
-	HMDOpSub_TempNavSliderListing(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine, UIBase* optBtn, UIBase* inspPlate);
+	HMDOpSub_TempNavSliderListing(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine, UIBase* optBtn, UIBase* inspPlate);
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

@@ -1,10 +1,10 @@
 #include "HMDOpSub_Base.h"
 #include "../AppCoroutines/CoroutineSnapWithLasers.h"
 
-HMDOpSub_Base::HMDOpSub_Base(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine)
+HMDOpSub_Base::HMDOpSub_Base(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine)
 {
-	this->cachedOwner = owner;
-	this->cachedSubStateMachine = substateMachine;
+	this->cachedTarget = targ;
+	this->cachedOwner = substateMachine;
 }
 
 void HMDOpSub_Base::OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -36,7 +36,7 @@ std::string HMDOpSub_Base::GetIconPath(ButtonID bid, bool isHold)
 			return "Assets/ButtonAnno/BAnno_Photo.png";
 
 		case ButtonID::Right:
-			if(this->cachedOwner->GetCoreWindow()->IsRecording(SpecialCams::Composite))
+			if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
 				return "Assets/ButtonAnno/BAnno_StopVideo.png";
 			else
 				return "Assets/ButtonAnno/BAnno_StartVideo.png";
@@ -60,7 +60,7 @@ std::string HMDOpSub_Base::GetActionName(ButtonID bid, bool isHold)
 			return "Snapshots";
 
 		case ButtonID::Right:
-			if(this->cachedOwner->GetCoreWindow()->IsRecording(SpecialCams::Composite))
+			if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
 				return "Stop Recording";
 			else
 				return "Start Recording";
@@ -108,15 +108,15 @@ void HMDOpSub_Base::HandleMessage(const Message& msg)
 		switch(msg.idx)
 		{
 		case 0:
-			this->OnLeftDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnLeftDown(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 1:
-			this->OnMiddleDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnMiddleDown(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 2:
-			this->OnRightDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnRightDown(*this->cachedTarget, *this->cachedOwner);
 			break;
 		}
 		break;
@@ -125,15 +125,15 @@ void HMDOpSub_Base::HandleMessage(const Message& msg)
 		switch(msg.idx)
 		{
 		case 0:
-			this->OnLeftUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnLeftUpHold(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 1:
-			this->OnMiddleUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnMiddleUpHold(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 2:
-			this->OnRightUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnRightUpHold(*this->cachedTarget, *this->cachedOwner);
 			break;
 		}
 		break;
@@ -142,15 +142,15 @@ void HMDOpSub_Base::HandleMessage(const Message& msg)
 		switch(msg.idx)
 		{
 		case 0:
-			this->OnLeftUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnLeftUp(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 1:
-			this->OnMiddleUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnMiddleUp(*this->cachedTarget, *this->cachedOwner);
 			break;
 
 		case 2:
-			this->OnRightUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			this->OnRightUp(*this->cachedTarget, *this->cachedOwner);
 			break;
 		}
 		break;

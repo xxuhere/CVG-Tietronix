@@ -13,7 +13,7 @@ class StateHMDOp;
 class HMDOpSub_Default : public HMDOpSub_Base
 {
 public:
-	HMDOpSub_Default(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
+	HMDOpSub_Default(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

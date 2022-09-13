@@ -22,11 +22,11 @@ void HMDOpSub_InspNavForm::CollectSelectable( UIBase* root, std::vector<UIBase*>
 }
 
 HMDOpSub_InspNavForm::HMDOpSub_InspNavForm(
-	StateHMDOp* owner,
+	StateHMDOp* targ,
 	SubstateMachine<StateHMDOp>* substateMachine, 
 	UIBase* optButton, 
 	UIBase* inspPlate)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {
 	this->inspectorPlate = inspPlate;
 	this->optButton = optButton;

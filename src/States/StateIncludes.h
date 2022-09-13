@@ -1,3 +1,5 @@
+// Common #include files for all BaseState subclasses
+
 #pragma once
 
 #include "../HMDOpApp.h"

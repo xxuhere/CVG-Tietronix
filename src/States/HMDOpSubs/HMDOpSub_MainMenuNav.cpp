@@ -5,9 +5,9 @@
 #include "../../UISys/UIButton.h"
 
 HMDOpSub_MainMenuNav::HMDOpSub_MainMenuNav(
-	StateHMDOp* owner, 
+	StateHMDOp* targ, 
 	SubstateMachine<StateHMDOp>* substateMachine)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {}
 
 void HMDOpSub_MainMenuNav::UpdateSelectedSubmenu(StateHMDOp& targ)
@@ -60,7 +60,7 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 
 			ssm.PushSubstate(
 				new HMDOpSub_InspNavForm(
-					this->cachedOwner,
+					this->cachedTarget,
 					&ssm,
 					targ.btnSettings, 
 					targ.inspSettingsPlate));
@@ -72,7 +72,7 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 
 			ssm.PushSubstate(
 				new HMDOpSub_TempNavSliderListing(
-					this->cachedOwner,
+					this->cachedTarget,
 					&ssm,
 					targ.btnCamSets, 
 					targ.inspCamSetsPlate));
@@ -82,7 +82,7 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 		case StateHMDOp::UIID::MBtnExit:
 			ssm.PushSubstate(
 				new HMDOpSub_InspNavForm(
-					this->cachedOwner,
+					this->cachedTarget,
 					&ssm,
 					targ.btnExit, 
 					targ.inspExitPlate));
@@ -200,7 +200,7 @@ bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid, bool isHold)
 		if(!isHold)
 		{
 			// This subme
-			UIBase* uibSel = this->cachedOwner->uiSys.GetSelected();
+			UIBase* uibSel = this->cachedTarget->uiSys.GetSelected();
 			if(uibSel == nullptr)
 				return false;
 

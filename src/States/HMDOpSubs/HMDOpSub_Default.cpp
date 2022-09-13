@@ -3,9 +3,9 @@
 #include "../../MainWin.h"
 
 HMDOpSub_Default::HMDOpSub_Default(
-	StateHMDOp* owner, 
+	StateHMDOp* targ, 
 	SubstateMachine<StateHMDOp>* substateMachine)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {}
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)

@@ -29,7 +29,7 @@ public:
 	std::vector<UIHSlider*> sliders;
 
 public:
-	HMDOpSub_WidgetCtrl(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine, UIButton* btn);
+	HMDOpSub_WidgetCtrl(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine, UIButton* btn);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

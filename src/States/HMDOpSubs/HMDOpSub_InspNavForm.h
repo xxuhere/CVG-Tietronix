@@ -45,7 +45,7 @@ public:
 	/// <param name="vecw">The output of the collected items.</param>
 	static void CollectSelectable(UIBase* root, std::vector<UIBase*>& vecw);
 
-	HMDOpSub_InspNavForm(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine, UIBase* optButton, UIBase* inspPlate);
+	HMDOpSub_InspNavForm(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine, UIBase* optButton, UIBase* inspPlate);
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override; 
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

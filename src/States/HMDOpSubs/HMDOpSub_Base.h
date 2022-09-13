@@ -24,8 +24,8 @@ protected:
 	// be valid if we store them up-front, but also because we're going
 	// to be calling our own input event handlers at arbitrary times when
 	// these values won't be readily available.
-	StateHMDOp* cachedOwner;
-	SubstateMachine<StateHMDOp>* cachedSubStateMachine;
+	StateHMDOp* cachedTarget;
+	SubstateMachine<StateHMDOp>* cachedOwner;
 
 public:
 	//////////////////////////////////////////////////
@@ -33,7 +33,7 @@ public:
 	//	INTERFACE: Substate<StateHMDOp>
 	//
 	//////////////////////////////////////////////////
-	HMDOpSub_Base(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
+	HMDOpSub_Base(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnRightUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 

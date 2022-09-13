@@ -4,11 +4,11 @@
 #include "../StateHMDOp.h"
 
 HMDOpSub_TempNavSliderListing::HMDOpSub_TempNavSliderListing(
-	StateHMDOp* owner, 
+	StateHMDOp* targ, 
 	SubstateMachine<StateHMDOp>* substateMachine, 
 	UIBase* optBtn, 
 	UIBase* inspPlate)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {
 	this->optnBtn = optBtn;
 	this->inspPlate = inspPlate;
@@ -86,7 +86,7 @@ void HMDOpSub_TempNavSliderListing::OnRightUp(StateHMDOp& targ, SubstateMachine<
 		return;
 
 	this->entered = true;
-	ssm.PushSubstate(new HMDOpSub_WidgetCtrl(this->cachedOwner, this->cachedSubStateMachine, (UIButton*)uiSel));
+	ssm.PushSubstate(new HMDOpSub_WidgetCtrl(this->cachedTarget, this->cachedOwner, (UIButton*)uiSel));
 }
 
 void HMDOpSub_TempNavSliderListing::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
@@ -194,7 +194,7 @@ bool HMDOpSub_TempNavSliderListing::GetButtonUsable(ButtonID bid, bool isHold)
 
 	case ButtonID::Right:
 		if(!isHold)
-			return this->SelectedButtonHasSliders(*this->cachedOwner);
+			return this->SelectedButtonHasSliders(*this->cachedTarget);
 		break;
 
 	}

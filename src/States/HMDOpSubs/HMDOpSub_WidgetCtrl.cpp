@@ -5,10 +5,10 @@
 #include "../../UISys/UIButton.h"
 
 HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(
-	StateHMDOp* owner, 
+	StateHMDOp* targ, 
 	SubstateMachine<StateHMDOp>* substateMachine, 
 	UIButton* btn)
-	: HMDOpSub_Base(owner, substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {
 	this->categoryBtn = btn;
 }

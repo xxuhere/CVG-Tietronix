@@ -9,7 +9,7 @@
 class HMDOpSub_Carousel : public HMDOpSub_Base
 {
 public:
-	HMDOpSub_Carousel(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
+	HMDOpSub_Carousel(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;

@@ -767,7 +767,6 @@ StateHMDOp::~StateHMDOp()
 
 bool StateHMDOp::ShowCarousels( bool show)
 {
-
 	if(this->showCarousel == show)
 		return false;
 
