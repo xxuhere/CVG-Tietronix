@@ -40,7 +40,7 @@ public:
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
 
-	std::string GetIconPath(ButtonID bid) override;
-	std::string GetActionName(ButtonID bid) override;
-	bool GetButtonUsable(ButtonID bid) override;
+	std::string GetIconPath(ButtonID bid, bool isHold) override;
+	std::string GetActionName(ButtonID bid, bool isHold) override;
+	bool GetButtonUsable(ButtonID bid, bool isHold) override;
 };

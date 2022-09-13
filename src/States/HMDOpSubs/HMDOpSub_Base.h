@@ -28,9 +28,26 @@ protected:
 	SubstateMachine<StateHMDOp>* cachedSubStateMachine;
 
 public:
+	//////////////////////////////////////////////////
+	//
+	//	INTERFACE: Substate<StateHMDOp>
+	//
+	//////////////////////////////////////////////////
 	HMDOpSub_Base(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnRightUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
+
+
+	//////////////////////////////////////////////////
+	//
+	//	INTERFACE: IMousepadUIBehaviour
+	//
+	//////////////////////////////////////////////////
+
+	// Functions handle the default hold left and hold right snapshots
+	std::string GetIconPath(ButtonID bid, bool isHold) override;
+	std::string GetActionName(ButtonID bid, bool isHold) override;
+	bool GetButtonUsable(ButtonID bid, bool isHold) override;
 
 	void HandleMessage(const Message& msg) override;
 };

@@ -135,62 +135,77 @@ std::string HMDOpSub_InspNavForm::GetStateName() const
 	return "FormNav";
 }
 
-std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid)
+std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_CycleNext.png";
+		break;
 
 	case ButtonID::Middle:
-		return "Assets/ButtonAnno/BAnno_CycleGroup.png";
-
-	case ButtonID::HoldMiddle:
-		return "Assets/ButtonAnno/BAnno_Return.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_CycleGroup.png";
+		else
+			return "Assets/ButtonAnno/BAnno_Return.png";
+		break;
 
 	case ButtonID::Right:
-		return "Assets/ButtonAnno/BAnno_Toggle.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_Toggle.png";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetIconPath(bid, isHold);
 }
 
-std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid)
+std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Next Item";
+		if(!isHold)
+			return "Next Item";
+		break;
 
 	case ButtonID::Middle:
-		return "Next Group";
-
-	case ButtonID::HoldMiddle:
-		return "Go Back";
+		if(!isHold)
+			return "Next Group";
+		else
+			return "Go Back";
+		break;
 
 	case ButtonID::Right:
-		return "Select";
+		if(!isHold)
+			return "Select";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetActionName(bid, isHold);
 }
 
-bool HMDOpSub_InspNavForm::GetButtonUsable(ButtonID bid)
+bool HMDOpSub_InspNavForm::GetButtonUsable(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return true;
+		if(!isHold)
+			return true;
+		break;
 
 	case ButtonID::Middle:
-		return true;
-
-	case ButtonID::HoldMiddle:
-		return true;
+		if(!isHold)
+			return true;
+		else
+			return true;
+		break;
 
 	case ButtonID::Right:
-		return true;
+		if(!isHold)
+			return true;
+		break;
 
 	}
-	return false;
+	return this->HMDOpSub_Base::GetButtonUsable(bid, isHold);
 }

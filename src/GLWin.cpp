@@ -201,7 +201,7 @@ void GLWin::OnPaint(wxPaintEvent& evt)
 		// Show ellapsed application time
 		std::stringstream sstrmEll;
 		sstrmEll << std::fixed << std::setprecision(2);
-		sstrmEll << "Seconds: " << this->appEllapsedTimer.Milliseconds(false) / 1000.0f;
+		sstrmEll << "Seconds: " << this->appEllapsedTimer.Seconds(false);
 		this->fontMousePos.RenderFont(sstrmEll.str().c_str(), sz.x - 200, sz.y - 100);
 
 		// Show mouse position.

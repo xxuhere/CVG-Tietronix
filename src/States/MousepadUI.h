@@ -12,7 +12,6 @@ enum class ButtonID
 	Left = 0,
 	Middle = 1,
 	Right = 2,
-	HoldMiddle = 3,
 	Totalnum
 };
 
@@ -35,29 +34,43 @@ public:
 
 class IMousepadUIBehaviour
 {
+
 public:
 	/// <summary>
 	/// Get the path of the icon to load and use for the
 	/// action's overlay of specific mouse pad buttons.
 	/// </summary>
 	/// <param name="bid">The button to provide an icon path for.</param>
+	/// /// <param name="isHold">
+	/// If true, the query is for hold events, else the query is for click events.
+	/// </param>
 	/// <returns>The path, or "" to return nothing.</returns>
-	virtual std::string GetIconPath(ButtonID bid) = 0;
+	virtual std::string GetIconPath(ButtonID bid, bool isHold) = 0;
 
 	/// <summary>
 	/// Get the name of the action for a mouse pad button.
 	/// </summary>
 	/// <param name="bid">The button to get the name of.</param>
+	/// <param name="isHold">
+	/// If true, the query is for hold events, else the query is for click events.
+	/// </param>
 	/// <returns>The queried name.</returns>
-	virtual std::string GetActionName(ButtonID bid) = 0;
+	virtual std::string GetActionName(ButtonID bid, bool isHold) = 0;
 
 	/// <summary>
 	/// Specify if a button is active.
 	/// </summary>
 	/// <param name="bid">The button to query the usability status of.</param>
+	/// /// <param name="isHold">
+	/// If true, the query is for hold events, else the query is for click events.
+	/// </param>
 	/// <returns>If true, button is usable, else the button does nothing.</returns>
-	virtual bool GetButtonUsable(ButtonID bid) = 0;
+	virtual bool GetButtonUsable(ButtonID bid, bool isHold) = 0;
 
+	/// <summary>
+	/// Handler for input events.
+	/// </summary>
+	/// <param name="msg">The message that the IMousepadUIBehaviour is responding to.</param>
 	virtual void HandleMessage(const Message& msg) = 0;
 };
 
@@ -149,7 +162,16 @@ public:
 	ButtonState btnMiddle;
 	ButtonState btnRight;
 
+
+	// Draws black only in the top region of the middle mouse circle
+	// to make sure stuff doesn't visually fill up that area.
 	TexObj ico_MousePadCrevice;
+
+	/// <summary>
+	/// A black region that's slight larger than the button circle
+	/// used by btnMiddle.
+	/// </summary>
+	TexObj ico_CircleBacking;
 
 	/// <summary>
 	/// Cached button annotation icons.

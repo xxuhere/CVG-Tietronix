@@ -130,60 +130,74 @@ std::string HMDOpSub_MainMenuNav::GetStateName() const
 	return "MenuNav";
 }
 
-std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid)
+std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Assets/ButtonAnno/BAnno_CycleNext.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_CycleNext.png";
+		break;
 
 	case ButtonID::Middle:
-		return "";
-
-	case ButtonID::HoldMiddle:
-		return "Assets/ButtonAnno/BAnno_Return.png";
+		if(!isHold)
+			return "";
+		else
+			return "Assets/ButtonAnno/BAnno_Return.png";
+		break;
 
 	case ButtonID::Right:
-		return "Assets/ButtonAnno/BAnno_Toggle.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_Toggle.png";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetIconPath(bid, isHold);
 }
 
-std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid)
+std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Next Selection";
+		if(!isHold)
+			return "Next Selection";
+		break;
 
 	case ButtonID::Middle:
-		return "--";
-
-	case ButtonID::HoldMiddle:
-		return "Go Back";
+		if(!isHold)
+			return "--";
+		else
+			return "Go Back";
+		break;
 
 	case ButtonID::Right:
-		return "Select";
+		if(!isHold)
+			return "Select";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetActionName(bid, isHold);
 }
 
-bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid)
+bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return true;
+		if(!isHold)
+			return true;
+		break;
 
 	case ButtonID::Middle:
-		return false;
-
-	case ButtonID::HoldMiddle:
-		return true;
+		if(!isHold)
+			return false;
+		else
+			return true;
+		break;
 
 	case ButtonID::Right:
+		if(!isHold)
 		{
 			// This subme
 			UIBase* uibSel = this->cachedOwner->uiSys.GetSelected();
@@ -192,7 +206,8 @@ bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid)
 
 			return uibSel->Idx() != StateHMDOp::MBtnAlign;
 		}
+		break;
 
 	}
-	return false;
+	return HMDOpSub_Base::GetButtonUsable(bid, isHold);
 }

@@ -13,6 +13,17 @@ public:
 	cvgStopwatch();
 
 	/// <summary>
+	/// A wrapper around Milliseconds() that converts the value
+	/// into seconds.
+	/// </summary>
+	/// <param name="restart">If true, restart the stopwatch.</param>
+	/// <returns>
+	/// The number of seconds since when the stopwatch was started
+	/// and when the function was called.
+	/// </returns>
+	float Seconds(bool restart = true);
+
+	/// <summary>
 	/// Track the progress of the stopwatch in milliseconds.
 	/// 
 	/// The precision of this timer depends on the platform

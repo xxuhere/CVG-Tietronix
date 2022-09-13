@@ -67,7 +67,7 @@ public:
 	/// <returns>If false, nullptr. If true, the selected button.</returns>
 	UIBase* SelectedButtonHasSliders(StateHMDOp& targ);
 
-	std::string GetIconPath(ButtonID bid) override;
-	std::string GetActionName(ButtonID bid) override;
-	bool GetButtonUsable(ButtonID bid) override;
+	std::string GetIconPath(ButtonID bid, bool isHold) override;
+	std::string GetActionName(ButtonID bid, bool isHold) override;
+	bool GetButtonUsable(ButtonID bid, bool isHold) override;
 };

@@ -71,7 +71,7 @@ void MousepadUI::ButtonState::DrawOffsetVerticesForButtonSet(
 	float scale,
 	float holdingThreshold)
 {
-	float downTime = this->heldDownTimer.Milliseconds(false) / 1000.0f;
+	float downTime = this->heldDownTimer.Seconds(false);
 
 	if(this->isDown == false)
 		DrawOffsetVertices(x, y, this->normal, px, py, scale);
@@ -95,8 +95,8 @@ UIColor4 MousepadUI::ButtonState::GetMousepadColor()
 }
 
 MousepadUI::MousepadUI()
-	:	btnLeft(	0, "", "", ""),
-		btnMiddle(	1, "", "", ""),
+	:	btnLeft(	0, "", "", ""),	// Empty strings for images paths to load, because 
+		btnMiddle(	1, "", "", ""),	// that will be handled later in this->Initialize()
 		btnRight(	2, "", "", "")
 {}
 
@@ -125,6 +125,8 @@ bool MousepadUI::Initialize()
 		"Assets/Mousepad/Mousepad_MiddleBall_Hold.png");
 
 	this->ico_MousePadCrevice.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Crevice.png");
+
+	this->ico_CircleBacking.LODEIfEmpty("Assets/Mousepad/Mousepad_CircleBacking.png");
 	return true;
 }
 
@@ -164,8 +166,38 @@ void MousepadUI::Update(double dt)
 	this->btnRight.Decay(dt);
 }
 
+void DrawHollowRadial(int segments, float percent, float innerDiameter, float outerDiameter, float centerX, float centerY)
+{
+	const float PI = 3.14159f;
+	float radians = percent * 2.0f * PI;
+	
+	glBegin(GL_QUADS);
+	for(int i = 0; i < segments; ++i)
+	{
+		// Shifts radians from trig functions (cos/sin) to start at the 
+		// top instead of at the middle right
+		const float RadialShift = -PI * 0.5f;
+
+		float lam_0 = RadialShift + ((float)(i + 0) / (float)segments) * radians;
+		float lam_1 = RadialShift + ((float)(i + 1) / (float)segments) * radians;
+
+		float seg_0x = cos(lam_0);
+		float seg_0y = sin(lam_0);
+		float seg_1x = cos(lam_1);
+		float seg_1y = sin(lam_1);
+
+		glVertex2f(centerX + seg_0x * outerDiameter,	centerY + seg_0y * outerDiameter);
+		glVertex2f(centerX + seg_1x * outerDiameter,	centerY + seg_1y * outerDiameter);
+		glVertex2f(centerX + seg_1x * innerDiameter,	centerY + seg_1y * innerDiameter);
+		glVertex2f(centerX + seg_0x * innerDiameter,	centerY + seg_0y * innerDiameter);
+
+	}
+	glEnd();
+}
+
 void MousepadUI::Render(IMousepadUIBehaviour* uiProvider, float x, float y, float scale)
 {
+	
 	static UIColor4 disabledBtnColor(0.2f, 0.2f, 0.2f, 1.0f);
 
 	glEnable(GL_TEXTURE_2D);
@@ -173,183 +205,310 @@ void MousepadUI::Render(IMousepadUIBehaviour* uiProvider, float x, float y, floa
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	// For all the quads we're about to lay down, we're starting at
-	// the top left and moving clockwise.
+	// Draw the middle mouse button backplate.
 	this->ico_MousePadCrevice.GLBind();
-	UIColor4 colMLeft	= this->btnLeft.GetMousepadColor();
-	UIColor4 colMMiddle = this->btnMiddle.GetMousepadColor();
-	UIColor4 colMRight	= this->btnRight.GetMousepadColor();
+	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
+
+	//////////////////////////////////////////////////
+	//
+	//	GATHER DATA
+	//
+	//////////////////////////////////////////////////
 
 	// Setup the substate, and collect what buttons are allowed to be shown.
-	int hasButton[4] = 
-	{true, true, true, true};
+	int hasButtonClick[3] = {true, true, true};
+	int hasButtonHold[3] = {true, true, true};
 	if(uiProvider)
 	{
 		for(int i = 0; i < (int)ButtonID::Totalnum; ++i)
-			hasButton[i] = uiProvider->GetButtonUsable((ButtonID)i);
+		{ 
+			hasButtonClick[i] = uiProvider->GetButtonUsable((ButtonID)i, false);
+			hasButtonHold[i] = uiProvider->GetButtonUsable((ButtonID)i, true);
+		}
 	}
 
-	// Draw the middle mouse button.
-	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
+
+	//////////////////////////////////////////////////
 	//
-	if(hasButton[1] || hasButton[3])
-		colMMiddle.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
+	//	DEFINE HOW TO RENDER THE BUTTONS
+	//
+	//////////////////////////////////////////////////
 
-	this->btnMiddle.DrawOffsetVerticesForButtonSet(
-		x, 
-		y,
-		0.5f, 
-		0.5f,
-		scale,
-		this->ButtonHoldTime);
-
-	// Draw the dial/ring for holding the middle mouse button down.
-	if(this->btnMiddle.isDown && hasButton[3])
+	// Define a structure that has all the parameters of how we'll draw each
+	// button. Then we draw all button mechanically the same way based on only
+	// the mechanics and data.
+	// 
+	struct IcoDrawData
 	{
-		glDisable(GL_TEXTURE_2D);
+	public:
+		// The button ID being handled
+		ButtonID bid;
 
-		// If a mouse button is pressed down, draw a ring
-		// whos angle represents the amount of the time the button
-		// has been pressed.
+		// The location of the graphic to line up at the center.
 		//
-		// Since all mouse buttons can be pressed, and technically
-		// can be pressed simultaneously, we use the largest timer
-		// for the value to draw the ring for.
+		// Note that the side of the button graphic will depend on the actual asset's size.
+		float btnPercentOffsX;
+		float btnPercentOffsY;
+
+		// Offset location of the center of the icon.
+		UIVec2 icoOffs;
+		// Offset of pivot location of the text
+		UIVec2 texOffs;
+		// Pivot location of text, using vector components [0, 1],
+		// where 0 is top left, and 1 is bottom right
+		UIVec2 texPivot;
+
+		// If true, the hold dial will be drawn on itself. Else, it will be offset via holdIconOffset.
+		bool holdDialOnSelf;
+		// The offset to the center of the hold icon. Only relevant when holdDialOnSelf is false.
+		UIVec2 holdIconOffset;
+		UIVec2 holdTexOffs;
+		UIVec2 holdTexPivot;
+
+	public:
+		UIVec2 GetAnnotationCenter(float x, float y, float scale) const
+		{
+			return UIVec2(
+				x + this->icoOffs.x * scale,
+				y + this->icoOffs.y * scale);
+		}
+
+		UIVec2 GetHoldAnnotationCenter(float x, float y, float scale) const
+		{
+			UIVec2 ret = GetAnnotationCenter(x, y, scale);
+
+			if(holdDialOnSelf)
+				return ret;
+
+			ret.x += this->holdIconOffset.x * scale;
+			ret.y += this->holdIconOffset.y * scale;
+
+			return ret;
+		}
+			
+	};
+	// Note that this data is static, meaning it's initialized in global memory only once,
+	// Either the first time it's used, or when the program is initialized.
+	static const IcoDrawData rdata[(int)ButtonID::Totalnum] = // UI Rendering data
+	{
+		// These indices will map to HMDOpSub_Base::ButtonID,
+		// [0] -> ButtonID::Left
+		{ButtonID::Left,	1.0f, 1.0f,	UIVec2(-175.0f,	-175.0f),	UIVec2(-90.0f, -20.0f),UIVec2(1.0f, 0.5f), false,	UIVec2(-400.0f, 100.0f),UIVec2(-70.0f, 0.0f),	UIVec2(1.0f, 0.5f)},	
+		// [1] -> ButtonID::Middle
+		{ButtonID::Middle,	0.5f, 0.5f,	UIVec2(0.0f,	0.0f),		UIVec2(70.0f, 20.0f),	UIVec2(0.0f, 0.5f), true,	UIVec2(0.0f, 0.0f),		UIVec2(50.0f, 50.0f),	UIVec2(0.5f, 0.5f)},	
+		// [2] -> ButtonID::Right
+		{ButtonID::Right,	0.0f, 1.0f, UIVec2(175.0f,	-175.0f),	UIVec2(90.0f, -20.0f),	UIVec2(0.0f, 0.5f), false,	UIVec2(400.0f, 100.0f), UIVec2(75.0f, 0.0f),	UIVec2(0.0f, 0.5f)}
+	};
+
+
+	//////////////////////////////////////////////////
+	//
+	//	RENDER BUTTON BACKPLATES
+	//
+	//////////////////////////////////////////////////
+	for(int i = 0; i < (int)ButtonID::Totalnum; ++i)
+	{
+		const IcoDrawData& icd = rdata[i];
+		ButtonState* bs = this->GetButton(i);
+
+		if(hasButtonClick[i])
+			bs->GetMousepadColor().GLColor4();
+		else
+			glColor3f(0.5f, 0.5f, 0.5f);
+
+		// Draw the mouse graphic
+		bs->DrawOffsetVerticesForButtonSet(
+			x, 
+			y,
+			icd.btnPercentOffsX, 
+			icd.btnPercentOffsY,
+			scale,
+			this->ButtonHoldTime);
+	}
+
+	//////////////////////////////////////////////////
+	//
+	//	RENDER HOLD ICONS
+	//
+	//////////////////////////////////////////////////
+	if(uiProvider)
+	{ 
 		const float PI = 3.14159f;
 		const int circleParts = 32;
-
-		float secondsMidDown	= 0.0f;
-		//
-		if(this->btnMiddle.isDown && hasButton[3])
-			secondsMidDown	= this->btnMiddle.heldDownTimer.Milliseconds(false) / 1000.0f;
-
-		float arcLen = std::min(1.0f, secondsMidDown / ButtonHoldTime) * 2.0f * PI;
-
-		if(secondsMidDown < ButtonHoldTime)
-			glColor3f(0.0f, 1.0f, 0.0f);
-		else
-			glColor3f(1.0f, 0.5f, 0.0f);
-
 		float radOut = 80.0f * scale;
 		float radIn = radOut - 10.0f;
-		glBegin(GL_QUADS);
-		for(int i = 0; i < circleParts; ++i)
-		{
-			float lam_0 = -PI * 0.5f + ((float)(i + 0) / (float)circleParts) * arcLen;
-			float lam_1 = -PI * 0.5f + ((float)(i + 1) / (float)circleParts) * arcLen;
-
-			float seg_0x = cos(lam_0);
-			float seg_0y = sin(lam_0);
-			float seg_1x = cos(lam_1);
-			float seg_1y = sin(lam_1);
-
-			glVertex2f(x + seg_0x * radOut, y + seg_0y * radOut);
-			glVertex2f(x + seg_1x * radOut, y + seg_1y * radOut);
-			glVertex2f(x + seg_1x * radIn,	y + seg_1y * radIn);
-			glVertex2f(x + seg_0x * radIn,	y + seg_0y * radIn);
-
-		}
-		glEnd();
-		glEnable(GL_TEXTURE_2D);
-	}
-
-	// Draw the left mouse button.
-	if(hasButton[0])
-		colMLeft.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
-
-	this->btnLeft.DrawOffsetVerticesForButtonSet(
-		x, 
-		y, 
-		1.0f, 
-		1.0f, 
-		scale,
-		this->ButtonHoldTime);
-
-	// Draw the right mouse button.
-	if(hasButton[2])
-		colMRight.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
-
-	this->btnRight.DrawOffsetVerticesForButtonSet(
-		x, 
-		y, 
-		0.0f, 
-		1.0f, 
-		scale,
-		this->ButtonHoldTime);
-
-	// Draw the button annotations.
-	if(uiProvider != nullptr)
-	{
-		glColor3f(0.5f, 0.5f, 0.5f);
-
-		struct IcoDrawData
-		{
-			// Offset location of the center of the icon.
-			UIVec2 icoOffs;
-			// Offset of pivot location of the text
-			UIVec2 texOffs;
-			// Pivot location of text, using vector components [0, 1],
-			// where 0 is top left, and 1 is bottom right
-			UIVec2 texPivot;
-		};
-		static const IcoDrawData rdata[4] =
-		{
-			// These indices will map to HMDOpSub_Base::ButtonID,
-			// [0] -> ButtonID::Left
-			{UIVec2(-175.0f,	-175.0f),	UIVec2(-250.0f, -175.0f),	UIVec2(1.0f, 0.5f)},	
-			// [1] -> ButtonID::Middle
-			{UIVec2(0.0f,		0.0f),		UIVec2(70.0f, 20.0f),		UIVec2(0.0f, 0.5f)},	
-			// [2] -> ButtonID::Right
-			{UIVec2(175.0f,		-175.0f),	UIVec2(250.0f, -175.0f),	UIVec2(0.0f, 0.5f)},	
-			// [3] -> ButtonID::HoldMiddle
-			{UIVec2(275.0f,		-25.0f),	UIVec2(310, -25.0f),		UIVec2(0.0f, 0.25f)},	
-		};
-
-		// There's some violation of type saftey here. Ideally we would find a way
-		// to have substateMachine to hold items of type HMDOpSub_Base instead of 
-		// it's parent class, Substate<StateHMDOp>.
-
+	
 		for(int i = 0; i < (int)ButtonID::Totalnum; ++i)
 		{
-			if(!hasButton[i])
+			ButtonID bid = (ButtonID)i;
+			const IcoDrawData& icd = rdata[i];
+			UIVec2 annotationCenter = icd.GetHoldAnnotationCenter(x, y, scale);
+			ButtonState* bs = this->GetButton(i);
+	
+			glEnable(GL_TEXTURE_2D);
+	
+			// If re-using the non-hold annotation, don't render backing plate and circle.
+			if(!icd.holdDialOnSelf)
+			{
+				DrawOffsetVertices(
+					annotationCenter.x, 
+					annotationCenter.y, 
+					this->ico_CircleBacking, 
+					0.5f, 0.5f, 
+					scale);
+	
+				if(hasButtonHold[i])
+				{ 
+	
+					glColor3f(1.0f, 1.0f, 1.0f);
+					DrawOffsetVertices(
+						annotationCenter.x, 
+						annotationCenter.y, 
+						this->btnMiddle.normal, 
+						0.5f, 0.5f, 
+						scale);
+	
+					TexObj::SPtr btnIco = this->GetBAnnoIco(uiProvider->GetIconPath(bid, true));
+					if(btnIco)
+					{ 
+						DrawOffsetVertices(
+							annotationCenter.x, 
+							annotationCenter.y, 
+							*btnIco.get(), 
+							0.5f, 0.5f, 
+							scale);
+					}
+
+					float secondsMidDown = 0.0f;
+					if(bs->isDown)
+						secondsMidDown = bs->heldDownTimer.Seconds(false);
+
+					if(!icd.holdDialOnSelf && hasButtonHold[i] && secondsMidDown >= ButtonHoldTime)
+						bs->GetMousepadColor().GLColor3();
+					else
+						glColor3f(1.0f, 1.0f, 1.0f);
+	
+					// Get position of text from location and offset
+					float baTxtX = annotationCenter.x + icd.holdTexOffs.x * scale;
+					float baTxtY = annotationCenter.y + icd.holdTexOffs.y * scale;
+					std::string holdStr = uiProvider->GetActionName(bid, true);
+					// Apply pivot offset.
+					float extHoriz = this->fontInsBAnno.GetAdvance(holdStr.c_str());
+					float extVert = this->fontInsBAnno.LineHeight();
+					baTxtX -= extHoriz * icd.holdTexPivot.x;
+					baTxtY += extVert * icd.holdTexPivot.y;
+	
+					this->fontInsBAnno.RenderFont(holdStr.c_str(), baTxtX, baTxtY);
+	
+					// DRAW THE RADIAL
+					if(secondsMidDown > 0.0f)
+					{ 
+						float ringFilled = std::min(1.0f, secondsMidDown / ButtonHoldTime);
+				
+						glDisable(GL_TEXTURE_2D);
+						if(secondsMidDown < ButtonHoldTime)
+							glColor3f(0.0f, 1.0f, 0.0f);
+						else
+							glColor3f(1.0f, 0.5f, 0.0f);
+				
+						DrawHollowRadial(circleParts, ringFilled, radIn, radOut, annotationCenter.x, annotationCenter.y);
+					}
+				}
+				else
+				{
+					glColor3f(0.5f, 0.5f, 0.5f);
+					DrawOffsetVertices(
+						annotationCenter.x, 
+						annotationCenter.y, 
+						this->btnMiddle.normal, 
+						0.5f, 0.5f, 
+						scale);
+				}
+			}
+			else
+			{
+				if(bs->isDown)
+				{ 
+					float secondsMidDown	= bs->heldDownTimer.Seconds(false);
+					float ringFilled = std::min(1.0f, secondsMidDown / ButtonHoldTime);
+
+					glDisable(GL_TEXTURE_2D);
+					if(secondsMidDown < ButtonHoldTime)
+						glColor3f(0.0f, 1.0f, 0.0f);
+					else
+						glColor3f(1.0f, 0.5f, 0.0f);
+
+					DrawHollowRadial(circleParts, ringFilled, radIn, radOut, annotationCenter.x, annotationCenter.y);
+				}
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////
+	//
+	//	RENDER CLICK ANNOTATIONS
+	//	Both icons and text
+	//
+	//////////////////////////////////////////////////
+	if(uiProvider)
+	{ 
+		glEnable(GL_TEXTURE_2D);
+		for(int i = 0; i < (int)ButtonID::Totalnum; ++i)
+		{
+			ButtonID bid = (ButtonID)i;
+			TexObj::SPtr btnIco = this->GetBAnnoIco(uiProvider->GetIconPath(bid, false));
+			ButtonState* bs = this->GetButton(i);
+			const IcoDrawData& icd = rdata[i];
+
+			bool isHeld = bs->isDown && bs->heldDownTimer.Seconds(false) >= ButtonHoldTime;
+			// Override to show the hold value on the click?
+			bool showHold = hasButtonHold[i] && isHeld && icd.holdDialOnSelf;
+
+			if(!showHold && !hasButtonClick[i])
 				continue;
 
-			ButtonID bid = (ButtonID)i;
-			TexObj::SPtr btnIco = this->GetBAnnoIco(uiProvider->GetIconPath(bid));
 
+			glColor3f(1.0f, 1.0f, 1.0f);
+			UIVec2 annoCenter = icd.GetAnnotationCenter(x, y, scale);
 			if(btnIco.get() != nullptr)
 			{
 				DrawOffsetVertices(
-					x + rdata[i].icoOffs.x * scale, 
-					y + rdata[i].icoOffs.y * scale, 
+					annoCenter.x, 
+					annoCenter.y, 
 					*btnIco.get(), 
 					0.5f, 0.5f, 
 					scale);
 			}
 
-			//this->fontInsBAnno
-			std::string bannoStr = uiProvider->GetActionName(bid);
+			
+			// Color the text the same as the button color (for now).
+			//
+			// If it's held down, don't emphasize it, and instead emphasize the hold-down
+			if(!showHold)
+				glColor3f(1.0f, 1.0f, 1.0f);
+			else
+				bs->GetMousepadColor().GLColor3();
+
+			std::string bannoStr;
+			if(showHold)
+				bannoStr = uiProvider->GetActionName((ButtonID)i, true);
+			else
+				bannoStr = uiProvider->GetActionName((ButtonID)i, false);
+			
 			if(!bannoStr.empty())
 			{
 				// Get position of text from location and offset
-				float baTxtX = x + rdata[i].texOffs.x * scale;
-				float baTxtY = y + rdata[i].texOffs.y * scale;
+				float baTxtX = annoCenter.x + icd.texOffs.x * scale;
+				float baTxtY = annoCenter.y + icd.texOffs.y * scale;
 				// Apply pivot offset.
 				float extHoriz = this->fontInsBAnno.GetAdvance(bannoStr.c_str());
 				float extVert = this->fontInsBAnno.LineHeight();
-				baTxtX -= extHoriz * rdata[i].texPivot.x;
-				baTxtY += extVert * rdata[i].texPivot.y;
+				baTxtX -= extHoriz * icd.texPivot.x;
+				baTxtY += extVert * icd.texPivot.y;
 
 				this->fontInsBAnno.RenderFont(bannoStr.c_str(), baTxtX, baTxtY);
 			}
 		}
-
 	}
 }
 
@@ -414,7 +573,8 @@ void MousepadUI::ButtonState::Decay(double dt)
 	if(this->isDown)
 		return;
 
-	this->clickRecent = (float)std::max(0.0, this->clickRecent	- dt * clickDecayRate);
+	this->clickRecent = 
+		(float)std::max(0.0, this->clickRecent	- dt * clickDecayRate);
 }
 
 void MousepadUI::ButtonState::FlagUp()
