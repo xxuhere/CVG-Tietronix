@@ -448,23 +448,25 @@ void StateHMDOp::Draw(const wxSize& sz)
 		const static UIColor4 selCaroColor(1.0f, 1.0f, 1.0f);
 		const static UIColor4 unselCaroColor(0.5f, 0.5f, 0.5f);
 
+		const float CarouselY = 850.0f;
+
 		this->caroOrient.Render(	
 			sz.x * 0.5f,		
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Orient], 
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroOrient == sel) ? selCaroColor : unselCaroColor);
 
 		this->caroBody.Render(
 			sz.x * 0.5f + 200,	
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Study],
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroBody == sel) ? selCaroColor : unselCaroColor);
 
 		this->caroSeries.Render(
 			sz.x * 0.5f - 200,	
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Series],
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroSeries == sel) ? selCaroColor : unselCaroColor);
@@ -604,9 +606,19 @@ void StateHMDOp::Update(double dt)
 
 	if(this->showCarousel)
 	{ 
+		// Update individual animations
 		this->caroBody.Update(this->carouselStyle, dt);
 		this->caroSeries.Update(this->carouselStyle, dt);
 		this->caroOrient.Update(this->carouselStyle, dt);
+
+		// Update lifting and lowering for seleted carousel
+		for(int i = 0; i < (int)CarouselType::Totalnum; ++i)
+		{
+			if( i == (int)this->selectedCarousel)
+				this->carouselLiftAmts[i] = std::min((float)(this->carouselLiftAmts[i] + dt * CarouselChangeRate), MaxCarouselLift);
+			else
+				this->carouselLiftAmts[i] = std::max((float)(this->carouselLiftAmts[i] - dt * CarouselChangeRate), 0.0f);
+		}
 	}
 }
 
@@ -758,6 +770,12 @@ bool StateHMDOp::ShowCarousels( bool show)
 
 	if(this->showCarousel == show)
 		return false;
+
+	// Reset if shown, that way they get an extra animation to emphasize the
+	// current selected item. Plus we don't have to worry about a paused
+	// animation spurriously resuming itself.
+	for(int i = 0; i < (int)CarouselType::Totalnum; ++i)
+		this->carouselLiftAmts[i] = 0.0f;
 
 	this->showCarousel = show;
 	this->caroBody.EndAnimation(this->carouselStyle, true);

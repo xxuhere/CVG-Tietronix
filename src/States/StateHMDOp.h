@@ -343,12 +343,30 @@ public:
 	UIPlate* inspExitPlate		= nullptr;
 
 private:
-	Carousel caroSeries;
-	Carousel caroBody;
-	Carousel caroOrient;
+	Carousel caroSeries;	// Maps to enum CarouselType::Series
+	Carousel caroBody;		// Maps to enum CarouselType::Study
+	Carousel caroOrient;	// Maps to enum CarouselType::Orient
 
 	bool showCarousel = false;
+
+	/// <summary>
+	/// The style information on how to render the carousels.
+	/// </summary>
 	CarouselStyle carouselStyle;
+
+	// Carousel elevation heights for the effect to animate the 
+	// selected carousel higher than the others.
+	float carouselLiftAmts[(int)CarouselType::Totalnum];
+
+	/// <summary>
+	/// The number of pixels to raise the selected carousel.
+	/// </summary>
+	const float MaxCarouselLift = 40.0f;
+
+	/// <summary>
+	/// The number of pixel to raise/lower carousels per second.
+	/// </summary>
+	const double CarouselChangeRate = 500.0f;
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
