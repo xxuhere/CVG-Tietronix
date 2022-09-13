@@ -9,7 +9,7 @@
 class HMDOpSub_Carousel : public HMDOpSub_Base
 {
 public:
-	HMDOpSub_Carousel();
+	HMDOpSub_Carousel(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
@@ -20,7 +20,7 @@ public:
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
 
-	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
-	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
-	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetIconPath(ButtonID bid, bool isHold) override;
+	std::string GetActionName(ButtonID bid, bool isHold) override;
+	bool GetButtonUsable(ButtonID bid, bool isHold) override;
 };

@@ -87,7 +87,7 @@ void StateInitCameras::Draw(const wxSize& sz)
 	int midScrY = sz.y / 2;
 
 	// Timer for the load animation
-	float loadAnimPhase = this->loadAnimTimer.Milliseconds(false) / 1000.0f;
+	float loadAnimPhase = this->loadAnimTimer.Seconds(false);
 
 	this->allCamsReady = true;
 

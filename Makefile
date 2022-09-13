@@ -72,7 +72,7 @@ SUBOBJ_MAIN = \
 	AppVersionDicom FontMgr GLWin HMDOpApp LoadAnim MainWin Session_Toml TexObj OpSession
 	
 SUBOBJ_STATES = \
-	BaseState StateExit StateHMDOp StateInitCameras StateIntro
+	BaseState MousepadUI StateExit StateHMDOp StateInitCameras StateIntro
 
 SUBOBJ_SUBSTATES_HMDOP = \
 	HMDOpSub_Base HMDOpSub_Carousel HMDOpSub_Default HMDOpSub_InspNavForm HMDOpSub_MainMenuNav HMDOpSub_TempNavSliderListing HMDOpSub_WidgetCtrl

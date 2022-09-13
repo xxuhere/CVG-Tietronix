@@ -19,7 +19,7 @@ public:
 	std::vector<UIBase*> menuButtons;
 
 public:
-	HMDOpSub_MainMenuNav();
+	HMDOpSub_MainMenuNav(StateHMDOp* targ, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
@@ -39,9 +39,9 @@ public:
 	/// </param>
 	void EnforceTabOrder(StateHMDOp& targ);
 
-	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
-	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
-	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetIconPath(ButtonID bid, bool isHold) override;
+	std::string GetActionName(ButtonID bid, bool isHold) override;
+	bool GetButtonUsable(ButtonID bid, bool isHold) override;
 
 	/// <summary>
 	/// Should be called whenever the main menu select state has changed

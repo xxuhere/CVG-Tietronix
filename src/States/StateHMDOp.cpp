@@ -35,43 +35,6 @@ void SetButtonStdCols(UIBase* uib, bool toggled = false)
 		uib->uiCols = colSetButtonTog;
 }
 
-bool ButtonTexSet::Initialize(
-	const std::string& normImgPath,
-	const std::string& pressedImgPath,
-	const std::string& holdimgPath)
-{
-	bool ret = true;
-	ret = this->normal.LODEIfEmpty(normImgPath) && ret;
-	ret = this->pressed.LODEIfEmpty(pressedImgPath) && ret;
-	ret = this->hold.LODEIfEmpty(holdimgPath) && ret;
-
-	return ret;
-}
-
-void StateHMDOp::MouseDownState::Reset()
-{
-	this->clickRecent = 0.0f;
-	this->isDown = false;
-}
-
-void StateHMDOp::MouseDownState::Decay(double dt)
-{
-	if(this->isDown)
-		return;
-
-	this->clickRecent = (float)std::max(0.0, this->clickRecent	- dt * clickDecayRate);
-}
-
-void StateHMDOp::MouseDownState::FlagUp()
-{
-	this->isDown = false;
-}
-
-void StateHMDOp::MouseDownState::FlagDown()
-{
-	this->isDown = true;
-	this->clickRecent = 1.0f;
-}
 
 const float icoDim = 60.0f;					// (Square) Size of main menu icons/buttons in pixels
 const float menuYPiv = 1.05f / 7.0f;		// Separation of main menu icons, in terms of percentage of the main menu bar.
@@ -315,9 +278,9 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	
 
 	// ADD DEFAULT Substates
-	this->substateMachine.CacheSubstate((int)CoreSubState::CarouselStage, StateHMDOp::SubPtr(new HMDOpSub_Carousel()));
-	this->substateMachine.CacheSubstate((int)CoreSubState::Default		, StateHMDOp::SubPtr(new HMDOpSub_Default()));
-	this->substateMachine.CacheSubstate((int)CoreSubState::MenuNav		, StateHMDOp::SubPtr(new HMDOpSub_MainMenuNav()));
+	this->substateMachine.CacheSubstate((int)CoreSubState::CarouselStage, StateHMDOp::SubPtr(new HMDOpSub_Carousel(this, &this->substateMachine)));
+	this->substateMachine.CacheSubstate((int)CoreSubState::Default		, StateHMDOp::SubPtr(new HMDOpSub_Default(this, &this->substateMachine)));
+	this->substateMachine.CacheSubstate((int)CoreSubState::MenuNav		, StateHMDOp::SubPtr(new HMDOpSub_MainMenuNav(this, &this->substateMachine)));
 
 	//		EXIT INSPECTOR
 	//
@@ -356,303 +319,6 @@ void StateHMDOp::AddCamGroupingEntry(UIButton* button, UIPlate* system, UIHSlide
 void StateHMDOp::AddCamGroupingEntry(UIButton* button, PlateSliderPair pair)
 {
 	this->camButtonGrouping[button].push_back(pair);
-}
-
-void DrawOffsetVertices(
-	float x, 
-	float y, 
-	float w, 
-	float h, 
-	float px, 
-	float py, 
-	float scale)
-{
-	float toLeft	= -px *			w * scale;
-	float toRight	= (1.0f - px) * w * scale;
-	float toTop		= -py *			h * scale;
-	float toBot		= (1.0 - py) *	h * scale;
-
-	glBegin(GL_QUADS);
-	{
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(x + toLeft, y + toTop);
-		//
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(x + toRight, y + toTop);
-		//
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(x + toRight, y + toBot);
-		//
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(x + toLeft, y + toBot);
-	}
-	glEnd();
-}
-
-void DrawOffsetVertices(float x, float y, TexObj& to, float px, float py, float scale)
-{
-	to.GLBind();
-	DrawOffsetVertices(x, y, to.width, to.height, px, py, scale);
-}
-
-/// <summary>
-/// Create a ButtonTexSet with the correct state.
-/// 
-/// See DrawOffsetVertices for other parameters.
-/// </summary>
-/// <param name="isDown">Is the mouse button down?</param>
-/// <param name="downTime">
-/// Hold long has the button been pressed down? Ignored if idDown is false.</param>
-/// <param name="holdingThreshold">
-/// How long does a button need to be held down before it's considered holding?
-/// </param>
-void DrawOffsetVerticesForButtonSet(
-	float x, 
-	float y, 
-	ButtonTexSet& bs, 
-	float px, 
-	float py, 
-	float scale,
-	bool isDown,
-	float downTime,
-	float holdingThreshold)
-{
-	if(isDown == false)
-		DrawOffsetVertices(x, y, bs.normal, px, py, scale);
-	else if(downTime < holdingThreshold)
-		DrawOffsetVertices(x, y, bs.pressed, px, py, scale);
-	else
-		DrawOffsetVertices(x, y, bs.hold, px, py, scale);
-	
-}
-
-UIColor4 GetMousepadColor(bool isDown, float timeSinceClick)
-{
-	// Pressed down
-	if(isDown)
-		return UIColor4(0.75f, 0.75f, 0.25f, 1.0f);
-
-	// Fading
-	float colorComp =  std::clamp(1.0f - timeSinceClick, 0.0f, 1.0f);
-	return UIColor4(colorComp, 1.0f, colorComp);
-}
-
-UIColor4 GetMousepadColor(float timeSinceClick)
-{
-	return GetMousepadColor((1.0f - timeSinceClick) == 0.0f, timeSinceClick);
-}
-
-void StateHMDOp::DrawMousePad(float x, float y, float scale)
-{
-	static UIColor4 disabledBtnColor(0.2f, 0.2f, 0.2f, 1.0f);
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-	// For all the quads we're about to lay down, we're starting at
-	// the top left and moving clockwise.
-	this->ico_MousePadCrevice.GLBind();
-	UIColor4 colMLeft	= GetMousepadColor(this->mdsLeft.clickRecent	);
-	UIColor4 colMMiddle = GetMousepadColor(this->mdsMiddle.clickRecent	);
-	UIColor4 colMRight	= GetMousepadColor(this->mdsRight.clickRecent	);
-	
-	// Setup the substate, and collect what buttons are allowed to be shown.
-	HMDOpSub_Base* subTyped = nullptr;
-	int hasButton[4] = 
-	{true, true, true, true};
-	auto ss = this->substateMachine.GetCurSubtate();
-	if(ss)
-	{
-		subTyped = (HMDOpSub_Base*)ss.get();
-		for(int i = 0; i < (int)HMDOpSub_Base::ButtonID::Totalnum; ++i)
-			hasButton[i] = subTyped->GetButtonUsable((HMDOpSub_Base::ButtonID)i, *this);
-	}
-
-	// Draw the middle mouse button.
-	DrawOffsetVertices(x, y, this->ico_MousePadCrevice, 0.5f, 1.0f, scale);
-	//
-	if(hasButton[1] || hasButton[3])
-		colMMiddle.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
-
-	DrawOffsetVerticesForButtonSet(
-		x, 
-		y,
-		this->ico_MousePadBall,
-		0.5f, 
-		0.5f,
-		scale,
-		this->middleDown,
-		this->middleDownTimer.Milliseconds(false) / 1000.0f,
-		this->ButtonHoldTime);
-
-	// Draw the dial/ring for holding the middle mouse button down.
-	if(
-		(this->middleDown && hasButton[3]) || 
-		this->leftDown ||
-		this->rightDown)
-	{
-		glDisable(GL_TEXTURE_2D);
-
-		// If a mouse button is pressed down, draw a ring
-		// whos angle represents the amount of the time the button
-		// has been pressed.
-		//
-		// Since all mouse buttons can be pressed, and technically
-		// can be pressed simultaneously, we use the largest timer
-		// for the value to draw the ring for.
-		const float PI = 3.14159f;
-		const int circleParts = 32;
-
-		// The 
-		float secondsLeftDown	= 0.0f;
-		float secondsMidDown	= 0.0f;
-		float secondsRightDown	= 0.0f;
-		//
-		if(this->leftDown)
-			secondsLeftDown	= this->leftDownTimer.Milliseconds(false) / 1000.0f;
-		if(this->middleDown && hasButton[3])
-			secondsMidDown	= this->middleDownTimer.Milliseconds(false) / 1000.0f;
-		if(this->rightDown)
-			secondsRightDown = this->rightDownTimer.Milliseconds(false) / 1000.0f;
-		//
-		float maxBtnDownTime = std::max({secondsLeftDown, secondsMidDown, secondsRightDown});
-
-		float arcLen = std::min(1.0f, maxBtnDownTime / ButtonHoldTime) * 2.0f * PI;
-
-		if(secondsMidDown < ButtonHoldTime)
-			glColor3f(0.0f, 1.0f, 0.0f);
-		else
-			glColor3f(1.0f, 0.5f, 0.0f);
-
-		float radOut = 80.0f * scale;
-		float radIn = radOut - 10.0f;
-		glBegin(GL_QUADS);
-			for(int i = 0; i < circleParts; ++i)
-			{
-				float lam_0 = -PI * 0.5f + ((float)(i + 0) / (float)circleParts) * arcLen;
-				float lam_1 = -PI * 0.5f + ((float)(i + 1) / (float)circleParts) * arcLen;
-
-				float seg_0x = cos(lam_0);
-				float seg_0y = sin(lam_0);
-				float seg_1x = cos(lam_1);
-				float seg_1y = sin(lam_1);
-
-				glVertex2f(x + seg_0x * radOut, y + seg_0y * radOut);
-				glVertex2f(x + seg_1x * radOut, y + seg_1y * radOut);
-				glVertex2f(x + seg_1x * radIn,	y + seg_1y * radIn);
-				glVertex2f(x + seg_0x * radIn,	y + seg_0y * radIn);
-
-			}
-		glEnd();
-		glEnable(GL_TEXTURE_2D);
-	}
-
-	// Draw the left mouse button.
-	if(hasButton[0])
-		colMLeft.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
-
-	DrawOffsetVerticesForButtonSet(
-		x, 
-		y, 
-		this->ico_MousePadLeft,	
-		1.0f, 
-		1.0f, 
-		scale,
-		this->leftDown,
-		this->leftDownTimer.Milliseconds(false) / 1000.0f,
-		this->ButtonHoldTime);
-
-	// Draw the right mouse button.
-	if(hasButton[2])
-		colMRight.GLColor4();
-	else
-		disabledBtnColor.GLColor4();
-
-	DrawOffsetVerticesForButtonSet(
-		x, 
-		y, 
-		this->ico_MousePadRight,	
-		0.0f, 
-		1.0f, 
-		scale,
-		this->rightDown,
-		this->rightDownTimer.Milliseconds(false) / 1000.0f,
-		this->ButtonHoldTime);
-	
-	// Draw the button annotations.
-	if(subTyped != nullptr)
-	{
-		glColor3f(0.5f, 0.5f, 0.5f);
-
-		struct IcoDrawData
-		{
-			// Offset location of the center of the icon.
-			UIVec2 icoOffs;
-			// Offset of pivot location of the text
-			UIVec2 texOffs;
-			// Pivot location of text, using vector components [0, 1],
-			// where 0 is top left, and 1 is bottom right
-			UIVec2 texPivot;
-		};
-		static const IcoDrawData rdata[4] =
-		{
-			// These indices will map to HMDOpSub_Base::ButtonID,
-			// [0] -> ButtonID::Left
-			{UIVec2(-175.0f,	-175.0f),	UIVec2(-250.0f, -175.0f),	UIVec2(1.0f, 0.5f)},	
-			// [1] -> ButtonID::Middle
-			{UIVec2(0.0f,		0.0f),		UIVec2(70.0f, 20.0f),		UIVec2(0.0f, 0.5f)},	
-			// [2] -> ButtonID::Right
-			{UIVec2(175.0f,		-175.0f),	UIVec2(250.0f, -175.0f),	UIVec2(0.0f, 0.5f)},	
-			// [3] -> ButtonID::HoldMiddle
-			{UIVec2(275.0f,		-25.0f),	UIVec2(310, -25.0f),		UIVec2(0.0f, 0.25f)},	
-		};
-
-		// There's some violation of type saftey here. Ideally we would find a way
-		// to have substateMachine to hold items of type HMDOpSub_Base instead of 
-		// it's parent class, Substate<StateHMDOp>.
-		
-		for(int i = 0; i < (int)HMDOpSub_Base::ButtonID::Totalnum; ++i)
-		{
-			if(!hasButton[i])
-				continue;
-
-			HMDOpSub_Base::ButtonID bid = (HMDOpSub_Base::ButtonID)i;
-			TexObj::SPtr btnIco = this->GetBAnnoIco(subTyped->GetIconPath(bid, *this));
-
-			if(btnIco.get() != nullptr)
-			{
-				DrawOffsetVertices(
-					x + rdata[i].icoOffs.x * scale, 
-					y + rdata[i].icoOffs.y * scale, 
-					*btnIco.get(), 
-					0.5f, 0.5f, 
-					scale);
-			}
-
-			//this->fontInsBAnno
-			std::string bannoStr = subTyped->GetActionName(bid, *this);
-			if(!bannoStr.empty())
-			{
-				// Get position of text from location and offset
-				float baTxtX = x + rdata[i].texOffs.x * scale;
-				float baTxtY = y + rdata[i].texOffs.y * scale;
-				// Apply pivot offset.
-				float extHoriz = this->fontInsBAnno.GetAdvance(bannoStr.c_str());
-				float extVert = this->fontInsBAnno.LineHeight();
-				baTxtX -= extHoriz * rdata[i].texPivot.x;
-				baTxtY += extVert * rdata[i].texPivot.y;
-
-				this->fontInsBAnno.RenderFont(bannoStr.c_str(), baTxtX, baTxtY);
-			}
-		}
-
-	}
 }
 
 void StateHMDOp::DrawRecordingDot(float x, float y, float rad)
@@ -782,23 +448,25 @@ void StateHMDOp::Draw(const wxSize& sz)
 		const static UIColor4 selCaroColor(1.0f, 1.0f, 1.0f);
 		const static UIColor4 unselCaroColor(0.5f, 0.5f, 0.5f);
 
+		const float CarouselY = 850.0f;
+
 		this->caroOrient.Render(	
 			sz.x * 0.5f,		
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Orient], 
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroOrient == sel) ? selCaroColor : unselCaroColor);
 
 		this->caroBody.Render(
 			sz.x * 0.5f + 200,	
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Study],
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroBody == sel) ? selCaroColor : unselCaroColor);
 
 		this->caroSeries.Render(
 			sz.x * 0.5f - 200,	
-			850.0f, 
+			CarouselY - this->carouselLiftAmts[(int)CarouselType::Series],
 			this->carouselStyle, 
 			1.0f,
 			(&this->caroSeries == sel) ? selCaroColor : unselCaroColor);
@@ -808,16 +476,18 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 	float mousepadX = sz.x /2 + (float)this->GetView()->mousepadOffsX;		// Horizontally at the center
 	float mousepadY = sz.y / 2 + (float)this->GetView()->mousepadOffsY;		// Near the bottom
-	this->DrawMousePad(
+	//
+	this->mousepadUI.Render(
+		(HMDOpSub_Base*)this->substateMachine.GetCurSubtate().get(),
 		mousepadX,
 		mousepadY,
 		(float)this->GetView()->mousepadScale);
 
 	if(camMgr.IsRecording(SpecialCams::Composite))
 	{
-		const float RecOffX = 125.0f;
-		const float RecOffY = -100;
-		const float RecCircRad = 20.0f;
+		const float RecOffX = 270;
+		const float RecOffY = -65;
+		const float RecCircRad = 16.0f;
 		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
 	}
 
@@ -910,14 +580,10 @@ void StateHMDOp::DrawMenuSystemAroundRect(const cvgRect& rectDrawAround)
 
 void StateHMDOp::Update(double dt)
 {
-	if(this->inspectorShow == true)
-	{
-		// TODO: Slide in/out inspector
-	}
-
-	this->mdsLeft.Decay(dt);
-	this->mdsMiddle.Decay(dt);
-	this->mdsRight.Decay(dt);
+	//if(this->inspectorShow == true)
+	//{
+	//	// TODO: Slide in/out inspector
+	//}
 
 	bool showRButtons = false;
 	if(this->showMainMenu)
@@ -936,50 +602,37 @@ void StateHMDOp::Update(double dt)
 	this->btnCamSets->Show(showRButtons);
 	this->btnExit->Show(showRButtons);
 
+	this->mousepadUI.Update(dt);
+
 	if(this->showCarousel)
 	{ 
+		// Update individual animations
 		this->caroBody.Update(this->carouselStyle, dt);
 		this->caroSeries.Update(this->carouselStyle, dt);
 		this->caroOrient.Update(this->carouselStyle, dt);
+
+		// Update lifting and lowering for seleted carousel
+		for(int i = 0; i < (int)CarouselType::Totalnum; ++i)
+		{
+			if( i == (int)this->selectedCarousel)
+				this->carouselLiftAmts[i] = std::min((float)(this->carouselLiftAmts[i] + dt * CarouselChangeRate), MaxCarouselLift);
+			else
+				this->carouselLiftAmts[i] = std::max((float)(this->carouselLiftAmts[i] - dt * CarouselChangeRate), 0.0f);
+		}
 	}
 }
 
 void StateHMDOp::EnteredActive()
 {
-	// While these texture loads were initially in Initialize(),
+	
+	// While these texture loads were initially in the App's Initialize(),
 	// they've been moved to EnteredActive to deffer them, because
 	// there was some texture loading issues on the Linux side -
 	//
 	// most likely because the OpenGL context doesn't get initialized
 	// as fast as on Windows.
-	this->ico_MousePadLeft.Initialize(
-		"Assets/Mousepad/Mousepad_Left_Norm.png",
-		"Assets/Mousepad/Mousepad_Left_Pressed.png",
-		"Assets/Mousepad/Mousepad_Left_Hold.png");
-
-	this->ico_MousePadRight.Initialize(
-		"Assets/Mousepad/Mousepad_Right_Norm.png",
-		"Assets/Mousepad/Mousepad_Right_Pressed.png",
-		"Assets/Mousepad/Mousepad_Right_Hold.png");
-
-	this->ico_MousePadBall.Initialize(
-		"Assets/Mousepad/Mousepad_MiddleBall_Norm.png",
-		"Assets/Mousepad/Mousepad_MiddleBall_Pressed.png",
-		"Assets/Mousepad/Mousepad_MiddleBall_Hold.png");
-
-	this->ico_MousePadCrevice.LODEIfEmpty(	"Assets/Mousepad/Mousepad_Crevice.png");
-
-	this->mdsLeft.Reset();
-	this->mdsMiddle.Reset();
-	this->mdsRight.Reset();
-
-	this->leftDownTimer.Restart();
-	this->rightDownTimer.Restart();
-	this->middleDownTimer.Restart();
-
-	this->leftDown = false;
-	this->middleDown = false;
-	this->rightDown = false;
+	this->mousepadUI.Initialize();
+	this->mousepadUI.Reset();
 
 	this->_SyncImageProcessingSetUI();
 	this->_SyncThresholdSlider();
@@ -1055,7 +708,6 @@ void StateHMDOp::ExitedActive()
 void StateHMDOp::Initialize() 
 {
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
-	this->fontInsBAnno = FontMgr::GetInstance().GetFont(12);
 
 	this->caroBody.Append(this->GetView()->cachedOptions.caroBody);
 	this->caroBody.LoadAssets();
@@ -1081,62 +733,7 @@ void StateHMDOp::OnMouseDown(int button, const wxPoint& pt)
 	// has been removed. Now it's exclusively the substates' job to
 	// manage this interaction.
 	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
-
-	// NOTE: There's a lot of similar code for the various button handlers,
-	// we should probably look for an elegant way to unify the logic.
-	if(button == 0)
-	{ 
-		this->mdsLeft.FlagDown();
-
-		if(!this->leftDown)		
-			this->leftDownTimer.Restart();
-
-		this->leftDown = true;
-
-		if(curSub != nullptr)
-			curSub->OnLeftDown(*this, this->substateMachine);
-	}
-	else if(button == 1)
-	{
-		this->mdsMiddle.FlagDown();
-
-		// It might seem odds to check if the middle button was already down
-		// before doing middle-down press stuff, but this is the timer for if
-		// the middle mouse button is being held down, and there could be other
-		// things that emulate middle mouse button clicks such as foot pedals
-		// that emulate keyboard presses - and keyboard presses can repeat themselves
-		// when held down (such as in notepad, when press 'a', you'll immediately
-		// get "a", but after a while you'll get "aaaaaaaaaaaaaaaaaaaaaaaaaa" 
-		// being spammed from the input.)
-		//
-		// If this is the case, we don't want t keep restarting the timer - but
-		// recognize it as one continuous (simulated) mouse-down press.
-		//
-		// Note that this only affects the middle mouse button, and only for not
-		// restarting the timer for holding down the button. A more robust and 
-		// general solution may be required for additional/future features.
-		
-		if(!this->middleDown)	
-			this->middleDownTimer.Restart();
-		
-
-		this->middleDown = true;
-
-		if(curSub != nullptr)
-			curSub->OnMiddleDown(*this, this->substateMachine);
-	}
-	else if(button == 2)
-	{
-		this->mdsRight.FlagDown();
-
-		if(!this->rightDown)	
-			this->rightDownTimer.Restart();
-
-		this->rightDown = true;
-
-		if(curSub != nullptr)
-			curSub->OnRightDown(*this, this->substateMachine);
-	}
+	this->mousepadUI.OnButtonDown((HMDOpSub_Base*)curSub.get(), button);
 }
 
 void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
@@ -1145,64 +742,7 @@ void StateHMDOp::OnMouseUp(int button, const wxPoint& pt)
 	// has been removed. Now it's exclusively the substates' job to
 	// manage this interaction.
 	StateHMDOp::SubPtr curSub = this->substateMachine.GetCurSubtate();
-
-	// NOTE: There's a lot of similar code, we may want to look into
-	// a way to unify the code for the various similar key up handlers.
-	if(button == 0)
-	{ 
-		int msLeftDown = this->leftDownTimer.Milliseconds();
-		float secDown = (float)msLeftDown/1000.0f;
-		if(secDown >= ButtonHoldTime)
-		{
-			if( curSub != nullptr)
-				curSub->OnLeftUpHold(*this, this->substateMachine);
-		}
-		else
-		{ 
-			if( curSub != nullptr)
-				curSub->OnLeftUp(*this, this->substateMachine);
-		}
-
-		this->mdsLeft.FlagUp();
-		this->leftDown = false;
-	}
-	else if(button == 1)
-	{
-		int msMidDown = this->middleDownTimer.Milliseconds();
-		float secDown = (float)msMidDown/1000.0f;
-		if( secDown >= ButtonHoldTime)
-		{
-			if(curSub != nullptr)
-				curSub->OnMiddleUpHold(*this, this->substateMachine);
-			
-		}
-		else
-		{
-			if(curSub != nullptr)
-				curSub->OnMiddleUp(*this, this->substateMachine);
-		}
-
-		this->mdsMiddle.FlagUp();
-		this->middleDown = false;
-	}
-	else if (button == 2)
-	{
-		int msRightDown = this->rightDownTimer.Milliseconds();
-		float secDown = (float)msRightDown/1000.0f;
-		if(secDown >= ButtonHoldTime)
-		{ 
-			if(curSub != nullptr)
-				curSub->OnRightUpHold(*this, this->substateMachine);
-		}
-		else
-		{
-			if(curSub != nullptr)
-				curSub->OnRightUp(*this, this->substateMachine);
-		}
-
-		this->mdsRight.FlagUp();
-		this->rightDown = false;
-	}
+	this->mousepadUI.OnButtonUp((HMDOpSub_Base*)curSub.get(), button);
 }
 
 void StateHMDOp::OnMouseMove(const wxPoint& pt)
@@ -1218,7 +758,7 @@ void StateHMDOp::ClosingApp()
 {
 	// Get rid of icons while we know the OpenGL context is still
 	// alive.
-	this->cachedBAnnoIcos.clear();
+	this->mousepadUI.Shutdown();
 }
 
 StateHMDOp::~StateHMDOp()
@@ -1227,9 +767,14 @@ StateHMDOp::~StateHMDOp()
 
 bool StateHMDOp::ShowCarousels( bool show)
 {
-
 	if(this->showCarousel == show)
 		return false;
+
+	// Reset if shown, that way they get an extra animation to emphasize the
+	// current selected item. Plus we don't have to worry about a paused
+	// animation spurriously resuming itself.
+	for(int i = 0; i < (int)CarouselType::Totalnum; ++i)
+		this->carouselLiftAmts[i] = 0.0f;
 
 	this->showCarousel = show;
 	this->caroBody.EndAnimation(this->carouselStyle, true);
@@ -1629,31 +1174,6 @@ void StateHMDOp::DoThresholdButton(int idxButton, ProcessingType type, bool skip
 				colSetButton);
 		}
 	}
-}
-
-TexObj::SPtr StateHMDOp::GetBAnnoIco(const std::string& path)
-{
-	if(path.empty())
-		return nullptr;
-
-	auto itFind = this->cachedBAnnoIcos.find(path);
-	if(itFind == this->cachedBAnnoIcos.end())
-	{
-		BAnnoIcon bico;
-		bico.path = path;
-		bico.loaded = TexObj::MakeSharedLODE(path);
-
-		if(bico.loaded == nullptr)
-		{
-			std::cerr << "Failed to load button annotation " << path << std::endl;
-		}
-
-		this->cachedBAnnoIcos[path] = bico;
-
-		return bico.loaded;
-	}
-
-	return itFind->second.loaded;
 }
 
 void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mousePos)

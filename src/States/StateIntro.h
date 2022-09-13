@@ -35,6 +35,10 @@ public:
 	/// </summary>
 	std::vector<TexObj::SPtr> logos;
 
+	/// <summary>
+	/// If true, the current session folder was found to already exist,
+	/// and a warning should be shown on the screen.
+	/// </summary>
 	bool sessionAlreadyExists = false;
 
 

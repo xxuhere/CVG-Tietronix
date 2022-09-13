@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include "MousepadUI.h"
 
 class UIButton;
 class StateHMDOp;
@@ -74,31 +75,11 @@ enum class CarouselType
 	Totalnum
 };
 
-/// <summary>
-/// Data to support caching button annotation data.
-/// </summary>
-struct BAnnoIcon
-{
-public:
-	std::string path;
-	TexObj::SPtr loaded;
-};
+
 
 class StateHMDOp;
 
-struct ButtonTexSet
-{
-public:
-	TexObj normal;
-	TexObj pressed;
-	TexObj hold;
 
-public:
-	bool Initialize(
-		const std::string& normImgPath,
-		const std::string& pressedImgPath,
-		const std::string& holdimgPath);
-};
 
 /// <summary>
 /// The application state for the main operator loop.
@@ -109,32 +90,6 @@ class StateHMDOp :
 	public DicomInjector
 {
 public:
-
-	/// <summary>
-	/// Animation state information for a button in the mousepad graphic.
-	/// </summary>
-	struct MouseDownState
-	{
-		// How fast the color will animation from fully on/off. Value
-		// is in seconds.
-		const double clickDecayRate = 1.0f;
-
-	public:
-		// A value from [0.0, 1.0], showing the render power to use based
-		// of when the button was last clicked.
-		// A value of 0.0 means the button was clicked long ago.
-		// A value of 1.0 means the button is pressed at the moment.
-		float clickRecent = 0.0f;
-
-		// True if the mouse button is currently down, else false.
-		bool isDown = false;
-
-	public:
-		void Reset();
-		void Decay(double dt);
-		void FlagUp();
-		void FlagDown();
-	};
 
 	/// <summary>
 	/// The UI IDs of all unique UI elements created in uiSys.
@@ -256,10 +211,7 @@ public:
 	/// </summary>
 	FontWU fontInsTitle;
 
-	/// <summary>
-	/// The font used for button annotations.
-	/// </summary>
-	FontWU fontInsBAnno;
+	MousepadUI mousepadUI;
 
 	/// <summary>
 	/// The lawn known pos/size of camera viewport - which can change if
@@ -296,30 +248,7 @@ public:
 	NinePatcher ninePatchCircle;		
 
 	TexObj::SPtr patch_smallCircle;
-	NinePatcher ninePatchSmallCircle;
-
-	//////////////////////////////////////////////////
-	//
-	//		MOUSE PAD GRAPHIC VARIABLES
-	//
-	//////////////////////////////////////////////////
-
-	/// <summary>
-	/// Cached button annotation icons.
-	/// </summary>
-	std::map<std::string, BAnnoIcon> cachedBAnnoIcos;
-
-	// Various icons for the mouse pad graphic
-	ButtonTexSet ico_MousePadLeft;
-	ButtonTexSet ico_MousePadRight;
-	ButtonTexSet ico_MousePadBall;
-	TexObj ico_MousePadCrevice;
-
-	// Animation state information for the mouse
-	// pad graphic buttons.
-	MouseDownState mdsLeft;
-	MouseDownState mdsRight;
-	MouseDownState mdsMiddle;
+	NinePatcher ninePatchSmallCircle;	
 
 	// NOTE: We may want to group everything similar in buttons,
 	// such as combining ico_MousePad* with mds*.
@@ -414,26 +343,30 @@ public:
 	UIPlate* inspExitPlate		= nullptr;
 
 private:
-	Carousel caroSeries;
-	Carousel caroBody;
-	Carousel caroOrient;
+	Carousel caroSeries;	// Maps to enum CarouselType::Series
+	Carousel caroBody;		// Maps to enum CarouselType::Study
+	Carousel caroOrient;	// Maps to enum CarouselType::Orient
 
 	bool showCarousel = false;
-	CarouselStyle carouselStyle;
 
 	/// <summary>
-	/// The amount of time to hold a button to do a hold operation
-	/// instead of a press operation.
+	/// The style information on how to render the carousels.
 	/// </summary>
-	const float ButtonHoldTime = 1.0f;
+	CarouselStyle carouselStyle;
 
-	bool leftDown = false;
-	bool middleDown = false;
-	bool rightDown = false;
+	// Carousel elevation heights for the effect to animate the 
+	// selected carousel higher than the others.
+	float carouselLiftAmts[(int)CarouselType::Totalnum];
 
-	cvgStopwatch leftDownTimer;
-	cvgStopwatch middleDownTimer;
-	cvgStopwatch rightDownTimer;
+	/// <summary>
+	/// The number of pixels to raise the selected carousel.
+	/// </summary>
+	const float MaxCarouselLift = 40.0f;
+
+	/// <summary>
+	/// The number of pixel to raise/lower carousels per second.
+	/// </summary>
+	const double CarouselChangeRate = 500.0f;
 
 public:
 	StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core);
@@ -451,14 +384,6 @@ protected:
 	SubstateMachine<StateHMDOp> substateMachine;
 
 public:
-	/// <summary>
-	/// Draw the mousepad graphic.
-	/// </summary>
-	/// <param name="x">The x position (screen pixel) of the center of the graphic.</param>
-	/// <param name="y">The y position (screen pixel) of the center of the graphic.</param>
-	/// <param name="scale">The scale of the graphic.</param>
-	void DrawMousePad(float x, float y, float scale);
-
 
 	void DrawRecordingDot(float x, float y, float rad);
 
@@ -598,8 +523,6 @@ protected:
 	void ApplyFormButtonStyle(UIGraphic* uib);
 
 	void DoThresholdButton(int idxButton, ProcessingType type, bool skipSet = false);
-
-	TexObj::SPtr GetBAnnoIco(const std::string& path);
 
 	/// <summary>
 	/// Should be called when a carousel is changed - to sync the rest

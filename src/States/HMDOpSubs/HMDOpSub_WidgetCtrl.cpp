@@ -4,7 +4,11 @@
 #include "../../UISys/UIHSlider.h"
 #include "../../UISys/UIButton.h"
 
-HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(UIButton* btn)
+HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(
+	StateHMDOp* targ, 
+	SubstateMachine<StateHMDOp>* substateMachine, 
+	UIButton* btn)
+	: HMDOpSub_Base(targ, substateMachine)
 {
 	this->categoryBtn = btn;
 }
@@ -90,62 +94,78 @@ std::string HMDOpSub_WidgetCtrl::GetStateName() const
 	return "WidgetCtrl";
 }
 
-std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Assets/ButtonAnno/BAnno_Left.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_Left.png";
+		break;
 
 	case ButtonID::Middle:
-		return "Assets/ButtonAnno/BAnno_CycleNext.png";
-
-	case ButtonID::HoldMiddle:
-		return "Assets/ButtonAnno/BAnno_Return.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_CycleNext.png";
+		else
+			return "Assets/ButtonAnno/BAnno_Return.png";
+		break;
 
 	case ButtonID::Right:
-		return "Assets/ButtonAnno/BAnno_Right.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_Right.png";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetIconPath(bid, isHold);
 }
 
-std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Slide Left";
+		if(!isHold)
+			return "Slide Left";
+		break;
 
 	case ButtonID::Middle:
-		return "Next Slider";
-
-	case ButtonID::HoldMiddle:
-		return "Go Back";
+		if(!isHold)
+			return "Next Slider";
+		else
+			return "Go Back";
+		break;
 
 	case ButtonID::Right:
-		return "Slide Right";
+		if(!isHold)
+			return "Slide Right";
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetActionName(bid, isHold);
 }
 
-bool HMDOpSub_WidgetCtrl::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_WidgetCtrl::GetButtonUsable(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return true;
+		if(!isHold)
+			return true;
+		break;
 
 	case ButtonID::Middle:
-		return this->sliders.size() > 1;
-
-	case ButtonID::HoldMiddle:
-		return true;
+		if(!isHold)
+			return this->sliders.size() > 1;
+		else
+			return true;
+		break;
 
 	case ButtonID::Right:
-		return true;
+		if(!isHold)
+			return true;
+		break;
 
 	}
-	return false;
+
+	return this->HMDOpSub_Base::GetButtonUsable(bid, isHold);
 }

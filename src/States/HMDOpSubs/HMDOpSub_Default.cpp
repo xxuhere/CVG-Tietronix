@@ -2,7 +2,10 @@
 #include "../StateHMDOp.h"
 #include "../../MainWin.h"
 
-HMDOpSub_Default::HMDOpSub_Default()
+HMDOpSub_Default::HMDOpSub_Default(
+	StateHMDOp* targ, 
+	SubstateMachine<StateHMDOp>* substateMachine)
+	: HMDOpSub_Base(targ, substateMachine)
 {}
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -48,66 +51,83 @@ bool IsRecording()
 	return camMgr.IsRecording(SpecialCams::Composite);
 }
 
-std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Default::GetIconPath(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "Assets/ButtonAnno/BAnno_Photo.png";
+		if(!isHold)
+			return "";
+		break;
 
 	case ButtonID::Middle:
-		return "Assets/ButtonAnno/BAnno_Menu.png";
-
-	case ButtonID::HoldMiddle:
-		return "Assets/ButtonAnno/BAnno_Phase.png";
+		if(!isHold)
+			return "Assets/ButtonAnno/BAnno_Menu.png";
+		else
+			return "Assets/ButtonAnno/BAnno_Phase.png";
 
 	case ButtonID::Right:
 		{
-			bool rec = IsRecording();
-			return rec ? 
-				"Assets/ButtonAnno/BAnno_StopVideo.png" : 
-				"Assets/ButtonAnno/BAnno_StartVideo.png";
+			if(!isHold)
+			{ 
+				bool rec = IsRecording();
+				return rec ? 
+					"Assets/ButtonAnno/BAnno_StopVideo.png" : 
+					"Assets/ButtonAnno/BAnno_StartVideo.png";
+			}
 		}
+		break;
 
 	}
-	return "";
+	return this->HMDOpSub_Base::GetIconPath(bid, isHold);
 }
 
-std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Default::GetActionName(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return "";
+		if(!isHold)
+			return "";
+		break;
 
 	case ButtonID::Middle:
-		return "Main Menu";
-
-	case ButtonID::HoldMiddle:
-		return "Surgery Phase";
+		if(!isHold)
+			return "Main Menu";
+		else
+			return "Surgery Phase";
+		break;
 
 	case ButtonID::Right:
-		return "";
+		if(!isHold)
+			return "";
+		break;
 	}
-	return "";
+	return this->HMDOpSub_Base::GetActionName(bid, isHold);
 }
 
-bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, bool isHold)
 {
 	switch(bid)
 	{
 	case ButtonID::Left:
-		return false;
+		if(!isHold)
+			return false;
+		break;
 
 	case ButtonID::Middle:
-		return true;
-
-	case ButtonID::HoldMiddle:
-		return true;
+		// Yes, this can be optimized, but we separate it out to show
+		// our explicit intent of handling both.
+		if(!isHold) 
+			return true;
+		else
+			return true;
 
 	case ButtonID::Right:
-		return false;
+		if(!isHold)
+			return false;
+		break;
 
 	}
-	return false;
+	return this->HMDOpSub_Base::GetButtonUsable(bid, isHold);
 }

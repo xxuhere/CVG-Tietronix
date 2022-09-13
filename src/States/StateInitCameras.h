@@ -19,8 +19,15 @@ class StateInitCameras : public BaseState
 {
 public:
 
-	FontWU titleFont;		// The larger font at the top of the screen.
-	FontWU mainFont;		// The font used for drawing text information
+	/// <summary>
+	/// The larger font at the top of the screen.
+	/// </summary>
+	FontWU titleFont;		
+
+	/// <summary>
+	/// The font used for drawing text information
+	/// </summary>
+	FontWU mainFont;
 
 	/// <summary>
 	/// If true, the menu should advance to the next state (StateHMDOp)
@@ -43,6 +50,9 @@ public:
 	/// </summary>
 	cvgStopwatch loadAnimTimer;
 
+	/// <summary>
+	/// Determines if the beep sound has been played yet.
+	/// </summary>
 	bool playBeepLatch = false;
 
 public:

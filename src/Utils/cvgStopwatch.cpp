@@ -5,6 +5,11 @@ cvgStopwatch::cvgStopwatch()
 	this->Restart();
 }
 
+float cvgStopwatch::Seconds(bool restart)
+{
+	return this->Milliseconds(restart) / 1000.0f;
+}
+
 int cvgStopwatch::Milliseconds(bool restart)
 {
 	std::chrono::high_resolution_clock::time_point now = 
