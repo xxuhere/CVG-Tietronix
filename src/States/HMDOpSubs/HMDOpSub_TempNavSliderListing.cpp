@@ -3,7 +3,12 @@
 #include "HMDOpSub_WidgetCtrl.h"
 #include "../StateHMDOp.h"
 
-HMDOpSub_TempNavSliderListing::HMDOpSub_TempNavSliderListing(UIBase* optBtn, UIBase* inspPlate)
+HMDOpSub_TempNavSliderListing::HMDOpSub_TempNavSliderListing(
+	StateHMDOp* owner, 
+	SubstateMachine<StateHMDOp>* substateMachine, 
+	UIBase* optBtn, 
+	UIBase* inspPlate)
+	: HMDOpSub_Base(owner, substateMachine)
 {
 	this->optnBtn = optBtn;
 	this->inspPlate = inspPlate;
@@ -81,7 +86,7 @@ void HMDOpSub_TempNavSliderListing::OnRightUp(StateHMDOp& targ, SubstateMachine<
 		return;
 
 	this->entered = true;
-	ssm.PushSubstate(new HMDOpSub_WidgetCtrl((UIButton*)uiSel));
+	ssm.PushSubstate(new HMDOpSub_WidgetCtrl(this->cachedOwner, this->cachedSubStateMachine, (UIButton*)uiSel));
 }
 
 void HMDOpSub_TempNavSliderListing::OnEnterContext(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) 
@@ -123,7 +128,7 @@ std::string HMDOpSub_TempNavSliderListing::GetStateName() const
 	return "SliderListing";
 }
 
-std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -143,7 +148,7 @@ std::string HMDOpSub_TempNavSliderListing::GetIconPath(ButtonID bid, StateHMDOp&
 	return "";
 }
 
-std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -163,7 +168,7 @@ std::string HMDOpSub_TempNavSliderListing::GetActionName(ButtonID bid, StateHMDO
 	return "";
 }
 
-bool HMDOpSub_TempNavSliderListing::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_TempNavSliderListing::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -177,7 +182,7 @@ bool HMDOpSub_TempNavSliderListing::GetButtonUsable(ButtonID bid, StateHMDOp& ta
 		return true;
 
 	case ButtonID::Right:
-		return this->SelectedButtonHasSliders(targ);
+		return this->SelectedButtonHasSliders(*this->cachedOwner);
 
 	}
 	return false;

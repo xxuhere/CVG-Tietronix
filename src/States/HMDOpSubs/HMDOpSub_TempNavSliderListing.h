@@ -42,7 +42,7 @@ class HMDOpSub_TempNavSliderListing : public HMDOpSub_Base
 
 public:
 
-	HMDOpSub_TempNavSliderListing(UIBase* optBtn, UIBase* inspPlate);
+	HMDOpSub_TempNavSliderListing(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine, UIBase* optBtn, UIBase* inspPlate);
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUpHold(	StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
@@ -67,7 +67,7 @@ public:
 	/// <returns>If false, nullptr. If true, the selected button.</returns>
 	UIBase* SelectedButtonHasSliders(StateHMDOp& targ);
 
-	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
-	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
-	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
+	bool GetButtonUsable(ButtonID bid) override;
 };

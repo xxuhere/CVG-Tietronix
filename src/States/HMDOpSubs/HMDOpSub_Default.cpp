@@ -2,7 +2,10 @@
 #include "../StateHMDOp.h"
 #include "../../MainWin.h"
 
-HMDOpSub_Default::HMDOpSub_Default()
+HMDOpSub_Default::HMDOpSub_Default(
+	StateHMDOp* owner, 
+	SubstateMachine<StateHMDOp>* substateMachine)
+	: HMDOpSub_Base(owner, substateMachine)
 {}
 
 void HMDOpSub_Default::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -48,7 +51,7 @@ bool IsRecording()
 	return camMgr.IsRecording(SpecialCams::Composite);
 }
 
-std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Default::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -73,7 +76,7 @@ std::string HMDOpSub_Default::GetIconPath(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Default::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -92,7 +95,7 @@ std::string HMDOpSub_Default::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_Default::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_Default::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{

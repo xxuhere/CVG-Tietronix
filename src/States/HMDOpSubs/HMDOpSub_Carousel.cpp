@@ -1,7 +1,10 @@
 #include "HMDOpSub_Carousel.h"
 #include "../StateHMDOp.h"
 
-HMDOpSub_Carousel::HMDOpSub_Carousel()
+HMDOpSub_Carousel::HMDOpSub_Carousel(
+	StateHMDOp* owner, 
+	SubstateMachine<StateHMDOp>* substateMachine)
+	: HMDOpSub_Base(owner, substateMachine)
 {}
 
 void HMDOpSub_Carousel::OnLeftDown(StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
@@ -46,7 +49,7 @@ std::string HMDOpSub_Carousel::GetStateName() const
 	return "Carousel";
 }
 
-std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -66,7 +69,7 @@ std::string HMDOpSub_Carousel::GetIconPath(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-std::string HMDOpSub_Carousel::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_Carousel::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -86,7 +89,7 @@ std::string HMDOpSub_Carousel::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_Carousel::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{

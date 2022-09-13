@@ -351,6 +351,9 @@
     <ClInclude Include="Session_Toml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="States\MousepadUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
@@ -579,6 +582,9 @@
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Session_Toml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="States\MousepadUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

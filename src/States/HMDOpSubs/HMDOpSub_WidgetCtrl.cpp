@@ -4,7 +4,11 @@
 #include "../../UISys/UIHSlider.h"
 #include "../../UISys/UIButton.h"
 
-HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(UIButton* btn)
+HMDOpSub_WidgetCtrl::HMDOpSub_WidgetCtrl(
+	StateHMDOp* owner, 
+	SubstateMachine<StateHMDOp>* substateMachine, 
+	UIButton* btn)
+	: HMDOpSub_Base(owner, substateMachine)
 {
 	this->categoryBtn = btn;
 }
@@ -90,7 +94,7 @@ std::string HMDOpSub_WidgetCtrl::GetStateName() const
 	return "WidgetCtrl";
 }
 
-std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -110,7 +114,7 @@ std::string HMDOpSub_WidgetCtrl::GetIconPath(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -130,7 +134,7 @@ std::string HMDOpSub_WidgetCtrl::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_WidgetCtrl::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_WidgetCtrl::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{

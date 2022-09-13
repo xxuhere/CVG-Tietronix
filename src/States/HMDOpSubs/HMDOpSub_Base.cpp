@@ -1,6 +1,12 @@
 #include "HMDOpSub_Base.h"
 #include "../AppCoroutines/CoroutineSnapWithLasers.h"
 
+HMDOpSub_Base::HMDOpSub_Base(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine)
+{
+	this->cachedOwner = owner;
+	this->cachedSubStateMachine = substateMachine;
+}
+
 void HMDOpSub_Base::OnLeftUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm)
 {
 	targ.GetView()->ResetSnapCoroutine(
@@ -18,4 +24,65 @@ void HMDOpSub_Base::OnRightUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>
 		targ.GetCoreWindow()->StopRecording(SpecialCams::Composite);
 	else
 		targ.GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
+}
+
+void HMDOpSub_Base::HandleMessage(const Message& msg)
+{
+	// For the base implementation, redirect the plumming to the functions
+	// already provided in the Substate we derive off of, and just make sure
+	// to disconnect it from StateHMDOp's event handler.
+
+	switch(msg.msgTy)
+	{
+	case MessageType::Down:
+		switch(msg.idx)
+		{
+		case 0:
+			this->OnLeftDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 1:
+			this->OnMiddleDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 2:
+			this->OnRightDown(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+		}
+		break;
+
+	case MessageType::HoldUp:
+		switch(msg.idx)
+		{
+		case 0:
+			this->OnLeftUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 1:
+			this->OnMiddleUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 2:
+			this->OnRightUpHold(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+		}
+		break;
+
+	case MessageType::Up:
+		switch(msg.idx)
+		{
+		case 0:
+			this->OnLeftUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 1:
+			this->OnMiddleUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+
+		case 2:
+			this->OnRightUp(*this->cachedOwner, *this->cachedSubStateMachine);
+			break;
+		}
+		break;
+	}
 }

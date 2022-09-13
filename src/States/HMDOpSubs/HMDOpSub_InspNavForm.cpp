@@ -2,7 +2,7 @@
 #include "../../UISys/UISys.h"
 #include "HMDOpSub_InspNavForm.h"
 
-void HMDOpSub_InspNavForm::CollectSelectable(UIBase* root, std::vector<UIBase*>& vecw)
+void HMDOpSub_InspNavForm::CollectSelectable( UIBase* root, std::vector<UIBase*>& vecw)
 {
 	std::vector<UIBase*> todo;
 	todo.push_back(root);
@@ -21,7 +21,12 @@ void HMDOpSub_InspNavForm::CollectSelectable(UIBase* root, std::vector<UIBase*>&
 	}
 }
 
-HMDOpSub_InspNavForm::HMDOpSub_InspNavForm(UIBase* optButton, UIBase* inspPlate)
+HMDOpSub_InspNavForm::HMDOpSub_InspNavForm(
+	StateHMDOp* owner,
+	SubstateMachine<StateHMDOp>* substateMachine, 
+	UIBase* optButton, 
+	UIBase* inspPlate)
+	: HMDOpSub_Base(owner, substateMachine)
 {
 	this->inspectorPlate = inspPlate;
 	this->optButton = optButton;
@@ -130,7 +135,7 @@ std::string HMDOpSub_InspNavForm::GetStateName() const
 	return "FormNav";
 }
 
-std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -150,7 +155,7 @@ std::string HMDOpSub_InspNavForm::GetIconPath(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -170,7 +175,7 @@ std::string HMDOpSub_InspNavForm::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_InspNavForm::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_InspNavForm::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{

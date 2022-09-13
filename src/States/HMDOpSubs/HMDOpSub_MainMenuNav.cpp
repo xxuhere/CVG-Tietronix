@@ -4,7 +4,10 @@
 #include "../StateHMDOp.h"
 #include "../../UISys/UIButton.h"
 
-HMDOpSub_MainMenuNav::HMDOpSub_MainMenuNav()
+HMDOpSub_MainMenuNav::HMDOpSub_MainMenuNav(
+	StateHMDOp* owner, 
+	SubstateMachine<StateHMDOp>* substateMachine)
+	: HMDOpSub_Base(owner, substateMachine)
 {}
 
 void HMDOpSub_MainMenuNav::UpdateSelectedSubmenu(StateHMDOp& targ)
@@ -57,6 +60,8 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 
 			ssm.PushSubstate(
 				new HMDOpSub_InspNavForm(
+					this->cachedOwner,
+					&ssm,
 					targ.btnSettings, 
 					targ.inspSettingsPlate));
 			break;
@@ -67,6 +72,8 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 
 			ssm.PushSubstate(
 				new HMDOpSub_TempNavSliderListing(
+					this->cachedOwner,
+					&ssm,
 					targ.btnCamSets, 
 					targ.inspCamSetsPlate));
 			break;
@@ -75,6 +82,8 @@ void HMDOpSub_MainMenuNav::OnRightUp(StateHMDOp& targ, SubstateMachine<StateHMDO
 		case StateHMDOp::UIID::MBtnExit:
 			ssm.PushSubstate(
 				new HMDOpSub_InspNavForm(
+					this->cachedOwner,
+					&ssm,
 					targ.btnExit, 
 					targ.inspExitPlate));
 			break;
@@ -121,7 +130,7 @@ std::string HMDOpSub_MainMenuNav::GetStateName() const
 	return "MenuNav";
 }
 
-std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -141,7 +150,7 @@ std::string HMDOpSub_MainMenuNav::GetIconPath(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid, StateHMDOp& targ)
+std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -161,7 +170,7 @@ std::string HMDOpSub_MainMenuNav::GetActionName(ButtonID bid, StateHMDOp& targ)
 	return "";
 }
 
-bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
+bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid)
 {
 	switch(bid)
 	{
@@ -177,7 +186,7 @@ bool HMDOpSub_MainMenuNav::GetButtonUsable(ButtonID bid, StateHMDOp& targ)
 	case ButtonID::Right:
 		{
 			// This subme
-			UIBase* uibSel = targ.uiSys.GetSelected();
+			UIBase* uibSel = this->cachedOwner->uiSys.GetSelected();
 			if(uibSel == nullptr)
 				return false;
 

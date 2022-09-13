@@ -13,7 +13,7 @@ class StateHMDOp;
 class HMDOpSub_Default : public HMDOpSub_Base
 {
 public:
-	HMDOpSub_Default();
+	HMDOpSub_Default(StateHMDOp* owner, SubstateMachine<StateHMDOp>* substateMachine);
 	void OnLeftDown(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnLeftUp(			StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	void OnMiddleUp(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
@@ -24,7 +24,7 @@ public:
 	void OnExitContext(		StateHMDOp& targ, SubstateMachine<StateHMDOp>& ssm) override;
 	std::string GetStateName() const override;
 
-	std::string GetIconPath(ButtonID bid, StateHMDOp& targ) override;
-	std::string GetActionName(ButtonID bid, StateHMDOp& targ) override;
-	bool GetButtonUsable(ButtonID bid, StateHMDOp& targ) override;
+	std::string GetIconPath(ButtonID bid) override;
+	std::string GetActionName(ButtonID bid) override;
+	bool GetButtonUsable(ButtonID bid) override;
 };
