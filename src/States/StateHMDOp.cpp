@@ -483,9 +483,9 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 	if(camMgr.IsRecording(SpecialCams::Composite))
 	{
-		const float RecOffX = 125.0f;
-		const float RecOffY = -100;
-		const float RecCircRad = 20.0f;
+		const float RecOffX = 270;
+		const float RecOffY = -65;
+		const float RecCircRad = 16.0f;
 		this->DrawRecordingDot(mousepadX + RecOffX, mousepadY + RecOffY, RecCircRad);
 	}
 
