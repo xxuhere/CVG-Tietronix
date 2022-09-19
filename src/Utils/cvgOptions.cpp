@@ -46,6 +46,15 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		src.linuxOverRidePoll = VideoPollType::MMAL;
 		src.camIndex = i;
 		src.camMMALIdx = i;
+
+		// Default image processing settings for menu_targ
+		// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/11
+		if(i == 0)
+		{
+			src.menuTarg = true;
+			src.processing = ProcessingType::yen_threshold_compressed;
+		}
+
 		this->feedOpts.push_back(src);
 	}
 
