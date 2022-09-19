@@ -150,6 +150,67 @@ public:
    }
 };
 
+// Log a status code as human readable text, and 
+bool HandleMMALStatus(MMAL_STATUS_T status)
+{
+	if (status == MMAL_SUCCESS)
+		return false;
+
+	switch (status)
+	{
+	case MMAL_ENOMEM :
+		std::cerr << "Out of memory" << std::endl;
+		break;
+	case MMAL_ENOSPC :
+		std::cerr << "Out of resources (other than memory)" << std::endl;
+		break;
+	case MMAL_EINVAL:
+		std::cerr << "Argument is invalid" << std::endl;
+		break;
+	case MMAL_ENOSYS :
+		std::cerr << "Function not implemented" << std::endl;
+		break;
+	case MMAL_ENOENT :
+		std::cerr << "No such file or directory" << std::endl;
+		break;
+	case MMAL_ENXIO :
+		std::cerr << "No such device or address" << std::endl;
+		break;
+	case MMAL_EIO :
+		std::cerr << "I/O error" << std::endl;
+		break;
+	case MMAL_ESPIPE :
+		std::cerr << "Illegal seek" << std::endl;
+		break;
+	case MMAL_ECORRUPT :
+		std::cerr << "Data is corrupt \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_ENOTREADY :
+		std::cerr << "Component is not ready \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_ECONFIG :
+		std::cerr << "Component is not configured \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_EISCONN :
+		std::cerr << "Port is already connected " << std::endl;
+		break;
+	case MMAL_ENOTCONN :
+		std::cerr << "Port is disconnected" << std::endl;
+		break;
+	case MMAL_EAGAIN :
+		std::cerr << "Resource temporarily unavailable. Try again later" << std::endl;
+		break;
+	case MMAL_EFAULT :
+		std::cerr << "Bad address" << std::endl;
+		break;
+	default :
+		std::cerr << "Unknown status error" << std::endl;
+		break;
+	}
+
+	return true;
+}
+
 
 inline void check_disable_port(MMAL_PORT_T* port)
 {
@@ -161,6 +222,7 @@ inline void check_disable_port(MMAL_PORT_T* port)
  * If we are configured to use /dev/video0 as unicam (e.g. for libcamera) then
  * these legacy camera apps can't work. Fail immediately with an obvious message.
  */
+// Borrowed from RaspberryPi userland repo
 bool check_camera_stack()
 {
 	// NOTES (wleu 06/27/2022)
@@ -186,6 +248,7 @@ bool check_camera_stack()
 	return false;
 }
 
+// Borrowed from RaspberryPi userland repo
 int raspicamcontrol_get_mem_gpu(void)
 {
    char response[80] = "";
@@ -198,10 +261,36 @@ int raspicamcontrol_get_mem_gpu(void)
 }
 
 /**
+* Set the flips state of the image
+* @param camera Pointer to camera component
+* @param hflip If true, horizontally flip the image
+* @param vflip If true, vertically flip the image
+*
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+// Borrowed from RaspberryPi userland repo
+bool raspicamcontrol_set_flips(MMAL_COMPONENT_T *camera, int hflip, int vflip)
+{
+	MMAL_PARAMETER_MIRROR_T mirror = {{MMAL_PARAMETER_MIRROR, sizeof(MMAL_PARAMETER_MIRROR_T)}, MMAL_PARAM_MIRROR_NONE};
+
+	if (hflip && vflip)
+		mirror.value = MMAL_PARAM_MIRROR_BOTH;
+	else if (hflip)
+		mirror.value = MMAL_PARAM_MIRROR_HORIZONTAL;
+	else if (vflip)
+		mirror.value = MMAL_PARAM_MIRROR_VERTICAL;
+
+	mmal_port_parameter_set(camera->output[0], &mirror.hdr);
+	mmal_port_parameter_set(camera->output[1], &mirror.hdr);
+	return HandleMMALStatus(mmal_port_parameter_set(camera->output[2], &mirror.hdr));
+}
+
+/**
  * Ask GPU about its camera abilities
  * @param supported None-zero if software supports the camera
  * @param detected  None-zero if a camera has been detected
  */
+ // Borrowed from RaspberryPi userland repo
 static void raspicamcontrol_get_camera(int *supported, int *detected)
 {
 	char response[80] = "";
@@ -232,6 +321,7 @@ void raspicamcontrol_check_configuration(int min_gpu_mem)
 		std::cerr << "Failed to run camera app. Please check for firmware updates" << std::endl;
 }
 
+// Borrowed from RaspberryPi userland repo
 void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& height )
 {
    // Default to the (Arducam 5MP Mini Camera) OV5647 setup
@@ -298,6 +388,7 @@ void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& hei
  * @param port Pointer to port from which callback originated
  * @param buffer mmal buffer header pointer
  */
+ // Borrowed from RaspberryPi userland repo
 void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
 	MMAL_BUFFER_HEADER_T *new_buffer;
@@ -380,67 +471,6 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
 		if (!new_buffer || status != MMAL_SUCCESS)
 			std::cerr << "Unable to return a buffer to the camera port" << std::endl;
    }
-}
-
-// Log a status code as human readable text, and 
-bool HandleMMALStatus(MMAL_STATUS_T status)
-{
-	if (status == MMAL_SUCCESS)
-		return false;
-	
-	switch (status)
-	{
-	case MMAL_ENOMEM :
-		std::cerr << "Out of memory" << std::endl;
-		break;
-	case MMAL_ENOSPC :
-		std::cerr << "Out of resources (other than memory)" << std::endl;
-		break;
-	case MMAL_EINVAL:
-		std::cerr << "Argument is invalid" << std::endl;
-		break;
-	case MMAL_ENOSYS :
-		std::cerr << "Function not implemented" << std::endl;
-		break;
-	case MMAL_ENOENT :
-		std::cerr << "No such file or directory" << std::endl;
-		break;
-	case MMAL_ENXIO :
-		std::cerr << "No such device or address" << std::endl;
-		break;
-	case MMAL_EIO :
-		std::cerr << "I/O error" << std::endl;
-		break;
-	case MMAL_ESPIPE :
-		std::cerr << "Illegal seek" << std::endl;
-		break;
-	case MMAL_ECORRUPT :
-		std::cerr << "Data is corrupt \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_ENOTREADY :
-		std::cerr << "Component is not ready \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_ECONFIG :
-		std::cerr << "Component is not configured \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_EISCONN :
-		std::cerr << "Port is already connected " << std::endl;
-		break;
-	case MMAL_ENOTCONN :
-		std::cerr << "Port is disconnected" << std::endl;
-		break;
-	case MMAL_EAGAIN :
-		std::cerr << "Resource temporarily unavailable. Try again later" << std::endl;
-		break;
-	case MMAL_EFAULT :
-		std::cerr << "Bad address" << std::endl;
-		break;
-	default :
-		std::cerr << "Unknown status error" << std::endl;
-		break;
-	}
-
-	return true;
 }
 
 /**
@@ -871,6 +901,11 @@ bool CamImpl_MMAL::ActivateImpl()
 	}
 
 	this->camVideoPort = this->state->camera_component->output[MMALCamPort::Video];
+
+	raspicamcontrol_set_flips(
+		this->state->camera_component, 
+		this->flipHoriz ? 1 : 0, 
+		this->flipVert ? 1 : 0);
 
 	if (status != MMAL_SUCCESS)
 	{

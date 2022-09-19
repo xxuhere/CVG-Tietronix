@@ -33,6 +33,7 @@ cv::Ptr<cv::Mat> CamImpl_StaticImg::PollFrameImpl()
 	cv::Ptr<cv::Mat> ret = new cv::Mat();
 	*ret = cv::imread(this->imgPath);
 
+	this->UtilToFlipMatInOpenCV(*ret);
 	return ret;
 }
 

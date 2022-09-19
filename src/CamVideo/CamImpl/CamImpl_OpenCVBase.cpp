@@ -44,6 +44,8 @@ cv::Ptr<cv::Mat> CamImpl_OpenCVBase::PollFrameImpl()
 	cv::Ptr<cv::Mat> ret = new cv::Mat();
 	*this->ocvStream >> *ret;
 
+	this->UtilToFlipMatInOpenCV(*ret);
+
 	return ret;
 }
 

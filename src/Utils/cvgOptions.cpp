@@ -42,10 +42,10 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		// populate it with these default values so that if we save the default
 		// cvgOptions into the AppOptions.json, it has the correct expected values.
 		cvgCamFeedSource src;
-		src.defPoll = VideoPollType::OpenCVUSB_Idx;
-		src.linuxOverRidePoll = VideoPollType::MMAL;
-		src.camIndex = i;
-		src.camMMALIdx = i;
+		src.defPoll				= VideoPollType::OpenCVUSB_Idx;
+		src.linuxOverRidePoll	= VideoPollType::MMAL;
+		src.camIndex			= i;
+		src.camMMALIdx			= i;
 
 		// Default image processing settings for menu_targ
 		// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/11
@@ -53,6 +53,10 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		{
 			src.menuTarg = true;
 			src.processing = ProcessingType::yen_threshold_compressed;
+
+			// Camera 0 to have 
+			// See comment in https://github.com/Achilefu-Lab/CVG-Tietronix/issues/6
+			src.flipHorizontal = true; 
 		}
 
 		this->feedOpts.push_back(src);
