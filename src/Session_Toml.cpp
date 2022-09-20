@@ -20,7 +20,7 @@ const char* szSessionTomlString =
 "\n"
 "[patient]\n"
 "	# https://dicom.innolitics.com/ciods/us-image/patient/00100020\n"
-"	id = \"Enter patient id\"\n"
+"	upn = \"Replace this with patient's unique patient number\"\n"
 "\n"
 "	# The patient comments is expected to have the surgeon name and more information\n"
 "	# about the operation being performed.\n"

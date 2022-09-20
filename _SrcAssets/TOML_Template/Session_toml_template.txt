@@ -15,7 +15,7 @@ session = "__session_name__"
 
 [patient]
 	# https://dicom.innolitics.com/ciods/us-image/patient/00100020
-	id = "Enter patient id"
+	upn = "Replace this with patient's unique patient number"
 
 	# The patient comments is expected to have the surgeon name and more information
 	# about the operation being performed.
