@@ -38,9 +38,6 @@ public:
 
 public:
 
-	// Session name metadata
-	std::string sessionName = "__unset_sessionname";
-
 	//////////////////////////////////////////////////
 	//
 	//	PREOP DATA
@@ -88,7 +85,7 @@ public:
 	
 
 public:
-	void SetSession(const std::string& session);
+	void SetSession();
 
 	/// <summary>
 	/// Generate a unique string that can represent the session

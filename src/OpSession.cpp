@@ -8,8 +8,6 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include "../DicomUtils/DicomMiscUtils.h"
 
-static const char* szToml_Key_Session			= "session";
-
 // Patient info
 static const char* szToml_Header_Patient		= "patient";
 static const char* szToml_Key_PatientId			= "upn";
@@ -35,10 +33,8 @@ static const char* szToml_Key_SurgeryTime		= "time";
 static const char* szToml_Key_SurgeryStudyID	= "study_id";
 static const char* szToml_Key_SurgeryDescr		= "study_descr";
 
-void OpSession::SetSession(const std::string& session)
-{
-	this->sessionName = session;
-}
+void OpSession::SetSession()
+{}
 
 /// <summary>
 /// A function to convert arbitrary strings to valid prefixes
@@ -61,13 +57,10 @@ static std::string _SanitizePrefix(const std::string& str)
 /// <returns>The directory path where surgery files would go.</returns>
 std::string OpSession::GenerateSessionPrefix() const
 {
-	if(!this->sessionName.empty())
-		return _SanitizePrefix(this->sessionName);
+	if(this->studyID.empty() && this->surgeryDate.empty())
+		return "_invalid_";
 
-	if(!this->studyID.empty())
-		return _SanitizePrefix(this->studyID);
-
-	return "_invalid_";
+	return this->studyID + "_" + this->surgeryDate;
 }
 
 OpSession::LoadRet OpSession::LoadFromFile(const std::string& filepath, bool throwOnParseErr)
@@ -150,23 +143,6 @@ bool LoadTOMLIntoName(const toml::v3::table* tomlName, DVRPersonName& dstname)
 
 bool OpSession::LoadFromToml(toml::table& inToml)
 {
-	////////////////////////////////////////////////////////////
-	//
-	//		LOAD SESSION DATA
-	//
-	////////////////////////////////////////////////////////////
-	std::optional<std::string> session = inToml[szToml_Key_Session].value<std::string>();
-	if(session)
-	{
-		if(session.has_value())
-			this->sessionName = session.value();
-	}
-	else
-	{
-		std::cerr << "Did not detect expected session name in TOML file" << std::endl;
-		return false;
-	}
-
 	////////////////////////////////////////////////////////////
 	//
 	//		LOAD PATIENT DATA

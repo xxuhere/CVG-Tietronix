@@ -7,12 +7,6 @@
 ##
 ###################################################
 
-# General name of the session, as well as the name of the folder to put captured
-# media assets into.
-#
-# You will be able to find the folder in $(App_Folder)/Captures/$(session)
-session = "__session_name__"
-
 [patient]
 	# https://dicom.innolitics.com/ciods/us-image/patient/00100020
 	upn = "Replace this with patient's unique patient number"
