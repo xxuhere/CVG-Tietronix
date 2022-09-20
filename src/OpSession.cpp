@@ -8,18 +8,18 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include "../DicomUtils/DicomMiscUtils.h"
 
-static const char* szToml_Key_Session		= "session";
+static const char* szToml_Key_Session			= "session";
 
 // Patient info
 static const char* szToml_Header_Patient		= "patient";
-static const char* szToml_Key_PatientId			=	"id";
-static const char* szToml_Key_PatientCom		=	"comments";
+static const char* szToml_Key_PatientId			= "upn";
+static const char* szToml_Key_PatientCom		= "comments";
 
 // Injection info
 static const char* szToml_Header_Contrast		= "contrast";
-static const char* szToml_Key_ContrastAgent		=	"agent";
-static const char* szToml_Key_ContrastVol		=	"milliliters";
-static const char* szToml_Key_ContrastTime		=	"time";
+static const char* szToml_Key_ContrastAgent		= "agent";
+static const char* szToml_Key_ContrastVol		= "milliliters";
+static const char* szToml_Key_ContrastTime		= "time";
 
 // UNUSED:
 // Parts of a name
@@ -30,10 +30,10 @@ static const char* szToml_Key_NamePrefix		= "prefix";
 static const char* szToml_Key_NameSuffix		= "suffix";
 
 static const char* szToml_Header_Surgery		= "surgery";
-static const char* szToml_Key_SurgeryDate		=	"date";
-static const char* szToml_Key_SurgeryTime		=	"time";
-static const char* szToml_Key_SurgeryStudyID	=	"study_id";
-static const char* szToml_Key_SurgeryDescr		=	"study_descr";
+static const char* szToml_Key_SurgeryDate		= "date";
+static const char* szToml_Key_SurgeryTime		= "time";
+static const char* szToml_Key_SurgeryStudyID	= "study_id";
+static const char* szToml_Key_SurgeryDescr		= "study_descr";
 
 void OpSession::SetSession(const std::string& session)
 {
