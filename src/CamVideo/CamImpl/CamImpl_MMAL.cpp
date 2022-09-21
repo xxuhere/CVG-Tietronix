@@ -13,6 +13,8 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 #include <iostream>
+#include "../IManagedCam.h"
+
 
 // The installation of these header files on the RaspberryPi may involve 
 // checking out the userland repo, and building the repo in order
@@ -20,14 +22,7 @@
 // expected locations.
 // https://github.com/raspberrypi/userland
 #include "bcm_host.h"
-#include "interface/vcos/vcos.h"
-#include "interface/mmal/mmal.h"
-#include "interface/mmal/mmal_logging.h"
-#include "interface/mmal/mmal_buffer.h"
-#include "interface/mmal/util/mmal_util.h"
-#include "interface/mmal/util/mmal_util_params.h"
-#include "interface/mmal/util/mmal_default_components.h"
-#include "interface/mmal/util/mmal_connection.h"
+
 
 #include <opencv2/imgcodecs.hpp>
 #include "CamImpl_MMAL.h"
@@ -150,6 +145,67 @@ public:
    }
 };
 
+// Log a status code as human readable text, and 
+bool HandleMMALStatus(MMAL_STATUS_T status)
+{
+	if (status == MMAL_SUCCESS)
+		return false;
+
+	switch (status)
+	{
+	case MMAL_ENOMEM :
+		std::cerr << "Out of memory" << std::endl;
+		break;
+	case MMAL_ENOSPC :
+		std::cerr << "Out of resources (other than memory)" << std::endl;
+		break;
+	case MMAL_EINVAL:
+		std::cerr << "Argument is invalid" << std::endl;
+		break;
+	case MMAL_ENOSYS :
+		std::cerr << "Function not implemented" << std::endl;
+		break;
+	case MMAL_ENOENT :
+		std::cerr << "No such file or directory" << std::endl;
+		break;
+	case MMAL_ENXIO :
+		std::cerr << "No such device or address" << std::endl;
+		break;
+	case MMAL_EIO :
+		std::cerr << "I/O error" << std::endl;
+		break;
+	case MMAL_ESPIPE :
+		std::cerr << "Illegal seek" << std::endl;
+		break;
+	case MMAL_ECORRUPT :
+		std::cerr << "Data is corrupt \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_ENOTREADY :
+		std::cerr << "Component is not ready \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_ECONFIG :
+		std::cerr << "Component is not configured \attention FIXME: not POSIX" << std::endl;
+		break;
+	case MMAL_EISCONN :
+		std::cerr << "Port is already connected " << std::endl;
+		break;
+	case MMAL_ENOTCONN :
+		std::cerr << "Port is disconnected" << std::endl;
+		break;
+	case MMAL_EAGAIN :
+		std::cerr << "Resource temporarily unavailable. Try again later" << std::endl;
+		break;
+	case MMAL_EFAULT :
+		std::cerr << "Bad address" << std::endl;
+		break;
+	default :
+		std::cerr << "Unknown status error" << std::endl;
+		break;
+	}
+
+	return true;
+}
+
 
 inline void check_disable_port(MMAL_PORT_T* port)
 {
@@ -161,6 +217,7 @@ inline void check_disable_port(MMAL_PORT_T* port)
  * If we are configured to use /dev/video0 as unicam (e.g. for libcamera) then
  * these legacy camera apps can't work. Fail immediately with an obvious message.
  */
+// Borrowed from RaspberryPi userland repo
 bool check_camera_stack()
 {
 	// NOTES (wleu 06/27/2022)
@@ -186,6 +243,7 @@ bool check_camera_stack()
 	return false;
 }
 
+// Borrowed from RaspberryPi userland repo
 int raspicamcontrol_get_mem_gpu(void)
 {
    char response[80] = "";
@@ -198,10 +256,104 @@ int raspicamcontrol_get_mem_gpu(void)
 }
 
 /**
+* Set the flips state of the image
+* @param camera Pointer to camera component
+* @param hflip If true, horizontally flip the image
+* @param vflip If true, vertically flip the image
+*
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+// Borrowed from RaspberryPi userland repo
+bool raspicamcontrol_set_flips(MMAL_COMPONENT_T *camera, int hflip, int vflip)
+{
+	MMAL_PARAMETER_MIRROR_T mirror = {{MMAL_PARAMETER_MIRROR, sizeof(MMAL_PARAMETER_MIRROR_T)}, MMAL_PARAM_MIRROR_NONE};
+
+	if (hflip && vflip)
+		mirror.value = MMAL_PARAM_MIRROR_BOTH;
+	else if (hflip)
+		mirror.value = MMAL_PARAM_MIRROR_HORIZONTAL;
+	else if (vflip)
+		mirror.value = MMAL_PARAM_MIRROR_VERTICAL;
+
+	mmal_port_parameter_set(camera->output[0], &mirror.hdr);
+	mmal_port_parameter_set(camera->output[1], &mirror.hdr);
+	return HandleMMALStatus(mmal_port_parameter_set(camera->output[2], &mirror.hdr));
+}
+
+/**
+* Set exposure mode for images
+* @param camera Pointer to camera component
+* @param mode Exposure mode to set from
+*   - MMAL_PARAM_EXPOSUREMODE_OFF,
+*   - MMAL_PARAM_EXPOSUREMODE_AUTO,
+*   - MMAL_PARAM_EXPOSUREMODE_NIGHT,
+*   - MMAL_PARAM_EXPOSUREMODE_NIGHTPREVIEW,
+*   - MMAL_PARAM_EXPOSUREMODE_BACKLIGHT,
+*   - MMAL_PARAM_EXPOSUREMODE_SPOTLIGHT,
+*   - MMAL_PARAM_EXPOSUREMODE_SPORTS,
+*   - MMAL_PARAM_EXPOSUREMODE_SNOW,
+*   - MMAL_PARAM_EXPOSUREMODE_BEACH,
+*   - MMAL_PARAM_EXPOSUREMODE_VERYLONG,
+*   - MMAL_PARAM_EXPOSUREMODE_FIXEDFPS,
+*   - MMAL_PARAM_EXPOSUREMODE_ANTISHAKE,
+*   - MMAL_PARAM_EXPOSUREMODE_FIREWORKS,
+*
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+bool raspicamcontrol_set_exposure_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_EXPOSUREMODE_T mode)
+{
+	MMAL_PARAMETER_EXPOSUREMODE_T exp_mode = {{MMAL_PARAMETER_EXPOSURE_MODE,sizeof(exp_mode)}, mode};
+
+	if (!camera)
+		return 1;
+
+	return HandleMMALStatus(mmal_port_parameter_set(camera->control, &exp_mode.hdr));
+}
+
+bool raspicamcontrol_set_frame_rate(MMAL_COMPONENT_T *camera, const MMAL_RATIONAL_T& rate)
+{
+	MMAL_PARAMETER_FRAME_RATE_T frame_rate = {{MMAL_PARAMETER_FRAME_RATE,sizeof(frame_rate)}, rate};
+
+	if (!camera)
+		return 1;
+
+	return HandleMMALStatus(mmal_port_parameter_set(camera->control, &frame_rate.hdr));
+}
+
+/**
+* Adjust the exposure time used for images
+* @param camera Pointer to camera component
+* @param shutter speed in microseconds
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+bool raspicamcontrol_set_shutter_speed(MMAL_COMPONENT_T *camera, int speed)
+{
+	if (!camera)
+		return 1;
+
+	return HandleMMALStatus(mmal_port_parameter_set_uint32(camera->control, MMAL_PARAMETER_SHUTTER_SPEED, speed));
+}
+
+/**
+* Adjust the ISO used for images
+* @param camera Pointer to camera component
+* @param ISO Value to set TODO :
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+bool raspicamcontrol_set_ISO(MMAL_COMPONENT_T *camera, int ISO)
+{
+	if (!camera)
+		return 1;
+
+	return HandleMMALStatus(mmal_port_parameter_set_uint32(camera->control, MMAL_PARAMETER_ISO, ISO));
+}
+
+/**
  * Ask GPU about its camera abilities
  * @param supported None-zero if software supports the camera
  * @param detected  None-zero if a camera has been detected
  */
+ // Borrowed from RaspberryPi userland repo
 static void raspicamcontrol_get_camera(int *supported, int *detected)
 {
 	char response[80] = "";
@@ -232,6 +384,7 @@ void raspicamcontrol_check_configuration(int min_gpu_mem)
 		std::cerr << "Failed to run camera app. Please check for firmware updates" << std::endl;
 }
 
+// Borrowed from RaspberryPi userland repo
 void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& height )
 {
    // Default to the (Arducam 5MP Mini Camera) OV5647 setup
@@ -298,6 +451,7 @@ void get_sensor_defaults(int camera_num, char *camera_name, int& width, int& hei
  * @param port Pointer to port from which callback originated
  * @param buffer mmal buffer header pointer
  */
+ // Borrowed from RaspberryPi userland repo
 void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T* buffer)
 {
 	MMAL_BUFFER_HEADER_T *new_buffer;
@@ -382,67 +536,6 @@ void CamImpl_MMAL::_CameraBufferCallback(MMAL_PORT_T* port, MMAL_BUFFER_HEADER_T
    }
 }
 
-// Log a status code as human readable text, and 
-bool HandleMMALStatus(MMAL_STATUS_T status)
-{
-	if (status == MMAL_SUCCESS)
-		return false;
-	
-	switch (status)
-	{
-	case MMAL_ENOMEM :
-		std::cerr << "Out of memory" << std::endl;
-		break;
-	case MMAL_ENOSPC :
-		std::cerr << "Out of resources (other than memory)" << std::endl;
-		break;
-	case MMAL_EINVAL:
-		std::cerr << "Argument is invalid" << std::endl;
-		break;
-	case MMAL_ENOSYS :
-		std::cerr << "Function not implemented" << std::endl;
-		break;
-	case MMAL_ENOENT :
-		std::cerr << "No such file or directory" << std::endl;
-		break;
-	case MMAL_ENXIO :
-		std::cerr << "No such device or address" << std::endl;
-		break;
-	case MMAL_EIO :
-		std::cerr << "I/O error" << std::endl;
-		break;
-	case MMAL_ESPIPE :
-		std::cerr << "Illegal seek" << std::endl;
-		break;
-	case MMAL_ECORRUPT :
-		std::cerr << "Data is corrupt \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_ENOTREADY :
-		std::cerr << "Component is not ready \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_ECONFIG :
-		std::cerr << "Component is not configured \attention FIXME: not POSIX" << std::endl;
-		break;
-	case MMAL_EISCONN :
-		std::cerr << "Port is already connected " << std::endl;
-		break;
-	case MMAL_ENOTCONN :
-		std::cerr << "Port is disconnected" << std::endl;
-		break;
-	case MMAL_EAGAIN :
-		std::cerr << "Resource temporarily unavailable. Try again later" << std::endl;
-		break;
-	case MMAL_EFAULT :
-		std::cerr << "Bad address" << std::endl;
-		break;
-	default :
-		std::cerr << "Unknown status error" << std::endl;
-		break;
-	}
-
-	return true;
-}
-
 /**
  * Handler for sigint signals
  *
@@ -465,6 +558,10 @@ void default_signal_handler(int signal_number)
 
 }
 
+float RationalToFloat(const MMAL_RATIONAL_T& r)
+{
+	return (float)((double)r.num/(double)r.den);
+}
 
 /** Default camera callback function
  * Handles the --settings
@@ -474,7 +571,6 @@ void default_signal_handler(int signal_number)
 void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
 	CamImpl_MMAL* camImpl = (CamImpl_MMAL*)port->userdata;
-
 	if (buffer->cmd == MMAL_EVENT_PARAMETER_CHANGED)
 	{
 		MMAL_EVENT_PARAMETER_CHANGED_T *param = (MMAL_EVENT_PARAMETER_CHANGED_T *)buffer->data;
@@ -482,21 +578,15 @@ void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 		{
 			case MMAL_PARAMETER_CAMERA_SETTINGS:
 			{
-				// If not commented out, this will show the lighting values every
-				// time the camera auto-balance is changed.
+				MMAL_PARAMETER_CAMERA_SETTINGS_T* settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
+				std::lock_guard<std::mutex> guard(camImpl->cachedSettingsMutex);
 
-				// MMAL_PARAMETER_CAMERA_SETTINGS_T *settings = (MMAL_PARAMETER_CAMERA_SETTINGS_T*)param;
-
-				//std::cerr << "Exposure now "	<< settings->exposure << 
-				//			 ", analog gain "	<< settings->analog_gain.num	<< settings->analog_gain.den << 
-				//			 ", digital gain "	<< settings->digital_gain.num	<< settings->digital_gain.den << std::endl;
-				//
-				//std::cerr << "AWB R=" << settings->awb_red_gain.num  << settings->awb_red_gain.den << 
-				//			 ", B= "  << settings->awb_blue_gain.num << settings->awb_blue_gain.den << std::endl;
-
-				// How much of the settings values we want to cache is 
-				// dependent on what's useful. For now we're just doing
-				// these 3 for example's sake.
+				camImpl->cachedExposure		= settings->exposure;
+				camImpl->cachedAnalogGain	= RationalToFloat(settings->analog_gain);
+				camImpl->cachedDigitalGain	= RationalToFloat(settings->digital_gain);
+				camImpl->cachedRedGain		= RationalToFloat(settings->awb_red_gain);
+				camImpl->cachedBlueGain		= RationalToFloat(settings->awb_blue_gain);
+				camImpl->cachedFocusPos		= settings->focus_position;
 			}
 			break;
 		}
@@ -536,8 +626,11 @@ bool CamImpl_MMAL::_ShutdownGlobal()
 	return ShutdownGlobal(MMAL_SUCCESS, this->state, this->camVideoPort);
 }
 
-static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
+static MMAL_STATUS_T create_camera_component(RPiYUVState* state, int videoExposureTime)
 {
+	std::cout << "Creating camera component" << std::endl;
+	std::cout << "\t" << "Target exposure microseconds: " << videoExposureTime;
+
 	// Create the component
 	MMAL_COMPONENT_T* camera = nullptr;
 	MMAL_STATUS_T status = mmal_component_create(MMAL_COMPONENT_DEFAULT_CAMERA, &camera);
@@ -588,8 +681,10 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 	MMAL_PORT_T* video_port 	= camera->output[MMALCamPort::Video];
 	MMAL_PORT_T* still_port 	= camera->output[MMALCamPort::Capture];
 
-	// Enable the camera, and tell it its control callback function
-	status = mmal_port_enable(camera->control, CamImpl_MMAL::_CameraControlCallback);
+	std::cout << "MMAL Preview port with addr "		<< preview_port << std::endl;
+	std::cout << "MMAL Video port with addr	"		<< video_port << std::endl;
+	std::cout << "MMAL Still port with addr	"		<< still_port << std::endl;
+	std::cout << "MMAL Control port with addr	"	<< camera->control << std::endl;
 
 	if (status != MMAL_SUCCESS)
 	{
@@ -635,8 +730,19 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 	format->es->video.crop.y 			= 0;
 	format->es->video.crop.width 		= state->width;
 	format->es->video.crop.height 		= state->height;
-	format->es->video.frame_rate.num 	= state->framerate;
-	format->es->video.frame_rate.den 	= VIDEO_FRAME_RATE_DEN;
+
+	// When setting the video port, in order for this to be handled correctly,
+	// the preview port ALSO needs to honor videoExposureTime.
+	if(videoExposureTime <= 34000)
+	{
+		format->es->video.frame_rate.num 	= VIDEO_FRAME_RATE_NUM;
+		format->es->video.frame_rate.den 	= VIDEO_FRAME_RATE_DEN;
+	}
+	else
+	{
+		format->es->video.frame_rate.num 	= videoExposureTime;
+		format->es->video.frame_rate.den 	= 1000000; // The num should be in microseconds
+	}
 
 	status = mmal_port_format_commit(preview_port);
 
@@ -663,9 +769,20 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state)
 	format->es->video.crop.x 			= 0;
 	format->es->video.crop.y 			= 0;
 	format->es->video.crop.width 		= state->width;
-	format->es->video.crop.height 		= state->height;
-	format->es->video.frame_rate.num 	= state->framerate;
-	format->es->video.frame_rate.den 	= VIDEO_FRAME_RATE_DEN;
+	format->es->video.crop.height 		= state->height;	
+
+	// If the exposure time is greater than ~1/30th of a second, we need to lower
+	// the refresh rate to allow additional photons to collect.
+	if(videoExposureTime <= 34000)
+	{
+		format->es->video.frame_rate.num 	= VIDEO_FRAME_RATE_NUM;
+		format->es->video.frame_rate.den 	= VIDEO_FRAME_RATE_DEN;
+	}
+	else
+	{
+		format->es->video.frame_rate.num 	= videoExposureTime;
+		format->es->video.frame_rate.den 	= 1000000; // The num should be in microseconds
+	}
 
 	status = mmal_port_format_commit(video_port);
 
@@ -859,7 +976,10 @@ bool CamImpl_MMAL::ActivateImpl()
 		"Get sensor defaults - camera num: "	<< this->state->width << std::endl <<
 		"Get sensor defaults - camera num: "	<< this->state->height << std::endl;
 
-	MMAL_STATUS_T status = create_camera_component(state);
+	std::cout << "Creating camera componenet" << std::endl;
+	std::cout << "\t" << this->videoExposureTime << std::endl;
+
+	MMAL_STATUS_T status = create_camera_component(state, this->videoExposureTime ); 
 
 	std::cout << "END Creating camera component : " <<  this->devCamID << std::endl;
 
@@ -870,7 +990,31 @@ bool CamImpl_MMAL::ActivateImpl()
 		return false;
 	}
 
+	// Enable the camera, and tell it its control callback function
+	this->state->camera_component->control->userdata = (struct MMAL_PORT_USERDATA_T *)this;
+	status = mmal_port_enable(this->state->camera_component->control, CamImpl_MMAL::_CameraControlCallback);
+
 	this->camVideoPort = this->state->camera_component->output[MMALCamPort::Video];
+
+	raspicamcontrol_set_flips(
+		this->state->camera_component, 
+		this->flipHoriz ? 1 : 0, 
+		this->flipVert ? 1 : 0);
+
+	if(this->videoExposureTime != 0)
+	{
+		std::cout << "Video shutter exposure value at " << this->videoExposureTime << std::endl;
+
+		// It's unsure if this should be turned off. Both on and off will change the brightness when
+		// the shutter speed is modified, but in different ways (exposure off will be brighter).
+		//
+		//raspicamcontrol_set_exposure_mode(this->state->camera_component, MMAL_PARAM_EXPOSUREMODE_OFF);
+
+		raspicamcontrol_set_shutter_speed(this->state->camera_component, this->videoExposureTime);
+		MMAL_RATIONAL_T framerate = {this->videoExposureTime, 1000000};
+		raspicamcontrol_set_frame_rate(this->state->camera_component, framerate);
+	}
+
 
 	if (status != MMAL_SUCCESS)
 	{
@@ -882,6 +1026,7 @@ bool CamImpl_MMAL::ActivateImpl()
 	// Set up our userdata - this is passed though to the callback where we need the information.
 	this->polling = true;
 	this->camVideoPort->userdata = (struct MMAL_PORT_USERDATA_T *)this;
+	std::cout << "Setting CamViewPort " << this->camVideoPort << " user data to " << this << std::endl;
 	
 	// Enable the camera video port and tell it its callback function
 	status = mmal_port_enable(this->camVideoPort, CamImpl_MMAL::_CameraBufferCallback);
@@ -963,12 +1108,37 @@ bool CamImpl_MMAL::IsValid()
 bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
 {
 	this->ICamImpl::PullOptions(opts);
-	this->devCamID = opts.camMMALIdx;
+	this->devCamID			= opts.camMMALIdx;
+	this->videoExposureTime = opts.videoExposureTime;
 	return true;
 }
 
 void CamImpl_MMAL::DelegatedInjectIntoDicom(DcmDataset* dicomData)
 {
 	// TODO: Poll camera name and insert
-	dicomData->putAndInsertString(DCM_SensorName, "MMAL(TODO)");
+	InsertAcquisitionContextInfo(dicomData, "camera_sensor",		this->state->camera_name);
+	{
+		std::lock_guard<std::mutex> guard(this->cachedSettingsMutex);
+
+		if(this->cachedExposure.has_value())
+		{
+			// The value is in microseconds, but we've decided on storing in milliseconds, hence the divide by 1000
+			InsertAcquisitionContextInfo(dicomData, "exposure", std::to_string(this->cachedExposure.value() / 1000.0f));
+		}
+
+		if(this->cachedAnalogGain.has_value())
+			InsertAcquisitionContextInfo(dicomData, "analog_gain", std::to_string(this->cachedAnalogGain.value()));
+
+		if(this->cachedDigitalGain.has_value())
+			InsertAcquisitionContextInfo(dicomData, "digital_gain", std::to_string(this->cachedDigitalGain.value()));
+
+		if(this->cachedRedGain.has_value())
+			InsertAcquisitionContextInfo(dicomData, "red_gain", std::to_string(this->cachedRedGain.value()));
+
+		if(this->cachedBlueGain.has_value())
+			InsertAcquisitionContextInfo(dicomData, "blue_gain", std::to_string(this->cachedBlueGain.value()));
+
+		if(this->cachedFocusPos.has_value())
+			InsertAcquisitionContextInfo(dicomData, "focus_pos", std::to_string(this->cachedFocusPos.value()));
+	}
 }

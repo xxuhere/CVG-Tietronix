@@ -127,7 +127,7 @@ bool CoroutineSnapWithLasers::RequestSnapAll(const std::string& baseName)
 	// Build snapshot image filename
 	std::stringstream sstrmFilebase;
 
-	sstrmFilebase << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << this->mainApp->opSession.sessionName << "_" << phaseName << "_" << baseName << "_" << this->mainApp->GetSnapCounter();
+	sstrmFilebase << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << phaseName << "_" << baseName << "_" << this->mainApp->GetSnapCounter();
 	std::string filebase = sstrmFilebase.str();
 
 	std::vector<SnapRequest::SPtr> mgrRet = camMgr.RequestSnapshotAll(filebase);

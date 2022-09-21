@@ -44,6 +44,8 @@ cv::Ptr<cv::Mat> CamImpl_OpenCVBase::PollFrameImpl()
 	cv::Ptr<cv::Mat> ret = new cv::Mat();
 	*this->ocvStream >> *ret;
 
+	this->UtilToFlipMatInOpenCV(*ret);
+
 	return ret;
 }
 
@@ -63,16 +65,36 @@ bool CamImpl_OpenCVBase::InitCapture(cv::VideoCapture* capture)
 	if(this->prefHeight != 0)
 		capture->set(cv::CAP_PROP_FRAME_HEIGHT, this->prefHeight);
 
-	// https://stackoverflow.com/a/69476456/2680066
-	// On some webcams, changing the exposure behaviour will
-	// allow it to run faster. Note that this may be naive
-	// in that the settings we use for one webcam may not apply
-	// to all other webcams.
-	//
-	// Also note that this is being set on a VideoCapture made
-	// in the base CamImpl_OpenCVBase class, but only really applies
-	// to specific subclasses, mainly ther OCV_USB and OCV_HWPath.
-	capture->set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
+	// Note that setting the exposure time may not guarantee it's
+	// used as requested. It's up to OpenCV and the implementation
+	// to (be able to) honor this value.
+	if(this->exposureTime != 0)
+	{ 
+		// Apparently, with CAP_PROP_AUTO_EXPOSURE, 0.25 is some magical number
+		// that turns on manual control
+		//
+		// Although this may be online misinformation as it does not match the
+		// else statement's parameter for what is essentially the same thing.
+		capture->set(cv::CAP_PROP_AUTO_EXPOSURE, 0.25);
+
+		// And CAP_PROP_EXPOSURE takes in a power of two of the parts per second.
+		double seconds = this->exposureTime / 1000000.0; // Microseconds to seconds
+		double log2Val = log(seconds) / log(2.0);
+		capture->set(cv::CAP_PROP_EXPOSURE, log2Val);
+	}
+	else
+	{ 
+		// https://stackoverflow.com/a/69476456/2680066
+		// On some webcams, changing the exposure behaviour will
+		// allow it to run faster. Note that this may be naive
+		// in that the settings we use for one webcam may not apply
+		// to all other webcams.
+		//
+		// Also note that this is being set on a VideoCapture made
+		// in the base CamImpl_OpenCVBase class, but only really applies
+		// to specific subclasses, mainly ther OCV_USB and OCV_HWPath.
+		capture->set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
+	}
 	return true;
 }
 
@@ -93,4 +115,11 @@ void CamImpl_OpenCVBase::DelegatedInjectIntoDicom(DcmDataset* dicomData)
 {
 	// TODO: Placeholder, this should be more specific.
 	dicomData->putAndInsertString(DCM_SensorName, "OpenCV Stream");
+}
+
+bool CamImpl_OpenCVBase::PullOptions(const cvgCamFeedLocs& opts)
+{
+	this->exposureTime = opts.videoExposureTime;
+
+	return this->ICamImpl::PullOptions(opts);
 }

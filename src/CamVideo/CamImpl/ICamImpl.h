@@ -35,6 +35,10 @@ protected:
 	/// </summary>
 	int prefHeight = 0;
 
+	bool flipHoriz = false;
+
+	bool flipVert = false;
+
 protected:
 	// Implementation methods.
 	// THESE SHOULD -=#=>NEVER<=#=- BE CALLED DIRECTLY except by the
@@ -80,6 +84,13 @@ protected:
 	/// A shared pointer to the last polled frame.
 	/// </returns>
 	virtual cv::Ptr<cv::Mat> PollFrameImpl() = 0;
+
+	/// <summary>
+	/// Utility to flip an image in OpenCV based on the camera's
+	/// flipHoriz and flipVert members.
+	/// </summary>
+	/// <param name="mat">The OpenCV matrix to flip.</param>
+	void UtilToFlipMatInOpenCV(cv::Mat& mat);
 
 public:
 	inline bool HasInitialized() const

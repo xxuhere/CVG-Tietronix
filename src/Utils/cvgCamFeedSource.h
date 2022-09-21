@@ -91,6 +91,28 @@ public:
 	/// The type of image processing to apply to the video frames.
 	/// </summary>
 	ProcessingType processing = ProcessingType::None;
+
+	/// <summary>
+	/// If true, flip the image frames being polled vertically.
+	/// 
+	/// This should be done at the hardware or low-level when possible,
+	/// or else it should flip the OpenCV image before returning it.
+	/// </summary>
+	bool flipVertical = false;
+
+	/// <summary>
+	/// If true, flip the image frames being polled horizontally.
+	/// 
+	/// This should be done at the hardware or low-level when possible,
+	/// or else it should flip the OpenCV image before returning it.
+	/// </summary>
+	bool flipHorizontal = false;
+
+	/// <summary>
+	/// The exposure time, in microseconds. A value of 0 means to use
+	/// the implemention's default method.
+	/// </summary>
+	int videoExposureTime = 0;
 };
 
 

@@ -20,6 +20,11 @@ private:
 	/// </summary>
 	cv::VideoCapture* ocvStream = nullptr;
 
+	/// <summary>
+	/// The exposure time to set. Value of 0 means to use automatic.
+	/// </summary>
+	int exposureTime = 0;
+
 protected:
 	bool InitializeImpl() override;
 	bool ShutdownImpl() override;
@@ -59,6 +64,8 @@ protected:
 
 	inline void AssertStreamNull()
 	{ cvgAssert(!this->IsStreamAllocated(),"AssertStreamNull failed"); }
+
+	bool PullOptions(const cvgCamFeedLocs& opts);
 
 public:
 	// No poll type here, that's the responsibility for 

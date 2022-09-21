@@ -319,7 +319,7 @@ SnapRequest::SPtr MainWin::RequestSnap(
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Snap_" << FileDateTimeNow() << "_" << this->opSession.sessionName << "_" <<  prefix << this->snapCtr;
+	sstrmFilepath << folderLoc << "/Snap_" << FileDateTimeNow() << "_" <<  prefix << this->snapCtr;
 	std::string filepath = sstrmFilepath.str();
 
 	++this->snapCtr;
@@ -343,7 +343,7 @@ VideoRequest::SPtr MainWin::RecordVideo(int idx, const std::string& prefix)
 
 	// Build snapshot image filename
 	std::stringstream sstrmFilepath;
-	sstrmFilepath << folderLoc << "/Video_" << FileDateTimeNow() << "_" << prefix << this->opSession.sessionName << "_" << this->videoCtr << ".mkv";
+	sstrmFilepath << folderLoc << "/Video_" << FileDateTimeNow() << "_" << prefix << "_" << this->videoCtr << ".mkv";
 	std::string filepath = sstrmFilepath.str();
 
 	++this->videoCtr;

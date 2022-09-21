@@ -20,6 +20,9 @@ static const char* szKey_StreamHeight	= "stream_height";
 static const char* szKey_StaticImg		= "static_img";
 static const char* szKey_MenuTarg		= "menu_targ";
 static const char* szKey_Processing		= "processing";
+static const char* szKey_FlipHoriz		= "flip_horiz";
+static const char* szKey_FlipVert		= "flip_vert";
+static const char* szKey_VideoExpMicro	= "video_exposure_micro";
 
 json cvgCamFeedSource::AsJSON() const
 {
@@ -48,6 +51,9 @@ json cvgCamFeedSource::AsJSON() const
 	ret[szKey_StreamHeight	] = this->streamHeight;
 	ret[szKey_StaticImg		] = this->staticImagePath;
 	ret[szKey_MenuTarg		] = this->menuTarg;
+	ret[szKey_FlipHoriz		] = this->flipHorizontal;
+	ret[szKey_FlipVert		] = this->flipVertical;
+	ret[szKey_VideoExpMicro	] = this->videoExposureTime;
 
 	if(this->processing == ProcessingType::static_threshold)
 		ret[szKey_Processing] = this->thresholdExplicit;
@@ -59,9 +65,8 @@ json cvgCamFeedSource::AsJSON() const
 
 void cvgCamFeedSource::ApplyJSON(const json& js)
 {
-	// WHEN ADDING/MODIFYING ITEMS HERE, 
-	// REMEMBER TO MATCH THE LOGIC WITH 
-	// AN EQUIVALENT IN AsJSON().
+	// WHEN ADDING/MODIFYING ITEMS HERE, REMEMBER TO 
+	// MATCH THE LOGIC WITH AN EQUIVALENT IN AsJSON().
 
 	//Default poll, might be replaced by other specific defaults
 	if (js.contains(szKey_DefPoll) && js[szKey_DefPoll].is_string())
@@ -108,6 +113,15 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains(szKey_MenuTarg) && js[szKey_MenuTarg].is_boolean())
 		this->menuTarg = js[szKey_MenuTarg];
+
+	if(js.contains(szKey_FlipHoriz) && js[szKey_FlipHoriz].is_boolean())
+		this->flipHorizontal = js[szKey_FlipHoriz];
+
+	if(js.contains(szKey_FlipVert) && js[szKey_FlipVert].is_boolean())
+		this->flipVertical = js[szKey_FlipVert];
+
+	if(js.contains(szKey_VideoExpMicro) && js[szKey_VideoExpMicro].is_number())
+		this->videoExposureTime = js[szKey_VideoExpMicro];
 
 	if (js.contains(szKey_Processing))
 	{
