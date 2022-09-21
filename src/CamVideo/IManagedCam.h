@@ -550,7 +550,7 @@ public:
 /// <param name="key">The attribute key.</param>
 /// <param name="value">The attribute value.</param>
 /// <returns>True if added, else an error occured.</returns>
-bool InsertAquisitionContextInfo(
+bool InsertAcquisitionContextInfo(
 	DcmDataset* dicomData,
 	const std::string& key, 
 	const std::string& value);

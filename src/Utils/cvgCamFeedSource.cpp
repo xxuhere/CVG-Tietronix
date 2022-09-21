@@ -22,6 +22,7 @@ static const char* szKey_MenuTarg		= "menu_targ";
 static const char* szKey_Processing		= "processing";
 static const char* szKey_FlipHoriz		= "flip_horiz";
 static const char* szKey_FlipVert		= "flip_vert";
+static const char* szKey_VideoExpMicro	= "video_exposure_micro";
 
 json cvgCamFeedSource::AsJSON() const
 {
@@ -52,6 +53,7 @@ json cvgCamFeedSource::AsJSON() const
 	ret[szKey_MenuTarg		] = this->menuTarg;
 	ret[szKey_FlipHoriz		] = this->flipHorizontal;
 	ret[szKey_FlipVert		] = this->flipVertical;
+	ret[szKey_VideoExpMicro	] = this->videoExposureTime;
 
 	if(this->processing == ProcessingType::static_threshold)
 		ret[szKey_Processing] = this->thresholdExplicit;
@@ -117,6 +119,9 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains(szKey_FlipVert) && js[szKey_FlipVert].is_boolean())
 		this->flipVertical = js[szKey_FlipVert];
+
+	if(js.contains(szKey_VideoExpMicro) && js[szKey_VideoExpMicro].is_number())
+		this->videoExposureTime = js[szKey_VideoExpMicro];
 
 	if (js.contains(szKey_Processing))
 	{
