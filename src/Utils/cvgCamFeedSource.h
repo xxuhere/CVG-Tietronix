@@ -107,6 +107,12 @@ public:
 	/// or else it should flip the OpenCV image before returning it.
 	/// </summary>
 	bool flipHorizontal = false;
+
+	/// <summary>
+	/// The exposure time, in microseconds. A value of 0 means to use
+	/// the implemention's default method.
+	/// </summary>
+	int videoExposureTime = 0;
 };
 
 

@@ -6,6 +6,16 @@
 
 #include "ICamImpl.h"
 
+#include "interface/vcos/vcos.h"
+#include "interface/mmal/mmal.h"
+#include "interface/mmal/mmal_logging.h"
+#include "interface/mmal/mmal_buffer.h"
+#include "interface/mmal/util/mmal_util.h"
+#include "interface/mmal/util/mmal_util_params.h"
+#include "interface/mmal/util/mmal_default_components.h"
+#include "interface/mmal/util/mmal_connection.h"
+
+
 struct RPiYUVState;
 struct MMAL_PORT_T;
 struct MMAL_BUFFER_HEADER_T;
@@ -39,6 +49,11 @@ private:
 	/// The last polled image data from the callback.
 	/// </summary>
 	cv::Ptr<cv::Mat> lastPolled;
+
+	/// <summary>
+	/// The exposure time to set. Value of 0 means to use default.
+	/// </summary>
+	int videoExposureTime = 0;
 	
 	/// <summary>
 	/// The thread guard for lastPolled. Note that this isn't for
@@ -51,6 +66,18 @@ private:
 	/// The video port for the camera being polled.
 	/// </summary>
 	MMAL_PORT_T* camVideoPort = nullptr;
+
+	/// <summary>
+	/// Thread saftey for reading/writing of the cached settings below.
+	/// </summary>
+	std::mutex cachedSettingsMutex;
+	//
+	std::optional<float>	cachedExposure;
+	std::optional<float>	cachedAnalogGain;
+	std::optional<float>	cachedDigitalGain;
+	std::optional<float>	cachedRedGain;
+	std::optional<float>	cachedBlueGain;
+	std::optional<uint32_t> cachedFocusPos;
 	
 private:
 	/// <summary>

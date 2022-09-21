@@ -479,13 +479,13 @@ void ManagedCam::_DeactivateStreamState(bool deactivateShould)
 	this->IManagedCam::_DeactivateStreamState(deactivateShould);
 }
 
-bool InsertAquisitionContextInfo(
+bool InsertAcquisitionContextInfo(
 	DcmDataset* dicomData,
 	const std::string& key, 
 	const std::string& value)
 {
-	DcmItem* seqItemAquis;
-	if(!dicomData->findOrCreateSequenceItem(DCM_AcquisitionContextSequence, seqItemAquis, -2).good())
+	DcmItem* seqItemAcquis;
+	if(!dicomData->findOrCreateSequenceItem(DCM_AcquisitionContextSequence, seqItemAcquis, -2).good())
 		return false;
 
 	// https://dicom.nema.org/medical/dicom/2018b/output/chtml/part03/sect_C.7.6.14.html
@@ -499,13 +499,13 @@ bool InsertAquisitionContextInfo(
 	//	- Person Name (0040,A123) or 
 	//	- Text Value (0040,A160).
 	DcmItem* seqNamedCode;
-	if(!seqItemAquis->findOrCreateSequenceItem(DCM_ConceptNameCodeSequence, seqNamedCode, 0).good())
+	if(!seqItemAcquis->findOrCreateSequenceItem(DCM_ConceptNameCodeSequence, seqNamedCode, 0).good())
 		return false;
 
 	if(!seqNamedCode->putAndInsertString(DCM_ValueType, key.c_str()).good())
 		return false;
 
-	if(!seqItemAquis->putAndInsertString(DCM_TextValue, value.c_str()).good())
+	if(!seqItemAcquis->putAndInsertString(DCM_TextValue, value.c_str()).good())
 		return false;
 
 	return true;
@@ -516,13 +516,10 @@ void ManagedCam::InjectIntoDicom(DcmDataset* dicomData)
 	if(currentImpl != nullptr && currentImpl->IsValid())
 		currentImpl->DelegatedInjectIntoDicom(dicomData);
 
-	DcmItem* seqItemAquis;
-	if(!dicomData->findOrCreateSequenceItem(DCM_AcquisitionContextSequence, seqItemAquis).good())
-		return;
 
 	// Arbitrary camera data listed in Aquisition context
-	InsertAquisitionContextInfo(dicomData, "threshold_method",	to_string(this->GetProcessingType()));
-	InsertAquisitionContextInfo(dicomData, "stream_type",		to_string(this->camOptions.GetUsedPoll()));
+	InsertAcquisitionContextInfo(dicomData, "threshold_method",	to_string(this->GetProcessingType()));
+	InsertAcquisitionContextInfo(dicomData, "stream_type",		to_string(this->camOptions.GetUsedPoll()));
 
 	// And then thresholding specific stuff, if any.
 	switch(GetProcessingType())
