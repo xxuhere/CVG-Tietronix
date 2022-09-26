@@ -17,7 +17,7 @@
 #include <dcmtk/dcmdata/libi2d/i2dplsc.h>
 
 
-#include "DicomImg_RawJpg.h"
+#include "DicomImg_RawBmp.h"
 
 #include "../DicomUtils/DicomInjectorSet.h"
 #include "../DicomUtils/DicomMiscUtils.h"
@@ -237,7 +237,7 @@ std::string IManagedCam::VideoFilepath()
 /// <param name="cam">The camera containing extra camera Dicom data.</param>
 /// <param name="baseFilename">The filename to save the Dicom file as.</param>
 /// <returns>true if successful, else false.</returns>
-bool SaveMatAsDicomJpeg(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::string& baseFilename)
+bool SaveMatAsDicomBmp(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::string& baseFilename)
 {
 	//////////////////////////////////////////////////
 	//	TEMPORARY CODE FOR DICOM
@@ -265,7 +265,7 @@ bool SaveMatAsDicomJpeg(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::st
 			<< std::endl;
 	}
 
-	I2DImgSource* inputImgSrc = new DicomImg_RawJpg(imgMat.get());
+	I2DImgSource* inputImgSrc = new DicomImg_RawBmp(imgMat.get());
 	inputImgSrc->setImageFile("snapshot"); // TODO: Better name
 	DcmDataset *resultObject = nullptr;
 	E_TransferSyntax writeXfer;
@@ -311,7 +311,7 @@ bool IManagedCam::SaveMatAsDicomJpeg_HandleReq(
 		return false;
 
 	// Save and notify success.
-	if(SaveMatAsDicomJpeg(imgMat, cam, snreq->filename))
+	if(SaveMatAsDicomBmp(imgMat, cam, snreq->filename))
 	{
 		snreq->frameID = camFeedChanges;
 		snreq->status = SnapRequest::Status::Filled;

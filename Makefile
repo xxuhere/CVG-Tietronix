@@ -54,7 +54,7 @@ SUBOBJ_CAMIMPL = \
 	ICamImpl CamImpl_StaticImg CamImpl_MMAL CamImpl_OpenCVBase CamImpl_OCV_Web CamImpl_OCV_USB CamImpl_OCV_HWPath
 	
 SUBOBJ_CAMVIDEO = \
-	CamStreamMgr DicomImg_RawJpg IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest ROIRect	
+	CamStreamMgr DicomImg_RawBmp IManagedCam ManagedCam ManagedComposite SnapRequest VideoRequest ROIRect	
 	
 SUBOBJ_CAROUSEL = \
 	Carousel

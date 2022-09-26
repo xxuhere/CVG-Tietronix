@@ -156,7 +156,7 @@
     <ClInclude Include="CamVideo\CamImpl\CamImpl_StaticImg.h" />
     <ClInclude Include="CamVideo\CamImpl\ICamImpl.h" />
     <ClInclude Include="CamVideo\CamStreamMgr.h" />
-    <ClInclude Include="CamVideo\DicomImg_RawJpg.h" />
+    <ClInclude Include="CamVideo\DicomImg_RawBmp.h" />
     <ClInclude Include="CamVideo\IManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedCam.h" />
     <ClInclude Include="CamVideo\ManagedComposite.h" />
@@ -246,7 +246,7 @@
     <ClCompile Include="CamVideo\CamImpl\CamImpl_StaticImg.cpp" />
     <ClCompile Include="CamVideo\CamImpl\ICamImpl.cpp" />
     <ClCompile Include="CamVideo\CamStreamMgr.cpp" />
-    <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp" />
+    <ClCompile Include="CamVideo\DicomImg_RawBmp.cpp" />
     <ClCompile Include="CamVideo\IManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedCam.cpp" />
     <ClCompile Include="CamVideo\ManagedComposite.cpp" />

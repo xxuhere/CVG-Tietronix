@@ -315,9 +315,6 @@
     <ClInclude Include="States\StateExit.h">
       <Filter>Header Files\States</Filter>
     </ClInclude>
-    <ClInclude Include="CamVideo\DicomImg_RawJpg.h">
-      <Filter>Header Files\CamVideo</Filter>
-    </ClInclude>
     <ClInclude Include="Vendored\lodePNG\lodepng.h">
       <Filter>Header Files\Vendored\lodePNG</Filter>
     </ClInclude>
@@ -353,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="States\MousepadUI.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CamVideo\DicomImg_RawBmp.h">
+      <Filter>Header Files\CamVideo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -551,9 +551,6 @@
     <ClCompile Include="States\StateExit.cpp">
       <Filter>Source Files\States</Filter>
     </ClCompile>
-    <ClCompile Include="CamVideo\DicomImg_RawJpg.cpp">
-      <Filter>Source Files\CamVideo</Filter>
-    </ClCompile>
     <ClCompile Include="Vendored\lodePNG\lodepng.cpp">
       <Filter>Source Files\Vendored\lodePNG</Filter>
     </ClCompile>
@@ -586,6 +583,9 @@
     </ClCompile>
     <ClCompile Include="States\MousepadUI.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CamVideo\DicomImg_RawBmp.cpp">
+      <Filter>Source Files\CamVideo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

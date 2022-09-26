@@ -8,7 +8,7 @@
 /// Implementation of I2DImgSource to save an OpenCV image as a
 /// jpeg, embedded in a Dicom file.
 /// </summary>
-class DicomImg_RawJpg : public I2DImgSource
+class DicomImg_RawBmp : public I2DImgSource
 {
 public:
 	/// <summary>
@@ -17,7 +17,7 @@ public:
 	cv::Mat* matImg;
 
 public:
-	DicomImg_RawJpg(cv::Mat* matImg );
+	DicomImg_RawBmp(cv::Mat* matImg );
 
 	OFString inputFormat () const override;
 
