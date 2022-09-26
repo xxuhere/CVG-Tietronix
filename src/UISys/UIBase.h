@@ -560,6 +560,9 @@ public:
 	/// </summary>
 	void DisableDyn();
 
+	inline UIRect GetGlobalRect()
+	{ return this->rect; }
+
 	/// <summary>
 	/// The class should implement this to render the widget.
 	/// 

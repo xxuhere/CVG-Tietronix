@@ -93,6 +93,16 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//
 	this->vertMenuPlate = new UIPlate( &this->uiSys, UIID::PullMenu, UIRect(960, 540, 50.0f, 100.0f), plateGray);
 	this->vertMenuPlate->SetMode_Patch(this->patch_roundRight, this->ninePatchCircle);
+
+	this->plateMainLaserBack = 
+		new UIPlate(
+			this->vertMenuPlate, -1, 
+			UIRect(0, 0, 0, 0)); // Set in RefreshLaserBackPlate() call below
+	//
+	this->plateMainLaserBack->SetPivot(0.0f, 0.5f - menuYPiv * 2.0f);
+	this->RefreshLaserBackPlate(false);
+	this->SetLaserBackPlateColor(false);
+
 	//
 	this->btnLaser		= new UIButton(this->vertMenuPlate, UIID::MBtnLaserTog, UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim),		"Assets/MenubarIcos/Menu_Icon_Laser.png"	);
 	this->btnLaser->SetPivot(0.0f, 0.5f - menuYPiv * 2.0f);
@@ -110,6 +120,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	this->btnExit		= new UIButton(this->vertMenuPlate, UIID::MBtnExit,		UIRect(20.0f, -icoDim/2.0f, icoDim, icoDim * 0.5f),	"Assets/MenubarIcos/Menu_Icon_Exit.png"	)	;
 	this->btnExit->SetPivot(0.0f, 0.5f + menuYPiv * 3.15f);
 	SetButtonStdCols(this->btnExit);
+
 
 	//		LASER SETTINGS INSPECTOR
 	//
@@ -442,6 +453,33 @@ void StateHMDOp::Draw(const wxSize& sz)
 	this->uiSys.AlignSystem();
 	this->uiSys.Render();
 
+	if(
+		this->curVertWidth == this->minVertWidth && 
+		this->GetCoreWindow()->hwLaser->intensityNIR != 0)
+	{
+		// If the main menu is compressed and the laser is on, add a little more
+		// emphasis on the laser backplate. 
+		//
+		// Specifically, strobing letters that say LASER ON in the vertical space.
+		UIRect rectLaserBackplate = this->plateMainLaserBack->GetGlobalRect();
+		glPushMatrix();
+			const float textMargin = 7.5f;
+			glTranslatef(rectLaserBackplate.pos.x + textMargin, rectLaserBackplate.pos.y + textMargin, 0.0f);
+			glRotatef(90.0f, 0.0f, 0.0f, 1.0f);
+
+			// Create a smooth oscillating value between [0.0, 1.0]
+			const double strobeFreqMod = 1.0;
+			float strobePhase = (sin((double)clock() / (double)CLOCKS_PER_SEC * strobeFreqMod) + 1.0f) * 0.5f;
+			static const UIColor4 strobeLasOnTxtA(1.0f, 0.2f, 0.2f);
+			static const UIColor4 strobeLasOnTxtB(1.0f, 0.5f, 0.5f);
+			//
+			UIColor4 strobeUse = UIColor4::Lerp(strobeLasOnTxtA, strobeLasOnTxtB, strobePhase);
+			strobeUse.GLColor3();
+			this->fontLaserOn.RenderFont("LASER ON", 0.0f, 0.0f);
+		glPopMatrix();
+		
+	}
+
 	if(this->showCarousel)
 	{ 
 		Carousel* sel = this->GetSelectedCarousel();
@@ -591,10 +629,14 @@ void StateHMDOp::Update(double dt)
 		curVertWidth = (float)std::min<float>(maxVertWidth, curVertWidth + vertTransSpeed * dt);
 		showRButtons = (curVertWidth == maxVertWidth);
 
+		this->RefreshLaserBackPlate(true);
 		this->HideCarousels();
 	}
 	else
+	{
+		this->RefreshLaserBackPlate(false);
 		this->curVertWidth = (float)std::max<float>(minVertWidth, curVertWidth - vertTransSpeed * dt);
+	}
 
 	this->btnLaser->Show(showRButtons);
 	this->btnSettings->Show(showRButtons);
@@ -708,6 +750,7 @@ void StateHMDOp::ExitedActive()
 void StateHMDOp::Initialize() 
 {
 	this->fontInsTitle = FontMgr::GetInstance().GetFont(24);
+	this->fontLaserOn = FontMgr::GetInstance().GetFont(12);
 
 	this->caroBody.Append(this->GetView()->cachedOptions.caroBody);
 	this->caroBody.LoadAssets();
@@ -1192,11 +1235,13 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			{ 
 				this->GetCoreWindow()->hwLaser->ShowNIR();
 				SetButtonStdCols(this->btnLaser, true);
+				this->SetLaserBackPlateColor(true);
 			}
 			else
 			{ 
 				this->GetCoreWindow()->hwLaser->HideNIR();
 				SetButtonStdCols(this->btnLaser, false);
+				this->SetLaserBackPlateColor(false);
 			}
 		}
 		break;
@@ -1421,4 +1466,34 @@ void StateHMDOp::InjectIntoDicom(DcmDataset* dicomData)
 	{
 		dicomData->putAndInsertString(DCM_PatientOrientation, dicomOrient.c_str());
 	}
+}
+
+void StateHMDOp::RefreshLaserBackPlate(bool expanded)
+{
+	// This should be pretty much the same place at the btnLaser
+	const float lasVBackPad = 10.0f;
+	const float lasHMargin = 2.0f;
+
+	if(expanded)
+	{
+		this->plateMainLaserBack->SetLocPos(lasHMargin, -icoDim/2.0f - lasVBackPad);
+		this->plateMainLaserBack->SetDim(maxVertWidth - 2 * lasHMargin, icoDim + lasVBackPad * 2.0f);
+	}
+	else
+	{
+		this->plateMainLaserBack->SetLocPos(lasHMargin, -icoDim/2.0f - lasVBackPad);
+		this->plateMainLaserBack->SetDim(minVertWidth - 2 * lasHMargin, icoDim + lasVBackPad * 2.0f);
+		
+	}
+}
+
+void StateHMDOp::SetLaserBackPlateColor(bool toggled)
+{
+	const static UIColor4 colLaserPlateSel(0.5f,	0.25f,	0.25f);
+	const static UIColor4 colLaserPlateUnsel(0.25f, 0.25f,	0.25f);
+
+	if(toggled)
+		this->plateMainLaserBack->uiCols.norm = colLaserPlateSel;
+	else
+		this->plateMainLaserBack->uiCols.norm = colLaserPlateUnsel;
 }

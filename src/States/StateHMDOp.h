@@ -211,6 +211,11 @@ public:
 	/// </summary>
 	FontWU fontInsTitle;
 
+	/// <summary>
+	/// The font to display "LASER ON"
+	/// </summary>
+	FontWU fontLaserOn;
+
 	MousepadUI mousepadUI;
 
 	/// <summary>
@@ -265,6 +270,7 @@ public:
 	UIButton* btnCamSets		= nullptr;
 	UIButton* btnExit			= nullptr;
 
+	UIPlate * plateMainLaserBack= nullptr;
 	//////////////////////////////////////////////////
 	//
 	//		LASER SETTINGS MENU
@@ -405,6 +411,9 @@ public:
 	//
 	void Initialize() override;
 	void ClosingApp() override;
+
+	void RefreshLaserBackPlate(bool expanded);
+	void SetLaserBackPlateColor(bool toggled);
 
 	/// <summary>
 	/// Manage when a button in the "Cam. Settings" group is pressed.
