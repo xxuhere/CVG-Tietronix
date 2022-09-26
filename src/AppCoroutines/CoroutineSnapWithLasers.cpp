@@ -51,12 +51,11 @@ bool CoroutineSnapWithLasers::ImplEnd()
 
 bool CoroutineSnapWithLasers::ImplStep()
 {
-	this->mainApp->IncrSnapCounter();
-
 	switch(this->step)
 	{
 		
 	case 0:	// Set the laser off
+		this->mainApp->IncrSnapCounter();
 		this->mainApp->hwLaser->HideNIR();
 		++this->step;
 		return true;
@@ -97,6 +96,9 @@ bool CoroutineSnapWithLasers::ImplStep()
 		return true;
 
 	case 7: // Await pictures
+		if(this->AwaitingOnAnySnapRequests())
+			return true;
+
 		++this->step;
 		return true;
 
