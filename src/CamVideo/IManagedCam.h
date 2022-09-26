@@ -533,7 +533,7 @@ public:
 	/// The counter for the number of pictures taken during the
 	/// session application.</param>
 	/// <returns>True if successful, else false.</returns>
-	static bool SaveMatAsDicomJpeg_HandleReq(
+	static bool SaveMatAsDicom_HandleReq(
 		cv::Ptr<cv::Mat> imgMat, 
 		IManagedCam* cam, 
 		SnapRequest::SPtr snreq,

@@ -300,7 +300,7 @@ bool SaveMatAsDicomBmp(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::str
 	return true;
 }
 
-bool IManagedCam::SaveMatAsDicomJpeg_HandleReq(
+bool IManagedCam::SaveMatAsDicom_HandleReq(
 	cv::Ptr<cv::Mat> imgMat, 
 	IManagedCam* cam, 
 	SnapRequest::SPtr snreq,
@@ -379,7 +379,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 
 		for(SnapRequest::SPtr snreq : rawSnaps)
 		{	
-			SaveMatAsDicomJpeg_HandleReq(
+			SaveMatAsDicom_HandleReq(
 				saveMat, 
 				this, 
 				snreq, 
@@ -414,7 +414,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		// the shared pointer.
 		for(SnapRequest::SPtr snreq : sptrSwap)
 		{
-			SaveMatAsDicomJpeg_HandleReq(
+			SaveMatAsDicom_HandleReq(
 				ptr, 
 				this, 
 				snreq,
