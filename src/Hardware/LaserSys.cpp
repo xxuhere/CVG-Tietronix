@@ -135,6 +135,10 @@ void LaserSys::InjectIntoDicom(DcmDataset* dicomData)
 	if(!dicomData->findOrCreateSequenceItem(DCM_DeviceSequence, deviceInfo, -2).good())
 		return;
 
+	float nirPercent = this->intensityNIR * 100.0f;
+	std::string strPercent = std::to_string(nirPercent) + "%";
+	deviceInfo->putAndInsertString(DCM_OutputPower, strPercent.c_str());
+
 	deviceInfo->putAndInsertString(DCM_CodeMeaning, "Laser System for IR viewing of contrast dye.");
 	deviceInfo->putAndInsertString(DCM_DeviceDescription, "Laser System");
 	deviceInfo->putAndInsertString(DCM_Manufacturer, "__Manufacturer_TBD__");
