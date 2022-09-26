@@ -14,10 +14,10 @@ public:
 	/// <summary>
 	/// The image to jpeg encode into a Dicom.
 	/// </summary>
-	cv::Mat* matImg;
+	cv::Ptr<cv::Mat> matImg;
 
 public:
-	DicomImg_RawBmp(cv::Mat* matImg );
+	DicomImg_RawBmp(cv::Ptr<cv::Mat> matImg );
 
 	OFString inputFormat () const override;
 

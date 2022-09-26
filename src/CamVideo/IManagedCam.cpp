@@ -265,7 +265,7 @@ bool SaveMatAsDicomBmp(cv::Ptr<cv::Mat> imgMat, IManagedCam* cam, const std::str
 			<< std::endl;
 	}
 
-	I2DImgSource* inputImgSrc = new DicomImg_RawBmp(imgMat.get());
+	I2DImgSource* inputImgSrc = new DicomImg_RawBmp(imgMat);
 	inputImgSrc->setImageFile("snapshot"); // TODO: Better name
 	DcmDataset *resultObject = nullptr;
 	E_TransferSyntax writeXfer;

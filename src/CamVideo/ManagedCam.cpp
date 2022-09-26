@@ -365,6 +365,7 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
 
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
+	cv::Ptr<cv::Mat> binaryMask;
 	// When modifying this function, make sure to sync with IsThresholded().
 	switch (this->camOptions.processing)
 	{
@@ -372,20 +373,41 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 		return inImg;
 
 	case ProcessingType::yen_threshold:
-		return ImgProc_YenThreshold(inImg, false);
+		binaryMask = ImgProc_YenThreshold(inImg, false);
+		break;
 
 	case ProcessingType::yen_threshold_compressed:
-		return ImgProc_YenThreshold(inImg, true);
+		binaryMask = ImgProc_YenThreshold(inImg, true);
+		break;
 
 	case ProcessingType::two_stdev_from_mean:
-		return ImgProc_TwoStDevFromMean(inImg);
+		binaryMask = ImgProc_TwoStDevFromMean(inImg);
+		break;
 
 	case ProcessingType::static_threshold:
-		return ImgProc_Simple(inImg, this->camOptions.thresholdExplicit);
+		binaryMask = ImgProc_Simple(inImg, this->camOptions.thresholdExplicit);
+		break;
+
+	default:
+		cvgAssert(false,"Unhandled processing switch");
 	}
 
-	cvgAssert(false,"Unhandled processing switch");
-	return inImg;
+	cvgAssert(binaryMask != nullptr, "Image processing did not send back an expected valid image.");
+
+	// All image processings are (currently) assumed to just return back
+	// binary masks to appy the input image which is converted to a heatmap.
+
+	// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/21
+	cv::Ptr<cv::Mat> ret = cv::Ptr<cv::Mat>(new cv::Mat());
+	// The result will be an RGB
+	cv::applyColorMap(*inImg, *ret, cv::COLORMAP_RAINBOW);
+	std::vector<cv::Mat> channels;
+	cv::split(*ret, channels);
+
+	std::vector<cv::Mat> chansToMerge = {channels[0], channels[1], channels[2], *binaryMask};
+	cv::merge(&chansToMerge[0], chansToMerge.size(), *ret);
+	
+	return ret;
 }
 
 bool ManagedCam::IsThresholded()
