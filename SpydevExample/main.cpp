@@ -32,17 +32,17 @@ int main()
    while(true)
    {
 	   std::cout << "Going up" << std::endl;
-	   for(unsigned short i = 0x00; i < 0x1FF; ++i)
-	   {
-		   WritePot(i);
-		   usleep(50000);
-	   }
+	   //for(unsigned short i = 0x00; i < 0x1FF; ++i)
+	   //{
+		   WritePot(0xFF);
+		   usleep(5000000);
+	   //}
 	   
 	   std::cout << "Going down" << std::endl;
-	   for(unsigned short i =  0x1FF; i > 0x00; --i)
-	   {
-		   WritePot(i);
-		   usleep(50000);
-	   }
+	   //for(unsigned short i =  0x1FF; i > 0x00; --i)
+	   //{
+		   WritePot(0x00);
+		   usleep(5000000);
+	   //}
    }
 }
