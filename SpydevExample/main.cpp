@@ -34,7 +34,7 @@ int main()
 	   std::cout << "Going up" << std::endl;
 	   //for(unsigned short i = 0x00; i < 0x1FF; ++i)
 	   //{
-		   WritePot(0xFF);
+		   WritePot(101);
 		   usleep(5000000);
 	   //}
 	   
