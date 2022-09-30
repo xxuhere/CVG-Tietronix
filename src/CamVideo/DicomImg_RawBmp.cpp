@@ -13,6 +13,30 @@ OFString DicomImg_RawBmp::inputFormat () const
 	return "BMP";
 }
 
+// Read bytes from a position in array, to reinterpret short from
+// big endian to little endian.
+int ExtractWord(const uchar* bytes, int offset)
+{
+	uchar c1 = bytes[offset + 0];
+	uchar c2 = bytes[offset + 1];
+	return (c2 << 8) | c1;
+}
+
+// Read bytes from a position in array, to reinterpret int from
+// big endian to little endian
+int ExtractDoubleWord(const uchar* bytes, int offset)
+{
+	uchar c1 = bytes[offset + 0];
+	uchar c2 = bytes[offset + 1];
+	uchar c3 = bytes[offset + 2];
+	uchar c4 = bytes[offset + 3];
+	return 
+		(c4 << 24) |
+		(c3 << 16) |
+		(c2 << 8 ) |
+		(c1 << 0 );
+}
+
 OFCondition DicomImg_RawBmp::readPixelData (
 	Uint16 &rows, 
 	Uint16 &cols, 
@@ -90,6 +114,18 @@ OFCondition DicomImg_RawBmp::readPixelData (
 	std::vector<uchar> bmpBuf;
 	cv::imencode(".bmp", flipped, bmpBuf, std::vector<int>());
 
+	// We don't actually package the entire BMP binary -
+	// So we need to strip out the header. The lines for that below have been translated
+	// from i2bmps.cc
+	// 
+	// We're not going to do anything too fancy with how many bitmap features we handle - 
+	// as we're using OpenCV, and it's probably only going to do so many things - such as
+	// NOT use color palettes.
+	int dataOffset	= ExtractWord(&bmpBuf[0], 10);
+	//int dataWidth	= ExtractDoubleWord(&bmpBuf[0], 18);
+	//int dataHeight	= ExtractDoubleWord(&bmpBuf[0], 22);
+	//int dataBPP		= ExtractWord(&bmpBuf[0], 28);
+
 
 	const bool isMonochrome = flipped.channels() == 1;
 	if(isMonochrome)
@@ -117,9 +153,10 @@ OFCondition DicomImg_RawBmp::readPixelData (
 	pixelRepr		= 0;
 	ts = EXS_LittleEndianExplicit;
 
-	length = bmpBuf.size(); // TODO: This may need to be an even number
+	// From dataOffset, we're going to assume the rest is image data.
+	length = bmpBuf.size() - dataOffset;
 	pixData = new char[length];
-	memcpy(pixData, &bmpBuf[0], length);
+	memcpy(pixData, &bmpBuf[dataOffset], length);
 
 	return EC_Normal;
 }
