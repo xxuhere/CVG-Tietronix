@@ -67,7 +67,7 @@ void TexObj::TransferFromCVMat(const cv::Mat& m)
 		break;
 	case 3:
 		internalFormat = GL_RGB;
-		format = GL_BGR;
+		format = GL_RGB;
 		break;
 	case 4:
 		internalFormat = GL_RGBA;

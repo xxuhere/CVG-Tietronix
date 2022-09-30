@@ -267,6 +267,23 @@ void ManagedComposite::ThreadFn(int camIdx)
 				// the display.
 				cv::Mat acRoi = (*accumframe)(roiVirtDst.ToCVRect());
 				cv::Mat cpyRoi = cpy(roiSrc.ToCVRect());
+
+				if(cpyRoi.channels() == 4)
+				{
+					// Add an RGB-A
+					// Alpha is a per-pixel gain for each channel.
+					// Although chances are the alpha will be binary, so it's 
+					// simply a pixel gate.
+					std::vector<cv::Mat> mats(4);
+					cv::split(cpyRoi, &mats[0]);
+
+					cv::multiply(mats[0], mats[3], mats[0], 1.0/255.0);
+					cv::multiply(mats[1], mats[3], mats[1], 1.0/255.0);
+					cv::multiply(mats[2], mats[3], mats[2], 1.0/255.0);
+					cv::merge(&mats[0], 3, cpyRoi);
+
+				}
+
 				cv::add(acRoi, cpyRoi, acRoi);
 			}
 

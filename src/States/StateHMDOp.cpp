@@ -453,9 +453,9 @@ void StateHMDOp::Draw(const wxSize& sz)
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
 
 		float alpha = camMgr.GetFloat(camIt, StreamParams::Alpha);
-		if(camMgr.IsThresholded(camIt))
-			glColor4f(1.0f, 0.0f, 0.0f, alpha);
-		else
+		//if(camMgr.IsThresholded(camIt))
+		//	glColor4f(1.0f, 0.0f, 0.0f, alpha);
+		//else
 			glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
 		glBegin(GL_QUADS);

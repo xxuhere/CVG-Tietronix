@@ -85,12 +85,14 @@ GLuint cvgCamTextureRegistry::LoadTexture(int camIdx, cv::Ptr<cv::Mat> img, long
 		format = GL_RG;
 		break;
 	case 3:
+		// Convert OpenCVs BGR to RGB format to display properly in OpenGL.
 		internalFormat = GL_RGB;
 		format = GL_BGR;
 		break;
 	case 4:
+		// Convert OpenCVs BGR to RGB format to display properly in OpenGL.
 		internalFormat = GL_RGBA;
-		format = GL_RGBA;
+		format = GL_BGRA;
 		break;
 
 	}
