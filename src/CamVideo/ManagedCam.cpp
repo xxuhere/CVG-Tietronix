@@ -400,7 +400,7 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 	// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/21
 	cv::Ptr<cv::Mat> ret = cv::Ptr<cv::Mat>(new cv::Mat());
 	// The result will be an RGB
-	cv::applyColorMap(*inImg, *ret, cv::COLORMAP_RAINBOW);
+	cv::applyColorMap(*inImg, *ret, cv::COLORMAP_JET);
 	std::vector<cv::Mat> channels;
 	cv::split(*ret, channels);
 
