@@ -12,6 +12,7 @@
 #include "HMDOpSubs/HMDOpSub_Carousel.h"
 #include "HMDOpSubs/HMDOpSub_Default.h"
 #include "HMDOpSubs/HMDOpSub_MainMenuNav.h"
+#include "../Utils/cvgAssert.h"
 
 // The standard colors for buttons
 ColorSetInteractable colSetButton(
@@ -43,6 +44,33 @@ const UIColor4 plateGray(0.5f, 0.5f, 0.5f, 1.0f);
 const UIColor4 menuTitleCol(0.0f, 0.0f, 0.0f, 1.0f);
 const float titleHeight = 40.0f;
 
+// Level should go from 1 to 3
+void SetLaserLevel(LaserSys& laser, int level)
+{
+	cvgAssert(level > 0, "Laser level too low, must be between [1,3]");
+	cvgAssert(level <= 3, "Laser level high low, must be between [1,3]");
+
+	float power = 0.0;
+	switch(level)
+	{
+	case 1:
+		power = 0.33f;
+		break;
+
+	case 2:
+		power = 0.66f;
+		break;
+
+	case 3:
+		power = 1.0f;
+		break;
+	}
+
+	laser.SetDefault(
+		LaserSys::Light::NIR,
+		power,
+		LaserSys::DefaultSetMode::OnlyIfOn);
+}
 
 StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	:	BaseState(BaseState::AppState::MainOp, app, view, core),
@@ -318,7 +346,12 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	//		FINALIZATION
 	//
 	//////////////////////////////////////////////////
+
+	// Hide all the created stuff that shouldn't be visible yet.
 	this->ManageCamButtonPressed(-1);
+
+	// Set the laser level to what the UI was initialized to show is selected.
+	SetLaserLevel(*this->GetCoreWindow()->hwLaser, 1);
 	
 }
 
@@ -1269,8 +1302,7 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			colSetButtonTog,
 			colSetButton);
 
-		// TODO: Placeholder
-		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(0.3f);
+		SetLaserLevel(*this->GetCoreWindow()->hwLaser, 1);
 		break;
 
 	case UIID::LaseWat_2:
@@ -1280,8 +1312,7 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			colSetButtonTog,
 			colSetButton);
 
-		// TODO: Placeholder
-		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(0.6f);
+		SetLaserLevel(*this->GetCoreWindow()->hwLaser, 2);
 		break;
 
 	case UIID::LaseWat_3:
@@ -1291,8 +1322,7 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			colSetButtonTog,
 			colSetButton);
 
-		// TODO: Placeholder
-		this->GetCoreWindow()->hwLaser->SetWhiteIntensity(1.0f);
+		SetLaserLevel(*this->GetCoreWindow()->hwLaser, 3);
 		break;
 
 	case UIID::Lase_Exposure_1:
