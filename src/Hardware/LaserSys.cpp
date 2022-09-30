@@ -3,14 +3,27 @@
 #include <dcmtk/dcmdata/dcdeftag.h>
 #include <algorithm>
 #include <iostream>
-
-#define PIN_NIR_BCM_PIN 25
-#define PIN_WHITE_BCM_PIN 6
+#include "../Utils/cvgAssert.h"
 
 // Something is defining macros for min and max, 
 // which we'll need to undo.
 #undef min
 #undef max
+
+#if IS_RPI
+
+// The input is a value between 0 and 255
+// to go from no input, to maximum
+void WritePot(short input)
+{
+	unsigned char transBytes[2] = 
+	{
+		input >> 8,
+		input & 0xFF
+	};
+	wiringPiSPIDataRW(SPI_CHANNEL, transBytes, 2);
+}
+#endif
 
 // The current version of C++ we're using doesn't
 // have std::clamp().
@@ -38,17 +51,9 @@ void LaserSys::ShowLight(Light l, bool onoff)
 		{	// Turn off
 #if IS_RPI 
 			std::cout << "Turning NIR OFF." << std::endl;
-			//
-			// Line below doesn't work for unknown reasons, so
-			// instead the pin mode is changed.
-			//
-			// digitalWrite(PIN_NIR_BCM_PIN, 1);
-			//
-			pinMode(PIN_NIR_BCM_PIN, INPUT);
 #else
 			std::cout <<"Unhandled request to turn NIR OFF." << std::endl;
 #endif
-
 			this->SetNIRIntensity(0.0f);
 		}
 		else
@@ -56,8 +61,6 @@ void LaserSys::ShowLight(Light l, bool onoff)
 
 #if IS_RPI
 			std::cout << "Turning NIR ON." << std::endl;
-			pinMode(PIN_NIR_BCM_PIN, OUTPUT);
-			digitalWrite(PIN_NIR_BCM_PIN, 1);
 #else
 			std::cout <<"Unhandled request to turn NIR ON." << std::endl;
 #endif
@@ -90,11 +93,14 @@ void LaserSys::SetLight(Light l, float intensity)
 {
 	intensity = fclamp01(intensity);
 
+
 	switch(l)
 	{
 	case Light::NIR:
-		// TODO: Implement
 		this->intensityNIR = intensity;
+#if IS_RPI
+		WritePot((short)(intensity * DIGIPOT_NIR_MAX));
+#endif
 		break;
 
 	case Light::White:
@@ -104,21 +110,91 @@ void LaserSys::SetLight(Light l, float intensity)
 	}
 }
 
+void LaserSys::SetDefault(Light l, float intensity, DefaultSetMode setMode)
+{
+	if(l == Light::NIR)
+	{
+		this->defIntensityNIR = intensity;
+
+		switch(setMode)
+		{
+		case DefaultSetMode::Set:
+			this->SetNIRIntensity(intensity);
+			break;
+
+		case DefaultSetMode::OnlyIfOn:
+			if(this->intensityNIR != 0.0f)
+				this->SetNIRIntensity(intensity);
+			break;
+		}
+	}
+	else if(l == Light::White)
+	{
+		this->defIntensityWhite = intensity;
+
+		switch(setMode)
+		{
+		case DefaultSetMode::Set:
+			this->SetWhiteIntensity(intensity);
+			break;
+
+		case DefaultSetMode::OnlyIfOn:
+			if(this->intensityWhite != 0.0f)
+				this->SetWhiteIntensity(intensity);
+			break;
+		}
+	}
+	else
+	{
+		cvgAssert(false, "Unknown default light mode.");
+	}
+}
+
 bool LaserSys::Initialize()
 { 
-	cvg::multiplatform::InitGPIO();
 
 	for(int i = 0; i < (int)Light::Totalnum; ++i)
 		this->ShowLight((Light)i, false);
+
+#if IS_RPI
+	this->digiPotHandle = wiringPiSPISetup(SPI_CHANNEL, 500000);
+#endif
 
 	return true; 
 }
 
 bool LaserSys::Validate()
-{ return true; }
+{ 
+#if IS_RPI
+	if(this->digiPotHandle != -1)
+	{
+		std::cout << "Laser system validated as connected to SPI." << std::endl;
+		return true;
+	}
+	else
+	{
+		std::cout << "ERROR: Laser system not connected to SPI." << std::endl;
+		return false;
+	}
+#endif
+	return true;
+}
 
 bool LaserSys::Shutdown()
-{ return true; }
+{ 
+#if IS_RPI
+	if(this->digiPotHandle != -1)
+	{ 
+		int retCode = close(this->digiPotHandle);
+		this->digiPotHandle = -1;
+
+		return retCode != -1;
+	}
+	else
+		return true;
+#endif
+	return true; 
+}
 
 DicomInjector* LaserSys::GetInjector()
 {

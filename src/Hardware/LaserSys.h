@@ -5,6 +5,21 @@
 
 #if IS_RPI
 	#include <wiringPi.h>
+	#include <wiringPiSPI.h>
+
+	// The SPI channel to use, assuming the use of a 
+	// 4151 digital potentiometer. 
+	// 
+	// This can either be 0 or 1, and its setting will 
+	// dictate which GPIO pins the digital pot hooks up to.
+	// 
+	// For example, a value of 0 will refer to the CE0 pin.
+	const int SPI_CHANNEL = 0;
+
+	// The max value to send to the digipot for the NIR - 
+	// used to map the 5vcc output of the RPi GPIO to the
+	// [0, 2]v range.
+	const int DIGIPOT_NIR_MAX = 101;
 #endif
 
 /// <summary>
@@ -15,6 +30,29 @@ class LaserSys :
 	public DicomInjector
 {
 public:
+
+	/// <summary>
+	/// Options on what to do with the current value if the 
+	/// default is changed.
+	/// </summary>
+	enum class DefaultSetMode
+	{
+		/// <summary>
+		/// If the default power value is changed, change the current value to match
+		/// </summary>
+		Set,
+
+		/// <summary>
+		/// If the default power value is changed, leave the current value alone.
+		/// </summary>
+		DontSet,
+
+		/// <summary>
+		/// Set the current value, but only if the lamp is currently on.
+		/// </summary>
+		OnlyIfOn
+	};
+
 	/// <summary>
 	/// The types of lights to manipulate in 
 	/// ShowLight() and SetLight().
@@ -28,8 +66,8 @@ public:
 
 	// For now (until there's more direction), the
 	// intensity will be on a scale from 0.0 to 1.0
-	const float defIntensityWhite = 0.5f;
-	const float defIntensityNIR = 0.5f;
+	float defIntensityWhite = 0.5f;
+	float defIntensityNIR = 0.5f;
 
 	/// <summary>
 	/// The current power of the White light. The value
@@ -42,6 +80,10 @@ public:
 	/// will be between [0.0, 1.0].
 	/// </summary>
 	float intensityNIR		= 0.0f;
+
+#if IS_RPI
+	int digiPotHandle = -1;
+#endif
 
 public:
 
@@ -83,6 +125,8 @@ public:
 
 	inline void ShowWhite()
 	{ return this->ShowLight(Light::White, false);}
+
+	void SetDefault(Light l, float intensity, DefaultSetMode setMode);
 
 public:
 	std::string HWName() const override;
