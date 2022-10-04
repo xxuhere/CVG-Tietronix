@@ -52,7 +52,7 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		if(i == 0)
 		{
 			src.menuTarg = true;
-			src.processing = ProcessingType::yen_threshold_compressed;
+			//src.processing = ProcessingType::yen_threshold_compressed;
 
 			// Camera 0 to have 
 			// See comment in https://github.com/Achilefu-Lab/CVG-Tietronix/issues/6
