@@ -112,7 +112,9 @@ DCMLIBS = -Wl,--start-group -ldl -ldcmdata -lofstd -li2d -loflog -licuuc -Wl,--e
 DEBUGFLAGS = -g -ggdb
 
 .PHONY: all multi
-multi:
+multi: gen_version
+	@echo "Running make all with -j8 parallelisation"
+	@echo "--------------------------------------------------"
 	$(MAKE) -j8 all
 	
 all: hmdopview
@@ -121,6 +123,11 @@ all: hmdopview
 	@echo "--------------------------------------------------"
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) `wx-config --cxxflags` hmdopview.a -pthread -I/usr/include/openssl `wx-config --libs std,aui --gl-libs` -L/lib -lssl -lcrypto -lboost_system -lboost_filesystem -lstdc++fs -Wall $(OPENCVLIBS) -lmmal_core -lmmal_components -lmmal -lmmal_util -lvcos -lpthread -ldl -lbcm_host -lftgl -lpthread -lxml2 $(DCMLIBS) -o hmdopapp
 	echo "Finished build command."
+	
+gen_version:
+	@echo "Rebuilding version information"
+	@echo "--------------------------------------------------"
+	python ./create_version_src.py
 	
 hmdopview: objs
 	@echo "COMPILING TARGET archive"

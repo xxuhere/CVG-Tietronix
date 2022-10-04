@@ -4,6 +4,7 @@
 #include "../UISys/UIRect.h"
 #include <wx/filename.h>
 #include "../MainWin.h"
+#include "../GenVer.h"
 
 StateIntro::StateIntro(HMDOpApp* app, GLWin* view, MainWin* core)
 	: BaseState(BaseState::AppState::Intro, app, view, core)
@@ -73,6 +74,11 @@ void StateIntro::Draw(const wxSize& sz)
 			50.0f,
 			sz.y - 10.0f);
 	}
+
+	glColor3f(1.0f, 0.5f, 0.25f);
+	this->mainFont.RenderFont(std::string("Commit Ver: ") + GENVER_SHORTSHA, 10.0f, 30.0f);
+	this->mainFont.RenderFont(std::string("Commit DT: ") + GENVER_DATETIME, 10.0f, 60.0f);
+
 }
 
 void StateIntro::Update(double dt)

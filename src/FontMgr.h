@@ -68,10 +68,25 @@ public:
 	void RenderFontCenter(const char* sz, float x, float y, bool vertCenter = false);
 	void _RenderFontRaw(const char* sz);
 
+	
 	inline void RenderFontCenter(const char* sz, const UIVec2& pos, bool vertCenter = false)
 	{ return this->RenderFontCenter(sz, pos.x, pos.y, vertCenter); }
 
+	// The same as above, but takes in std::string
+	void RenderFont(const std::string& str, float x, float y);
+	void RenderFontCenter(const std::string& str, float x, float y, bool vertCenter = false);
+	void _RenderFontRaw(const std::string& str);
+
+	inline void RenderFontCenter(const std::string& str, const UIVec2& pos, bool vertCenter = false)
+	{ return this->RenderFontCenter(str, pos.x, pos.y, vertCenter); }
+
+	/// <summary>
+	/// Get the calculated horizontal length a string would take to render.
+	/// </summary>
+	/// <param name="sz"></param>
+	/// <returns></returns>
 	float GetAdvance(const char* sz);
+	float GetAdvance(const std::string& str);
 	float LineHeight() const;
 	float TypeSize() const;
 };

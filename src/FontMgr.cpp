@@ -48,12 +48,32 @@ void FontWU::RenderFontCenter(const char * sz, float x, float y, bool vertCenter
 	this->RenderFont(sz, x - adv * 0.5f, y);
 }
 
+void FontWU::RenderFont(const std::string& str, float x, float y)
+{
+	this->RenderFont(str.c_str(), x, y);
+}
+
+void FontWU::RenderFontCenter(const std::string& str, float x, float y, bool vertCenter)
+{
+	this->RenderFontCenter(str.c_str(), x, y, vertCenter);
+}
+
+void FontWU::_RenderFontRaw(const std::string& str)
+{
+	this->_RenderFontRaw(str.c_str());
+}
+
 float FontWU::GetAdvance(const char* sz)
 {
 	if(!this->valid)
 		return 0.0f;
 
 	return this->font->Advance(sz);
+}
+
+float FontWU::GetAdvance(const std::string& str)
+{
+	return this->GetAdvance(str.c_str());
 }
 
 float FontWU::LineHeight() const
