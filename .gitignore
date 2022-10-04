@@ -22,3 +22,4 @@ Session.json
 *.mkv
 Snap*.png
 Captures
+src/GenVer.h
