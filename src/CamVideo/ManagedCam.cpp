@@ -236,14 +236,17 @@ bool ManagedCam::SwitchImplementation(VideoPollType newImplType, bool delCurrent
 
 cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, double threshold)
 {
-	cv::Ptr<cv::Mat> grey;
+	cv::Ptr<cv::Mat> grey = new cv::Mat();
 	if (src->elemSize() != 1)
 	{
-		grey = new cv::Mat();
 		cv::cvtColor(*src, *grey, cv::COLOR_RGBA2GRAY, 0);
 	}
 	else 
-		grey = src;
+	{ 
+		// We can't use this directly, because they're going to be edited
+		// as separate images outside this function.
+		src->copyTo(*grey);
+	}
 
 	cv::threshold(
 		*grey,
@@ -347,7 +350,8 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
 {
 	// make sure greyscale first
 	cv::Ptr<cv::Mat> grey;
-	if (src->elemSize() != 1)
+	int elemSz = src->elemSize();
+	if (elemSz != 1)
 	{
 		grey = new cv::Mat();
 		cv::cvtColor(*src, *grey, cv::COLOR_RGBA2GRAY, 0);
@@ -359,7 +363,7 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
 	cv::meanStdDev(*grey, mean, stddev);
 	double final_mean = mean.at<double>(0, 0);
 	double final_stddev = stddev.at<double>(0, 0);
-
+	
 	return ImgProc_Simple(grey, final_mean + 2.0 * final_stddev);
 }
 
@@ -403,10 +407,9 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 	cv::applyColorMap(*inImg, *ret, cv::COLORMAP_JET);
 	std::vector<cv::Mat> channels;
 	cv::split(*ret, channels);
-
+	
 	std::vector<cv::Mat> chansToMerge = {channels[0], channels[1], channels[2], *binaryMask};
 	cv::merge(&chansToMerge[0], chansToMerge.size(), *ret);
-	
 	return ret;
 }
 
