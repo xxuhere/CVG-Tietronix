@@ -387,7 +387,6 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 		}
 	}
 
-
 	ptr = this->ProcessImage(ptr);
 
 	if(ptr)
