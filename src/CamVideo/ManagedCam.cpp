@@ -108,7 +108,10 @@ void ManagedCam::ThreadFn(int camIdx)
 
 					++this->streamFrameCt;
 					this->msInterval = swFPS.Milliseconds();
-					int msLeft = swLoopSleep.MSLeft33();
+
+					// The max is to accomodate if we get a 0. On RPi/Linux, input can start 
+					// breaking if the thread doesn't have a moment to breathe.
+					int msLeft = std::max(swLoopSleep.MSLeft33(), 2);
 					MSSleep(msLeft);
 				}
 				else

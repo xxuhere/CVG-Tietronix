@@ -11,7 +11,7 @@
 	#include <unistd.h>
 	void MSSleep(int ms) 
 	{ 
-		usleep(ms); 
+		usleep(ms * 1000); 
 	}
 #endif
 

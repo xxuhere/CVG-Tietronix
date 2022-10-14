@@ -1058,8 +1058,8 @@ bool CamImpl_MMAL::ActivateImpl()
 	std::cout << 
 		"Get sensor defaults - camera num: "	<< this->state->cameraNum << std::endl <<
 		"Get sensor defaults - camera name: "	<< this->state->camera_name << std::endl << 
-		"Get sensor defaults - camera num: "	<< this->state->width << std::endl <<
-		"Get sensor defaults - camera num: "	<< this->state->height << std::endl;
+		"Get sensor defaults - camera width: "	<< this->state->width << std::endl <<
+		"Get sensor defaults - camera height: "	<< this->state->height << std::endl;
 
 	std::cout << "Creating camera componenet" << std::endl;
 	std::cout << "\t" << this->videoExposureTime << std::endl;
