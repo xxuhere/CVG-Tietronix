@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include <string>
 #include <optional>
+#include "GainStructs.h"
 
 using json = nlohmann::json;
 
@@ -113,6 +114,28 @@ public:
 	/// the implemention's default method.
 	/// </summary>
 	int videoExposureTime = 0;
+
+	/// <summary>
+	/// Explicit whitebalance gain values - or use automatic if empty.
+	/// 
+	/// Currently only supported for MMAL polling. Thus that will also
+	/// affect its name in the AppOptions file.
+	/// </summary>
+	std::optional<WhiteBalanceGain> whitebalanceGain;
+
+	/// <summary>
+	/// Explicit digital/analog gain values - or use automatic if empty.
+	/// 
+	/// Currently only supported for MMAL polling. Thus that will also
+	/// affect its name in the AppOptions file.
+	/// </summary>
+	std::optional<CameraGain> cameraGain;
+
+	/// <summary>
+	/// Explicitly spit out camera gain
+	/// </summary>
+	bool spamGains = false;
+
 };
 
 

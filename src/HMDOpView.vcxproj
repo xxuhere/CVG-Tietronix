@@ -231,6 +231,7 @@
     <ClInclude Include="Utils\cvgShapes.h" />
     <ClInclude Include="Utils\cvgStopwatch.h" />
     <ClInclude Include="Utils\cvgStopwatchLeft.h" />
+    <ClInclude Include="Utils\GainStructs.h" />
     <ClInclude Include="Utils\multiplatform.h" />
     <ClInclude Include="Utils\ProcessingType.h" />
     <ClInclude Include="Utils\TimeUtils.h" />

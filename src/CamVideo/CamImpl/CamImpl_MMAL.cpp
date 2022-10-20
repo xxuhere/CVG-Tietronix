@@ -217,7 +217,7 @@ inline void check_disable_port(MMAL_PORT_T* port)
  * If we are configured to use /dev/video0 as unicam (e.g. for libcamera) then
  * these legacy camera apps can't work. Fail immediately with an obvious message.
  */
-// Borrowed from RaspberryPi userland repo
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool check_camera_stack()
 {
 	// NOTES (wleu 06/27/2022)
@@ -243,7 +243,7 @@ bool check_camera_stack()
 	return false;
 }
 
-// Borrowed from RaspberryPi userland repo
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 int raspicamcontrol_get_mem_gpu(void)
 {
    char response[80] = "";
@@ -263,7 +263,7 @@ int raspicamcontrol_get_mem_gpu(void)
 *
 * @return 0 if successful, non-zero if any parameters out of range
 */
-// Borrowed from RaspberryPi userland repo
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool raspicamcontrol_set_flips(MMAL_COMPONENT_T *camera, int hflip, int vflip)
 {
 	MMAL_PARAMETER_MIRROR_T mirror = {{MMAL_PARAMETER_MIRROR, sizeof(MMAL_PARAMETER_MIRROR_T)}, MMAL_PARAM_MIRROR_NONE};
@@ -300,6 +300,7 @@ bool raspicamcontrol_set_flips(MMAL_COMPONENT_T *camera, int hflip, int vflip)
 *
 * @return 0 if successful, non-zero if any parameters out of range
 */
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool raspicamcontrol_set_exposure_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_EXPOSUREMODE_T mode)
 {
 	MMAL_PARAMETER_EXPOSUREMODE_T exp_mode = {{MMAL_PARAMETER_EXPOSURE_MODE,sizeof(exp_mode)}, mode};
@@ -310,6 +311,51 @@ bool raspicamcontrol_set_exposure_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_EXPO
 	return HandleMMALStatus(mmal_port_parameter_set(camera->control, &exp_mode.hdr));
 }
 
+/**
+* Set the aWB (auto white balance) mode for images
+* @param camera Pointer to camera component
+* @param awb_mode Value to set from
+*   - MMAL_PARAM_AWBMODE_OFF,
+*   - MMAL_PARAM_AWBMODE_AUTO,
+*   - MMAL_PARAM_AWBMODE_SUNLIGHT,
+*   - MMAL_PARAM_AWBMODE_CLOUDY,
+*   - MMAL_PARAM_AWBMODE_SHADE,
+*   - MMAL_PARAM_AWBMODE_TUNGSTEN,
+*   - MMAL_PARAM_AWBMODE_FLUORESCENT,
+*   - MMAL_PARAM_AWBMODE_INCANDESCENT,
+*   - MMAL_PARAM_AWBMODE_FLASH,
+*   - MMAL_PARAM_AWBMODE_HORIZON,
+* @return 0 if successful, non-zero if any parameters out of range
+*/
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
+int raspicamcontrol_set_awb_mode(MMAL_COMPONENT_T *camera, MMAL_PARAM_AWBMODE_T awb_mode)
+{
+	MMAL_PARAMETER_AWBMODE_T param = {{MMAL_PARAMETER_AWB_MODE,sizeof(param)}, awb_mode};
+
+	if (!camera)
+		return 1;
+
+	return HandleMMALStatus(mmal_port_parameter_set(camera->control, &param.hdr));
+}
+
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
+int raspicamcontrol_set_awb_gains(MMAL_COMPONENT_T *camera, float r_gain, float b_gain)
+{
+	MMAL_PARAMETER_AWB_GAINS_T param = {{MMAL_PARAMETER_CUSTOM_AWB_GAINS,sizeof(param)}, {0,0}, {0,0}};
+
+	if (!camera)
+		return 1;
+
+	if (!r_gain || !b_gain)
+		return 0;
+
+	param.r_gain.num = (unsigned int)(r_gain * 65536);
+	param.b_gain.num = (unsigned int)(b_gain * 65536);
+	param.r_gain.den = param.b_gain.den = 65536;
+	return HandleMMALStatus(mmal_port_parameter_set(camera->control, &param.hdr));
+}
+
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool raspicamcontrol_set_frame_rate(MMAL_COMPONENT_T *camera, const MMAL_RATIONAL_T& rate)
 {
 	MMAL_PARAMETER_FRAME_RATE_T frame_rate = {{MMAL_PARAMETER_FRAME_RATE,sizeof(frame_rate)}, rate};
@@ -326,6 +372,7 @@ bool raspicamcontrol_set_frame_rate(MMAL_COMPONENT_T *camera, const MMAL_RATIONA
 * @param shutter speed in microseconds
 * @return 0 if successful, non-zero if any parameters out of range
 */
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool raspicamcontrol_set_shutter_speed(MMAL_COMPONENT_T *camera, int speed)
 {
 	if (!camera)
@@ -340,12 +387,32 @@ bool raspicamcontrol_set_shutter_speed(MMAL_COMPONENT_T *camera, int speed)
 * @param ISO Value to set TODO :
 * @return 0 if successful, non-zero if any parameters out of range
 */
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
 bool raspicamcontrol_set_ISO(MMAL_COMPONENT_T *camera, int ISO)
 {
 	if (!camera)
 		return 1;
 
 	return HandleMMALStatus(mmal_port_parameter_set_uint32(camera->control, MMAL_PARAMETER_ISO, ISO));
+}
+
+// Borrowed from RaspberryPi userland repo, RaspiCamControl.c
+int raspicamcontrol_set_gains(MMAL_COMPONENT_T *camera, float analog, float digital)
+{
+	MMAL_RATIONAL_T rational = {0,65536};
+	MMAL_STATUS_T status;
+
+	if (!camera)
+		return 1;
+
+	rational.num = (unsigned int)(analog * 65536);
+	status = mmal_port_parameter_set_rational(camera->control, MMAL_PARAMETER_ANALOG_GAIN, rational);
+	if (status != MMAL_SUCCESS)
+		return HandleMMALStatus(status);
+
+	rational.num = (unsigned int)(digital * 65536);
+	status = mmal_port_parameter_set_rational(camera->control, MMAL_PARAMETER_DIGITAL_GAIN, rational);
+	return HandleMMALStatus(status);
 }
 
 /**
@@ -587,6 +654,24 @@ void CamImpl_MMAL::_CameraControlCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 				camImpl->cachedRedGain		= RationalToFloat(settings->awb_red_gain);
 				camImpl->cachedBlueGain		= RationalToFloat(settings->awb_blue_gain);
 				camImpl->cachedFocusPos		= settings->focus_position;
+
+				if(camImpl->spamGains)
+				{ 
+					// This is put into a single stringstream and sent to std::cout all at once, or else
+					// there's the possibility of the output being interlaced from multiple cameras because
+					// of threading.
+
+					std::stringstream sstrmOut;
+					sstrmOut << "Camera Idx: " << camImpl->devCamID << std::endl;
+					sstrmOut << "Control change for exposure     - " << camImpl->cachedExposure.value()		<< std::endl;
+					sstrmOut << "Control change for analog gain  - " << camImpl->cachedAnalogGain.value()	<< std::endl;
+					sstrmOut << "Control change for digital gain - " << camImpl->cachedDigitalGain.value()	<< std::endl;
+					sstrmOut << "Control change for red gain     - " << camImpl->cachedRedGain.value()		<< std::endl;
+					sstrmOut << "Control change for blue gain    - " << camImpl->cachedBlueGain.value()		<< std::endl;
+					sstrmOut << "Control change for focus pos    - " << camImpl->cachedFocusPos.value()		<< std::endl;
+					//
+					std::cout << sstrmOut.str() << std::endl;
+				}
 			}
 			break;
 		}
@@ -629,7 +714,7 @@ bool CamImpl_MMAL::_ShutdownGlobal()
 static MMAL_STATUS_T create_camera_component(RPiYUVState* state, int videoExposureTime)
 {
 	std::cout << "Creating camera component" << std::endl;
-	std::cout << "\t" << "Target exposure microseconds: " << videoExposureTime;
+	std::cout << "\t" << "Target exposure microseconds: " << videoExposureTime << std::endl;
 
 	// Create the component
 	MMAL_COMPONENT_T* camera = nullptr;
@@ -981,6 +1066,51 @@ bool CamImpl_MMAL::ActivateImpl()
 
 	MMAL_STATUS_T status = create_camera_component(state, this->videoExposureTime ); 
 
+	if(this->whitebalanceGain.has_value())
+	{ 
+		raspicamcontrol_set_awb_mode(
+			this->state->camera_component, 
+			MMAL_PARAM_AWBMODE_OFF);
+		//
+		raspicamcontrol_set_awb_gains(
+			this->state->camera_component, 
+			this->whitebalanceGain.value().redGain, 
+			this->whitebalanceGain.value().blueGain);
+	
+		std::cout << "Setting explicit white balance for camera : " << this->state->cameraNum << std::endl;
+		std::cout << "\tRed - " << this->whitebalanceGain.value().redGain << std::endl;
+		std::cout << "\tBlue - " << this->whitebalanceGain.value().blueGain << std::endl;
+	}
+	else
+	{
+		std::cout << "Leaving automatic white balance for camera : " << this->state->cameraNum << std::endl;
+	}
+	
+	if(this->cameraGain.has_value())
+	{ 
+		raspicamcontrol_set_gains(
+			this->state->camera_component, 
+			this->cameraGain.value().analogGain, 
+			this->cameraGain.value().digitalGain);
+	
+		std::cout << "Setting explicit analog/digital gain for camera : " << this->state->cameraNum << std::endl;
+		std::cout << "\tAnalog - " << this->cameraGain.value().analogGain << std::endl;
+		std::cout << "\tDigital - " << this->cameraGain.value().digitalGain << std::endl;
+	}
+	else
+	{
+		std::cout << "Leaving automatic gain control for camera : " << this->state->cameraNum << std::endl;
+	}
+	
+	if(this->spamGains)
+	{
+		std::cout << "Camera feed is set to output control values as they change." << std::endl;
+	}
+
+	//
+	//
+	//////////////////////////////////////////////////
+
 	std::cout << "END Creating camera component : " <<  this->devCamID << std::endl;
 
 
@@ -1110,6 +1240,10 @@ bool CamImpl_MMAL::PullOptions(const cvgCamFeedLocs& opts)
 	this->ICamImpl::PullOptions(opts);
 	this->devCamID			= opts.camMMALIdx;
 	this->videoExposureTime = opts.videoExposureTime;
+
+	this->spamGains			= opts.spamGains;
+	this->cameraGain		= opts.cameraGain;
+	this->whitebalanceGain	= opts.whitebalanceGain;
 	return true;
 }
 

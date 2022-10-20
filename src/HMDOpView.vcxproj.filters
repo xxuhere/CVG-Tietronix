@@ -354,6 +354,9 @@
     <ClInclude Include="CamVideo\DicomImg_RawBmp.h">
       <Filter>Header Files\CamVideo</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\GainStructs.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">
