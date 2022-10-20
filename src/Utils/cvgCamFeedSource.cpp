@@ -23,6 +23,9 @@ static const char* szKey_Processing		= "processing";
 static const char* szKey_FlipHoriz		= "flip_horiz";
 static const char* szKey_FlipVert		= "flip_vert";
 static const char* szKey_VideoExpMicro	= "video_exposure_micro";
+static const char* szKey_MMAL_WBGain	= "mmal_wb_gain";
+static const char* szKey_MMAL_ADGain	= "mmal_ad_gain";
+static const char* szKey_MMAL_SpamGains	= "mmal_spam_gain";
 
 json cvgCamFeedSource::AsJSON() const
 {
@@ -54,6 +57,23 @@ json cvgCamFeedSource::AsJSON() const
 	ret[szKey_FlipHoriz		] = this->flipHorizontal;
 	ret[szKey_FlipVert		] = this->flipVertical;
 	ret[szKey_VideoExpMicro	] = this->videoExposureTime;
+	ret[szKey_MMAL_SpamGains] = this->spamGains;
+
+	json jsCamGain = json::array();
+	if(this->cameraGain.has_value())
+	{
+		jsCamGain[0] = this->cameraGain.value().analogGain;
+		jsCamGain[1] = this->cameraGain.value().digitalGain;
+	}
+	ret[szKey_MMAL_ADGain] = jsCamGain;
+
+	json jsrWBGain = json::array();
+	if(this->whitebalanceGain.has_value())
+	{
+		jsrWBGain[0] = this->whitebalanceGain.value().redGain;
+		jsrWBGain[1] = this->whitebalanceGain.value().blueGain;
+	}
+	ret[szKey_MMAL_WBGain] = jsrWBGain;
 
 	if(this->processing == ProcessingType::static_threshold)
 		ret[szKey_Processing] = this->thresholdExplicit;
@@ -122,6 +142,33 @@ void cvgCamFeedSource::ApplyJSON(const json& js)
 
 	if(js.contains(szKey_VideoExpMicro) && js[szKey_VideoExpMicro].is_number())
 		this->videoExposureTime = js[szKey_VideoExpMicro];
+
+	if( js.contains(szKey_MMAL_WBGain) && js[szKey_MMAL_WBGain].is_array())
+	{
+		const json& jsonwb = js[szKey_MMAL_WBGain];
+		if(jsonwb.size() == 2)
+		{
+			WhiteBalanceGain wb;
+			wb.redGain = jsonwb[0];
+			wb.blueGain = jsonwb[1]; 
+			this->whitebalanceGain = wb;
+		}
+	}
+
+	if( js.contains(szKey_MMAL_ADGain) && js[szKey_MMAL_ADGain].is_array())
+	{
+		const json& jsgain = js[szKey_MMAL_ADGain];
+		if(jsgain.size() == 2)
+		{
+			CameraGain cg;
+			cg.analogGain = jsgain[0];
+			cg.digitalGain = jsgain[1];
+			this->cameraGain = cg;
+		}
+	}
+
+	if(js.contains(szKey_MMAL_SpamGains) && js[szKey_MMAL_SpamGains].is_boolean())
+		this->spamGains = js[szKey_MMAL_SpamGains];
 
 	if (js.contains(szKey_Processing))
 	{

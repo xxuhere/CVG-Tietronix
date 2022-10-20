@@ -78,6 +78,10 @@ private:
 	std::optional<float>	cachedRedGain;
 	std::optional<float>	cachedBlueGain;
 	std::optional<uint32_t> cachedFocusPos;
+
+	bool spamGains = false;
+	std::optional<WhiteBalanceGain> whitebalanceGain;
+	std::optional<CameraGain> cameraGain;
 	
 private:
 	/// <summary>
