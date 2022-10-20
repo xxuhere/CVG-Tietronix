@@ -20,10 +20,14 @@ void HMDOpSub_Base::OnRightUpHold( StateHMDOp& targ, SubstateMachine<StateHMDOp>
 {
 	// If nothing is shown an the right pedal is pressed, start video recording
 	// of the composite stream
-	if(targ.GetCoreWindow()->IsRecording(SpecialCams::Composite))
-		targ.GetCoreWindow()->StopRecording(SpecialCams::Composite);
-	else
-		targ.GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
+
+	// NOTE: VIDEO RECORDING DISABLED FOR NOW
+	// See https://github.com/Achilefu-Lab/CVG-Tietronix/issues/42 for details
+
+	//if(targ.GetCoreWindow()->IsRecording(SpecialCams::Composite))
+	//	targ.GetCoreWindow()->StopRecording(SpecialCams::Composite);
+	//else
+	//	targ.GetCoreWindow()->RecordVideo(SpecialCams::Composite, "video");
 }
 
 std::string HMDOpSub_Base::GetIconPath(ButtonID bid, bool isHold)
@@ -36,10 +40,15 @@ std::string HMDOpSub_Base::GetIconPath(ButtonID bid, bool isHold)
 			return "Assets/ButtonAnno/BAnno_Photo.png";
 
 		case ButtonID::Right:
-			if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
-				return "Assets/ButtonAnno/BAnno_StopVideo.png";
-			else
-				return "Assets/ButtonAnno/BAnno_StartVideo.png";
+			// NOTE: VIDEO RECORDING DISABLED FOR NOW
+			// See https://github.com/Achilefu-Lab/CVG-Tietronix/issues/42 for details
+			// 
+			// if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
+			// 	return "Assets/ButtonAnno/BAnno_StopVideo.png";
+			// else
+			// 	return "Assets/ButtonAnno/BAnno_StartVideo.png";
+
+			return "";
 				
 		}
 	}
@@ -60,10 +69,14 @@ std::string HMDOpSub_Base::GetActionName(ButtonID bid, bool isHold)
 			return "Snapshots";
 
 		case ButtonID::Right:
-			if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
-				return "Stop Recording";
-			else
-				return "Start Recording";
+			// NOTE: VIDEO RECORDING DISABLED FOR NOW
+			// See https://github.com/Achilefu-Lab/CVG-Tietronix/issues/42 for details
+			// 
+			// if(this->cachedTarget->GetCoreWindow()->IsRecording(SpecialCams::Composite))
+			// 	return "Stop Recording";
+			// else
+			// 	return "Start Recording";
+			return "";
 			break;
 		}
 	}
@@ -85,7 +98,11 @@ bool HMDOpSub_Base::GetButtonUsable(ButtonID bid, bool isHold)
 			break;
 
 		case ButtonID::Right:
-			return true;
+			// NOTE: VIDEO RECORDING DISABLED FOR NOW
+			// See https://github.com/Achilefu-Lab/CVG-Tietronix/issues/42 for details
+			//
+			// return true;
+			return !isHold;
 			break;
 		}
 	}
