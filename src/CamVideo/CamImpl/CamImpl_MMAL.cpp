@@ -1107,10 +1107,6 @@ bool CamImpl_MMAL::ActivateImpl()
 		std::cout << "Camera feed is set to output control values as they change." << std::endl;
 	}
 
-	//
-	//
-	//////////////////////////////////////////////////
-
 	std::cout << "END Creating camera component : " <<  this->devCamID << std::endl;
 
 
