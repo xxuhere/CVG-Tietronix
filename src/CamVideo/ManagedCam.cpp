@@ -12,9 +12,13 @@
 #include "../Utils/cvgAssert.h"
 #include "../Utils/yen_threshold.h"
 
+
 #if !_WIN32
 	#include "CamImpl/CamImpl_MMAL.h"
+#else
+	#undef max
 #endif
+	#include <algorithm>
 
 ManagedCam::ManagedCam(VideoPollType pt, int cameraId, const cvgCamFeedSource& camOptions)
 {
