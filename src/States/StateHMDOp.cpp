@@ -286,7 +286,7 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 			// the camera streams aren't available to query from.
 			//int segCamIdx = this->GetView()->cachedOptions.FindMenuTargetIndex();
 			//if(segCamIdx != -1)
-			//	curOpacity = camMgr.GetFloat(segCamIdx, StreamParams::Alpha);
+			//	curOpacity = camMgr.GetParam(segCamIdx, StreamParams::Alpha);
 
 			this->sliderSysOpacity = this->CreateSliderSystem(&this->uiSys, UIID::CamSet_Opacity_Meter, "Opacity", 0.0f, 1.0f, curOpacity, UIRect(), this->camBtnOpacity);
 		}
@@ -452,7 +452,7 @@ void StateHMDOp::Draw(const wxSize& sz)
 
 		glBindTexture(GL_TEXTURE_2D, texInfo.glTexId);
 
-		float alpha = camMgr.GetFloat(camIt, StreamParams::Alpha);
+		float alpha = camMgr.GetParam(camIt, StreamParams::Alpha);
 		//if(camMgr.IsThresholded(camIt))
 		//	glColor4f(1.0f, 0.0f, 0.0f, alpha);
 		//else
@@ -715,18 +715,83 @@ void StateHMDOp::EnteredActive()
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
 
 	// Sync the composite saving resolution
-	cmgr.SetFloat(
+	cmgr.SetParam(
 		SpecialCams::Composite, 
 		StreamParams::CompositeVideoWidth,
 		this->GetView()->cachedOptions.compositeWidth);
 
-	cmgr.SetFloat(
+	cmgr.SetParam(
 		SpecialCams::Composite,
 		StreamParams::CompositeVideoHeight,
 		this->GetView()->cachedOptions.compositeHeight);
 
 	this->substateMachine.ChangeCachedSubstate((int)CoreSubState::Default);
+
+
+	this->_LoadExposureButtonLabelsFromOptions();	// Setup labels of exposure buttons
+	this->GetView()->RefreshExposureSetting();		//		Re-enforce the value.
+	this->_HighlighExposureButton();				//		Properly visually toggle the correct button.
 } 
+
+UIButton* StateHMDOp::GetExposureButton(int idx, bool mustBeValidIdx )
+{
+	switch(idx)
+	{
+	case 0:
+		return this->btnExp_1;
+	case 1:
+		return this->btnExp_2;
+	case 2:
+		return this->btnExp_3;
+	case 3:
+		return this->btnExp_4;
+	default:
+		if(mustBeValidIdx)
+			cvgAssert(false, "Unhandled Exposure button index for assigning a label.");
+	}
+	return nullptr;
+}
+
+void StateHMDOp::_LoadExposureButtonLabelsFromOptions()
+{
+	cvgAssert(
+		this->btnExp_1 && this->btnExp_2 && this->btnExp_3 && this->btnExp_4, 
+		"Expected Exposure buttons not ready.");
+
+	for(int i = 0; i < SUPPORTED_EXPOSURE_ENTRIES; ++i)
+	{
+		cvgOptions::ExposureSetting eset = this->GetView()->cachedOptions.GetExposureEntry(i);
+		UIButton* uib = this->GetExposureButton(i, true);
+		
+		if(uib == nullptr)
+			continue;
+
+		if(eset.label.empty())
+			uib->text = "--";
+		else
+			uib->text = eset.label;
+	}
+}
+
+void StateHMDOp::_HighlighExposureButton()
+{
+	cvgAssert(
+		this->btnExp_1 && this->btnExp_2 && this->btnExp_3 && this->btnExp_4, 
+		"Expected Exposure buttons not ready.");
+
+	int activeExp = this->GetView()->GetUsedExposureSettingIdx();
+
+	UIButton* uib = this->GetExposureButton(activeExp, false);
+	int uiIdx = -1;
+	if(uib != nullptr)
+		uiIdx = uib->Idx();
+
+	UpdateGroupColorSet(
+		uiIdx, 
+		{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
+		colSetButtonTog,
+		colSetButton);
+}
 
 void StateHMDOp::_SyncImageProcessingSetUI()
 {
@@ -770,7 +835,7 @@ void StateHMDOp::_SyncThresholdSlider()
 		return;
 
 	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
-	this->sliderSysThresh.slider->SetCurValue(cmgr.GetFloat(targIdx, StreamParams::StaticThreshold));
+	this->sliderSysThresh.slider->SetCurValue(cmgr.GetParam(targIdx, StreamParams::StaticThreshold));
 }
 
 void StateHMDOp::ExitedActive() 
@@ -1331,6 +1396,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
 			colSetButtonTog,
 			colSetButton);
+
+		this->GetView()->UseExposureSetting(0);
 		break;
 
 	case UIID::Lase_Exposure_2:
@@ -1339,6 +1406,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
 			colSetButtonTog,
 			colSetButton);
+
+		this->GetView()->UseExposureSetting(1);
 		break;
 
 	case UIID::Lase_Exposure_3:
@@ -1347,6 +1416,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
 			colSetButtonTog,
 			colSetButton);
+
+		this->GetView()->UseExposureSetting(2);
 		break;
 
 	case UIID::Lase_Exposure_4:
@@ -1355,6 +1426,8 @@ void StateHMDOp::OnUISink_Clicked(UIBase* uib, int mouseBtn, const UIVec2& mouse
 			{this->btnExp_1, this->btnExp_2, this->btnExp_3, this->btnExp_4}, 
 			colSetButtonTog,
 			colSetButton);
+
+		this->GetView()->UseExposureSetting(3);
 		break;
 
 	case UIID::Lase_Threshold_None:
@@ -1437,7 +1510,7 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 				return;
 
 			CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
-			cmgr.SetFloat(targIdx, StreamParams::StaticThreshold, value);
+			cmgr.SetParam(targIdx, StreamParams::StaticThreshold, value);
 		}
 		break;
 
@@ -1448,7 +1521,7 @@ void StateHMDOp::OnUISink_ChangeValue(UIBase* uib, float value, int vid)
 				return;
 
 			CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
-			cmgr.SetFloat(targIdx, StreamParams::Alpha, value);
+			cmgr.SetParam(targIdx, StreamParams::Alpha, value);
 		}
 	}
 }

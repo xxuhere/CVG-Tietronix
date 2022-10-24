@@ -357,6 +357,9 @@
     <ClInclude Include="Utils\GainStructs.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="CamVideo\StreamParams.h">
+      <Filter>Header Files\CamVideo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainWin.cpp">

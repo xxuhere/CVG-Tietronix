@@ -64,3 +64,9 @@ void ICamImpl::UtilToFlipMatInOpenCV(cv::Mat& mat)
 	else if(this->flipVert)
 		cv::flip(mat, mat, 0);
 }
+
+bool ICamImpl::SetParam(StreamParams paramid, double value)
+{
+	std::cout << "Unhandled parameter " << paramid << "In ICamImpl::SetParam()" << std::endl;
+	return false;
+}

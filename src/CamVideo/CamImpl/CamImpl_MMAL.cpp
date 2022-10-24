@@ -816,6 +816,8 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state, int videoExposu
 	format->es->video.crop.width 		= state->width;
 	format->es->video.crop.height 		= state->height;
 
+	// NOTE: We may want to unify this startup code with SetExposureMicroseconds()
+	//
 	// When setting the video port, in order for this to be handled correctly,
 	// the preview port ALSO needs to honor videoExposureTime.
 	if(videoExposureTime <= 34000)
@@ -925,6 +927,8 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state, int videoExposu
 	// 	ENABLE COMPONENT
 	//
 	//////////////////////////////////////////////////
+
+	std::cout << "Enabling MMAL camera component" << std::endl;
 	status = mmal_component_enable(camera);
 
 	if (status != MMAL_SUCCESS)
@@ -955,7 +959,7 @@ static MMAL_STATUS_T create_camera_component(RPiYUVState* state, int videoExposu
 	
 	if (!pool)
 	{
-		std::cerr << "Failed to create buffer header pool for camera still port " << still_port->name << std::endl;
+		std::cerr << "Failed to create buffer header pool for camera video port " << still_port->name << std::endl;
 		return status;
 	}
 
@@ -1066,41 +1070,7 @@ bool CamImpl_MMAL::ActivateImpl()
 
 	MMAL_STATUS_T status = create_camera_component(state, this->videoExposureTime ); 
 
-	if(this->whitebalanceGain.has_value())
-	{ 
-		raspicamcontrol_set_awb_mode(
-			this->state->camera_component, 
-			MMAL_PARAM_AWBMODE_OFF);
-		//
-		raspicamcontrol_set_awb_gains(
-			this->state->camera_component, 
-			this->whitebalanceGain.value().redGain, 
-			this->whitebalanceGain.value().blueGain);
-	
-		std::cout << "Setting explicit white balance for camera : " << this->state->cameraNum << std::endl;
-		std::cout << "\tRed - " << this->whitebalanceGain.value().redGain << std::endl;
-		std::cout << "\tBlue - " << this->whitebalanceGain.value().blueGain << std::endl;
-	}
-	else
-	{
-		std::cout << "Leaving automatic white balance for camera : " << this->state->cameraNum << std::endl;
-	}
-	
-	if(this->cameraGain.has_value())
-	{ 
-		raspicamcontrol_set_gains(
-			this->state->camera_component, 
-			this->cameraGain.value().analogGain, 
-			this->cameraGain.value().digitalGain);
-	
-		std::cout << "Setting explicit analog/digital gain for camera : " << this->state->cameraNum << std::endl;
-		std::cout << "\tAnalog - " << this->cameraGain.value().analogGain << std::endl;
-		std::cout << "\tDigital - " << this->cameraGain.value().digitalGain << std::endl;
-	}
-	else
-	{
-		std::cout << "Leaving automatic gain control for camera : " << this->state->cameraNum << std::endl;
-	}
+	this->EnforceGainSettings();
 	
 	if(this->spamGains)
 	{
@@ -1189,6 +1159,49 @@ bool CamImpl_MMAL::ActivateImpl()
 	return true;
 }
 
+void CamImpl_MMAL::EnforceGainSettings()
+{
+	std::cout << "Resetting white balance and A/D gain settings from options." << std::endl;
+
+	if(this->whitebalanceGain.has_value())
+	{ 
+		raspicamcontrol_set_awb_mode(
+			this->state->camera_component, 
+			MMAL_PARAM_AWBMODE_OFF);
+		//
+		raspicamcontrol_set_awb_gains(
+			this->state->camera_component, 
+			this->whitebalanceGain.value().redGain, 
+			this->whitebalanceGain.value().blueGain);
+
+		std::cout << "Setting explicit white balance for camera : " << this->state->cameraNum << std::endl;
+		std::cout << "\tRed - " << this->whitebalanceGain.value().redGain << std::endl;
+		std::cout << "\tBlue - " << this->whitebalanceGain.value().blueGain << std::endl;
+	}
+	else
+	{
+		std::cout << "Leaving automatic white balance for camera : " << this->state->cameraNum << std::endl;
+		raspicamcontrol_set_awb_gains(this->state->camera_component, 0, 0);
+	}
+
+	if(this->cameraGain.has_value())
+	{ 
+		raspicamcontrol_set_gains(
+			this->state->camera_component, 
+			this->cameraGain.value().analogGain, 
+			this->cameraGain.value().digitalGain);
+
+		std::cout << "Setting explicit analog/digital gain for camera : " << this->state->cameraNum << std::endl;
+		std::cout << "\tAnalog - " << this->cameraGain.value().analogGain << std::endl;
+		std::cout << "\tDigital - " << this->cameraGain.value().digitalGain << std::endl;
+	}
+	else
+	{
+		std::cout << "Leaving automatic gain control for camera : " << this->state->cameraNum << std::endl;
+		raspicamcontrol_set_gains(this->state->camera_component, 0, 0);
+	}
+}
+
 bool CamImpl_MMAL::DeactivateImpl()
 {
 	this->polling = false;
@@ -1271,4 +1284,105 @@ void CamImpl_MMAL::DelegatedInjectIntoDicom(DcmDataset* dicomData)
 		if(this->cachedFocusPos.has_value())
 			InsertAcquisitionContextInfo(dicomData, "focus_pos", std::to_string(this->cachedFocusPos.value()));
 	}
+}
+
+bool CamImpl_MMAL::SetParam(StreamParams paramid, double value)
+{
+	switch(paramid)
+	{
+	case StreamParams::ExposureMicroseconds:
+		SetExposureMicroseconds((long)value);
+		return true;
+	}
+	return this->ICamImpl::SetParam(paramid, value);
+}
+
+void CamImpl_MMAL::SetExposureMicroseconds(long microseconds)
+{
+	std::cout << "Setting exposure to " << microseconds << " microseconds." << std::endl;
+
+
+	//mmal_port_disable(this->camVideoPort);
+	//MMAL_STATUS_T status;
+	////status = mmal_component_disable(this->state->camera_component);
+	////HandleMMALStatus(status);
+	//
+	//status = mmal_port_parameter_set_boolean(
+	//	this->camVideoPort, 
+	//	MMAL_PARAMETER_CAPTURE, 
+	//	false);
+
+	MMAL_ES_FORMAT_T* format = this->camVideoPort->format;
+	if(microseconds <= 0)
+	{
+		// No explicit exposure time, allow camera to adjust it automatically.
+	
+		std::cout << "\tAdjusting shutter speed" << std::endl;
+		raspicamcontrol_set_exposure_mode(
+			this->state->camera_component, 
+			MMAL_PARAM_EXPOSUREMODE_AUTO);
+	
+		// Return to default 30FPS for framerate
+		//
+		//std::cout << "\tAdjusting frame rate" << std::endl;
+		//format->es->video.frame_rate.num = VIDEO_FRAME_RATE_NUM;
+		//format->es->video.frame_rate.den = VIDEO_FRAME_RATE_DEN;
+	}
+	else 
+	{
+		std::cout << "\tAdjusting shutter speed" << std::endl;
+		
+		raspicamcontrol_set_exposure_mode(
+			this->state->camera_component, 
+			MMAL_PARAM_EXPOSUREMODE_OFF);
+	
+		raspicamcontrol_set_shutter_speed(
+			this->state->camera_component, 
+			microseconds);
+	
+		//std::cout << "\tAdjusting frame rate" << std::endl;
+		//if(ExposureMicroseconds <= 34000)
+		//{ 
+		//	// Use default frame rate
+		//	format->es->video.frame_rate.num = VIDEO_FRAME_RATE_NUM;
+		//	format->es->video.frame_rate.den = VIDEO_FRAME_RATE_DEN;
+		//}
+		//else
+		//{
+		//	// Needs manual framerate
+		//	format->es->video.frame_rate.num = microseconds;
+		//	format->es->video.frame_rate.den = 1000000;
+		//}
+	}
+
+	this->EnforceGainSettings();
+	//
+	//status = mmal_port_format_commit(this->camVideoPort);
+	//HandleMMALStatus(status);
+	//
+	//status = mmal_port_enable(this->camVideoPort, CamImpl_MMAL::_CameraBufferCallback);
+	//HandleMMALStatus(status);
+	//////status = mmal_component_enable(this->state->camera_component);
+	//////HandleMMALStatus(status);
+	////
+	////// Send all the buffers to the camera video port
+	//int num = mmal_queue_length(this->state->camera_pool->queue);
+	//for (int q = 0; q < num; q++)
+	//{
+	//	MMAL_BUFFER_HEADER_T *buffer = 
+	//		mmal_queue_get(this->state->camera_pool->queue);
+	//
+	//	if (!buffer)
+	//		std::cerr << "Unable to get a required buffer " << q << " from pool queue" << std::endl;
+	//
+	//	if (mmal_port_send_buffer(this->camVideoPort, buffer)!= MMAL_SUCCESS)
+	//		std::cerr << "Unable to send a buffer to camera video port (" << q << ")" << std::endl;
+	//}	
+	//
+	//status = mmal_port_parameter_set_boolean(
+	//	this->camVideoPort, 
+	//	MMAL_PARAMETER_CAPTURE, 
+	//	true);
+	//
+	//HandleMMALStatus(status);
 }

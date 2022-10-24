@@ -165,6 +165,7 @@
     <ClInclude Include="CamVideo\ManagedComposite.h" />
     <ClInclude Include="CamVideo\ROIRect.h" />
     <ClInclude Include="CamVideo\SnapRequest.h" />
+    <ClInclude Include="CamVideo\StreamParams.h" />
     <ClInclude Include="CamVideo\VideoRequest.h" />
     <ClInclude Include="Carousel\Carousel.h" />
     <ClInclude Include="DicomUtils\DicomInjector.h" />

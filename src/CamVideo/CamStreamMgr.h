@@ -246,17 +246,17 @@ public:
 	bool SetProcessingType(int idx, ProcessingType pt);
 
 	/// <summary>
-	/// Get a float property value.
-	/// See IManagedCam::GetFloat() for more details.
+	/// Get a property value.
+	/// See IManagedCam::GetParam() for more details.
 	/// </summary>
 	/// <param name="id">The id of the camera.</param>
 	/// <param name="paramid">The parameter to retrieve the value of.</param>
 	/// <returns>The retrieved value.</returns>
-	float GetFloat(int id, StreamParams paramid);
+	double GetParam(int id, StreamParams paramid);
 
 	/// <summary>
 	/// Set a float property value.
-	/// See IManagedCam::SetFloat() for more details.
+	/// See IManagedCam::SetParam() for more details.
 	/// </summary>
 	/// <param name="id">The id of the camera.</param>
 	/// <param name="paramid">The parameter to set the value of.</param>
@@ -265,7 +265,7 @@ public:
 	/// true if successful. false if the paramid was unknown, or 
 	/// if an error occured.
 	/// </returns>
-	bool SetFloat(int id, StreamParams paramid, float value);
+	bool SetParam(int id, StreamParams paramid, double value);
 
 private:
 	// Only the singleton systems should be in charge of its construction.

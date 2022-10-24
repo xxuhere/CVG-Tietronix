@@ -5,6 +5,7 @@
 #include "../../Utils/cvgOptions.h"
 #include <opencv2/core.hpp>
 #include <dcmtk/dcmdata/dcdeftag.h>
+#include "../StreamParams.h"
 
 /// <summary>
 /// Base class for an implementation of polling video frames from
@@ -169,6 +170,8 @@ public:
 	/// </summary>
 	/// <param name="dicomData"></param>
 	virtual void DelegatedInjectIntoDicom(DcmDataset* dicomData);
+
+	virtual bool SetParam(StreamParams paramid, double value);
 
 	virtual ~ICamImpl();
 };

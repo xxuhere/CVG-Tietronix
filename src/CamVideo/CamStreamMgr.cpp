@@ -421,22 +421,22 @@ bool CamStreamMgr::Shutdown()
 }
 
 
-float CamStreamMgr::GetFloat(int id, StreamParams paramid)
+double CamStreamMgr::GetParam(int id, StreamParams paramid)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
 	IManagedCam* imc = this->_GetIManaged(id);
 	if(imc == nullptr)
 		return -1.0f;
 
-	return imc->GetFloat(paramid);
+	return imc->GetParam(paramid);
 }
 
-bool CamStreamMgr::SetFloat(int id, StreamParams paramid, float value)
+bool CamStreamMgr::SetParam(int id, StreamParams paramid, double value)
 {
 	std::lock_guard<std::mutex> guard(this->camAccess);
 	IManagedCam* imc = this->_GetIManaged(id);
 	if(imc == nullptr)
 		return false;
 
-	return imc->SetFloat(paramid, value);
+	return imc->SetParam(paramid, value);
 }

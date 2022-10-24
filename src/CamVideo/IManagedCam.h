@@ -18,31 +18,7 @@
 #include <vector>
 
 #include "../DicomUtils/DicomInjector.h"
-
-/// <summary>
-/// Parameter ID values for ALL items that can be used for 
-/// GetFloat() or SetFloat(), for ALL IManagedCam subclasses.
-/// </summary>
-enum StreamParams
-{
-	// Alpha blending amount
-	Alpha,
-
-	/// <summary>
-	/// For simple thresholding image processing. The pixel value to threshold.
-	/// </summary>
-	StaticThreshold,
-
-	/// <summary>
-	/// For composite video feeds, the width of the video to save.
-	/// </summary>
-	CompositeVideoWidth,
-
-	/// <summary>
-	/// For composite video feeds, the height of the video to save.
-	/// </summary>
-	CompositeVideoHeight
-};
+#include "StreamParams.h"
 
 /// <summary>
 /// Enumeration of types to allow 
@@ -359,7 +335,7 @@ public:
 	/// 
 	/// In the future, this may change to a floating point error code; eg, NaN.
 	/// </returns>
-	virtual float GetFloat( StreamParams paramid);
+	virtual double GetParam( StreamParams paramid);
 
 	/// <summary>
 	/// Set a parameter.
@@ -375,7 +351,7 @@ public:
 	/// True if the value was successfully set. Else, there was an issue with
 	/// the value, OR the parameter is unsupported.
 	/// </returns>
-	virtual bool SetFloat( StreamParams paramid, float value);
+	virtual bool SetParam( StreamParams paramid, double value);
 
 	/// <summary>
 	/// Get access to the shared pointer of the last polled image.

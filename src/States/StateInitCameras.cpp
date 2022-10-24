@@ -193,6 +193,10 @@ void StateInitCameras::Draw(const wxSize& sz)
 	{
 		this->GetCoreWindow()->doubleBeep.Play();
 		this->playBeepLatch = true;
+
+		// We're piggybacking off the beep mechanism to also update
+		// exposure for the first frame when both cameras are available.
+		this->GetView()->ResetExposureSetting();
 	}
 }
 

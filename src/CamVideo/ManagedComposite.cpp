@@ -306,7 +306,7 @@ void ManagedComposite::ThreadFn(int camIdx)
 	this->conState = State::Shutdown;
 }
 
-float ManagedComposite::GetFloat( StreamParams paramid)
+double ManagedComposite::GetParam( StreamParams paramid)
 {
 	switch(paramid)
 	{
@@ -317,10 +317,10 @@ float ManagedComposite::GetFloat( StreamParams paramid)
 		return this->streamHeight;
 	}
 
-	return this->IManagedCam::GetFloat(paramid);
+	return this->IManagedCam::GetParam(paramid);
 }
 
-bool ManagedComposite::SetFloat( StreamParams paramid, float value)
+bool ManagedComposite::SetParam( StreamParams paramid, double value)
 {
 	
 	switch(paramid)
@@ -334,7 +334,7 @@ bool ManagedComposite::SetFloat( StreamParams paramid, float value)
 		return true;
 	}
 
-	return this->IManagedCam::SetFloat(paramid, value);
+	return this->IManagedCam::SetParam(paramid, value);
 }
 
 CamType ManagedComposite::GetCamType()

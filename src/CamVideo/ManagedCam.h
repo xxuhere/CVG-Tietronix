@@ -100,9 +100,9 @@ public:
 	/// </return>
 	bool SetProcessingType(ProcessingType pt);
 
-	float GetFloat( StreamParams paramid) override;
+	double GetParam( StreamParams paramid) override;
 
-	bool SetFloat( StreamParams paramid, float value) override;
+	bool SetParam( StreamParams paramid, double value) override;
 	
 	CamType GetCamType() override;
 

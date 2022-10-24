@@ -539,6 +539,10 @@ protected:
 	/// </summary>
 	void OnCarouselChanged(CarouselType caroTy);
 
+	void _LoadExposureButtonLabelsFromOptions();
+	void _HighlighExposureButton();
+	UIButton* GetExposureButton(int idx, bool mustBeValidIdx);
+
 
 public:
 	//////////////////////////////////////////////////

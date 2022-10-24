@@ -2,6 +2,7 @@
 #include <istream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 // The JSON keys. This listing is the authority on what literal
 // strings can be expected throughout the options json file.
@@ -31,6 +32,87 @@ static const char* szkey_FeedOpts			= "feed_options";
 static const char* szKey_CarouselSeries		= "carousel_series";
 static const char* szKey_CarouselBody		= "carousel_body";
 static const char* szKey_CarouselOrient		= "carousel_orientation";
+
+static const char* szKey_ExposureID			= "exposure_idx";
+static const char* szKey_ExposureEntry		= "exposure_entries";
+static const char* szKey_ExposureEntryLbl	= "label";
+static const char* szKey_ExposureEntryMicro	= "microseconds";
+
+// Try-get utilities for JSON - We could probably get away with
+// templating this, but for now we'll just have a few explicit 
+// definitions for now to reduce implementation complexity.
+bool JSONGetMember(const json& obj, const std::string& memberName, std::string& into)
+{
+	if(!obj.contains(memberName) || !obj[memberName].is_string())
+		return false;
+
+	into = obj[memberName];
+}
+
+
+bool JSONGetMember(const json& obj, const std::string& memberName, int& into)
+{
+	if(!obj.contains(memberName) || !obj[memberName].is_number())
+		return false;
+
+	into = obj[memberName];
+}
+
+
+bool JSONGetMember(const json& obj, const std::string& memberName, float& into)
+{
+	if(!obj.contains(memberName) || !obj[memberName].is_number())
+		return false;
+
+	into = obj[memberName];
+}
+
+bool JSONGetMember(const json& obj, const std::string& memberName, long& into)
+{
+	if(!obj.contains(memberName) || !obj[memberName].is_number())
+		return false;
+
+	into = obj[memberName];
+}
+
+bool JSONGetMember(const json& obj, const std::string& memberName, bool& into)
+{
+	if(!obj.contains(memberName) || !obj[memberName].is_boolean())
+		return false;
+
+	into = obj[memberName];
+}
+
+
+// Overloads of the above utility functions, but instead of having a failure return,
+// they simply set the value to a default if it's missing.
+void JSONGetMember(const json& obj, const std::string& memberName, std::string& into, const std::string& def)
+{ if(!JSONGetMember(obj, memberName, into)){into = def;}}
+
+void JSONGetMember(const json& obj, const std::string& memberName, int& into, int def)
+{ if(!JSONGetMember(obj, memberName, into)){into = def;}}
+
+void JSONGetMember(const json& obj, const std::string& memberName, float& into, float def)
+{ if(!JSONGetMember(obj, memberName, into)){into = def;}}
+
+void JSONGetMember(const json& obj, const std::string& memberName, long& into, long def)
+{ if(!JSONGetMember(obj, memberName, into)){into = def;}}
+
+void JSONGetMember(const json& obj, const std::string& memberName, bool& into, bool def)
+{ if(!JSONGetMember(obj, memberName, into)){into = def;}}
+
+
+cvgOptions::ExposureSetting::ExposureSetting()
+{
+	this->label = "";
+	this->microseconds = 0;
+}
+
+cvgOptions::ExposureSetting::ExposureSetting(const std::string& label, long microseconds)
+{
+	this->label = label;
+	this->microseconds = microseconds;
+}
 
 cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 {
@@ -91,6 +173,8 @@ cvgOptions::cvgOptions(int defSources, bool sampleCarousels)
 		this->caroSysOrient.entries.push_back(CarouselData( "LA",	"Assets/CarIcons/Lateral.png",			"LATR",		"Lateral"));
 		this->caroSysOrient.entries.push_back(CarouselData( "ME",	"Assets/CarIcons/Medial.png",			"MEDI",		"Medial"));
 	}
+
+	this->SetExposureEntriesToDefault();
 }
 
 bool cvgOptions::LoadFromFile(const std::string& filepath)
@@ -131,41 +215,18 @@ bool cvgOptions::SaveToFile(const std::string& filepath) const
 
 void cvgOptions::Apply(json& data)
 {	
-	if(data.contains(szKey_TestImg) && data[szKey_TestImg].is_string())
-		this->testImagePath = data[szKey_TestImg];
-
-	if(data.contains(szKey_VPWidth) && data[szKey_VPWidth].is_number())
-		this->viewportX = data[szKey_VPWidth];
-
-	if(data.contains(szKey_VPHeight) && data[szKey_VPHeight].is_number())
-		this->viewportY = data[szKey_VPHeight];
-
-	if(data.contains(szKey_compositeWidth) && data[szKey_compositeWidth].is_number_integer())
-		this->compositeWidth = data[szKey_compositeWidth];
-
-	if(data.contains(szKey_compositeHeight) && data[szKey_compositeHeight].is_number_integer())
-		this->compositeHeight = data[szKey_compositeHeight];
-
-	if(data.contains(szKey_VPOffsX) && data[szKey_VPOffsX].is_number())
-		this->viewportOffsX = data[szKey_VPOffsX];
-
-	if(data.contains(szKey_VPOffsY) && data[szKey_VPOffsY].is_number())
-		this->viewportOffsY = data[szKey_VPOffsY];
-
-	if(data.contains(szKey_mousepad_x) && data[szKey_mousepad_x].is_number())
-		this->mousepadX = data[szKey_mousepad_x];
-
-	if(data.contains(szKey_mousepad_y) && data[szKey_mousepad_y].is_number())
-		this->mousepadY = data[szKey_mousepad_y];
-
-	if(data.contains(szKey_mousepad_scale) && data[szKey_mousepad_scale].is_number())
-		this->mousepadScale = data[szKey_mousepad_scale];
-
-	if(data.contains(szKey_debugUI) && data[szKey_debugUI].is_boolean())
-		this->drawUIDebug = data[szKey_debugUI];
-
-	if (data.contains(szKey_fullscreen) && data[szKey_fullscreen].is_boolean())
-		this->fullscreen = data[szKey_fullscreen];
+	JSONGetMember(data, szKey_TestImg,			this->testImagePath);
+	JSONGetMember(data, szKey_VPWidth,			this->viewportX);
+	JSONGetMember(data, szKey_VPHeight,			this->viewportY);
+	JSONGetMember(data, szKey_compositeWidth,	this->compositeWidth);
+	JSONGetMember(data, szKey_compositeHeight,	this->compositeHeight);
+	JSONGetMember(data, szKey_VPOffsX,			this->viewportOffsX);
+	JSONGetMember(data, szKey_VPOffsY,			this->viewportOffsY);
+	JSONGetMember(data, szKey_mousepad_x,		this->mousepadX);
+	JSONGetMember(data, szKey_mousepad_y,		this->mousepadY);
+	JSONGetMember(data, szKey_mousepad_scale,	this->mousepadScale);
+	JSONGetMember(data, szKey_debugUI,			this->drawUIDebug);
+	JSONGetMember(data, szKey_fullscreen,		this->fullscreen);
 
 	if(data.contains(szkey_FeedOpts) && data[szkey_FeedOpts].is_array())
 	{
@@ -188,6 +249,31 @@ void cvgOptions::Apply(json& data)
 
 	if(data.contains(szKey_CarouselOrient))
 		this->caroSysOrient.ApplyJSON(data[szKey_CarouselOrient]);
+
+	this->exposures.clear();
+	if(data.contains(szKey_ExposureEntry) && data[szKey_ExposureEntry].is_array())
+	{
+		const json& jsonExpEnt = data[szKey_ExposureEntry];
+		int entryCt = std::min<int>(jsonExpEnt.size(), SUPPORTED_EXPOSURE_ENTRIES);
+		for(int i = 0; i < entryCt; ++i)
+		{
+			ExposureSetting expToAdd;
+			JSONGetMember(jsonExpEnt[i], szKey_ExposureEntryLbl, expToAdd.label);
+			JSONGetMember(jsonExpEnt[i], szKey_ExposureEntryMicro, expToAdd.microseconds);
+			this->exposures.push_back(expToAdd);
+
+			const int EXPOSURE_FRAMERATE_MAX = 34243;
+			if( expToAdd.microseconds > EXPOSURE_FRAMERATE_MAX)
+			{
+				std::cout << "WARNING: Detecting loading exposure option " << i << " with label " << expToAdd.label << " with a microsecond window of " << expToAdd.microseconds <<
+					", the max supported by default is " << EXPOSURE_FRAMERATE_MAX << std::endl;
+			}
+		}
+	}
+	else
+		this->SetExposureEntriesToDefault();
+
+	JSONGetMember(data, szKey_ExposureID, this->defaultExposureID);
 }
 
 int cvgOptions::FindMenuTargetIndex() const
@@ -244,9 +330,24 @@ json cvgOptions::RepresentAsJSON() const
 
 	//		CAROUSEL ENTRIES
 	//////////////////////////////////////////////////
-	ret[szKey_CarouselBody] = this->caroBody.AsJSON();
-	ret[szKey_CarouselSeries] = this->caroSysSeries.AsJSON();
-	ret[szKey_CarouselOrient] = this->caroSysOrient.AsJSON();
+	ret[szKey_CarouselBody]		= this->caroBody.AsJSON();
+	ret[szKey_CarouselSeries]	= this->caroSysSeries.AsJSON();
+	ret[szKey_CarouselOrient]	= this->caroSysOrient.AsJSON();
+
+	//		EXPOSURES
+	//////////////////////////////////////////////////
+	ret[szKey_ExposureID] = this->defaultExposureID;
+	int expEntCt = std::min<int>(this->exposures.size(), SUPPORTED_EXPOSURE_ENTRIES);
+	json jsonExpEntries = json::array();
+	for(int i = 0; i < expEntCt; ++i)
+	{
+		json jsonEntry = json::object();
+		jsonEntry[szKey_ExposureEntryLbl] = this->exposures[i].label;
+		jsonEntry[szKey_ExposureEntryMicro] = this->exposures[i].microseconds;
+		//
+		jsonExpEntries.push_back(jsonEntry);
+	}
+	ret[szKey_ExposureEntry] = jsonExpEntries;
 
 	return ret;
 }
@@ -255,4 +356,22 @@ void cvgOptions::Clear()
 {
 	// Take default values from default constructor.
 	*this = cvgOptions(0, false);
+}
+
+void cvgOptions::SetExposureEntriesToDefault()
+{
+	this->exposures.clear();
+	//
+	this->exposures.push_back(ExposureSetting( "Auto", 0));
+	this->exposures.push_back(ExposureSetting( "10ms", 10000));
+	this->exposures.push_back(ExposureSetting( "22ms", 32000));
+	this->exposures.push_back(ExposureSetting( "33ms", 33000));
+}
+
+cvgOptions::ExposureSetting cvgOptions::GetExposureEntry(int index) const
+{
+	if(index < 0 || index >= this->exposures.size())
+		return ExposureSetting(); // If not valid, return a default
+
+	return this->exposures[index];
 }

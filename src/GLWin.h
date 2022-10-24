@@ -62,6 +62,8 @@ private:
 	/// </summary>
 	std::string lastUIMsg = "";
 
+	int exposureOptionID = -1;
+
 public:
 	/// <summary>
 	/// The application preferences. This cache should not be
@@ -135,6 +137,38 @@ public:
 
 	void ResetSnapCoroutine(cvgCoroutine* coroutine)
 	{ this->coroutineSnapPhoto = cvgCoroutineHandle(coroutine); }
+
+	/// <summary>
+	/// Get the ID of the last exposure ID was was set.
+	/// </summary>
+	/// <returns></returns>
+	int GetUsedExposureSettingIdx() const;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="index"></param>
+	/// <returns></returns>
+	cvgOptions::ExposureSetting GetExposureSetting(int index) const;
+
+	/// <summary>
+	/// Set the exposure to use something from the AppOptions.
+	/// </summary>
+	/// <param name="index">
+	/// The index of the ID from the AppOptions to use. This is expected to
+	/// be a value between [0, 3]
+	/// </param>
+	/// <returns>
+	/// If true, the exposure ID was used. Else, the id was not found and the
+	/// request is ignored.
+	/// </returns>
+	bool UseExposureSetting(int index);
+
+
+	bool RefreshExposureSetting()
+	{ return this->UseExposureSetting(this->exposureOptionID); }
+
+	bool ResetExposureSetting();
 
 public:
 

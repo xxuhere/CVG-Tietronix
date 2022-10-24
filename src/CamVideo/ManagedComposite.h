@@ -82,9 +82,9 @@ public:
 
 	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg) override;
 
-	float GetFloat( StreamParams paramid) override;
+	double GetParam( StreamParams paramid) override;
 
-	bool SetFloat( StreamParams paramid, float value) override;
+	bool SetParam( StreamParams paramid, double value) override;
 
 	bool UsesImageProcessingChain() override;
 

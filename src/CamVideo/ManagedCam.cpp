@@ -440,28 +440,33 @@ ProcessingType ManagedCam::GetProcessingType() const
 	return this->camOptions.processing;
 }
 
-float ManagedCam::GetFloat( StreamParams paramid)
+double ManagedCam::GetParam( StreamParams paramid)
 {
 	switch(paramid)
 	{
 	case StreamParams::StaticThreshold:
-		return (float)this->camOptions.thresholdExplicit;
+		return (double)this->camOptions.thresholdExplicit;
 		break;
 	}
 
-	return this->IManagedCam::GetFloat(paramid);
+	return this->IManagedCam::GetParam(paramid);
 }
 
-bool ManagedCam::SetFloat( StreamParams paramid, float value)
+bool ManagedCam::SetParam( StreamParams paramid, double value)
 {
 	switch(paramid)
 	{
 	case StreamParams::StaticThreshold:
-		this->camOptions.thresholdExplicit = (int)std::clamp(value, 0.0f, 255.0f);
+		this->camOptions.thresholdExplicit = (int)std::clamp(value, 0.0, 255.0);
 		return true;
+
+	// Add all other cases that are designed to be handled by the 
+	// implementation here
+	case StreamParams::ExposureMicroseconds:
+		this->currentImpl->SetParam(paramid, value);
 	}
 
-	return this->IManagedCam::SetFloat(paramid, value);
+	return this->IManagedCam::SetParam(paramid, value);
 }
 
 bool ManagedCam::SetProcessingType(ProcessingType pt)
