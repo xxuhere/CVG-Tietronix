@@ -8,9 +8,13 @@
 #include "Utils/cvgOptions.h"
 #include "OpSession.h"
 #include "Session_Toml.h"
+#include "GenVer.h"
 
 bool HMDOpApp::OnInit()
 {
+    std::cout << "Commit Ver: " << GENVER_SHORTSHA << std::endl;
+    std::cout << "Commit Date: " << GENVER_DATETIME << std::endl;
+
     bool createOptionsFile = false;
     bool createSessionFile = false;
     bool showHelp = false;
