@@ -121,4 +121,15 @@ public:
 	bool IsValid() override;
 	bool PullOptions(const cvgCamFeedLocs& opts) override;
 	void DelegatedInjectIntoDicom(DcmDataset* dicomData) override;
+	bool SetParam(StreamParams paramid, double value) override;
+
+	/// <summary>
+	/// Set how long the exposure time will be. This will affect both the 
+	/// framerate and the shutterspeed.
+	/// 
+	/// Set to a value of 0 to turn off and use automatic.
+	/// </summary>
+	void SetExposureMicroseconds(long microseconds);
+
+	void EnforceGainSettings();
 };

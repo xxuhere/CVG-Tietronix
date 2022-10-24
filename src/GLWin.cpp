@@ -159,6 +159,45 @@ void GLWin::SaveOptions()
 	this->SaveOptions(wxGetApp().appOptionsLoc);
 }
 
+
+int GLWin::GetUsedExposureSettingIdx() const
+{
+	return this->exposureOptionID;
+}
+
+cvgOptions::ExposureSetting GLWin::GetExposureSetting(int index) const
+{
+
+	return this->cachedOptions.GetExposureEntry(index);
+}
+
+bool GLWin::UseExposureSetting(int index)
+{
+	int targIdx = this->cachedOptions.FindMenuTargetIndex();
+	if(targIdx == -1)
+		return false;
+
+	if(index < 0 || index >= this->cachedOptions.ExposureEntriesCt() )
+	{ 
+		this->exposureOptionID = index;
+		std::cout << "Ignoring request to use exposure setting " << index << " not a valid index." << std::endl;
+		return -1;
+	}
+
+	CamStreamMgr& cmgr = CamStreamMgr::GetInstance();
+	long ms = this->cachedOptions.GetExposureEntry(index).microseconds;
+	cmgr.SetParam(targIdx, StreamParams::ExposureMicroseconds, (double)ms);
+	this->exposureOptionID = index;
+
+	std::cout << "Set processing target camera exposure setting " << index << " to " << ms << "." << std::endl;
+	return true;
+}
+
+bool GLWin::ResetExposureSetting()
+{
+	return this->UseExposureSetting(this->cachedOptions.defaultExposureID);
+}
+
 void GLWin::OnResize(wxSizeEvent& evt)
 {
 	if(this->ctx == nullptr || !this->initStaticResources)

@@ -26,7 +26,7 @@
 #include "../Utils/cvgAssert.h"
 
 
-float IManagedCam::GetFloat( StreamParams paramid)
+double IManagedCam::GetParam(StreamParams paramid)
 {
 	switch(paramid)
 	{
@@ -37,7 +37,7 @@ float IManagedCam::GetFloat( StreamParams paramid)
 	return 0.0f;
 }
 
-bool IManagedCam::SetFloat( StreamParams paramid, float value)
+bool IManagedCam::SetParam( StreamParams paramid, double value)
 {
 	switch(paramid)
 	{
@@ -400,7 +400,7 @@ bool IManagedCam::_FinalizeHandlingPolledImage(cv::Ptr<cv::Mat> ptr)
 			this->GetID(), 
 			ptr,
 			this->UsesImageProcessingChain(),
-			this->GetFloat(StreamParams::Alpha));
+			this->GetParam(StreamParams::Alpha));
 	}
 
 	// SAVE SNAPSHOTS OF IMAGE PROCESSED

@@ -200,6 +200,7 @@ public:
     /// options will be immediately 
     /// </summary>
     void ReloadAppOptions();
+    
 
     //////////////////////////////////////////////////
     //

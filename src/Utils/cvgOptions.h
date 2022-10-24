@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#define SUPPORTED_EXPOSURE_ENTRIES 4
+
 using json = nlohmann::json;
 
 /// <summary>
@@ -35,6 +37,15 @@ using json = nlohmann::json;
 class cvgOptions
 {
 public:
+	struct ExposureSetting
+	{
+		std::string label;
+		long microseconds;
+
+		ExposureSetting();
+		ExposureSetting(const std::string& label, long microseconds);
+	};
+
 	std::string testImagePath = "";
 
 	/// <summary>
@@ -109,6 +120,16 @@ public:
 	CarouselSystemData caroSysSeries;
 	CarouselSystemData caroSysOrient;
 
+	// This should have 4 entries. Anything more will be ignored.
+	std::vector<ExposureSetting> exposures;
+
+	/// <summary>
+	/// The id in exposured to use. This should be a value beween 0 through 3.
+	/// Anything else will ignore any ExposureSettings and use the camera's
+	/// default automatic mode.
+	/// </summary>
+	int defaultExposureID = 0;
+
 public:
 	cvgOptions(int defSources, bool sampleCarousels = true);
 
@@ -152,4 +173,11 @@ public:
 	/// Reset object to defaults.
 	/// </summary>
 	void Clear();
+
+	void SetExposureEntriesToDefault();
+
+	ExposureSetting GetExposureEntry(int index) const;
+
+	int ExposureEntriesCt() const
+	{ return this->exposures.size(); }
 };
