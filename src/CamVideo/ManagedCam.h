@@ -59,6 +59,12 @@ protected:
 	/// <returns>True if successful, else false.</returns>
 	bool SwitchImplementation(VideoPollType newImplType, bool delCurrent = true);
 
+	/// <summary>
+	/// Process a greyscale image to return it as a RGB-A heatmap, where
+	/// the RGB is the heatmap, and the A is the binary mask of the thresholding.
+	/// </summary>
+	/// <param name="inImg">The greyscale image to process.</param>
+	/// <returns>The alpha-channeled heatmap.</returns>
 	cv::Ptr<cv::Mat> ProcessImage(cv::Ptr<cv::Mat> inImg) override;
 
 	void _DeactivateStreamState(bool deactivateShould = false) override;
@@ -131,9 +137,23 @@ public:
 	/// will preform all memory management needs
 	/// </summary>
 	/// <param name="src"> The image to threshold</param>
-	/// <returns></returns>
-	cv::Ptr<cv::Mat> ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed);
+	/// <param name="foundMinThresh">
+	/// Output parameter.
+	/// The threshold used, calculated with Yen's algorithm.
+	/// </param>
+	/// <returns>The binary mask image from the threshold.</returns>
+	cv::Ptr<cv::Mat> ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed, double& foundThresh);
 
-	cv::Ptr<cv::Mat> ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src);
+	/// <summary>
+	/// Performs thresholding using the value found by adding 
+	/// two standard deviations above the mean.
+	/// </summary>
+	/// <param name="src">The image to threshold.</param>
+	/// <param name="foundMinThresh">
+	/// Output parameter.
+	/// The calculated threshold value.
+	/// </param>
+	/// <returns>The binary mask image from the threshold.</returns>
+	cv::Ptr<cv::Mat> ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src, double& foundThresh);
 
 };
