@@ -364,7 +364,7 @@ void cvgOptions::SetExposureEntriesToDefault()
 	//
 	this->exposures.push_back(ExposureSetting( "Auto", 0));
 	this->exposures.push_back(ExposureSetting( "10ms", 10000));
-	this->exposures.push_back(ExposureSetting( "22ms", 32000));
+	this->exposures.push_back(ExposureSetting( "22ms", 22000));
 	this->exposures.push_back(ExposureSetting( "33ms", 33000));
 }
 
