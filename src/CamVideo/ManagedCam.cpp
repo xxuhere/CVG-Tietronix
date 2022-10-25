@@ -266,7 +266,7 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_Simple(cv::Ptr<cv::Mat> src, double thresho
 }
 
 
-cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed)
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool compressed, double& foundThresh)
 {
 	//Histogram constants
 	// Quantize the hue to 30 levels
@@ -304,11 +304,13 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool com
 
 	// yen_thresholding
 	int yen_threshold = Yen(hist);
+	foundThresh = yen_threshold;
 	cv::Mat thresholded; 
 	//std::cout << "Yen threshold : " << yen_threshold << "\n";
 	if(compressed)
 	{ 
-		cv::threshold(cl,
+		cv::threshold(
+			cl,
 			thresholded,
 			double(yen_threshold),
 			255,
@@ -316,7 +318,8 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool com
 	}
 	else
 	{ 
-		cv::threshold(cl,
+		cv::threshold(
+			cl,
 			thresholded,
 			double(yen_threshold),
 			255,
@@ -353,7 +356,7 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_YenThreshold(cv::Ptr<cv::Mat> src, bool com
 
 }
 
-cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
+cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src, double& foundThresh)
 {
 	// make sure greyscale first
 	cv::Ptr<cv::Mat> grey;
@@ -371,12 +374,14 @@ cv::Ptr<cv::Mat> ManagedCam::ImgProc_TwoStDevFromMean(cv::Ptr<cv::Mat> src)
 	double final_mean = mean.at<double>(0, 0);
 	double final_stddev = stddev.at<double>(0, 0);
 	
-	return ImgProc_Simple(grey, final_mean + 2.0 * final_stddev);
+	foundThresh = final_mean + 2.0 * final_stddev;
+	return ImgProc_Simple(grey, foundThresh);
 }
 
 cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 {
 	cv::Ptr<cv::Mat> binaryMask;
+	int remapMin = 0;
 	// When modifying this function, make sure to sync with IsThresholded().
 	switch (this->camOptions.processing)
 	{
@@ -384,19 +389,34 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 		return inImg;
 
 	case ProcessingType::yen_threshold:
-		binaryMask = ImgProc_YenThreshold(inImg, false);
+		{
+			double fmthDouble;
+			binaryMask = ImgProc_YenThreshold(inImg, false, fmthDouble);
+			remapMin = (int)fmthDouble;
+		}
 		break;
 
 	case ProcessingType::yen_threshold_compressed:
-		binaryMask = ImgProc_YenThreshold(inImg, true);
+		{
+			double fmthDouble;
+			binaryMask = ImgProc_YenThreshold(inImg, true, fmthDouble);
+			remapMin = (int)fmthDouble;
+		}
 		break;
 
 	case ProcessingType::two_stdev_from_mean:
-		binaryMask = ImgProc_TwoStDevFromMean(inImg);
+		{
+			double fmthDouble;
+			binaryMask = ImgProc_TwoStDevFromMean(inImg, fmthDouble);
+			remapMin = (int)fmthDouble;
+		}
 		break;
 
 	case ProcessingType::static_threshold:
-		binaryMask = ImgProc_Simple(inImg, this->camOptions.thresholdExplicit);
+		{
+			binaryMask = ImgProc_Simple(inImg, this->camOptions.thresholdExplicit);
+			remapMin = (int)this->camOptions.thresholdExplicit;
+		}
 		break;
 
 	default:
@@ -405,13 +425,14 @@ cv::Ptr<cv::Mat> ManagedCam::ProcessImage(cv::Ptr<cv::Mat> inImg)
 
 	cvgAssert(binaryMask != nullptr, "Image processing did not send back an expected valid image.");
 
-	// All image processings are (currently) assumed to just return back
-	// binary masks to appy the input image which is converted to a heatmap.
-
-	// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/21
+	// Apply remapping of the thing to heatmap from [0,255] to [thresh,255] so 
+	// that the entire ROYGBIV color space can be used, regardless of what thresh is.
+	// 
+	// https://github.com/Achilefu-Lab/CVG-Tietronix/issues/40
+	cv::Mat remapped = (*inImg - this->camOptions.thresholdExplicit) * 255.0f/(255.0f - remapMin);
 	cv::Ptr<cv::Mat> ret = cv::Ptr<cv::Mat>(new cv::Mat());
 	// The result will be an RGB
-	cv::applyColorMap(*inImg, *ret, cv::COLORMAP_JET);
+	cv::applyColorMap(remapped, *ret, cv::COLORMAP_JET);
 	std::vector<cv::Mat> channels;
 	cv::split(*ret, channels);
 	
