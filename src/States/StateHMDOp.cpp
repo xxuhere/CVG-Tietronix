@@ -54,11 +54,11 @@ void SetLaserLevel(LaserSys& laser, int level)
 	switch(level)
 	{
 	case 1:
-		power = 0.33f;
+		power = 0.30f;
 		break;
 
 	case 2:
-		power = 0.66f;
+		power = 0.70f;
 		break;
 
 	case 3:
@@ -170,19 +170,19 @@ StateHMDOp::StateHMDOp(HMDOpApp* app, GLWin* view, MainWin* core)
 	// TODO:
 	// this->inspSetFrame->filled = false;
 	this->inspSetFrame->SetAllColors(UIColor4(0.0f, 0.0f, 0.0f, 1.0f));
-	UIText* textLaseWatts = new UIText(this->inspSetFrame, -1, "LASE WATTS", 20, UIRect());
-	textLaseWatts->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, 40.0f);
-	textLaseWatts->uiCols.norm.SetColor_Black();
-	this->btnLaseW_1 = new UIButton(this->inspSetFrame, UIID::LaseWat_1, UIRect(),	"L1", btnTextSz);
+	UIText* textLasePwr = new UIText(this->inspSetFrame, -1, "LASE PWR", 20, UIRect());
+	textLasePwr->UseDyn()->AnchorsTop().SetOffsets(0.0f, 0.0f, 0.0f, 40.0f);
+	textLasePwr->uiCols.norm.SetColor_Black();
+	this->btnLaseW_1 = new UIButton(this->inspSetFrame, UIID::LaseWat_1, UIRect(),	"30%", btnTextSz);
 	this->btnLaseW_1->UseDyn()->SetAnchors(0.0f, 0.0f, 0.33f, 0.0f).SetOffsets(0.0f, 40.0f, 0.0f, 70.0f);
 	this->ApplyFormButtonStyle(this->btnLaseW_1);
 	SetButtonStdCols(this->btnLaseW_1, true);
 	this->btnLaseW_1->customFlags |= CustomUIFlag::IsGroupStart;
-	this->btnLaseW_2 = new UIButton(this->inspSetFrame, UIID::LaseWat_2, UIRect(),	"L2", btnTextSz);
+	this->btnLaseW_2 = new UIButton(this->inspSetFrame, UIID::LaseWat_2, UIRect(),	"70%", btnTextSz);
 	this->btnLaseW_2->UseDyn()->SetAnchors(0.33f, 0.0f, 0.66f, 0.0f).SetOffsets(0.0f, 40.0f, 0.0f, 70.0f);
 	this->ApplyFormButtonStyle(this->btnLaseW_2);
 	SetButtonStdCols(this->btnLaseW_2, false);
-	this->btnLaseW_3 = new UIButton(this->inspSetFrame, UIID::LaseWat_3, UIRect(),	"L3", btnTextSz);
+	this->btnLaseW_3 = new UIButton(this->inspSetFrame, UIID::LaseWat_3, UIRect(),	"100%", btnTextSz);
 	this->btnLaseW_3->UseDyn()->SetAnchors(0.66f, 0.0f, 1.0f, 0.0f).SetOffsets(0.0f, 40.0f, 0.0f, 70.0f);
 	this->ApplyFormButtonStyle(this->btnLaseW_3);
 	SetButtonStdCols(this->btnLaseW_3, false);
